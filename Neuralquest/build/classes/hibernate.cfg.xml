@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration
+    PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory >
+ 
+		<!-- Use a Tomcat 5.5 JNDI datasource  -->
+	 	<property name="connection.datasource">java:comp/env/jdbc/pooledDS</property>
+ 		<!-- dialect for MySQL -->
+        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+        
+        <!-- We need this for Session per Conversation, must do our own flush 
+        <property name="hibernate.current_session_context_class">org.hibernate.context.ManagedSessionContext</property>		
+		<!- -  we have a managed session context       
+		<property name="current_session_context_class">managed</property>
+		-->
+		
+		
+		<property name="transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>
+		<!-- thread is the short name for org.hibernate.context.ThreadLocalSessionContext and let Hibernate bind the session automatically to the thread -->
+		<property name="current_session_context_class">thread</property> 
+		
+		<!--
+		<property name="transaction.factory_class">org.hibernate.transaction.JTATransactionFactory</property>
+		<property name="jta.UserTransaction">java:comp/UserTransaction</property>
+		--> 		
+ 
+		<property name="hibernate.show_sql">false</property>
+		<property name="hibernate.format_sql">false</property>
+        <property name="hibernate.use_outer_join">true</property>
+       		
+		<mapping resource="com/neuralquest/server/Cell.hbm.xml" />
+
+    </session-factory>
+</hibernate-configuration>
