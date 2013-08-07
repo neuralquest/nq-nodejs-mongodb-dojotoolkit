@@ -1,15 +1,7 @@
 package com.neuralquest.server;
 
-import java.awt.Dimension;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-
-import javax.vecmath.Vector3d;
-
-import org.dom4j.Element;
-import org.json.JSONObject;
 
 import com.neuralquest.server.base.BaseCell;
 
@@ -367,120 +359,6 @@ public class Cell extends BaseCell implements Constants {
 		return null;
 	}
 
-
-	public void positionCells3D(Element sceneEl, Map cellPos, Vector3d ourPos){
-		if(cellPos.containsKey(this)) return;
-		positionCells3DUp(sceneEl, cellPos, ourPos);
-		Vector3d usePos1 = new Vector3d(ourPos);
-		Vector3d usePos2 = new Vector3d(ourPos);
-		usePos1.x -= 16;
-		Iterator<Assoc> parentIter = getDestAssocs().iterator();
-		while(parentIter.hasNext()){
-			Assoc parentAssoc = (Assoc)parentIter.next();
-			//System.out.println(name+ " - "+ p.getName()+ " - "+ cellA.getType());
-
-			if(parentAssoc.getType() != PARENT_ASSOC){
-				parentAssoc.getSourceFk().positionCells3DUp(sceneEl, cellPos, usePos1);
-				usePos1.z -= 8;
-			}
-		}
-		usePos2.x += 16;
-		parentIter = getSourceAssocs().iterator();
-		while (parentIter.hasNext()){
-			Assoc parentAssoc = (Assoc)parentIter.next();
-			//System.out.println(name+ " - "+ p.getName()+ " - "+ cellA.getType());
-
-			if(parentAssoc.getType() != PARENT_ASSOC){
-				parentAssoc.getDestFk().positionCells3DUp(sceneEl, cellPos, usePos2);
-				usePos2.z -= 8;
-			}
-		}
-	}
-	public void positionCells3DUp(Element sceneEl, Map cellPos, Vector3d ourPos){
-		if(cellPos.containsKey(this)) return;
-		cellPos.put(this, new Vector3d(ourPos));
-		Vector3d usePos = new Vector3d(ourPos);
-		usePos.y += 8;
-		Iterator<Assoc> parentIter = getSourceAssocs().iterator();
-		while (parentIter.hasNext()){
-			Assoc parentAssoc = (Assoc)parentIter.next();
-			if(parentAssoc.getType() == PARENT_ASSOC){
-				parentAssoc.getDestFk().positionCells3DUp(sceneEl, cellPos, usePos);
-				usePos.z -= -8;
-			}
-		}
-	}
-
-	public int[] positionCells2D(Map cellPos, int[] ourPos){
-		int[] noPos = {0,0};
-		if(cellPos.containsKey(this)) return noPos;
-		if(getType() == OBJECT) return noPos;
-		//System.out.println(getName()+ " - "+ ourPos[0]+","+ourPos[1]);
-		int[] copyPos = {ourPos[0],ourPos[1]};
-		cellPos.put(this, copyPos);
-		//System.out.println(">name - "+ getName()+ " - "+ ourPos[0]+","+ourPos[1]);
-		int[]  usePos = {ourPos[0],ourPos[1]};
-		int[]  maxPos = {ourPos[0],ourPos[1]};
-		usePos[1] += SVGGRIDHEIGHT;
-		Iterator<Assoc> childIter = getDestAssocs().iterator();
-		while (childIter.hasNext()){
-			Assoc childAssoc = (Assoc)childIter.next();
-			if(childAssoc.getType() == PARENT_ASSOC){
-				//System.out.println("name - "+ childAssoc.getSourceFk().getName()+ " - "+ childAssoc.getType());
-				int[] retPos = childAssoc.getSourceFk().positionCells2D(cellPos, usePos);
-				maxPos = vectorMax(retPos, maxPos);
-				if(!(retPos[0]==0 && retPos[1]==0)) usePos[0] = maxPos[0] + SVGGRIDWIDTH;
-			}
-		}
-		//doesn't work
-		//ourPos[0] = ourPos[0]+(maxPos[0]-ourPos[0])/2;//move our cell to the center of the underlying childern
-		//cellPos.put(this, copyPos);
-		//int[] usePos2 = {maxPos[0]+SVGGRIDWIDTH,ourPos[1]};
-		usePos[0] = maxPos[0]+SVGGRIDWIDTH;
-		usePos[1] = ourPos[1];
-		Iterator<Assoc> oneManyIter = getSourceAssocs().iterator();
-		while (oneManyIter.hasNext()){
-			Assoc manyAssoc = (Assoc)oneManyIter.next();
-			if(manyAssoc.getType() == ORDERED_ASSOC ||
-					manyAssoc.getType() == MANYTOMANY_ASSOC||
-					manyAssoc.getType() == ONETOMANY_ASSOC||
-					manyAssoc.getType() == MAPSTO_ASSOC){//one to many
-				//System.out.println("name - "+ manyAssoc.getDestFk().getName()+ " - "+ manyAssoc.getType());
-				int[] retPos = manyAssoc.getDestFk().positionCells2D(cellPos, usePos);
-				maxPos = vectorMax(retPos, maxPos);
-				if(!(retPos[0]==0 && retPos[1]==0))  usePos[0] = maxPos[0] + SVGGRIDWIDTH;//usePos[1] = maxPos[1] + SVGGRIDHEIGHT;
-			}
-		}
-		Iterator<Assoc> manyOneIter = getDestAssocs().iterator();
-		while (manyOneIter.hasNext()){
-			Assoc manyAssoc = (Assoc)manyOneIter.next();
-			if(manyAssoc.getType() == ORDERED_ASSOC ||
-					manyAssoc.getType() == MANYTOMANY_ASSOC||
-					manyAssoc.getType() == ONETOMANY_ASSOC||
-					manyAssoc.getType() == MAPSTO_ASSOC){//one to many
-				//System.out.println("name - "+ manyAssoc.getDestFk().getName()+ " - "+ manyAssoc.getType());
-				int[] retPos = manyAssoc.getSourceFk().positionCells2D(cellPos, usePos);
-				maxPos = vectorMax(retPos, maxPos);
-				if(!(retPos[0]==0 && retPos[1]==0))  usePos[0] = maxPos[0] + SVGGRIDWIDTH;//usePos[1] = maxPos[1] + SVGGRIDHEIGHT;
-			}
-		}
-		/*Iterator<Assoc> oneIter = getDestAssocs().iterator();
-		while (oneIter.hasNext()){
-			Assoc oneAssoc = (Assoc)oneIter.next();
-			if(oneAssoc.getType() == ORDERED_ASSOC){
-				Vector2d retPos = oneAssoc.getSourceFk().positionCells2D(cellPos, usePos);
-				maxPos = vectorMax(retPos, maxPos);
-				usePos[1] = maxPos[1] + SVGGRIDHEIGHT;
-			}
-		}*/
-		return maxPos;
-	}
-	public int[] vectorMax(int[] a, int[] b){
-		int[] retVec = {a[0],a[1]};
-		if(b[0]>a[0]) retVec[0] = b[0]; 
-		if(b[1]>a[1]) retVec[1] = b[1];
-		return retVec;
-	}
 	private String listToString(LinkedList<Cell> list){
 		String retString = "";
 		for(Iterator<Cell> itr1=list.iterator();itr1.hasNext();){
