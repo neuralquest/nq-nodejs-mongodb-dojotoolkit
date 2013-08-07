@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+	<servlet>
+		<servlet-name>DataServlet</servlet-name>
+		<servlet-class>
+			com.neuralquest.server.DataServlet
+		</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>ConsistancyServlet</servlet-name>
+		<servlet-class>
+			com.neuralquest.server.ConsistancyServlet
+		</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>SitemapServlet</servlet-name>
+		<servlet-class>
+			com.neuralquest.server.SitemapServlet
+		</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>SchemaServlet</servlet-name>
+		<servlet-class>
+			com.neuralquest.server.SchemaServlet
+		</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>SpriteServlet</servlet-name>
+		<servlet-class>
+			com.neuralquest.server.SpriteServlet
+		</servlet-class>
+	</servlet>
+	
+	<!--  -->
+	<servlet-mapping>
+		<servlet-name>DataServlet</servlet-name>
+		<url-pattern>/data/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ConsistancyServlet</servlet-name>
+		<url-pattern>/consistancy.html</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>SitemapServlet</servlet-name>
+		<url-pattern>/sitemap.xml</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>SchemaServlet</servlet-name>
+		<url-pattern>/schema/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>SpriteServlet</servlet-name>
+		<url-pattern>/nqSprites.png</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>SpriteServlet</servlet-name>
+		<url-pattern>/nqSprites.css</url-pattern>
+	</servlet-mapping>
+		
+	<resource-ref>
+		<description>
+			Resource reference to a factory for java.sql.Connection
+			instances that may be used for talking to a particular
+			database that is configured in the
+			Context>configurartion for the web application.
+		</description>
+		<res-ref-name>jdbc/pooledDS</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
+	<resource-ref>
+		<description>
+			Resource reference to a factory for javax.mail.Session
+			instances that may be used for sending electronic mail
+			messages, preconfigured to connect to the appropriate
+			SMTP server.
+		</description>
+		<res-ref-name>mail/Session</res-ref-name>
+		<res-type>javax.mail.Session</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
+	<!-- 
+	http://bob.marlboro.edu/~msie/2005/ipl/ipl2/s3.html
+	
+	To generate password in command prompt do:
+	cd C:\Program Files\Apache Software Foundation\Tomcat 5.5
+	java -classpath server\lib\catalina.jar;bin\commons-logging-api.jar org.apache.catalina.realm.RealmBase -a MD5 enthalpie
+	
+	New installations must have mysql-connector-java-5.0.6-bin.jar added to TOMCAT_HOME/lib, else you will get an error during server statup
+
+
+	If you get this error on the web server: Caused by: java.security.AccessControlException: access denied (java.util.PropertyPermission cglib.debugLocation read)
+	It's because these lines need to be added to you secuity policy, running under a SecurityManager
+	// definitely needed for Hibernate
+	permission java.util.PropertyPermission "*", "read,write";
+	permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+	// needed for other libraries in my app, maybe Hibernate
+	permission java.lang.RuntimePermission "accessDeclaredMembers";
+	See http://www.hibernate.org/294.html
+	-->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Entire Application</web-resource-name>
+			<url-pattern>/*</url-pattern>
+			<http-method>POST</http-method>
+			<http-method>PUT</http-method>
+			<http-method>DELETE</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>user</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<!-- Define the Login Configuration for this Application -->
+	<login-config>
+		 <auth-method>BASIC</auth-method>  
+		<!--<auth-method>FORM</auth-method>-->
+		<realm-name>Neuralquest</realm-name>
+		<!--<form-login-config> -->
+			<!-- here's the HTML form-containing page -->
+			<!-- <form-login-page>/login.html</form-login-page> -->
+			<!-- here's where we go on authentication failure -->
+			<!-- <form-error-page>/error.html</form-error-page> -->
+		<!--</form-login-config> -->
+	</login-config>
+	<security-role>
+		<role-name>user</role-name>
+	</security-role>
+	<security-role>
+		<role-name>admin</role-name>
+	</security-role>
+	
+</web-app>
