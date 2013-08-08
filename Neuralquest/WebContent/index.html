@@ -6,12 +6,12 @@
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 		<title>Neuralquest - Browser based process modeling and execution.</title>
 		<!--dojo seylesheets-->	
-		<link rel="stylesheet" type="text/css" href="js/dojo-release-1.9.1/dojo/resources/dojo.css" media="screen"/>
-		<link rel="stylesheet" type="text/css" href="js/dojo-release-1.9.1/dijit/themes/soria/soria.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/resources/dojo.css" media="screen"/>
+		<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dijit/themes/soria/soria.css" media="screen">
 		<!--for the grid -->
-		<link rel="stylesheet" type="text/css" href="js/dojo-release-1.9.1/dgrid/css/skins/soria.css"> 
+		<link rel="stylesheet" type="text/css" href="js/dgrid/css/skins/soria.css"> 
 		<!--for the editor  -->
-		<link rel="stylesheet" type="text/css" href="js/dojo-release-1.9.1/dojox/editor/plugins/resources/editorPlugins.css"/>
+		<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojox/editor/plugins/resources/editorPlugins.css"/>
 		<!--the nq stylesheet-->
 		<!--<link rel="stylesheet" type="text/css"  href="/nqserver/nqSprites.css"/> this works, but do we need it?-->
 		<link rel="stylesheet"  type="text/css" href="css/nq.css" />
@@ -26,17 +26,22 @@
 		<!-- <script src="js/threejs/examples/fonts/helvetiker_regular.typeface.js"></script>
 		<script src="js/threejs/examples/fonts/helvetiker_bold.typeface.js"></script> -->
 		
-		<!-- provide config via data attribute -->
-		<script> //we need this to make our package location relative
-			var dojoConfig = (function(){
-				var base = location.href.split("/");
-				base.pop();
-				base = base.join("/");
-				return {async: true, parseOnLoad: true, dojoBlankHtmlUrl:'/blank.html', isDebug: true, packages: [{name: "nq", location: base + "/js/extensions"}]};
-			})();
-		</script>
+		<!-- provide config -->
+		<script>	
+			dojoConfig = {
+				isDebug: true , 
+				parseOnLoad: true,
+	            dojoBlankHtmlUrl:'/blank.html',
+				packages: [
+					{name: "nq", location: "/NqApp/js/extensions"},
+					{name: "dgrid", location: "/NqApp/js/dgrid" },
+					{name: "xstyle", location: "/NqApp/js/xstyle" },
+					{name: "put-selector", location: "/NqApp/js/put-selector" }
+				]
+		    };
+		</script>		
 		<!-- load dojo, must come after dojoConfig -->
-		<script type='text/javascript' src="js/dojo-release-1.9.1/dojo/dojo.js"></script>
+		<script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/dojo.js"></script>
 		<!-- nq magic -->
 		<script type="text/javascript" src="js/nq.js"></script>
 		<!-- Google Analytics -->

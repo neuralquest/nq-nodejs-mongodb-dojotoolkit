@@ -233,7 +233,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		render();
 		// make the scene
 		var loader = new THREE.JSONLoader(true);
-		loader.load("img/mesh/classMesh.js", function(geometry, materials) {
+		loader.load("img/Neuralquest/mesh/classMesh.js", function(geometry, materials) {
 			var cellPositionsObj = {};
 			//var greatestXUntilNow = {value: 0};
 
