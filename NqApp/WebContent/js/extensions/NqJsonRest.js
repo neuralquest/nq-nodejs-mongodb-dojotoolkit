@@ -4,7 +4,7 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 	var dirtyObjects = {};
 	
 	var NqJsonRest = declare(JsonRest, {
-		target:"/nqserver/data/",
+		target:"data/",
 		//queryEngine: NqSimpleQueryEngine,
 		//See http://dojotoolkit.org/documentation/tutorials/1.6/data_modeling/
 		// Since dojo.store.Memory doesn't have various store methods we need, we have to add them manually

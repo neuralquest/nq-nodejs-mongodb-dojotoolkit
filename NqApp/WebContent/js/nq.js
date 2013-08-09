@@ -17,7 +17,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	_nqMemoryStore = Observable(new Memory({}));
 	_nqDataStore = Cache(NqJsonRest(), _nqMemoryStore);
 	_nqSchemaMemoryStore = new Memory({});
-	_nqSchemaStore = Cache(new JsonRest({target:"/nqserver/schema/"}), _nqSchemaMemoryStore);
+	_nqSchemaStore = Cache(new JsonRest({target:"schema/"}), _nqSchemaMemoryStore);
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Initialize

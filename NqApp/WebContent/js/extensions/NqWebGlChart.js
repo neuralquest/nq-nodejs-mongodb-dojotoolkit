@@ -192,7 +192,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			if(classItem.classId != 0) return;// class as opposed to object
 			greatestXUntilNow.value = ourPos.x;
 			//store the cells position in cell position object 
-			var positionData = {name: classItem[852], vector: ourPos, minChildrenX: ourPos.x, maxhildrenX: ourPos.x, rotate: false};
+			var positionData = {name: classItem[852], vector: ourPos, minChildrenX: ourPos.x, maxChildrenX: ourPos.x, rotate: false};
 			var promisses = [];
 			var x = ourPos.x;
 			var y = ourPos.y - 400;
@@ -207,7 +207,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 					x = x + 800;
 				}
 			});
-			//positionData.vector.x = (positionData.maxChildrenX - positionData.minChildrenX) /2 ;//+ positionData.minChildrenX;//place at the centre of our children
+			positionData.vector.x = (positionData.maxChildrenX - positionData.minChildrenX) /2 + positionData.minChildrenX;//place at the centre of our children
 			console.log(positionData);
 			cellPositionsObj[classItemId] = positionData; 
 			return all(promisses);

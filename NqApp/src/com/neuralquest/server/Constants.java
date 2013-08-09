@@ -81,10 +81,13 @@ public interface Constants {
 	static final long VIEWS_ID = 74;
 	
 	//used by site map
-	static final long ESSAYS_ID = 824;
+	static final long FIRSTPAGE_ID = 810;
 	static final long CONTENTS_ID = 78;
 	static final long PAGES_ID = 79;
-	static final long PAGE_MODEL_ID = 842;
+	static final long DOCUMENT_VIEW_ID = 842;
+	static final long DOCUMENT_TAB_ID = 1784;
+	static final long CONTENTS_VIEW_ID = 846;
+	static final long CONTENTS_TAB_ID = 1866;
 
 	
 	static final long DESCRIPTION_ID = 77;// rtf attributes

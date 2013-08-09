@@ -27,7 +27,7 @@ public class SitemapServlet extends HttpServlet implements Constants {
 			Document doc = DocumentFactory.getInstance().createDocument();
 			Element urlsetElement = doc.addElement("urlset");
 			urlsetElement.addAttribute("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9");
-			Cell essObj = (Cell) session.load(Cell.class, new Long(ESSAYS_ID));
+			Cell essObj = (Cell) session.load(Cell.class, new Long(FIRSTPAGE_ID));
 			isAUsefulUrl(essObj, urlsetElement, session);
 			resp.getWriter().print(doc.asXML());
 
@@ -45,9 +45,9 @@ public class SitemapServlet extends HttpServlet implements Constants {
 			if(contentsObj.isA(PAGES_ID)){
 				Element urlEl = urlsetElement.addElement("url");
 				urlEl.addComment(contentsObj.getName(100));
-				urlEl.addElement("loc").addText("http://neuralquest.com/#"+PAGE_MODEL_ID+"."+ESSAYS_ID+"."+contentsObj.getId());
+				urlEl.addElement("loc").addText("http://neuralquest.com/#"+DOCUMENT_VIEW_ID+"."+DOCUMENT_TAB_ID+"."+contentsObj.getId()+"."+CONTENTS_VIEW_ID+"."+CONTENTS_TAB_ID);
 				urlEl.addElement("changefreq").addText("weekly");
-				urlEl.addElement("priority").addText("0.8");
+				//urlEl.addElement("priority").addText("0.8");
 			}
 			else isAUsefulUrl(contentsObj, urlsetElement, session);
 		}
