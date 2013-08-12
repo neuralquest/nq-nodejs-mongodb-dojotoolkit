@@ -15,7 +15,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	
 	var _editMode = false;
 	_nqMemoryStore = Observable(new Memory({}));
-	_nqDataStore = Cache(NqJsonRest({target:"data/"}), _nqMemoryStore);
+	_nqDataStore = Cache(NqJsonRest({}), _nqMemoryStore);
 	_nqSchemaMemoryStore = new Memory({});
 	_nqSchemaStore = Cache(new JsonRest({target:"schema/"}), _nqSchemaMemoryStore);
 
@@ -24,8 +24,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	//////////////////////////////////////////////////////////////////////////////
 	ready( function() {
 		topic.subscribe("/dojo/hashchange", interpritHash);
-		on(dom.byId('cancelButtonId'), 'click', function(event){cancelChanges();});
-		on(dom.byId('saveButtonId'), 'click', function(event){saveChanges();});
+//		on(dom.byId('cancelButtonId'), 'click', function(event){_nqDataStore.Cancel();});
+//		on(dom.byId('saveButtonId'), 'click', function(event){_nqDataStore.Save();});
 		on(dom.byId('editButtonId'), 'click', function(event){
 			_editMode=!_editMode;
 			interpritHash(0);

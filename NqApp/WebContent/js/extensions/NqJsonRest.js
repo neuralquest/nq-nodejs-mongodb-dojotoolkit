@@ -1,9 +1,9 @@
 define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqSimpleQueryEngine", 'dijit/registry', 'dojo/when', "dojo/store/util/QueryResults",
-        "dojo/request", "dojo.store.JsonRest"],
-	function(declare, JsonRest, all, NqSimpleQueryEngine, registry, when, QueryResults, request, JsonRest){
+        "dojo/request", "dojo/store/JsonRest", "dojo/json"],
+	function(declare, JsonRest, all, NqSimpleQueryEngine, registry, when, QueryResults, request, JsonRest, JSON){
 
-	return declare("NqJsonRest", [JsonRest], {
-		target:"",
+	return declare(JsonRest, {
+		target: "data/",
 		addObjects: {},
 		putObjects: {},
 		removeObjects: {},
@@ -34,9 +34,9 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 			registry.byId('saveButtonId').set('disabled',false);
 			// add it to the queue of put Objects
 			// skip if it was updated previously or its been added by ourselves 
-			if(!(object.id in putObjects) && !(object.id in addObjects)){
+			if(!(object.id in this.putObjects) && !(object.id in this.addObjects)){
 				var originalObject =_nqMemoryStore.get(object.id);
-				putObjects[object.id] = originalObject;
+				this.putObjects[object.id] = originalObject;
 			}
 
 			//return JsonRest.prototype.put.call(this, object, options); //this will xhr to the server
@@ -48,23 +48,23 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 			registry.byId('saveButtonId').set('disabled',false);
 			// add it to the queue of added Objects
 			object.id = object.viewId+"/cid:"+Math.floor((Math.random()*1000000)+1);
-			addObjects[object.id] = "put";
+			this.addObjects[object.id] = "put";
 			return object;
 	    },
 		remove: function(id){
 			registry.byId('cancelButtonId').set('disabled',false);
 			registry.byId('saveButtonId').set('disabled',false);
-			if(object.id in addObjects){
-				addObjects.splice(id,1);
+			if(object.id in this.addObjects){
+				this.addObjects.splice(id,1);
 			}
 			else {
 				var originalObject =_nqMemoryStore.get(object.id);
-				if(object.id in putObjects){
-					originalObject = putObjects[object.id];
-					putObjects.splice(id,1);
+				if(object.id in this.putObjects){
+					originalObject = this.putObjects[object.id];
+					this.putObjects.splice(id,1);
 				}
 				// add it to the queue of removed Objects
-				removeObjects[object.id] = originalObject;
+				this.removeObjects[object.id] = originalObject;
 			}
 	    },
 		query: function(query, options){
@@ -102,21 +102,23 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 			});
 			*/
 			var postOperations = [];
-			for(key in removeObjects){
+			for(key in this.removeObjects){
 				postOperations.push({action: "delete", data: key});
 			};
-			for(key in addObjects){
+			for(key in this.addObjects){
 				var newObject =_nqMemoryStore.get(key);
 				postOperations.push({action: "put", data: newObject});
 			};
-			for(key in putObjects){
+			for(key in this.putObjects){
 				var updatedObject =_nqMemoryStore.get(key);
 				postOperations.push({action: "post", data: updatedObject});
 			};
 			// commit the transaction, sending all the operations in a single request
-			request(target, {
+			request(this.target, {
 				// send all the operations in the body
-				data: dojo.toJson(postOperations),//JSON.stringify(postOperations)
+				data: JSON.stringify(postOperations),
+				handleAs: "json",
+				headers: {"Content-Type": "application/json"}
 			}).then( 
 				function(data){
 					dojo.fadeIn({ node:"savedDlg", duration: 300,
@@ -124,16 +126,16 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 							dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();	
 						}
 					}).play();
-					removeObjects = {};
-					addObjects = {};
-					putObjects = {};
+					this.removeObjects = {};
+					this.addObjects = {};
+					this.putObjects = {};
 	    		},
 	    		function(error){
 	    	    	new dijit.Dialog({title: "Rollback",content: error.message,style: "width: 500px"}).show();
 	    	    	//rollBackClient(); //TODO
-					removeObjects = {};
-					addObjects = {};
-					putObjects = {};
+					this.removeObjects = {};
+					this.addObjects = {};
+					this.putObjects = {};
 	    		} 
 	    	);
 		
@@ -153,7 +155,9 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 				//editor.close(false);
 			});
 	    	//rollBackClient(); //TODO
-		
+			this.removeObjects = {};
+			this.addObjects = {};
+			this.putObjects = {};
 	    }
 
 	});
