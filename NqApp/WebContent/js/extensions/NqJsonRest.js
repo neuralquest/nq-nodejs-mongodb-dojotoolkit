@@ -1,10 +1,12 @@
-define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqSimpleQueryEngine", 'dijit/registry', 'dojo/when', "dojo/store/util/QueryResults",],
-	function(declare, JsonRest, all, NqSimpleQueryEngine, registry, when, QueryResults){
+define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqSimpleQueryEngine", 'dijit/registry', 'dojo/when', "dojo/store/util/QueryResults",
+        "dojo/request", "dojo.store.JsonRest"],
+	function(declare, JsonRest, all, NqSimpleQueryEngine, registry, when, QueryResults, request, JsonRest){
 
-	var dirtyObjects = {};
-	
-	var NqJsonRest = declare(JsonRest, {
-		target:"data/",
+	return declare("NqJsonRest", [JsonRest], {
+		target:"",
+		addObjects: {},
+		putObjects: {},
+		removeObjects: {},
 		//queryEngine: NqSimpleQueryEngine,
 		//See http://dojotoolkit.org/documentation/tutorials/1.6/data_modeling/
 		// Since dojo.store.Memory doesn't have various store methods we need, we have to add them manually
@@ -30,10 +32,11 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 		put: function(object, options){
 			registry.byId('cancelButtonId').set('disabled',false);
 			registry.byId('saveButtonId').set('disabled',false);
-			// add it to the queue of _dirtyObjects
-			if(!(object.id in _dirtyObjects)){
-				//var originalObject =_nqMemoryStore.get(object.id);
-				_dirtyObjects[object.id] = "post";
+			// add it to the queue of put Objects
+			// skip if it was updated previously or its been added by ourselves 
+			if(!(object.id in putObjects) && !(object.id in addObjects)){
+				var originalObject =_nqMemoryStore.get(object.id);
+				putObjects[object.id] = originalObject;
 			}
 
 			//return JsonRest.prototype.put.call(this, object, options); //this will xhr to the server
@@ -43,22 +46,25 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 		add: function(object, options){
 			registry.byId('cancelButtonId').set('disabled',false);
 			registry.byId('saveButtonId').set('disabled',false);
-			// add it to the queue of _dirtyObjects
+			// add it to the queue of added Objects
 			object.id = object.viewId+"/cid:"+Math.floor((Math.random()*1000000)+1);
-			_dirtyObjects[object.id] = "put";
+			addObjects[object.id] = "put";
 			return object;
 	    },
 		remove: function(id){
 			registry.byId('cancelButtonId').set('disabled',false);
 			registry.byId('saveButtonId').set('disabled',false);
-			// add it to the queue of _dirtyObjects
-			if(_dirtyObjects[id]) {
-				if(id.indexOf('cid') > -1) _dirtyObjects.splice(id,1);//if its a temp id then remove from _dirtyObjects
-				else _dirtyObjects[id] = {action:"delete", originalObject:{}};// delete, but use the original object from put
+			if(object.id in addObjects){
+				addObjects.splice(id,1);
 			}
 			else {
 				var originalObject =_nqMemoryStore.get(object.id);
-				_dirtyObjects[object.id] = {action:"delete", originalObject:{}};
+				if(object.id in putObjects){
+					originalObject = putObjects[object.id];
+					putObjects.splice(id,1);
+				}
+				// add it to the queue of removed Objects
+				removeObjects[object.id] = originalObject;
 			}
 	    },
 		query: function(query, options){
@@ -78,9 +84,78 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 				return QueryResults(all(promisses));
 			}
 			else return JsonRest.prototype.query.call(this, query, options);
-		}
+		},
+	    save: function(){
+			registry.byId('cancelButtonId').set('disabled',true);
+			registry.byId('saveButtonId').set('disabled',true);
+			/*
+			//registry.byId('saveUpdatesDlg').hide()//in case it came from the dialoge
+			registry.byClass("dojox.grid.EnhancedGrid").forEach( function(grid) {
+				grid.edit.apply();
+			});
+			registry.byClass("dijit.form.TextBox",'placeholder').forEach(function(tb){
+				//only destroy if it is not part of a form
+				//tb.destroy();
+			});
+			registry.byClass("dijit.Editor",'placeholder').forEach(function(editor){
+				//editor.close(true);
+			});
+			*/
+			var postOperations = [];
+			for(key in removeObjects){
+				postOperations.push({action: "delete", data: key});
+			};
+			for(key in addObjects){
+				var newObject =_nqMemoryStore.get(key);
+				postOperations.push({action: "put", data: newObject});
+			};
+			for(key in putObjects){
+				var updatedObject =_nqMemoryStore.get(key);
+				postOperations.push({action: "post", data: updatedObject});
+			};
+			// commit the transaction, sending all the operations in a single request
+			request(target, {
+				// send all the operations in the body
+				data: dojo.toJson(postOperations),//JSON.stringify(postOperations)
+			}).then( 
+				function(data){
+					dojo.fadeIn({ node:"savedDlg", duration: 300,
+						onEnd:function(){
+							dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();	
+						}
+					}).play();
+					removeObjects = {};
+					addObjects = {};
+					putObjects = {};
+	    		},
+	    		function(error){
+	    	    	new dijit.Dialog({title: "Rollback",content: error.message,style: "width: 500px"}).show();
+	    	    	//rollBackClient(); //TODO
+					removeObjects = {};
+					addObjects = {};
+					putObjects = {};
+	    		} 
+	    	);
+		
+	    },
+	    cancel: function(){
+			registry.byId('cancelButtonId').set('disabled',true);
+			registry.byId('saveButtonId').set('disabled',true);
+
+			//registry.byId('saveUpdatesDlg').hide()//in case it came from the dialoge
+			registry.byClass("dojox.grid.EnhancedGrid").forEach( function(grid) {
+				grid.edit.cancel();
+			});
+			registry.byClass("dijit.form.TextBox",'placeholder').forEach(function(textBox){
+				textBox.undo(); 
+			});
+			registry.byClass("dijit.Editor",'placeholder').forEach(function(editor){
+				//editor.close(false);
+			});
+	    	//rollBackClient(); //TODO
+		
+	    }
 
 	});
-	return NqJsonRest;
 });
 

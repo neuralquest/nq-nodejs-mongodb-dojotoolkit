@@ -15,7 +15,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	
 	var _editMode = false;
 	_nqMemoryStore = Observable(new Memory({}));
-	_nqDataStore = Cache(NqJsonRest(), _nqMemoryStore);
+	_nqDataStore = Cache(NqJsonRest({target:"data/"}), _nqMemoryStore);
 	_nqSchemaMemoryStore = new Memory({});
 	_nqSchemaStore = Cache(new JsonRest({target:"schema/"}), _nqSchemaMemoryStore);
 
@@ -344,73 +344,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	//////////////////////////////////////////////////////////////////////////////
 	//Helpers
 	//////////////////////////////////////////////////////////////////////////////
-	function saveChanges() {
-		cancelButton.set('disabled',true);
-		saveButton.set('disabled',true);
-		/*
-		//registry.byId('saveUpdatesDlg').hide()//in case it came from the dialoge
-		registry.byClass("dojox.grid.EnhancedGrid").forEach( function(grid) {
-			grid.edit.apply();
-		});
-		registry.byClass("dijit.form.TextBox",'placeholder').forEach(function(tb){
-			//only destroy if it is not part of a form
-			//tb.destroy();
-		});
-		registry.byClass("dijit.Editor",'placeholder').forEach(function(editor){
-			//editor.close(true);
-		});
-		*/
-		var postOperations = [];
-		for(key in _dirtyObjects){
-			var updatedObject =_nqMemoryStore.get(key);
-			postOperations.push({action: _dirtyObjects[key], data: updatedObject});
-		};
-		/*
-		for(var actionObjId in this.operations){
-			var operationsObj = this.operations[actionObjId];
-			var updatedObject =_nqMemoryStore.get(actionObjId);
-			// FIXME originalObject doesn't work				
-			/*if(operationsObj.action == 'post'){
-				var compactedObj;
-				for(var attr in updatedObject){
-					if(attr=='id' || attr=='viewId' || updatedObject[attr] != operationsObj.originalObject[attr]) compactedObj[attr] = updatedObject.attr;						
-				}
-			}* /
-			postOperations.push({action: operationsObj.action, dataObj: updatedObject});
-		}*/
-		// commit the transaction, sending all the operations in a single request
-		return dojo.xhrPost({
-			url: nqRestStore.target, 
-			// send all the operations in the body
-			postData: dojo.toJson(postOperations),//JSON.stringify(postOperations)
-			load: function(data){
-				dojo.fadeIn({ node:"savedDlg", duration: 300,
-					onEnd:function(){
-						dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();	
-					}
-				}).play();
-				_dirtyObjects = [];
-    		},
-    		error: function(error){
-    	    	new dijit.Dialog({title: "Rollback",content: error.message,style: "width: 500px"}).show();
-    			_dirtyObjects = [];
-    		} 
-    	});
-	}
-	// called from the Cancel button and from the Save dialog
-	function cancelChanges(){
-		//registry.byId('saveUpdatesDlg').hide()//in case it came from the dialoge
-		registry.byClass("dojox.grid.EnhancedGrid").forEach( function(grid) {
-			grid.edit.cancel();
-		});
-		registry.byClass("dijit.form.TextBox",'placeholder').forEach(function(textBox){
-			textBox.undo(); 
-		});
-		registry.byClass("dijit.Editor",'placeholder').forEach(function(editor){
-			//editor.close(false);
-		});
-		_nqDataStore.abort();
-	}
 	lang.setObject("nq.getState", getState);//make the function accessable from inline script
 	function getState(level){
 		var hashArr = hash().split('.');

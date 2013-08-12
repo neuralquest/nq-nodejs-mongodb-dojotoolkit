@@ -199,7 +199,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			var z = ourPos.z;
 			arrayUtil.forEach(classItem[bodyViewId], function(subClassItemId){
 				var newPos = new THREE.Vector3( x, y, z );
-				result = positionCellsInHierarchy(subClassItemId, newPos, cellPositionsObj, greatestXUntilNow, bodyViewId);
+				var result = positionCellsInHierarchy(subClassItemId, newPos, cellPositionsObj, greatestXUntilNow, bodyViewId);
 				if(result){
 					promisses.push(result);
 					positionData.maxChildrenX = x;
@@ -207,8 +207,9 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 					x = x + 800;
 				}
 			});
-			positionData.vector.x = (positionData.maxChildrenX - positionData.minChildrenX) /2 + positionData.minChildrenX;//place at the centre of our children
+			//positionData.vector.x = (positionData.maxChildrenX - positionData.minChildrenX) /2 + positionData.minChildrenX;//place at the centre of our children
 			console.log(positionData);
+			console.log((positionData.maxChildrenX - positionData.minChildrenX) /2 );//+ positionData.minChildrenX;//place at the centre of our children
 			cellPositionsObj[classItemId] = positionData; 
 			return all(promisses);
 		});
