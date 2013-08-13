@@ -1,9 +1,9 @@
 define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqSimpleQueryEngine", 'dijit/registry', 'dojo/when', "dojo/store/util/QueryResults",
-        "dojo/request", "dojo/store/JsonRest", "dojo/json"],
-	function(declare, JsonRest, all, NqSimpleQueryEngine, registry, when, QueryResults, request, JsonRest, JSON){
+        "dojo/request", "dojo/store/JsonRest"],
+	function(declare, JsonRest, all, NqSimpleQueryEngine, registry, when, QueryResults, request, JsonRest){
 
-	return declare(JsonRest, {
-		target: "data/",
+	return declare("NqJsonRest", [JsonRest], {
+		target:"",
 		addObjects: {},
 		putObjects: {},
 		removeObjects: {},
@@ -114,11 +114,9 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 				postOperations.push({action: "post", data: updatedObject});
 			};
 			// commit the transaction, sending all the operations in a single request
-			request(this.target, {
+			request(target, {
 				// send all the operations in the body
-				data: JSON.stringify(postOperations),
-				handleAs: "json",
-				headers: {"Content-Type": "application/json"}
+				data: dojo.toJson(postOperations),//JSON.stringify(postOperations)
 			}).then( 
 				function(data){
 					dojo.fadeIn({ node:"savedDlg", duration: 300,
@@ -155,9 +153,7 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 				//editor.close(false);
 			});
 	    	//rollBackClient(); //TODO
-			this.removeObjects = {};
-			this.addObjects = {};
-			this.putObjects = {};
+		
 	    }
 
 	});
