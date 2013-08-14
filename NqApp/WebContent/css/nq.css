@@ -30,6 +30,10 @@ div.popUp {	border: 2px solid gray;	-moz-border-radius: 5px; position: fixed; z-
 #loadingOverlay {background:  #fff url('../img/Neuralquest/loadingAnimation.gif') no-repeat 10px 23px;}
 .loadingMessage {padding: 25px 40px;color: #999;}
 
+.editIcon {background-image: url('../img/Neuralquest/edit.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.annoIcon {background-image: url('../img/Neuralquest/help.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.rulesIcon {background-image: url('../img/Neuralquest/help.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.todoIcon {background-image: url('../img/Neuralquest/help.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 .cancelIcon {background-image: url('../img/Neuralquest/cancel.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 .saveIcon {background-image: url('../img/Neuralquest/save.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 .helpIcon {background-image: url('../img/Neuralquest/help.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}

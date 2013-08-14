@@ -1,19 +1,44 @@
 define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/array', 'dijit/registry', 'dijit/layout/ContentPane', 
-        'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "dijit/_WidgetBase", "dojo/on", "dojo/dom-geometry", "dojo/sniff",
+        'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "dijit/_WidgetBase", "dojo/on", "dojo/dom-geometry", "dojo/sniff", "dijit/form/Button",
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, domConstruct, when, arrayUtil, registry, ContentPane, 
-			Toolbar, ValidationTextBox, Editor, _WidgetBase, on, domGeometry, has){
+			Toolbar, ValidationTextBox, Editor, _WidgetBase, on, domGeometry, has, Button){
 
 	var ContentWidget = declare("NqContentWidget", [_WidgetBase], {
 		extraPlugins: {},
 		state: {},
+		editMode: false,
+		objectId: null,
 		
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
 			this.toolbarDivNode = domConstruct.create('div', {},this.domNode);//placeholder for the toolbars
+			// Create toolbar and place it at the top of the page
+			var _this = this;
+			var toolbar = new Toolbar({});
+			var button1 = new Button({
+				label: 'Edit',
+				iconClass: 'editIcon',
+				onClick: function(){
+					_this.editMode = true;
+					_this.setSelectedObjectId();
+				}
+			});
+			toolbar.addChild(button1);
+			var button2 = new Button({
+				label: 'Annotations',
+				iconClass: ''				
+			});
+			toolbar.addChild(button2);
+			var button3 = new Button({
+				label: 'Rules',
+				iconClass: ''				
+			});
+			toolbar.addChild(button3);
+			this.toolbarDivNode.appendChild(toolbar.domNode);
 			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
 			this.pane = new ContentPane( {
 				'class' : 'backgroundClass',
@@ -31,15 +56,17 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			this.inherited(arguments);
 			this.pane.resize(changeSize);
 		},
-		setSelectedObjectId: function(objectId, editMode){
+		setSelectedObjectId: function(objectId){
+			if(objectId) this.objectId = objectId;
+//			if(this.editMode) this.toolbar.set('style', {'display': ''});
 			this.wipeClean();
 			var viewId = this.state.viewId;
 			var _this = this;
 			var toolbarDivNode = this.toolbarDivNode;
 			var containerNode = this.pane.containerNode;
 			var extraPlugins = this.extraPlugins;
-			when(_nqDataStore.get(objectId), function(item){
-				if(editMode) when(generateNextLevelContentsEditMode(containerNode, item, viewId, 1, [], toolbarDivNode, extraPlugins), function(item){
+			when(_nqDataStore.get(this.objectId), function(item){
+				if(_this.editMode) when(generateNextLevelContentsEditMode(containerNode, item, viewId, 1, [], toolbarDivNode, extraPlugins), function(item){
 					//_this.startup();
 				});
 				else generateNextLevelContents(containerNode, item, viewId, 1, []);
@@ -123,6 +150,15 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			//lang: this.lang
 			'style': {'display': paragraphNrArr.length==0?'':'none'}
 		});
+		var button1 = new Button({
+			label: 'Close',
+			//iconClass: 'editIcon',
+			onClick: function(){
+				_this.editMode = false;
+				_this.setSelectedObjectId();
+			}
+		});
+		toolbar.addChild(button1);
 		toolbarDivNode.appendChild(toolbar.domNode);
 		//Paragraph
 		var editorDijit = new Editor({

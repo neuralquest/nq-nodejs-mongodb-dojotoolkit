@@ -13,7 +13,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		TabContainer, ContentPane, AccordionContainer, 
 		Editor, NqWebGlChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqContents) {
 	
-	var _editMode = false;
 	_nqMemoryStore = Observable(new Memory({}));
 	_nqDataStore = Cache(NqJsonRest({target:"data/"}), _nqMemoryStore);
 	_nqSchemaMemoryStore = new Memory({});
@@ -25,11 +24,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	ready( function() {
 		topic.subscribe("/dojo/hashchange", interpritHash);
 		on(registry.byId('cancelButtonId'), 'click', function(event){cancelChanges();});
-		on(registry.byId('saveButtonId'), 'click', function(event){saveChanges();});
-		on(registry.byId('editButtonId'), 'click', function(event){
-			_editMode=!_editMode;
-			interpritHash(0);
-		});
+		on(registry.byId('saveButtonId'), 'click', function(event){_nqDataStore.masterStore.saveChanges();});
 		on(registry.byId('helpButtonId'), 'click', function(event){
 			dojo.query(".helpTextInvisable").forEach(function(node) {
 				domStyle.set(node, 'display', 'block');
@@ -337,7 +332,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				tabNode.appendChild(widget.domNode);
 				widget.startup();
 			}
-			widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel, _editMode);
+			widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
 			break;
 		}
 	}
