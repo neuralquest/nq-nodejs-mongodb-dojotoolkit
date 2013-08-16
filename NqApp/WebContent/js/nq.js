@@ -13,18 +13,17 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		TabContainer, ContentPane, AccordionContainer, 
 		Editor, NqWebGlChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqContents) {
 	
-	_nqMemoryStore = Observable(new Memory({}));
-	_nqDataStore = Cache(NqJsonRest({target:"data/"}), _nqMemoryStore);
-	_nqSchemaMemoryStore = new Memory({});
-	_nqSchemaStore = Cache(new JsonRest({target:"schema/"}), _nqSchemaMemoryStore);
+	_nqDataStore = new Cache(new NqJsonRest({target:"data/"}), Observable(new Memory()));
+	var _transaction = _nqDataStore.transaction();
+	_nqSchemaStore = Cache(new JsonRest({target:"schema/"}), new Memory({}));
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Initialize
 	//////////////////////////////////////////////////////////////////////////////
 	ready( function() {
 		topic.subscribe("/dojo/hashchange", interpritHash);
-		on(registry.byId('cancelButtonId'), 'click', function(event){cancelChanges();});
-		on(registry.byId('saveButtonId'), 'click', function(event){_nqDataStore.masterStore.saveChanges();});
+		on(registry.byId('cancelButtonId'), 'click', function(event){_transaction.abort();});
+		on(registry.byId('saveButtonId'), 'click', function(event){_transaction.commit();});
 		on(registry.byId('helpButtonId'), 'click', function(event){
 			dojo.query(".helpTextInvisable").forEach(function(node) {
 				domStyle.set(node, 'display', 'block');

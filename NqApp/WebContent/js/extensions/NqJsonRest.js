@@ -8,14 +8,7 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 		putObjects: {},
 		removeObjects: {},
 		//queryEngine: NqSimpleQueryEngine,
-		//See http://dojotoolkit.org/documentation/tutorials/1.6/data_modeling/
-		// Since dojo.store.Memory doesn't have various store methods we need, we have to add them manually
-		/*
-		getChildren: function(object, childrenAttr){
-			var childrenQuery = {parentId: object.id, childrenAttr: childrenAttr};
-			return this.query(childrenQuery);
-		},
-		*/
+
 		getChildren: function(object, childrenAttr){
 			var promisses = [];
 			for(var i=0;i<childrenAttr.length;i++){
@@ -32,15 +25,12 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 		put: function(object, options){
 			registry.byId('cancelButtonId').set('disabled',false);
 			registry.byId('saveButtonId').set('disabled',false);
-			// add it to the queue of put Objects
 			// skip if it was updated previously or its been added by ourselves 
 			if(!(object.id in this.putObjects) && !(object.id in this.addObjects)){
+				// add it to the queue of put Objects
 				var originalObject =_nqMemoryStore.get(object.id);
 				this.putObjects[object.id] = originalObject;
 			}
-
-			//return JsonRest.prototype.put.call(this, object, options); //this will xhr to the server
-			//return JsonRest.prototype.put.apply(this, arguments);
 			return object;
 	    },
 		add: function(object, options){
@@ -85,77 +75,77 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 			}
 			else return JsonRest.prototype.query.call(this, query, options);
 		},
-	    save: function(){
-			registry.byId('cancelButtonId').set('disabled',true);
-			registry.byId('saveButtonId').set('disabled',true);
-			/*
-			//registry.byId('saveUpdatesDlg').hide()//in case it came from the dialoge
-			registry.byClass("dojox.grid.EnhancedGrid").forEach( function(grid) {
-				grid.edit.apply();
-			});
-			registry.byClass("dijit.form.TextBox",'placeholder').forEach(function(tb){
-				//only destroy if it is not part of a form
-				//tb.destroy();
-			});
-			registry.byClass("dijit.Editor",'placeholder').forEach(function(editor){
-				//editor.close(true);
-			});
-			*/
-			var postOperations = [];
-			for(key in this.removeObjects){
-				postOperations.push({action: "delete", data: key});
-			};
-			for(key in this.addObjects){
-				var newObject =_nqMemoryStore.get(key);
-				postOperations.push({action: "put", data: newObject});
-			};
-			for(key in this.putObjects){
-				var updatedObject =_nqMemoryStore.get(key);
-				postOperations.push({action: "post", data: updatedObject});
-			};
-			// commit the transaction, sending all the operations in a single request
-			request(target, {
-				// send all the operations in the body
-				data: dojo.toJson(postOperations),//JSON.stringify(postOperations)
-			}).then( 
-				function(data){
-					dojo.fadeIn({ node:"savedDlg", duration: 300,
-						onEnd:function(){
-							dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();	
-						}
-					}).play();
+	    transaction: function(){
+	    	return {
+		    	commit: function(){
+					registry.byId('cancelButtonId').set('disabled',true);
+					registry.byId('saveButtonId').set('disabled',true);
+					/*
+					//registry.byId('saveUpdatesDlg').hide()//in case it came from the dialoge
+					registry.byClass("dojox.grid.EnhancedGrid").forEach( function(grid) {
+						grid.edit.apply();
+					});
+					registry.byClass("dijit.form.TextBox",'placeholder').forEach(function(tb){
+						//only destroy if it is not part of a form
+						//tb.destroy();
+					});
+					registry.byClass("dijit.Editor",'placeholder').forEach(function(editor){
+						//editor.close(true);
+					});
+					*/
+					var postOperations = [];
+					for(key in this.removeObjects){
+						postOperations.push({action: "delete", data: key});
+					};
+					for(key in this.addObjects){
+						var newObject =_nqMemoryStore.get(key);
+						postOperations.push({action: "put", data: newObject});
+					};
+					for(key in this.putObjects){
+						var updatedObject =_nqMemoryStore.get(key);
+						postOperations.push({action: "post", data: updatedObject});
+					};
+					// commit the transaction, sending all the operations in a single request
+					return request(target, {
+						// send all the operations in the body
+						handleAs: "json",
+						data: dojo.toJson(postOperations)//JSON.stringify(postOperations)
+					}).then( 
+						function(data){
+							dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
+							this.removeObjects = {};
+							this.addObjects = {};
+							this.putObjects = {};
+			    		},
+			    		function(error){
+			    	    	new dijit.Dialog({title: "Rollback",content: error.message,style: "width: 500px"}).show();
+			    	    	//rollBackClient(); //TODO
+							this.removeObjects = {};
+							this.addObjects = {};
+							this.putObjects = {};
+			    		} 
+			    	);		    	
+				},
+			    abort: function(){
+					registry.byId('cancelButtonId').set('disabled',true);
+					registry.byId('saveButtonId').set('disabled',true);
+					
+					registry.byClass("dojox.grid.EnhancedGrid").forEach( function(grid) {
+						grid.edit.cancel();
+					});
+					registry.byClass("dijit.form.TextBox",'placeholder').forEach(function(textBox){
+						textBox.undo(); 
+					});
+					registry.byClass("dijit.Editor",'placeholder').forEach(function(editor){
+						//editor.close(false);
+					});
+			    	//rollBackClient(); //TODO
 					this.removeObjects = {};
 					this.addObjects = {};
 					this.putObjects = {};
-	    		},
-	    		function(error){
-	    	    	new dijit.Dialog({title: "Rollback",content: error.message,style: "width: 500px"}).show();
-	    	    	//rollBackClient(); //TODO
-					this.removeObjects = {};
-					this.addObjects = {};
-					this.putObjects = {};
-	    		} 
-	    	);
-		
-	    },
-	    cancel: function(){
-			registry.byId('cancelButtonId').set('disabled',true);
-			registry.byId('saveButtonId').set('disabled',true);
-
-			//registry.byId('saveUpdatesDlg').hide()//in case it came from the dialoge
-			registry.byClass("dojox.grid.EnhancedGrid").forEach( function(grid) {
-				grid.edit.cancel();
-			});
-			registry.byClass("dijit.form.TextBox",'placeholder').forEach(function(textBox){
-				textBox.undo(); 
-			});
-			registry.byClass("dijit.Editor",'placeholder').forEach(function(editor){
-				//editor.close(false);
-			});
-	    	//rollBackClient(); //TODO
-		
+		    	}
+	    	};
 	    }
-
 	});
 });
 

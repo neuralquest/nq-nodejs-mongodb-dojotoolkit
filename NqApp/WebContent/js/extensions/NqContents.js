@@ -30,14 +30,19 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			toolbar.addChild(button1);
 			var button2 = new Button({
 				label: 'Annotations',
-				iconClass: ''				
+				iconClass: 'annoIcon'				
 			});
 			toolbar.addChild(button2);
 			var button3 = new Button({
 				label: 'Rules',
-				iconClass: ''				
+				iconClass: 'rulesIcon'				
 			});
 			toolbar.addChild(button3);
+			var button4 = new Button({
+				label: 'ToDo',
+				iconClass: 'todoIcon'				
+			});
+			toolbar.addChild(button4);
 			this.toolbarDivNode.appendChild(toolbar.domNode);
 			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
 			this.pane = new ContentPane( {
