@@ -7,9 +7,11 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 
 	var nqWebGlChartWidget = declare("NqWebGlChartWidget", [_WidgetBase], {
 		state: {},
-		bodyViewId: 0,
-		xAxisViewId: 0,
-		yAxisViewId: 0,
+		cellPositionsObj: {},
+		bodyViewYId: null,
+		bodyViewZId: null,
+		headerViewYId: null,
+		headerViewXId: null,
 		skyboxArray: [],	
 
 		buildRendering: function(){
@@ -157,6 +159,34 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				fillSceneClassModel(objectId, this.bodyViewId);			
 			break;
 			}
+		},
+		buildHierarchy: function(objectId, ourPos){
+			if(objectId in this.cellPositionsObj) return;//loop protection
+			return when(_nqDataStore.get(objectId), function(classItem){
+				if(classItem.classId != 0) return;// class as opposed to object
+				greatestXUntilNow.value = ourPos.x;
+				//store the cells position in cell position object 
+				var positionData = {name: classItem[852], vector: ourPos, minChildrenX: ourPos.x, maxChildrenX: ourPos.x, rotate: false};
+				var promisses = [];
+				var x = ourPos.x;
+				var y = ourPos.y - 400;
+				var z = ourPos.z;
+				arrayUtil.forEach(classItem[bodyViewId], function(subobjectId){
+					var newPos = new THREE.Vector3( x, y, z );
+					var result = positionCellsInHierarchy(subobjectId, newPos, cellPositionsObj, greatestXUntilNow, bodyViewId);
+					if(result){
+						promisses.push(result);
+						positionData.maxChildrenX = x;
+						if(greatestXUntilNow.value > x) x = greatestXUntilNow.value;// a lower level may have bumped our x
+						x = x + 800;
+					}
+				});
+				//positionData.vector.x = (positionData.maxChildrenX - positionData.minChildrenX) /2 + positionData.minChildrenX;//place at the centre of our children
+				console.log(positionData);
+				console.log((positionData.maxChildrenX - positionData.minChildrenX) /2 );//+ positionData.minChildrenX;//place at the centre of our children
+				cellPositionsObj[objectId] = positionData; 
+				return all(promisses);
+			});
 		}
 	});
 	function animate() {

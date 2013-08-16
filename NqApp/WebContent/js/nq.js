@@ -3,15 +3,15 @@ require([
 'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct', 
 'dojo/_base/declare', 'dojo/store/Observable', 'dojo/store/Cache', 'dojo/store/JsonRest', 'dojo/store/Memory',
 'dijit/tree/dndSource', 'dojo/Deferred', 'dojo/when', 'dojo/query', 'dijit/layout/BorderContainer', 
-'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer',
-'dijit/Editor', 'nq/NqWebGlChart', 'nq/NqForm', 'nq/NqGrid', 'nq/NqJsonRest', 'nq/NqTree', 'nq/NqObjectStoreModel', 'nq/NqContents',
+'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', 'dijit/Editor', 
+'nq/NqWebGlChart', 'nq/NqForm', 'nq/NqGrid', 'nq/NqJsonRest', 'nq/NqTree', 'nq/NqObjectStoreModel', 'nq/NqContents',
  'dojo/promise/instrumentation', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct,
 		declare, Observable, Cache, JsonRest, Memory, 
 		dndSource, Deferred, when, query, BorderContainer, 
-		TabContainer, ContentPane, AccordionContainer, 
-		Editor, NqWebGlChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqContents) {
+		TabContainer, ContentPane, AccordionContainer, Editor, 
+		NqWebGlChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqContents) {
 	
 	_nqDataStore = new Cache(new NqJsonRest({target:"data/"}), Observable(new Memory()));
 	var _transaction = _nqDataStore.transaction();
