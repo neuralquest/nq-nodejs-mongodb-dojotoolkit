@@ -127,22 +127,14 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 			    	);		    	
 				},
 			    abort: function(){
-					registry.byId('cancelButtonId').set('disabled',true);
-					registry.byId('saveButtonId').set('disabled',true);
-					
-					registry.byClass("dojox.grid.EnhancedGrid").forEach( function(grid) {
-						grid.edit.cancel();
-					});
-					registry.byClass("dijit.form.TextBox",'placeholder').forEach(function(textBox){
-						textBox.undo(); 
-					});
-					registry.byClass("dijit.Editor",'placeholder').forEach(function(editor){
-						//editor.close(false);
-					});
-			    	//rollBackClient(); //TODO
+			    	window.location.reload(true);
+			    	//window.location.href = window.location.href;
+			    	/*
+			    	TODO evict from the cache then refresh the page
 					this.removeObjects = {};
 					this.addObjects = {};
 					this.putObjects = {};
+					*/
 		    	}
 	    	};
 	    }

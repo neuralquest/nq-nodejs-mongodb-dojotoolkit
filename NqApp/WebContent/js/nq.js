@@ -13,9 +13,11 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		TabContainer, ContentPane, AccordionContainer, Editor, 
 		NqWebGlChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqContents) {
 	
-	_nqDataStore = new Cache(new NqJsonRest({target:"data/"}), Observable(new Memory()));
+	_nqMemoryStore = Observable(new Memory({}));
+	_nqDataStore = new Cache(new NqJsonRest({target:"data/"}), _nqMemoryStore);
 	var _transaction = _nqDataStore.transaction();
-	_nqSchemaStore = Cache(new JsonRest({target:"schema/"}), new Memory({}));
+	_nqSchemaMemoryStore = new Memory();
+	_nqSchemaStore = Cache(new JsonRest({target:"schema/"}), _nqSchemaMemoryStore);
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Initialize
@@ -49,7 +51,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		for(var level = 0; level<levels; level++){
 			var state = getState(level);
 			if(state.viewId && !registry.byId('acctab'+state.viewId)){
-				var viewDef = _nqSchemaMemoryStore.get(state.viewId);
+				var viewDef = _nqSchemaStore.get(state.viewId);
 				var parentContentPane = findParentContainer(viewDef);
 				if(viewDef.containerType == 'Accordion') createAccordion(parentContentPane, state.viewId, state.tabId, level);
 				else createTabs(parentContentPane, state.viewId, state.tabId, level);
@@ -63,8 +65,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	//////////////////////////////////////////////////////////////////////////////
 	function findParentContainer(viewDef){
 		if(viewDef.parentTabId) {
-			var tabDef = _nqSchemaMemoryStore.get(viewDef.parentTabId);
-			var parentDef = _nqSchemaMemoryStore.get(tabDef.parentViewId);
+			var tabDef = _nqSchemaStore.get(viewDef.parentTabId);
+			var parentDef = _nqSchemaStore.get(tabDef.parentViewId);
 			if(parentDef.entity == 'tab'){
 				if(parentDef.displayType == 'Sub Accordion') {
 					var parentContentPane = registry.byId('slave'+parentDef.id);
@@ -228,7 +230,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var tabNode = dom.byId('tab'+state.tabId);			
 		var tabPane = registry.byId('tab'+state.tabId);
 		var widget = registry.byId('widget'+state.tabId);
-		var tabDef = _nqSchemaMemoryStore.get(state.tabId);		 
+		var tabDef = _nqSchemaStore.get(state.tabId);		 
 		var viewsArr = _nqSchemaMemoryStore.query({parentTabId: state.tabId, entity: 'view'});//get the views that belong to this tab
 		var viewIdsArr = [];
 		for(var i=0;i<viewsArr.length;i++){
@@ -299,15 +301,16 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			if(!widget){
 				widget = new NqWebGlChart({
 					id: 'widget'+state.tabId,
-					bodyViewId: state.viewId,
-					xAxisViewId: 1,
-					yAxisViewId: 1,
+					bodyViewYId: state.viewId,
 					skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
 				}, domConstruct.create('div'));
 				tabNode.appendChild(widget.domNode);
+				widget.startup().then(function(res){
+					widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
+				});
 				widget.startup();
 			}
-			widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel, tabDef.displayType);
+			else widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
 			break;
 		case 'Form': 
 			if(!widget){

@@ -1,18 +1,18 @@
 define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array", "dijit/_WidgetBase", 'dojo/dom-construct', "dojo/_base/lang", 
-        "dojo/dom-geometry"],
-	function(declare, when, all, arrayUtil, _WidgetBase, domConstruct, lang, domGeom){
+        "dojo/dom-geometry", "dojo/Deferred"],
+	function(declare, when, all, arrayUtil, _WidgetBase, domConstruct, lang, domGeom, Deferred){
 
 	var camera, scene, renderer, controls, requestID, projector, stats;
 	var selectableObjects = [];
 
 	var nqWebGlChartWidget = declare("NqWebGlChartWidget", [_WidgetBase], {
 		state: {},
-		cellPositionsObj: {},
 		bodyViewYId: null,
 		bodyViewZId: null,
 		headerViewYId: null,
 		headerViewXId: null,
-		skyboxArray: [],	
+		skyboxArray: [],
+		classGeometry: null,
 
 		buildRendering: function(){
 			this.inherited(arguments);
@@ -123,6 +123,14 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		startup: function(){
 			this.resize();
 			animate();
+			// load any meshes, return a defered so that loading the scene can wait
+			var loader = new THREE.JSONLoader(true);			
+			var deferred = new Deferred();
+			loader.load("img/Neuralquest/mesh/classMesh.js", lang.hitch(this, function(geometry, materials) {
+				this.classGeometry = geometry;
+				deferred.resolve(geometry);
+			}));
+			return deferred;
 		},
 		resize: function(changeSize){
 			var positionInfo = dojo.position(this.domNode.parentNode, true);
@@ -149,44 +157,176 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			cancelAnimation();
 			this.inherited(arguments);
 		},
-		setSelectedObjectId: function(objectId, chartType){
+		setSelectedObjectId: function(objectId){
 			clearScene();
-			switch(chartType){
-			case '2D Process Model': 
-				fillSceneClassModel(objectId, this.bodyViewId);			
-			break;
-			case '3D Class Model': 
-				fillSceneClassModel(objectId, this.bodyViewId);			
-			break;
-			}
+			loadingMessage();
+			var parentChildrenArray = [];
+			var cellPositionsObj = {};
+			when(this.buildHierarchy(objectId, cellPositionsObj, parentChildrenArray), lang.hitch(this, function(classItem){
+				var newPos = new THREE.Vector3( 0, 0, 0 );
+				this.postionObjects(objectId, newPos, cellPositionsObj);
+				console.log(cellPositionsObj);
+				this.fillScene(objectId, cellPositionsObj);				
+			}));
 		},
-		buildHierarchy: function(objectId, ourPos){
-			if(objectId in this.cellPositionsObj) return;//loop protection
-			return when(_nqDataStore.get(objectId), function(classItem){
+		buildHierarchy: function(objectId, cellPositionsObj, parentChildrenArray){
+			if(objectId in cellPositionsObj) return;//loop protection
+			return when(_nqDataStore.get(objectId), lang.hitch(this, function(classItem){
 				if(classItem.classId != 0) return;// class as opposed to object
-				greatestXUntilNow.value = ourPos.x;
-				//store the cells position in cell position object 
-				var positionData = {name: classItem[852], vector: ourPos, minChildrenX: ourPos.x, maxChildrenX: ourPos.x, rotate: false};
+				parentChildrenArray.push(classItem.id);
 				var promisses = [];
-				var x = ourPos.x;
-				var y = ourPos.y - 400;
-				var z = ourPos.z;
-				arrayUtil.forEach(classItem[bodyViewId], function(subobjectId){
-					var newPos = new THREE.Vector3( x, y, z );
-					var result = positionCellsInHierarchy(subobjectId, newPos, cellPositionsObj, greatestXUntilNow, bodyViewId);
-					if(result){
-						promisses.push(result);
-						positionData.maxChildrenX = x;
-						if(greatestXUntilNow.value > x) x = greatestXUntilNow.value;// a lower level may have bumped our x
-						x = x + 800;
+				var childrenY = [];
+				var childrenZ = [];
+				var viewYArr = classItem[this.bodyViewYId];
+				for(var i=0;i<viewYArr.length;i++){
+					var subObjectId = viewYArr[i];
+					var result = this.buildHierarchy(subObjectId, cellPositionsObj, childrenY);
+					promisses.push(result);				
+				}
+				if(this.bodyViewZId){
+					var viewZArr = classItem[this.bodyViewZId];
+					for(var i=0;i<viewZArr.length;i++){
+						var subObjectId = viewZArr[i];
+						childrenZ.push(subObjectId);
+						var result = when(_nqDataStore.get(subObjectId), lang.hitch(this, function(classItem){
+							cellPositionsObj[subObjectId] = {childrenY: [], childrenZ: []}; 						
+						}));
+						promisses.push(result);				
 					}
-				});
-				//positionData.vector.x = (positionData.maxChildrenX - positionData.minChildrenX) /2 + positionData.minChildrenX;//place at the centre of our children
-				console.log(positionData);
-				console.log((positionData.maxChildrenX - positionData.minChildrenX) /2 );//+ positionData.minChildrenX;//place at the centre of our children
-				cellPositionsObj[objectId] = positionData; 
+				}			
+				cellPositionsObj[objectId] = {childrenY: childrenY, childrenZ: childrenZ}; 
 				return all(promisses);
-			});
+			}));
+		},
+		postionObjects: function(objectId, ourPos, cellPositionsObj){
+			var x = ourPos.x;
+			var y = ourPos.y - 400;
+			var z = ourPos.z;
+			var childrenY = cellPositionsObj[objectId].childrenY;
+			for(var i=0;i<childrenY.length;i++){
+				var subObjectId = childrenY[i];
+				var newPos = new THREE.Vector3( x, y, z );
+				this.postionObjects(subObjectId, newPos, cellPositionsObj);
+				x = x + 800;
+			}
+			if(childrenY.length>1){
+				var maxXId = childrenY[childrenY.length-1];
+				var maxX = cellPositionsObj[maxXId].pos.x;
+				ourPos.x = (maxX - ourPos.x)/2 + ourPos.x;
+			}
+			cellPositionsObj[objectId].pos = ourPos;
+		},
+		fillScene: function(objectId, cellPositionsObj){
+			clearScene();
+			var classMaterial = new THREE.MeshLambertMaterial( {color: 0x8904B1});
+			var connectorMaterial =  new THREE.MeshPhongMaterial({specular: 0xffffff, color: 0x9F9F9F, emissive: 0x4F4F4F,shininess: 100 });
+			var textMaterial = new THREE.MeshLambertMaterial({color: 0xEFEFEF});
+			//console.dir(cellPositionsObj);
+			var sceneObject3D = new THREE.Object3D();
+			for(var key in cellPositionsObj){
+				var positionInfo = cellPositionsObj[key];
+
+				var classObject = new THREE.Object3D();
+				classObject.position = positionInfo.pos;
+				if(positionInfo.rotate == true) classObject.rotation.y = + 90 * ( Math.PI / 180 );
+				
+				//The mesh
+		    	mesh = new THREE.Mesh(this.classGeometry, classMaterial);
+		        mesh.scale.set(100,100,100);
+		        mesh.name = key;
+		        classObject.add(mesh);
+		        classObject.name = positionInfo.name;
+		        
+		        selectableObjects.push(mesh);
+		        
+		        //The Name
+		        var name = _nqDataStore.get(key)[852];
+				var text3d = new THREE.TextGeometry(name, {size: 30, height: 5, font: 'helvetiker'});
+				//var text3d = new THREE.TextGeometry( 'Organizations', {size: 70, height: 20, curveSegments: 4, font: 'helvetiker', weight: 'normal', style: 'normal',  });
+				text3d.computeBoundingBox();
+				var xOffset = -0.5 * ( text3d.boundingBox.max.x - text3d.boundingBox.min.x );
+				var yOffset = -0.5 * ( text3d.boundingBox.max.y - text3d.boundingBox.min.y );
+				var textMesh = new THREE.Mesh(text3d, textMaterial);
+				textMesh.position.x = xOffset;
+				textMesh.position.y = yOffset;
+				textMesh.position.z = 55;
+				textMesh.rotation.x = 0;
+				textMesh.rotation.y = Math.PI * 2;
+				classObject.add(textMesh);
+				
+				sceneObject3D.add(classObject);
+			}
+			//now add connectors
+			for(var key in cellPositionsObj){
+				var positionInfo = cellPositionsObj[key];
+				//z axis for the attributes
+				if(positionInfo.lastAttrId < 0) {					
+					var connectorLength = positionInfo.lastAttrId;
+					var connectorGeometry = new THREE.CylinderGeometry( 10, 10, connectorLength, 15, 15, true );
+					var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
+					var ourVec = new THREE.Vector3( positionInfo.pos.x, positionInfo.pos.y, positionInfo.pos.z + (connectorLength/2) );
+					connectorMesh.position = ourVec;
+					connectorMesh.rotation.x = + 90 * ( Math.PI / 180 );
+					sceneObject3D.add(connectorMesh);
+				}
+				//for the subclasses
+				if(positionInfo.childrenY.length>0){
+					//get the length of the connector
+					var firstId = positionInfo.childrenY[0];
+					var firstX = cellPositionsObj[firstId].pos.x;
+					var lastId = positionInfo.childrenY[positionInfo.childrenY.length -1];
+					var lastX = cellPositionsObj[lastId].pos.x;
+					var connectorLength = lastX - firstX;
+
+					//horizontal connector
+					var connectorGeometry = new THREE.CylinderGeometry( 10, 10, connectorLength, 15, 15, true );
+					var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
+					var ourVec = new THREE.Vector3( positionInfo.pos.x, positionInfo.pos.y - 200, positionInfo.pos.z);
+					connectorMesh.position = ourVec;
+					connectorMesh.rotation.z = + 90 * ( Math.PI / 180 );
+					sceneObject3D.add(connectorMesh);
+
+					//sphere at the left end
+					var connectorGeometry = new THREE.SphereGeometry( 10 );
+					var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
+					var ourVec = new THREE.Vector3(firstX, positionInfo.pos.y - 200, positionInfo.pos.z);
+					connectorMesh.position = ourVec;
+					sceneObject3D.add(connectorMesh);
+					
+					//sphere at the right end
+					var connectorGeometry = new THREE.SphereGeometry( 10 );
+					var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
+					var ourVec = new THREE.Vector3(lastX, positionInfo.pos.y - 200, positionInfo.pos.z);
+					connectorMesh.position = ourVec;
+					sceneObject3D.add(connectorMesh);
+					
+					//vertical connector to super class
+					var connectorGeometry = new THREE.CylinderGeometry( 10, 10, 200, 15, 15, true );
+					var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
+					var ourVec = new THREE.Vector3( positionInfo.pos.x, positionInfo.pos.y - 100, positionInfo.pos.z);
+					connectorMesh.position = ourVec;
+					sceneObject3D.add(connectorMesh);
+					
+					//vertical connectors to sub class
+					arrayUtil.forEach(positionInfo.childrenY, function(chlidClassItemId){
+						var positionInfo = cellPositionsObj[chlidClassItemId];
+						var connectorGeometry = new THREE.CylinderGeometry( 10, 10, 200, 15, 15, true );
+						var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
+						var ourVec = new THREE.Vector3( positionInfo.pos.x, positionInfo.pos.y + 100, positionInfo.pos.z);
+						connectorMesh.position = ourVec;
+						sceneObject3D.add(connectorMesh);
+						
+					});
+				}
+			}
+			var positionInfo = cellPositionsObj[objectId];
+			var ourVec = new THREE.Vector3(- positionInfo.pos.x, 0, 0 );
+			sceneObject3D.position = ourVec;
+			scene.add(sceneObject3D);
+
+			render();
+
+		
 		}
 	});
 	function animate() {
@@ -214,7 +354,23 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		}
 		render();
 	}
-
+	function loadingMessage(){
+		var textMaterial = new THREE.MeshLambertMaterial({color: 0xEFEFEF});
+        //'Loading...'
+		var text3d = new THREE.TextGeometry('Loading...', {size: 50, font: 'helvetiker'});
+		text3d.computeBoundingBox();
+		var xOffset = -0.5 * ( text3d.boundingBox.max.x - text3d.boundingBox.min.x );
+		var yOffset = -0.5 * ( text3d.boundingBox.max.y - text3d.boundingBox.min.y );
+		var textMesh = new THREE.Mesh(text3d, textMaterial);
+		textMesh.position.x = xOffset;
+		textMesh.position.y = 400;
+		textMesh.position.z = 0;
+		textMesh.rotation.x = 0;
+		textMesh.rotation.y = Math.PI * 2;
+		scene.add(textMesh);
+		render();
+	}
+/*
 	function positionCellsInHierarchy(classItemId, ourPos, cellPositionsObj, greatestXUntilNow, bodyViewId){	
 		if(classItemId in cellPositionsObj) return;
 
@@ -377,6 +533,6 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			});
 		});
 
-	}
+	}*/
 	return nqWebGlChartWidget;
 });
