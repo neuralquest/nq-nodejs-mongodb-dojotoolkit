@@ -114,7 +114,7 @@ public class DataServlet extends HttpServlet implements Constants {
 
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//new row
-		resp.setContentType("application/x-json");
+		resp.setContentType("application/json");
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
 			session.beginTransaction();

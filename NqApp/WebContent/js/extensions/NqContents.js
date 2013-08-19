@@ -57,8 +57,15 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			var tabDef = _nqSchemaMemoryStore.get(this.state.tabId);
 			this.pageHelpTextDiv.innerHTML = tabDef.description;
 		},
+		startup: function(){
+			arrayUtil.forEach(this.pane.getChildren(), function(widget){
+				if(widget.startup) widget.startup();
+			});
+			this.resize();
+		},
 		resize: function(changeSize){
 			this.inherited(arguments);
+			var positionInfo = dojo.position(this.domNode.parentNode, true);
 			this.pane.resize(changeSize);
 		},
 		setSelectedObjectId: function(objectId){
@@ -176,7 +183,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 				when(_nqDataStore.get(item.id), function(item){
 					item[959] = editorDijit.get('value');
 					_nqDataStore.put(item);
-			})},
+			});},
 			'onFocus': function(evt){
 				var widgets = registry.findWidgets(toolbarDivNode);
 				arrayUtil.forEach(widgets, function(tb) {
@@ -196,7 +203,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 		editorDijit.set('value', storedRtf);
 		node.appendChild(editorDijit.domNode);
 
-		editorDijit.startup();
+//		editorDijit.startup();
 		if(item.classId==80) return;
 
 		//Get the sub- headers/paragraphs

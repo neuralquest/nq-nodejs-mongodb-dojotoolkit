@@ -1,12 +1,12 @@
 define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox',  'dijit/form/NumberTextBox', 
         'dijit/form/CheckBox', 'dijit/Editor', 'dijit/form/CurrencyTextBox', 'dijit/form/ValidationTextBox', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", 
-        "dojo/when", "dojo/query", 'dijit/registry', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff",
+        "dojo/when", "dojo/query", 'dijit/registry', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/_base/lang",
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, arrayUtil, Form, Select, Toolbar, DateTextBox, NumberTextBox, 
 			CheckBox, Editor, CurrencyTextBox, ValidationTextBox, Memory, domConstruct, on, 
-			when, query, registry, _WidgetBase, ContentPane, domGeometry, has){
+			when, query, registry, _WidgetBase, ContentPane, domGeometry, has, lang){
 	var dijit;
    
 	return declare("NqFormWidget", [_WidgetBase], {
@@ -45,7 +45,9 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 			}
 			var toolbarDivNode = this.toolbarDivNode; 
 			var extraPlugins = this.extraPlugins; 
-			arrayUtil.forEach(propsArr, function(prop) {	
+			for(var i=0; i<propsArr.length;i++){
+				var prop = propsArr[i];
+
 				//console.log('Create dijit:', prop.title, prop);				
 				var row = domConstruct.create("tr", null, tableNode);
 				
@@ -78,6 +80,14 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 					//widgetProperties.styleSheet = 'css/editor.css';
 					dijit = new Editor(widgetProperties, domConstruct.create('div'));
 					dijit.addStyleSheet('css/editor.css');
+					dijit.on("NormalizedDisplayChanged", function(){
+						var height = domGeometry.getMarginSize(dijit.editNode).h;
+						if(has("opera")){
+							height = dijit.editNode.scrollHeight;
+						}
+						dijit.resize({h: height});
+					});
+
 				}
 				else if(prop.type=='string' && prop.format=='date-time') dijit = new DateTextBox(getWidgetProperties(prop), domConstruct.create('input'));
 				else if(prop.type=='string'){
@@ -93,31 +103,31 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 				else tdDom.innerHTML = "[unknown poperty type in schema]";
 
 				tdDom.appendChild(dijit.domNode);
-				dijit.startup();
+//				dijit.startup();
 				
-				on(dijit,'onChange', function(evt){
-					when(_nqDataStore.get(objectId), function(item){
-						item[prop.name] = dijit.get('value');
+				var _this = this;
+				dijit.on('change', function(evt){
+					var _objectId = _this.objectId;
+					var _name = this.name;
+					var _value = evt;
+					when(_nqDataStore.get(_objectId), function(item){
+						item[_name] = _value;
 						_nqDataStore.put(item);
 					});
-				});				
+				});	
+				
 				//the help text
 				domConstruct.create("td", { innerHTML: (prop.description?prop.description:""), style: "padding-right: 5px", 'class': 'helpTextInvisable'}, row);
-
-			});
+			};
 		},
-		Xstartup: function(){
-			this.inherited(arguments);
-			dijit.on("NormalizedDisplayChanged", function(){
-				var height = domGeometry.getMarginSize(dijit.editNode).h;
-				if(has("opera")){
-					height = dijit.editNode.scrollHeight;
-				}
-				dijit.resize({h: height});
+		startup: function(){
+			arrayUtil.forEach(this.pane.getChildren(), function(widget){
+				if(widget.startup) widget.startup();
 			});
+			this.resize();
 		},
 		resize: function(changeSize){
-			this.pane.resize(changeSize);
+			this.pane.resize();
 		},
 		destroy: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){

@@ -1,6 +1,6 @@
 define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqSimpleQueryEngine", 'dijit/registry', 'dojo/when', "dojo/store/util/QueryResults",
-        "dojo/request", "dojo/store/JsonRest"],
-	function(declare, JsonRest, all, NqSimpleQueryEngine, registry, when, QueryResults, request, JsonRest){
+        "dojo/request", "dojo/store/JsonRest", "dojo/_base/lang"],
+	function(declare, JsonRest, all, NqSimpleQueryEngine, registry, when, QueryResults, request, JsonRest, lang){
 
 	return declare("NqJsonRest", [JsonRest], {
 		target:"",
@@ -77,7 +77,7 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 		},
 	    transaction: function(){
 	    	return {
-		    	commit: function(){
+		    	commit: lang.hitch(this, function(){
 					registry.byId('cancelButtonId').set('disabled',true);
 					registry.byId('saveButtonId').set('disabled',true);
 					/*
@@ -106,8 +106,9 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 						postOperations.push({action: "post", data: updatedObject});
 					};
 					// commit the transaction, sending all the operations in a single request
-					return request(target, {
+					return request.post(this.target, {
 						// send all the operations in the body
+						headers: {'Content-Type': 'application/json'},
 						handleAs: "json",
 						data: dojo.toJson(postOperations)//JSON.stringify(postOperations)
 					}).then( 
@@ -125,7 +126,7 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 							this.putObjects = {};
 			    		} 
 			    	);		    	
-				},
+				}),
 			    abort: function(){
 			    	window.location.reload(true);
 			    	//window.location.href = window.location.href;

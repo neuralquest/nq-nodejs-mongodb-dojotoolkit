@@ -54,7 +54,8 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 					label:"Delete",
 					iconClass:"dijitEditorIcon dijitEditorIconCut",
 					onClick: function(){
-						var selectedItem = this.getParent().currentTarget.item;
+						var selectedItem = tree.get("selectedItem");
+						//var selectedItem = this.getParent().currentTarget.item;
 						_nqDataStore.remove(selectedItem.id);
 					}//TODO must fix linkedList, on the server?
 				}));
