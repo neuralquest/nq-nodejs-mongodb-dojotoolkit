@@ -4,14 +4,15 @@ require([
 'dojo/_base/declare', 'dojo/store/Observable', 'dojo/store/Cache', 'dojo/store/JsonRest', 'dojo/store/Memory',
 'dijit/tree/dndSource', 'dojo/Deferred', 'dojo/when', 'dojo/query', 'dijit/layout/BorderContainer', 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', 'dijit/Editor', 
-'nq/NqWebGlChart', 'nq/NqForm', 'nq/NqGrid', 'nq/NqJsonRest', 'nq/NqTree', 'nq/NqObjectStoreModel', 'nq/NqContents',
+'nq/NqClassChart', 'nq/NqForm', 'nq/NqGrid', 'nq/NqJsonRest', 'nq/NqTree', 'nq/NqObjectStoreModel', 'nq/NqContents',
  'dojo/promise/instrumentation', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct,
 		declare, Observable, Cache, JsonRest, Memory, 
 		dndSource, Deferred, when, query, BorderContainer, 
 		TabContainer, ContentPane, AccordionContainer, Editor, 
-		NqWebGlChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqContents) {
+		NqClassChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqContents, 
+		instrumentation) {
 	
 	_nqMemoryStore = Observable(new Memory({}));
 	_nqDataStore = new Cache(new NqJsonRest({target:"data/"}), _nqMemoryStore);
@@ -299,16 +300,17 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			break;
 		case '3D Class Model': 
 			if(!widget){
-				widget = new NqWebGlChart({
+				widget = new NqClassChart({
 					id: 'widget'+state.tabId,
-					bodyViewYId: state.viewId,
+					bodyRootId: state.selectedObjectIdPreviousLevel,
+					bodyViewXYAxisId: state.viewId,
 					skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
 				}, domConstruct.create('div'));
 				tabNode.appendChild(widget.domNode);
+				//widget.startup();
 				widget.startup().then(function(res){
 					widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
 				});
-				widget.startup();
 			}
 			else widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
 			break;
