@@ -4,15 +4,6 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 	var renderer, camera, scene, controls, projector, stats, requestId;
 	
 	return declare("NqWebGlChartWidget", [_WidgetBase], {
-		bodyRootId: "",
-		bodyViewXYAxisId: null,
-		bodyViewZAxisId: null,
-		rowHeaderViewId: null,
-		columnHeaderViewId: null,
-		bodyViewHeight: 400,
-		bodyViewWidth: 800,
-		rowHeaderHeight: 100,
-		columnHeaderWidth: 100,
 		skyboxArray: [],
 		selectableObjects: [],
 
@@ -110,7 +101,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			var highlightMaterial = new THREE.MeshLambertMaterial({color: 0xFFFFFF});
 			selectedMesh.material = highlightMaterial;
 			render();
-			
+return;			
 			var curPosition =  new THREE.Vector3( camera.postion );
 			var slectedPosition = selectedMesh.parent.position;
 			var newPosition =  new THREE.Vector3( slectedPosition.x, slectedPosition.y, slectedPosition.z );

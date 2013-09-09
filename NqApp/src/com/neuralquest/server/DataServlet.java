@@ -264,7 +264,11 @@ public class DataServlet extends HttpServlet implements Constants {
 				rowObject.put(String.valueOf(childViewObj.getId()), childrenArray);
 				continue;
 			}
-			LinkedList<Cell> rowList = selectedObj.getListOfRelatedObjectsByView(childViewObj);
+			LinkedList<Cell> rowList = null;
+			if(childViewObj.getId()==CLASS_VIEW_ID){//make an exception for the class view
+				rowList = selectedObj.getLsitOfSubClasses();
+			}
+			else rowList = selectedObj.getListOfRelatedObjectsByView(childViewObj);
 			for(Iterator<Cell> itr0=rowList.iterator();itr0.hasNext();){
 				Cell childObj = itr0.next();
 				childrenArray.put(childViewObj.getId()+"/"+childObj.getId());

@@ -302,12 +302,13 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			if(!widget){
 				widget = new NqClassChart({
 					id: 'widget'+state.tabId,
-					bodyRootId: state.selectedObjectIdPreviousLevel,
-					bodyViewXYAxisId: state.viewId,
+					XYAxisRootId: '844/67', // Process Classes
+					viewId: state.viewId,
+					nameAttrId: 852,
+					ZYAxisRootId: '844/53', //Attributes
 					skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
 				}, domConstruct.create('div'));
 				tabNode.appendChild(widget.domNode);
-				//widget.startup();
 				widget.startup().then(function(res){
 					widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
 				});

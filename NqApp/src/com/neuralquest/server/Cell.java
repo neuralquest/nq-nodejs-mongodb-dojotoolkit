@@ -170,12 +170,23 @@ public class Cell extends BaseCell implements Constants {
 			subclass.getLsitOfAllSubClasses(list);
 		}
 	}
+	public LinkedList<Cell> getLsitOfSubClasses(){
+		LinkedList<Cell> list = new LinkedList<Cell>();
+		for(Iterator<Assoc> itr1=getDestAssocs().iterator();itr1.hasNext();){
+			Assoc assoc = itr1.next();
+			if(assoc.getType() != PARENT_ASSOC) continue;// if not, go to the next
+			Cell subclass = assoc.getSourceFk();
+			if(subclass.getType()==OBJECT) continue;
+			list.add(assoc.getSourceFk());
+		}
+		return list;
+	}
 	/**
 	 * Returns a cell that has a particular rel type to this one
 	 * Only one expected  
 	 * @return Cell linked through relTypeId, or null
 	 */
-	//TODO we should try to get rid of this
+	//TODO we should try to get rid of this. replace it with getObjectByAssocTypeAndDestClass
 	public Cell getCellByAssocType(long relTypeId){
 		//System.out.println(getIdName(50));
 		for(Iterator<Assoc> itr1=getSourceAssocs().iterator();itr1.hasNext();){
@@ -220,30 +231,6 @@ public class Cell extends BaseCell implements Constants {
 			byte primitiveAssocType = (byte)(assocType - 12);// Big NoNo: here we do math with identifires
 			return lookBackward(primitiveAssocType, destClassId);
 		}
-		/*else if(assocType==BY_ORG_UNIT_PASSOC){
-			LinkedList<Cell> orgUnitList = getListOfRelatedObjectsByAssocTypeAndDestClassId(MANYTOMANY_ASSOC, ORG_UNIT_ID);
-			for(Iterator<Cell> itr0=orgUnitList.iterator();itr0.hasNext();){
-				Cell orgUnitObj = itr0.next();
-				Cell orgStateObj = orgUnitObj.getCellByAssocType(MAPSTO_ASSOC);;
-				if(orgStateObj==null) continue;
-				Cell viewObj = orgUnitObj.getObjectByAssocTypeAndDestClass(MANYTOONE_PASSOC, VIEWS_ID);
-				if(viewObj==null) continue;
-				Cell destClass = viewObj.getCellByAssocType(MAPSTO_ASSOC);;
-				if(destClass==null) continue;
-				LinkedList<Cell> objList = destClass.getListOfInstances();
-				for(Iterator<Cell> itr1=objList.iterator();itr1.hasNext();){
-					Cell obj = itr1.next();
-					Cell objStateObj = obj.getAttributeObjByDestClass(STATES_ID);
-					if(objStateObj==null) continue;
-					if(objStateObj.equals(orgStateObj)){
-						JSONObject objObj = new JSONObject();
-						objObj.put("$ref", viewObj.getId()+"/"+obj.getId());
-						objObj.put("view name", "all view");
-						assocArray.put(objObj);
-					}
-				}
-			}
-		}*/
 		return new LinkedList<Cell>();
 	}
 
@@ -277,27 +264,17 @@ public class Cell extends BaseCell implements Constants {
 		return getObjectByAssocTypeAndDestClass(assocType, destClass==null?0:destClass.getId());
 	}
 	public Cell getObjectByAssocTypeAndDestClass(long assocType, long destClassId){
-		//check to see if this assoc type is a one type
-		if(assocType==PARENT_ASSOC || assocType==ATTRIBUTE_ASSOC || assocType==MAPSTO_ASSOC || assocType==DEFAULT_ASSOC || assocType==ONETOONE_ASSOC || assocType==NEXT_ASSOC || assocType==ORDERED_PARENT_PASSOC || assocType==MANYTOONE_PASSOC){
-			LinkedList<Cell> list = getListOfRelatedObjectsByAssocTypeAndDestClassId(assocType, destClassId);
-			if(destClassId!=0 && list.size()>1) {
-				System.out.println("ERROR:\tA 'to one' association has more than one destination");
-				//System.out.println("source:\t"+this.getIdName(50));
-				System.out.println("source:\t"+this.getId()+" - "+this.getName());
-				System.out.println("assocType:\t"+assocType);
-				System.out.println("list:\t"+listToString(list));
-				throw new RuntimeException("A 'to one' association has more than one destination");
-			}
-			if(list.isEmpty()) return null;
-			return list.getFirst();
-		}
-		else {
-			System.out.println("ERROR:\tassocType must be a 'to one' type");
+		LinkedList<Cell> list = getListOfRelatedObjectsByAssocTypeAndDestClassId(assocType, destClassId);
+		if(destClassId!=0 && list.size()>1) {
+			System.out.println("ERROR:\tA 'to one' association has more than one destination");
 			//System.out.println("source:\t"+this.getIdName(50));
 			System.out.println("source:\t"+this.getId()+" - "+this.getName());
 			System.out.println("assocType:\t"+assocType);
-			throw new RuntimeException("assocType must be a 'to one' type");
+			System.out.println("list:\t"+listToString(list));
+			throw new RuntimeException("A 'to one' association has more than one destination");
 		}
+		if(list.isEmpty()) return null;
+		return list.getFirst();
 	}
 	private void addNextToListByDestClass(LinkedList<Cell> list, long destClassId){
 		Cell nextObj = getObjectByAssocTypeAndDestClass(NEXT_ASSOC, destClassId);
