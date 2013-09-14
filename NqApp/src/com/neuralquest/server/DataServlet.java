@@ -219,6 +219,7 @@ public class DataServlet extends HttpServlet implements Constants {
 				Cell attrRefMTClass = attrRefObj.getCellByAssocType(MAPSTO_ASSOC);
 				if(attrRefMTClass==null) continue;
 				if(attrRefMTClass.getId()==CELL_NAME_ID) rowObject.putOpt(fieldName, selectedObj.getName(0));
+				else if(attrRefMTClass.getId()==CELL_ASSOCIATION_ID) rowObject.putOpt(fieldName, cellAssociations(selectedObj, viewObj, session));
 				else{
 					Cell valueCell = selectedObj.getObjectByAssocTypeAndDestClass(assocType, attrRefMTClass);
 					/*
@@ -259,13 +260,12 @@ public class DataServlet extends HttpServlet implements Constants {
 		for(Iterator<Cell> itr1=childViewList.iterator();itr1.hasNext();){
 			Cell childViewObj = itr1.next();
 			JSONArray childrenArray = new JSONArray();
-			if(childViewObj.getId()==ASSOCS_VIEW_ID){//make an exception for the association view
-				assocsViewChildren(childrenArray, selectedObj, childViewObj, session);
-				rowObject.put(String.valueOf(childViewObj.getId()), childrenArray);
+			LinkedList<Cell> rowList = null;
+			if(childViewObj.getId()==ASSOCS_VIEW_ID){//make an exception for the class view
+				//rowList = assocsViewChildren(childrenArray, selectedObj, childViewObj, session);
 				continue;
 			}
-			LinkedList<Cell> rowList = null;
-			if(childViewObj.getId()==CLASS_VIEW_ID){//make an exception for the class view
+			else if(childViewObj.getId()==CLASS_VIEW_ID){//make an exception for the class view
 				rowList = selectedObj.getLsitOfSubClasses();
 			}
 			else rowList = selectedObj.getListOfRelatedObjectsByView(childViewObj);
@@ -729,18 +729,40 @@ public class DataServlet extends HttpServlet implements Constants {
 	}
 	//experimental
 	private void assocsViewChildren(JSONArray assocArray, Cell selectedObj, Cell viewObj, Session session) throws Exception {
-		Cell permittenValuesParent = (Cell) session.load(Cell.class, new Long(ASSOCIATION_TYPES_ID));
-		LinkedList<Cell> permittenValuesList = permittenValuesParent.getListOfInstances();				
-		for(Iterator<Cell> itr1=permittenValuesList.iterator();itr1.hasNext();){
+		Cell permittedValuesParent = (Cell) session.load(Cell.class, new Long(ASSOCIATION_TYPES_ID));
+		LinkedList<Cell> permittedValuesList = permittedValuesParent.getListOfInstances();				
+		for(Iterator<Cell> itr1=permittedValuesList.iterator();itr1.hasNext();){
 			Cell permittedValue = (itr1.next());
 			long assocType = permittedValue.getId();
 			//if(assocType==CHILDREN_PASSOC) continue;//we are doing other than children
 			if(assocType==PARENT_ASSOC) continue;//causes loop in the tree//doesn;t help
 			//if(permittedValue.getId()!=ATTRIBUTE_ASSOC) continue;//we are doing other than children
 			LinkedList<Cell> thisAssocsList = selectedObj.getListOfRelatedObjectsByAssocTypeAndDestClass(permittedValue.getId(), null);
-			if(thisAssocsList.isEmpty()) continue;
-			assocArray.put(viewObj.getId()+"/"+selectedObj.getId()+"."+assocType);
+			for(Iterator<Cell> itr2=thisAssocsList.iterator();itr2.hasNext();){
+				Cell destCell = (itr2.next());
+				assocArray.put(viewObj.getId()+"/"+selectedObj.getId()+"."+assocType);
+			}
 		}
+	}
+	private JSONObject cellAssociations(Cell selectedObj, Cell viewObj, Session session) throws Exception {
+		JSONObject assocObj = new JSONObject();
+		Cell permittedValuesParent = (Cell) session.load(Cell.class, new Long(ASSOCIATION_TYPES_ID));
+		LinkedList<Cell> permittedValuesList = permittedValuesParent.getListOfInstances();				
+		for(Iterator<Cell> itr1=permittedValuesList.iterator();itr1.hasNext();){
+			Cell permittedValue = (itr1.next());
+			long assocType = permittedValue.getId();
+			//if(assocType==CHILDREN_PASSOC) continue;//we are doing other than children
+			//if(assocType==PARENT_ASSOC) continue;//causes loop in the tree//doesn;t help
+			LinkedList<Cell> thisAssocsList = selectedObj.getListOfRelatedObjectsByAssocTypeAndDestClass(assocType, null);
+			if(thisAssocsList.isEmpty()) continue;
+			JSONArray destArray = new JSONArray();
+			for(Iterator<Cell> itr2=thisAssocsList.iterator();itr2.hasNext();){
+				Cell destObj = itr2.next();
+				destArray.put(viewObj.getId()+"/"+destObj.getId());
+			}
+			assocObj.put(String.valueOf(assocType), destArray);
+		}
+		return assocObj;
 	}
 	private JSONObject assocsViewAssoc(long viewIdString, String assocIdString, Session session) throws Exception {
 		String[] asssocIds = assocIdString.split("\\.");
