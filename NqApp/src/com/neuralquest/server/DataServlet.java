@@ -49,8 +49,8 @@ public class DataServlet extends HttpServlet implements Constants {
 				else {
 					long selObjId = Long.parseLong(reqUri[reqUri.length-1]);
 					if(selObjId > 0 && viewObjId > 0) {
-						Cell viewObj = (Cell) session.load(Cell.class, new Long(viewObjId));
-						Cell selObj = (Cell) session.load(Cell.class, new Long(selObjId));
+						Cell viewObj = (Cell) session.get(Cell.class, new Long(viewObjId));
+						Cell selObj = (Cell) session.get(Cell.class, new Long(selObjId));
 						rowObject = getRowData(selObj, viewObj, session, userObj);
 					}
 				}
@@ -91,8 +91,8 @@ public class DataServlet extends HttpServlet implements Constants {
 					}
 				}
 				if(objectId != 0 && viewId != 0){//used by tree and contents to get array with the root
-					Cell requestedObj = (Cell) session.load(Cell.class, new Long(objectId));
-					Cell viewObj = (Cell) session.load(Cell.class, new Long(viewId));
+					Cell requestedObj = (Cell) session.get(Cell.class, new Long(objectId));
+					Cell viewObj = (Cell) session.get(Cell.class, new Long(viewId));
 					JSONObject rowObject = getRowData(requestedObj, viewObj, session, userObj);
 					tableArray.put(rowObject);				
 				}
@@ -199,8 +199,9 @@ public class DataServlet extends HttpServlet implements Constants {
 		rowObject.put("viewId",viewObj.getId());
 		rowObject.put("id",viewObj.getId()+"/"+selectedObj.getId());
 		rowObject.put("viewName",viewObj.getIdName(50));// debugging purposes
+		long selectedObjId = selectedObj.getId();
 		if(viewObj.getId()==CLASS_VIEW_ID) rowObject.put("classId",selectedObj.getType());//make an exception for the class model
-		else rowObject.put("classId",selectedObj.getId()==1?0:selectedObj.getObjectByAssocTypeAndDestClass(PARENT_ASSOC, 0).getId());// this is used for icons and DnD
+		else rowObject.put("classId",1 == selectedObjId?0:selectedObj.getCellByAssocType(PARENT_ASSOC).getId());// this is used by icons and DnD
 		//rowObject.put("class","css"+viewObj.getId());//used by tree menu to determin which menu to present
 		
 		//----------------------------------------------------------------------------------

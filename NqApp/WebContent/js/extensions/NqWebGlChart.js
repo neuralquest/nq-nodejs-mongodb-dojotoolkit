@@ -13,17 +13,22 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		},
 		postCreate: function(){
 			this.inherited(arguments);
+			var sceneObject3D = new THREE.Object3D();
 			//camera
 			camera = new THREE.PerspectiveCamera( 60, 3 / 2, 1, 100000 );
 			camera.position.z = 2000;
+			//by changing the eulerOrder we can force the camera to keep its head level
+			//see: http://stackoverflow.com/questions/17517937/three-js-camera-tilt-up-or-down-and-keep-horizon-level
+			camera.eulerOrder = "YXZ";
 			//controls
-			controls = new THREE.TrackballControls( camera );
+			controls = new THREE.TrackballControls(camera, this.domNode);
 			controls.rotateSpeed = 1.0;
 			controls.zoomSpeed = 1.5;
 			controls.panSpeed = 0.8;
+			controls.noRotate = false;
 			controls.noZoom = false;
 			controls.noPan = false;
-			controls.staticMoving = true;
+			controls.staticMoving = false;
 			controls.dynamicDampingFactor = 0.3;
 			controls.keys = [ 65, 83, 68 ];
 			controls.addEventListener( 'change', render );
@@ -32,15 +37,15 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			// lights
 			var light1 = new THREE.DirectionalLight( 0xffffff );
 			light1.position.set( 1, 1, 1 ).normalize();
-			scene.add( light1 );
+			sceneObject3D.add( light1 );
 			var light2 = new THREE.AmbientLight( 0x404040 );
-			scene.add( light2 );
+			sceneObject3D.add( light2 );
 			// axes
-			scene.add( new THREE.AxisHelper(100) );
+			sceneObject3D.add( new THREE.AxisHelper(100) );
 			// projector
 			projector = new THREE.Projector();
 			// renderer
-			if ( Detector.webgl ) renderer = new THREE.WebGLRenderer( {antialias: false} );
+			if ( Detector.webgl ) renderer = new THREE.WebGLRenderer( {antialias: true} );
 			else if(Detector.canvas) renderer = new THREE.CanvasRenderer();
 			//else;
 			this.domNode.appendChild( renderer.domElement );
@@ -59,8 +64,10 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 					side: THREE.BackSide
 				});					 
 				var mesh = new THREE.Mesh( new THREE.CubeGeometry(100000, 100000, 100000, 1, 1, 1, null, true), material );
-				scene.add(mesh);	
+				sceneObject3D.add(mesh);	
 			}
+			//else see http://threejs.org/examples/webgl_multiple_views.html
+			// for canvas gradient
 			if(location.href.indexOf('localhost')){
 				stats = new Stats();
 				stats.domElement.style.position = 'absolute';
@@ -68,6 +75,8 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				this.domNode.appendChild( stats.domElement );
 			}
 			this.connect(this.domNode, "onclick", "gotoObject");
+			sceneObject3D.name = 'Boilerplate'
+			scene.add(sceneObject3D);
 		},
 		gotoObject: function(event){
 			//see http://stackoverflow.com/questions/11161674/dragging-and-clicking-objects-with-controls
@@ -89,16 +98,11 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			}
 		},		
 		setSelectedObjectId: function(objectId){
-			for(var i=0;i<this.selectableObjects.length;i++){
-				var selectableObject = this.selectableObjects[i];
-				if(selectableObject.name == objectId){
-					this.moveCameraToMesh(selectableObject);					
-					break;
-				}				
-			}
+			var mesh = this.getMeshByName(objectId);
+			if(mesh) this.moveCameraToMesh(mesh);
 		},
 		moveCameraToMesh: function(selectedMesh){
-			var highlightMaterial = new THREE.MeshLambertMaterial({color: 0xFFFFFF});
+			var highlightMaterial = new THREE.MeshLambertMaterial({color: 0xFFFF33});
 			selectedMesh.material = highlightMaterial;
 			render();
 return;			
@@ -161,17 +165,28 @@ return;
 		clearScene: function(){
 			// clear the scene
 			this.selectableObjects = [];
-			var obj, i;
-			for ( i = scene.children.length - 1; i >= 5 ; i -- ) {
-			    obj = scene.children[ i ];
-			    //if ( obj !== plane && obj !== tabPane.threejs.camera) {
+			// the first object contains the boilerplate, so leave it.
+			for ( var i = scene.children.length - 1; i >= 1 ; i -- ) {
+			    var obj = scene.children[ i ];
 			    scene.remove(obj);
-			    //}
 			}
 			render();
 		},
-		addToScene: function(sceneObject3D){
-			scene.add(sceneObject3D);
+		addToScene: function(object3D, headerOrBody){
+			switch(headerOrBody){
+			case 'rowHeader':
+				this.rowHeaderObject = object3D;
+				scene.add(object3D);
+				break;
+			case 'columnHeader':
+				this.columnHeaderObject = object3D;
+				scene.add(object3D);
+				break;
+			default:
+				this.bodyObject = object3D;
+				scene.add(object3D);
+				break;
+			}
 			render();
 		},
 		loadingMessage: function(){
@@ -187,11 +202,22 @@ return;
 			textMesh.position.z = 0;
 			textMesh.rotation.x = 0;
 			textMesh.rotation.y = Math.PI * 2;
+			textMesh.name = 'Loading Message'
 			scene.add(textMesh);
 			render();
-		}
+		},
+		getMeshByName: function(name){
+			for(var i=0;i<this.selectableObjects.length;i++){
+				var selectableObject = this.selectableObjects[i];
+				if(selectableObject.name == name){
+					return selectableObject;
+				}				
+			}			
+		}, 
 	});
 	function render(){
+		//console.log(camera.position.x);
+		camera.rotation.z = 0;
 		renderer.render( scene, camera );		
 	}
 	function animate(){

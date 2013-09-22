@@ -4,14 +4,14 @@ require([
 'dojo/_base/declare', 'dojo/store/Observable', 'dojo/store/Cache', 'dojo/store/JsonRest', 'dojo/store/Memory',
 'dijit/tree/dndSource', 'dojo/Deferred', 'dojo/when', 'dojo/query', 'dijit/layout/BorderContainer', 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', 'dijit/Editor', 
-'nq/NqClassChart', 'nq/NqForm', 'nq/NqGrid', 'nq/NqJsonRest', 'nq/NqTree', 'nq/NqObjectStoreModel', 'nq/NqContents',
+'nq/NqProcessChart', 'nq/NqClassChart', 'nq/NqForm', 'nq/NqGrid', 'nq/NqJsonRest', 'nq/NqTree', 'nq/NqObjectStoreModel', 'nq/NqContents',
  'dojo/promise/instrumentation', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct,
 		declare, Observable, Cache, JsonRest, Memory, 
 		dndSource, Deferred, when, query, BorderContainer, 
 		TabContainer, ContentPane, AccordionContainer, Editor, 
-		NqClassChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqContents, 
+		NqProcessChart, NqClassChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqContents, 
 		instrumentation) {
 	
 	_nqMemoryStore = Observable(new Memory({}));
@@ -191,7 +191,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			container = new TabContainer( {
 				'id' : 'acctab'+parentTabOrViewId,
 				'persist' : true,
-				'region' : 'center',
+				'region' : 'center'
 			});
 		}
 		dojo.forEach(tabsArr, function(tab) {
@@ -200,7 +200,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				'title' : tab.title,
 				'selected' : tab.id==selectedTabId?true:false,
 				'class' : 'backgroundClass',
-				'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%',},
+				'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'},
 				'onShow' : function(){
 								//fullPage.resize();doesn't help
 								setHashTabId(level, tab.id); // this will trigger createWidgetProvideData
@@ -286,12 +286,15 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			break;
 		case '2D Process Model': 
 			if(!widget){
-				widget = new NqWebGlChart({
+				widget = new NqProcessChart({
 					id: 'widget'+state.tabId,
-					bodyViewId: state.viewId,
-					xAxisViewId: 1,
-					yAxisViewId: 1,
-					skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
+					orgUnitRootId: '850/494', // Process Classes
+					orgUnitViewId: '1868',
+					orgUnitNameAttrId: '1926',
+					stateRootId: '2077/443',
+					stateViewId: '2077',
+					stateNameAttrId: '2081'
+					//skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
 				}, domConstruct.create('div'));
 				tabNode.appendChild(widget.domNode);
 				widget.startup();

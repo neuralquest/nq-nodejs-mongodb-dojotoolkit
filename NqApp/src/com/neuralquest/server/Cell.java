@@ -181,11 +181,6 @@ public class Cell extends BaseCell implements Constants {
 		}
 		return list;
 	}
-	/**
-	 * Returns a cell that has a particular rel type to this one
-	 * Only one expected  
-	 * @return Cell linked through relTypeId, or null
-	 */
 	//TODO we should try to get rid of this. replace it with getObjectByAssocTypeAndDestClass
 	public Cell getCellByAssocType(long relTypeId){
 		//System.out.println(getIdName(50));
