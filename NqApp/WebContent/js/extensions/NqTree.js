@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "dojo/hash", 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem'],
-	function(declare, Tree, registry, cookie, hash, Menu, MenuItem, PopupMenuItem ){
+define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "dojo/hash", 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dojo/query!css2'],
+	function(declare, Tree, registry, cookie, hash, Menu, MenuItem, PopupMenuItem){
 	
 	var NqTree = declare(Tree, {
 		postCreate: function(){
@@ -7,50 +7,60 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 			
 			var state = nq.getState(this.level);
 			var viewsArr = _nqSchemaMemoryStore.query({parentTabId: state.tabId, entity: 'view'});//get the views that belong to this tab
-			var node = this.domNode;
-			dojo.forEach(viewsArr, function(childView) {
-				var menu = new Menu({targetNodeIds: [node], selector: ".css"+childView.id});
-				dojo.forEach(childView.childViews, function(allowedViewId) {
+			// walk through all the views that are allowed as seen from this tab
+			for(var i=0;i<viewsArr.length;i++){
+				var childView = viewsArr[i];			
+				var parentMenu = new Menu({targetNodeIds: [this.domNode], selector: ".css"+childView.id});
+				for(var k=0;k<childView.childViews.length;k++){
+					var allowedViewId = childView.childViews[k];			
 					var viewDef = _nqSchemaMemoryStore.get(allowedViewId);
-					var classMenu = new Menu({});
-					dojo.forEach(viewDef.mapsToClasses, function(mapsToClass) {
-						classMenu.addChild(new MenuItem({
-							label:"A New <b>"+mapsToClass.className+"</b> Object",
-							iconClass:"icon"+mapsToClass.id,
-							onClick: function(){
-								/*var children = treeNode.getChildren();
-								var lastItem = children[children.length-1].item;
-								if(lastItem){
-									lastItem.insertBefore = tempId;
-									_nqDataStore.put(lastItem);
-								}*/
-								var selectedItem = tree.get("selectedItem");
-								var labelAttrId = viewDef.label;
-								var addObj = {
-									'id': '',//cid will be added by our restStore extention, we need a dummy id
-									//labelArrrId: '[new]',
-									'viewId': viewDef.id, 
-									'classId': mapsToClass.id
-								};
-								addObj[labelAttrId] = '[new '+mapsToClass.className+']';
-								var newItem = _nqDataStore.add(addObj);
-								var x = treeModel.getChildren(selectedItem, viewIdsArr);//we need this to create an observer in the parent
-								selectedItem[viewDef.id].push(newItem.id);
-								_nqDataStore.put(selectedItem);
-								interpritHash(0);//force page refresh of the content pane. we could do providedataforwidget, but we dont know the level
-								
-								var selectedNodes = tree.getNodesByItem(selectedItem);
-								selectedNodes[0].expand();
+					var classMenu = new Menu({parentMenu: parentMenu});
+					//arrayUtil.forEach(viewDef.mapsToClasses,  lang.hitch(this, function(mapsToClass) {
+					for(var j=0;j<viewDef.mapsToClasses.length;j++){
+						var mapsToClass = viewDef.mapsToClasses[j];
+						var model = this.tree.model;
+						var tree = this.tree;
+						var menuItem = new MenuItem({
+							label: "A New <b>"+mapsToClass.className+"</b> Object",
+							iconClass: "icon"+mapsToClass.id,
+							classToCreate: mapsToClass,
+							viewDefToCreate: viewDef
+						});
+						menuItem.on("click", function(evt){
+							var classToCreate = this.classToCreate;
+							var viewDefToCreate = this.viewDefToCreate;
+							var viewId = viewDefToCreate.id;
+							console.log(classToCreate.className); 
+							var selectedItem = tree.get("selectedItem");
+							var addObj = {
+								'id': '',//cid will be added by our restStore exstension, we need a dummy id
+								'viewId': viewId, 
+								'classId': classToCreate.id
+							};
+							addObj[viewDefToCreate.label] = '[new '+classToCreate.className+']';;
+							var newItem = _nqDataStore.add(addObj);
+							var x = model.getChildren(newItem, viewsArr);//we need this to create an observer on the newly created item
+							if(!selectedItem[viewId]) selectedItem[viewId] = [];
+							selectedItem[viewId].push(newItem.id);
+							_nqDataStore.put(selectedItem);
+							//interpritHash(0);//force page refresh of the content pane. we could do providedataforwidget, but we dont know the level
+							
+							var selectedNodes = tree.getNodesByItem(selectedItem);
+							if(!selectedNodes[0].isExpanded){
+							    tree._expandNode(selectedNodes[0]);
 							}
-						}));	
-					});	
-					menu.addChild(new PopupMenuItem({
+							tree.set('selectedItem', newItem.id);
+						});
+						classMenu.addChild(menuItem);	
+					};
+					classMenu.startup();
+					parentMenu.addChild(new PopupMenuItem({
 						label:"Add <span style='color:blue'>"+viewDef.relationship+"</span> Relationship To",
 						iconClass:"icon"+viewDef.relationshipId,
 						popup: classMenu
 					}));
-				});	
-				menu.addChild(new MenuItem({
+				};	
+				parentMenu.addChild(new MenuItem({
 					label:"Delete",
 					iconClass:"dijitEditorIcon dijitEditorIconCut",
 					onClick: function(){
@@ -59,7 +69,9 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 						_nqDataStore.remove(selectedItem.id);
 					}//TODO must fix linkedList, on the server?
 				}));
-			});		
+				parentMenu.startup();
+
+			};		
 		},
 		onLoad: function(){
 			fullPage.resize();//need this for lazy loaded trees

@@ -13,8 +13,32 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		gridWidth: 800,
 		gridDepth: 800,
 		rowHeaderWidth: 200,
+		highlightColors: [],
+		rowHeaderColors: [],
+		stateColors: [],
+		swimlaneColors: [],
 		
 		startup: function(){
+			this.highlightColors.push(new THREE.Color( 0xFFFFEF ));
+			this.highlightColors.push(new THREE.Color( 0xFFFFEF ));
+			this.highlightColors.push(new THREE.Color( 0xFFFF00 ));
+			this.highlightColors.push(new THREE.Color( 0xFFFF00 ));
+
+			this.rowHeaderColors.push(new THREE.Color( 0x6699FF ));
+			this.rowHeaderColors.push(new THREE.Color( 0x3366FF ));
+			this.rowHeaderColors.push(new THREE.Color( 0x3366FF ));
+			this.rowHeaderColors.push(new THREE.Color( 0x3333FF ));
+
+			this.stateColors.push(new THREE.Color( 0x66FF66 ));
+			this.stateColors.push(new THREE.Color( 0x33CC33 ));
+			this.stateColors.push(new THREE.Color( 0x33CC33 ));
+			this.stateColors.push(new THREE.Color( 0x009900 ));
+
+			this.swimlaneColors.push(new THREE.Color( 0xB2E6FF ));
+			this.swimlaneColors.push(new THREE.Color( 0x85D6FF ));
+			this.swimlaneColors.push(new THREE.Color( 0x85D6FF ));
+			this.swimlaneColors.push(new THREE.Color( 0x5CB8E6 ));
+
 			this.inherited(arguments);
 			var deferred = new Deferred();
 			
@@ -42,8 +66,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 					//sceneObject3D.rotation.y += Math.PI / 2;;
 					//sceneObject3D.position = ourVec;
 					this.addToScene(sceneObject3D, 'body');
-					this.drawAssociations(rowHeaderPositionsObj, statePositionsObj)
-					deferred.resolve(classItem);
+					deferred.resolve(attrItem);
 				}));
 			}));
 			
@@ -125,7 +148,6 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			return maxYUntilNow;
 		},		
 		drawRowHeader: function(objectId, rowHeaderPositionsObj){
-			var rowHeaderMaterial = new THREE.MeshLambertMaterial( {color: 0x0000EF});
 			var textMaterial = new THREE.MeshLambertMaterial({color: 0xEFEFEF});
 			//console.dir(rowHeaderPositionsObj);
 			var sceneObject3D = new THREE.Object3D();
@@ -141,29 +163,12 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				if(positionInfo.children.length>0){
 					height = positionInfo.minChild - positionInfo.maxChild + this.gridHeight;
 				}
-				var height = height-10;
+				height = height-10;
 				var width = this.rowHeaderWidth-10;
-				var cubeGeometry = new THREE.CubeGeometry(width, height, 10, 1, 1, 1);
 				
-				//===============================
-				//var materials = [
-				//	new THREE.MeshLambertMaterial( { color: 0x0000ff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } ),
-				//	new THREE.MeshBasicMaterial( { color: 0x000000, shading: THREE.FlatShading, wireframe: true, transparent: true } )
-				//];
-		    	//var cube = THREE.SceneUtils.createMultiMaterialObject( cubeGeometry, materials );				
-				//===============================
-				// see http://stemkoski.github.io/Three.js/Vertex-Colors.html				
-				// this material causes a mesh to use colors assigned to vertices
-				//   different colors at face vertices create gradient effect
+				var cubeGeometry = new THREE.CubeGeometry(width, height, 10, 1, 1, 1);
+				this.colorVerticies(cubeGeometry, this.rowHeaderColors);
 				var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: THREE.VertexColors } );
-				for ( var i = 0; i < cubeGeometry.faces.length; i++ ) 
-				{
-					var face = cubeGeometry.faces[ i ];
-					face.vertexColors[ 0 ] = new THREE.Color( 0x6699FF );
-					face.vertexColors[ 1 ] = new THREE.Color( 0x3366FF );
-					face.vertexColors[ 2 ] = new THREE.Color( 0x3366FF );
-					face.vertexColors[ 3 ] = new THREE.Color( 0x3333FF );
-				}
 				var cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
 		    	cube.name = key;
 		        this.selectableObjects.push(cube);
@@ -173,7 +178,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		        
 		        //The Name
 		        var name = positionInfo.name;
-				var text3d = new THREE.TextGeometry(name, {size: 30, height: 1, font: 'helvetiker'});
+				var text3d = new THREE.TextGeometry(name, {size: 30, height: 0, font: 'helvetiker'});
 				//var text3d = new THREE.TextGeometry( 'Organizations', {size: 70, height: 20, curveSegments: 4, font: 'helvetiker', weight: 'normal', style: 'normal',  });
 				text3d.computeBoundingBox();
 				var xOffset = -0.5 * ( text3d.boundingBox.max.x - text3d.boundingBox.min.x );
@@ -189,20 +194,11 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				sceneObject3D.add(rowHeaderObject);				
 				
 				if(positionInfo.children.length==0){
-					var cubeGeometry = new THREE.CubeGeometry(5000, height, 10, 1, 1, 1);
+					var cubeGeometry = new THREE.CubeGeometry(5000, height, 1, 1, 1, 1);
+					this.colorVerticies(cubeGeometry, this.swimlaneColors);
 					var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: THREE.VertexColors } );
-					for ( var i = 0; i < cubeGeometry.faces.length; i++ ) 
-					{
-						var face = cubeGeometry.faces[ i ];
-						face.vertexColors[ 0 ] = new THREE.Color( 0xB2E6FF );
-						face.vertexColors[ 1 ] = new THREE.Color( 0x85D6FF );
-						face.vertexColors[ 2 ] = new THREE.Color( 0x85D6FF );
-						face.vertexColors[ 3 ] = new THREE.Color( 0x5CB8E6 );
-					}
-					//var cubeMaterial = new THREE.MeshLambertMaterial( {color: 0x8904B1});
-
 					var cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
-					cube.position.x = positionInfo.pos.x + 2500;
+					cube.position.x = positionInfo.pos.x + this.rowHeaderWidth/2 -10 + 2500 ;
 					cube.position.y = positionInfo.pos.y;
 					cube.position.z = -30;
 					sceneObject3D.add(cube);									
@@ -212,7 +208,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		
 		},
 		drawStates: function(objectId, statePositionsObj){
-			var stateMaterial = new THREE.MeshLambertMaterial( {color: 0x00EF00});
+			//var stateMaterial = new THREE.MeshLambertMaterial( {color: 0x00EF00});
 			//var connectorMaterial =  new THREE.MeshPhongMaterial({specular: 0xffffff, color: 0x9F9F9F, emissive: 0x4F4F4F,shininess: 100 });
 			var connectorMaterial = new THREE.MeshLambertMaterial({color: 0xEFEFEF});
 			var textMaterial = new THREE.MeshLambertMaterial({color: 0x000000});
@@ -226,15 +222,8 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				
 				//The cube
 				var cubeGeometry = new THREE.CubeGeometry(this.gridWidth/2, this.gridHeight/2, 25, 1, 1, 1);
+				this.colorVerticies(cubeGeometry, this.stateColors);
 				var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: THREE.VertexColors } );
-				for ( var i = 0; i < cubeGeometry.faces.length; i++ ) 
-				{
-					var face = cubeGeometry.faces[ i ];
-					face.vertexColors[ 0 ] = new THREE.Color( 0x66FF66 );
-					face.vertexColors[ 1 ] = new THREE.Color( 0x33CC33 );
-					face.vertexColors[ 2 ] = new THREE.Color( 0x33CC33 );
-					face.vertexColors[ 3 ] = new THREE.Color( 0x009900 );
-				}
 				var cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
 		    	cube.name = key;
 		        this.selectableObjects.push(cube);
@@ -356,6 +345,38 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				sceneObject3D.add(textMesh);
 			}
 
+		},
+		swapSelectedItemMaterial: function(mesh){
+
+			if(this.selectedMeshColorsBeforeSelection) {
+				//set the colors of the current selected mesh to what it was
+				this.colorVerticies(this.selectedMesh.geometry, this.selectedMeshColorsBeforeSelection);
+				this.selectedMesh.geometry.colorsNeedUpdate = true;
+			}
+			//set the new SelectedMesh
+			this.selectedItemId = mesh.name;
+			this.selectedMesh = mesh;
+			this.selectedMeshColorsBeforeSelection = this.colorVerticies(mesh.geometry, this.highlightColors);
+			//mesh.material.needsUpdate = true;
+			mesh.geometry.colorsNeedUpdate = true;
+		},
+		colorVerticies: function(cubeGeometry, colors){
+			var curentColors = [];
+			var face = cubeGeometry.faces[0];
+			var numberOfSides = ( face instanceof THREE.Face3 ) ? 3 : 4;
+			for( var j = 0; j < numberOfSides; j++ ){
+				curentColors.push(face.vertexColors[j]);
+			}
+			for ( var i = 0; i < cubeGeometry.faces.length; i++ ){
+				var face = cubeGeometry.faces[ i ];
+				// determine if current face is a tri or a quad
+				var numberOfSides = ( face instanceof THREE.Face3 ) ? 3 : 4;
+				// assign color to each vertex of current face
+				for( var j = 0; j < numberOfSides; j++ ){
+					face.vertexColors[j] = colors[j];
+				}
+			}
+			return curentColors;
 		}
 	});
 });

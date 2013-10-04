@@ -297,9 +297,11 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					//skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
 				}, domConstruct.create('div'));
 				tabNode.appendChild(widget.domNode);
-				widget.startup();
+				widget.startup().then(function(res){
+					widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
+				});
 			}
-			widget.setSelectedObjectId("2077/443", tabDef.displayType);
+			else widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
 			break;
 		case '3D Class Model': 
 			if(!widget){

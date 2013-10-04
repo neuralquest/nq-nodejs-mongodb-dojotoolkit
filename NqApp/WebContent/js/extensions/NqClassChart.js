@@ -44,7 +44,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 						sceneObject3D.rotation.y += Math.PI / 2;;
 						sceneObject3D.position = ourVec;
 						this.addToScene(sceneObject3D);
-						this.drawAssociations(cellPositionsObj, attrPositionsObj)
+						this.drawAssociations(cellPositionsObj, attrPositionsObj);
 						deferred.resolve(classItem);
 					}));
 				}));

@@ -81,7 +81,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 					dijit = new Editor(widgetProperties, domConstruct.create('div'));
 					dijit.addStyleSheet('css/editor.css');
 					dijit.on("NormalizedDisplayChanged", function(){
-						var height = domGeometry.getMarginSize(dijit.editNode).h;
+						var height = domGeometry.getMarginSize(dijit.domNode).h;
 						if(has("opera")){
 							height = dijit.editNode.scrollHeight;
 						}

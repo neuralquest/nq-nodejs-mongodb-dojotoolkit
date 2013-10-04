@@ -75,7 +75,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				this.domNode.appendChild( stats.domElement );
 			}
 			this.connect(this.domNode, "onclick", "gotoObject");
-			sceneObject3D.name = 'Boilerplate'
+			sceneObject3D.name = 'Boilerplate';
 			scene.add(sceneObject3D);
 		},
 		gotoObject: function(event){
@@ -98,39 +98,51 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			}
 		},		
 		setSelectedObjectId: function(objectId){
+			if(objectId == this.selectedItemId) return;
 			var mesh = this.getMeshByName(objectId);
 			if(mesh) this.moveCameraToMesh(mesh);
 		},
 		moveCameraToMesh: function(selectedMesh){
-			var highlightMaterial = new THREE.MeshLambertMaterial({color: 0xFFFF33});
-			selectedMesh.material = highlightMaterial;
-			render();
-return;			
-			var curPosition =  new THREE.Vector3( camera.postion );
-			var slectedPosition = selectedMesh.parent.position;
-			var newPosition =  new THREE.Vector3( slectedPosition.x, slectedPosition.y, slectedPosition.z );
+			this.swapSelectedItemMaterial(selectedMesh);
 			
-//			var curPosition = { x : camera.position.x, y : camera.position.y, z : camera.position.z };
-			var curPosition = { x : 0, y : 0, z : 0 };
-			var newPosition = { x : slectedPosition.x, y : slectedPosition.y, z : slectedPosition.z };
-			//controls.target.set( controls.target.set( 0, 0, 0 ) )
-//			camera.lookAt(slectedPosition);
-//			render();
-//		return;	
-			var tween = new TWEEN.Tween(curPosition).to(newPosition, 2000);
+			var newTargetPos = new THREE.Vector3();
+			newTargetPos.getPositionFromMatrix(selectedMesh.matrixWorld);
+			var newCameraPos = newTargetPos.clone();
+			newCameraPos.z = 2000;
+
+			var cameraPos = camera.position;
+			var target = controls.target;
+			var fromPos = {tx: target.x, ty: target.y, tz: target.z, cx: cameraPos.x, cy: cameraPos.y, cz: cameraPos.z};
+			var toPos = {tx: newTargetPos.x, ty: newTargetPos.y, tz: newTargetPos.z, cx: newCameraPos.x, cy: newCameraPos.y, cz: newCameraPos.z};
+			var tween = new TWEEN.Tween(fromPos).to(toPos, 1500);
 			tween.easing(TWEEN.Easing.Quadratic.Out);				
 			tween.onUpdate(function(){
-//				camera.position = curPosition;
-//				controls.target.set( controls.target.set( 0, 0, 0 ) )
-//				controls.target.set( this );
-				camera.lookAt(this);
-				render();
-				console.log(this.x);
+				var tweenTargetPos = new THREE.Vector3(this.tx, this.ty, this.tz);
+				var tweenCameraPos = new THREE.Vector3(this.cx, this.cy, this.cz);
+				controls.object.position = tweenCameraPos;
+				controls.target = tweenTargetPos;
 			});
 			tween.start();
-//			camera.lookAt(newPosition);
-//			camera.position = newPosition;
-		
+		},
+		swapSelectedItemMaterial: function(mesh){
+			var currentMaterial = mesh.material;
+			if(this.selectedMeshMaterialBeforeSelection) {
+				//set the material of the current selected mesh to what it was
+				this.selectedMesh.material = this.selectedMeshMaterialBeforeSelection;
+			}
+			this.selectedItemId = mesh.name;
+			this.selectedMesh = mesh;
+			this.selectedMeshMaterialBeforeSelection = currentMaterial;
+			var highlightMaterial = new THREE.MeshLambertMaterial({color: 0xFFFF33});			
+			mesh.material = highlightMaterial;
+			//===============================
+			//var materials = [
+			//	new THREE.MeshLambertMaterial( { color: 0x0000ff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors } ),
+			//	new THREE.MeshBasicMaterial( { color: 0x000000, shading: THREE.FlatShading, wireframe: true, transparent: true } )
+			//];
+	    	//var cube = THREE.SceneUtils.createMultiMaterialObject( cubeGeometry, materials );				
+			//===============================
+
 		},
 		startup: function(){
 			this.resize();
@@ -202,7 +214,7 @@ return;
 			textMesh.position.z = 0;
 			textMesh.rotation.x = 0;
 			textMesh.rotation.y = Math.PI * 2;
-			textMesh.name = 'Loading Message'
+			textMesh.name = 'Loading Message';
 			scene.add(textMesh);
 			render();
 		},
@@ -217,14 +229,14 @@ return;
 	});
 	function render(){
 		//console.log(camera.position.x);
-		camera.rotation.z = 0;
+		camera.rotation.z = 0;// this is used to keep the camera level
 		renderer.render( scene, camera );		
 	}
 	function animate(){
 		requestId = requestAnimationFrame( animate.bind(this) );
+		TWEEN.update();
 		controls.update();
 		if(stats) stats.update();
-		TWEEN.update();
 	}
 	function cancelAnimation(){
 		if(requestId) cancelAnimationFrame(requestId);
