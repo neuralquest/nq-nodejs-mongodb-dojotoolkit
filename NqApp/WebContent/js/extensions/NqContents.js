@@ -79,7 +79,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			else this.normalToolbar.set('style', {'display': ''});
 			this.wipeClean();
 			var viewId = this.state.viewId;
-			when(_nqDataStore.get(this.objectId), lang.hitch(this, function(item){
+			when(this.store.get(this.objectId), lang.hitch(this, function(item){
 				if(this.editMode) this.generateNextLevelContentsEditMode(item, viewId, 1, []);
 				else this.generateNextLevelContents(item, viewId, 1, []);
 			}));
@@ -115,7 +115,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			if(item.classId==80) return;
 			
 			//Get the sub- headers/paragraphs
-			when(_nqDataStore.getChildren(item, [846]), lang.hitch(this, function(children){
+			when(this.store.getChildren(item, [846]), lang.hitch(this, function(children){
 				for(var i=0;i<children.length;i++){
 					var childItem = children[i];
 					paragraphNrArr[headerLevel-1] = i+1;
@@ -143,9 +143,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			    'style':{width:'90%','background': 'rgba(0,0,255,0.04)', 'border-style': 'none'},
 				'placeHolder': 'Paragraph Header',
 				'onChange': function(evt){
-					when(_nqDataStore.get(item.id), function(item){
+					when(this.store.get(item.id), function(item){
 						item[873] = textDijit.get('value');
-						_nqDataStore.put(item);
+						this.store.put(item);
 					});
 			    }
 			}, domConstruct.create('input'));
@@ -176,9 +176,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 //			    'value': storedRtf,
 				'toolbar': toolbar,
 				'onChange': function(evt){
-					when(_nqDataStore.get(item.id), function(item){
+					when(this.store.get(item.id), function(item){
 						item[959] = editorDijit.get('value');
-						_nqDataStore.put(item);
+						this.store.put(item);
 				});},
 				'onFocus': function(evt){
 					var widgets = registry.findWidgets(this.toolbarDivNode);
@@ -203,7 +203,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			if(item.classId==80) return;
 
 			//Get the sub- headers/paragraphs
-			return when(_nqDataStore.getChildren(item, [846]), lang.hitch(this, function(children){
+			return when(this.store.getChildren(item, [846]), lang.hitch(this, function(children){
 				for(var i=0;i<children.length;i++){
 					var childItem = children[i];
 					paragraphNrArr[headerLevel-1] = i+1;

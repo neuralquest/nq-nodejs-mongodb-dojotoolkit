@@ -31,7 +31,6 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 							var viewDefToCreate = this.viewDefToCreate;
 							var viewId = viewDefToCreate.id;
 							console.log(classToCreate.className); 
-							var selectedItem = tree.get("selectedItem");
 							var addObj = {
 								'id': '',//cid will be added by our restStore exstension, we need a dummy id
 								'viewId': viewId, 
@@ -40,6 +39,8 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 							addObj[viewDefToCreate.label] = '[new '+classToCreate.className+']';;
 							var newItem = _nqDataStore.add(addObj);
 							var x = model.getChildren(newItem, viewsArr);//we need this to create an observer on the newly created item
+							
+							var selectedItem = tree.get("selectedItem");
 							if(!selectedItem[viewId]) selectedItem[viewId] = [];
 							selectedItem[viewId].push(newItem.id);
 							_nqDataStore.put(selectedItem);
@@ -62,12 +63,18 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 				};	
 				parentMenu.addChild(new MenuItem({
 					label:"Delete",
-					iconClass:"dijitEditorIcon dijitEditorIconCut",
+					iconClass:"removeIcon",
 					onClick: function(){
+						//TODO
 						var selectedItem = tree.get("selectedItem");
-						//var selectedItem = this.getParent().currentTarget.item;
-						_nqDataStore.remove(selectedItem.id);
-					}//TODO must fix linkedList, on the server?
+				    	this.store.remove(selectedItem.id);
+						
+						var parentItem = this.store.get(this.parentId);
+						var viewId = this.viewDefToCreate.id;
+						index = array.indexOf(parentItem[viewId], selectedItem.id);
+						parentItem[viewId].splice(index, 1);
+						this.store.put(parentItem);
+					}
 				}));
 				parentMenu.startup();
 

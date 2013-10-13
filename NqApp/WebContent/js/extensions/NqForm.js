@@ -7,7 +7,6 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 	function(declare, arrayUtil, Form, Select, Toolbar, DateTextBox, NumberTextBox, 
 			CheckBox, Editor, CurrencyTextBox, ValidationTextBox, Memory, domConstruct, on, 
 			when, query, registry, _WidgetBase, ContentPane, domGeometry, has, lang){
-	var dijit;
    
 	return declare("NqFormWidget", [_WidgetBase], {
 		extraPlugins: {},
@@ -46,6 +45,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 			var toolbarDivNode = this.toolbarDivNode; 
 			var extraPlugins = this.extraPlugins; 
 			for(var i=0; i<propsArr.length;i++){
+				var dijit;
 				var prop = propsArr[i];
 
 				//console.log('Create dijit:', prop.title, prop);				
@@ -106,15 +106,15 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 //				dijit.startup();
 				
 				var _this = this;
-				dijit.on('change', function(evt){
+				dijit.on('change', lang.hitch(dijit, function(evt){
 					var _objectId = _this.objectId;
 					var _name = this.name;
 					var _value = evt;
-					when(_nqDataStore.get(_objectId), function(item){
+					when(_this.store.get(_objectId), function(item){
 						item[_name] = _value;
-						_nqDataStore.put(item);
+						_this.store.put(item);
 					});
-				});	
+				}));	
 				
 				//the help text
 				domConstruct.create("td", { innerHTML: (prop.description?prop.description:""), style: "padding-right: 5px", 'class': 'helpTextInvisable'}, row);
@@ -137,7 +137,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 		},		
 		setSelectedObjectId: function(objectId){
 			this.set('objectId', objectId);
-			when(_nqDataStore.get(objectId), function(item){
+			when(this.store.get(objectId), function(item){
 				for(attr in item){
 					if(item[attr].isNaN) continue;
 					var attrQuery = "[name='"+attr+"']";

@@ -53,7 +53,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		},
 		buildHierarchy: function(objectId, cellPositionsObj, parentChildrenArray){
 			if(objectId in cellPositionsObj) return;//loop protection
-			return when(_nqDataStore.get(objectId), lang.hitch(this, function(classItem){
+			return when(this.store.get(objectId), lang.hitch(this, function(classItem){
 				if(classItem.classId != 0) return;// class as opposed to object
 				parentChildrenArray.push(classItem.id);
 				var promisses = [];

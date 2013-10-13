@@ -7,12 +7,16 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 		addObjects: {},
 		putObjects: {},
 		removeObjects: {},
-		//queryEngine: NqSimpleQueryEngine,
+		queryEngine: NqSimpleQueryEngine,
 
-		getChildren: function(object, childrenAttr){
+		/*getChildren: function(object, childViewAttributes, options){
+			var genQuery ={parentId: object.id, childViewAttributes: childViewAttributes};
+			return this.query(genQuery, options);
+		},*/
+		getChildren: function(object, childViewAttributes){
 			var promisses = [];
-			for(var i=0;i<childrenAttr.length;i++){
-				var childAttr = childrenAttr[i];
+			for(var i=0;i<childViewAttributes.length;i++){
+				var childAttr = childViewAttributes[i];
 				var childrenIds = object[childAttr];
 				if(!childrenIds) continue;
 				for(var j=0;j<childrenIds.length;j++){
@@ -20,7 +24,26 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 					promisses.push(this.get(childId));
 				}
 			}
-			return all(promisses);
+			//return all(promisses);
+			return when(all(promisses), function(results){
+				results.sort(function(a, b){
+					//Presort by view name
+					var titleA = _nqSchemaMemoryStore.get(a.viewId).title;
+					var titleB = _nqSchemaMemoryStore.get(b.viewId).title;
+					if(titleA > titleB) return 1;
+					if(titleA < titleB) return -1;
+					//the views are the same
+					var viewDef = _nqSchemaMemoryStore.get(a.viewId);
+					if(viewDef.relationship == 'ordered') return 0;//we're dealing with an ordered view so leave the order alone
+					//Sort by label
+					var aLabel = a[viewDef.label].toLowerCase();
+					var bLabel = b[viewDef.label].toLowerCase();
+					if(aLabel > bLabel) return 1;
+					if(aLabel < bLabel) return -1;
+					return 0;
+				});
+				return results;
+			});
 		},		
 		put: function(object, options){
 			registry.byId('cancelButtonId').set('disabled',false);
@@ -44,25 +67,25 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 		remove: function(id){
 			registry.byId('cancelButtonId').set('disabled',false);
 			registry.byId('saveButtonId').set('disabled',false);
-			if(object.id in this.addObjects){
-				this.addObjects.splice(id,1);
+			if(id in this.addObjects){
+				delete this.addObjects[id];
 			}
 			else {
-				var originalObject =_nqMemoryStore.get(object.id);
-				if(object.id in this.putObjects){
-					originalObject = this.putObjects[object.id];
-					this.putObjects.splice(id,1);
+				var originalObject =_nqMemoryStore.get(id);
+				if(id in this.putObjects){
+					originalObject = this.putObjects[id];
+					delete this.putObjects[id];
 				}
 				// add it to the queue of removed Objects
-				this.removeObjects[object.id] = originalObject;
+				this.removeObjects[id] = originalObject;
 			}
 	    },
 		query: function(query, options){
-			if(query.parentId && query.childrenAttr){				
+			if(query.parentId && query.childViewAttributes){				
 				var promisses = [];
 				when(_nqDataStore.get(query.parentId), function(parent){
-					for(var i=0;i<query.childrenAttr.length;i++){
-						var viewAttr = query.childrenAttr[i];
+					for(var i=0;i<query.childViewAttributes.length;i++){
+						var viewAttr = query.childViewAttributes[i];
 						var childrenIds = parent[viewAttr];
 						if(!childrenIds) continue;
 						for(var j=0;j<childrenIds.length;j++){
@@ -72,8 +95,38 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 					}
 				});
 				return QueryResults(all(promisses));
+				//return QueryResults(this.queryEngine(query, options)(all(promisses)));
+				//when(all(promisses), function(results){
+				//	return QueryResults(this.queryEngine(query, options)(results));
+				//});
+			}
+			else if(query.parentId && query.joinViewAttributes){
+				this.join(object, childViewAttributes, idx, rowItemArr);
 			}
 			else return JsonRest.prototype.query.call(this, query, options);
+		},
+		join: function(object, childViewAttributes, idx, rowItemArr){
+			var rowItem = {};
+			for(key in object){rowItem[key] = object[key];}
+			for(var i=0;i<childViewAttributes.length;i++){
+				var viewAttr = childViewAttributes[i];
+				when(_nqDataStore.get(object[viewAttr]), function(child){
+					for(key in child){rowItem[key] = child[key];}
+				});
+			}
+			var promisses = [];
+			when(_nqDataStore.get(object[childViewAttributes[idx]]), function(child){
+				for(var i=0;i<query.childViewAttributes.length;i++){
+					var viewAttr = query.childViewAttributes[i];
+					var childrenIds = parent[viewAttr];
+					if(!childrenIds) continue;
+					for(var j=0;j<childrenIds.length;j++){
+						var childId = childrenIds[j];
+						promisses.push(_nqDataStore.get(childId));
+					}
+				}
+			});
+			return QueryResults(all(promisses));
 		},
 	    transaction: function(){
 	    	return {
@@ -106,32 +159,34 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 						postOperations.push({action: "post", data: updatedObject});
 					};
 					// commit the transaction, sending all the operations in a single request
-					return request.post(this.target, {
+					request.post(this.target, {
 						// send all the operations in the body
 						headers: {'Content-Type': 'application/json'},
-						handleAs: "json",
+//						handleAs: "json",
 						data: dojo.toJson(postOperations)//JSON.stringify(postOperations)
 					}).then( 
 						function(data){
-							dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
+							console.log(data);//TODO: Replace IDs
 							this.removeObjects = {};
 							this.addObjects = {};
 							this.putObjects = {};
+							dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
 			    		},
 			    		function(error){
-			    	    	new dijit.Dialog({title: "Rollback",content: error.message,style: "width: 500px"}).show();
-			    	    	//rollBackClient(); //TODO
+			    	    	new dijit.Dialog({title: "Rollback",content: error.response.data,style: "width: 700px"}).show();
 							this.removeObjects = {};
 							this.addObjects = {};
 							this.putObjects = {};
-			    		} 
+					    	//TODO evict from the cache then refresh the page data
+					    	//window.location.reload(true);
+			    		}
 			    	);		    	
 				}),
 			    abort: function(){
 			    	window.location.reload(true);
 			    	//window.location.href = window.location.href;
 			    	/*
-			    	TODO evict from the cache then refresh the page
+			    	TODO evict from the cache then refresh the page data
 					this.removeObjects = {};
 					this.addObjects = {};
 					this.putObjects = {};

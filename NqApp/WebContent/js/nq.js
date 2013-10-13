@@ -5,21 +5,21 @@ require([
 'dijit/tree/dndSource', 'dojo/Deferred', 'dojo/when', 'dojo/query', 'dijit/layout/BorderContainer', 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', 'dijit/Editor', 
 'nq/NqProcessChart', 'nq/NqClassChart', 'nq/NqForm', 'nq/NqGrid', 'nq/NqJsonRest', 'nq/NqTree', 'nq/NqObjectStoreModel', 'nq/NqContents',
- 'dojo/promise/instrumentation', 'dojo/query!css2'], 
+ 'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct,
 		declare, Observable, Cache, JsonRest, Memory, 
 		dndSource, Deferred, when, query, BorderContainer, 
 		TabContainer, ContentPane, AccordionContainer, Editor, 
 		NqProcessChart, NqClassChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqContents, 
-		instrumentation) {
+		instrumentation, styles) {
 	
 	_nqMemoryStore = Observable(new Memory({}));
 	_nqDataStore = new Cache(new NqJsonRest({target:"data/"}), _nqMemoryStore);
 	var _transaction = _nqDataStore.transaction();
 	_nqSchemaMemoryStore = new Memory();
 	_nqSchemaStore = Cache(new JsonRest({target:"schema/"}), _nqSchemaMemoryStore);
-
+	var helpTextEnabled = false;
 	//////////////////////////////////////////////////////////////////////////////
 	// Initialize
 	//////////////////////////////////////////////////////////////////////////////
@@ -28,9 +28,14 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		on(registry.byId('cancelButtonId'), 'click', function(event){_transaction.abort();});
 		on(registry.byId('saveButtonId'), 'click', function(event){_transaction.commit();});
 		on(registry.byId('helpButtonId'), 'click', function(event){
-			dojo.query(".helpTextInvisable").forEach(function(node) {
-				domStyle.set(node, 'display', 'block');
-			});
+			if(helpTextEnabled) {
+				dojox.html.insertCssRule('.helpTextInvisable', 'color:navy;display:none;', 'nq.css');
+				helpTextEnabled = false;
+			}
+			else{
+				dojox.html.insertCssRule('.helpTextInvisable', 'color:navy;display:block;', 'nq.css');
+				helpTextEnabled = true;
+			}
 		});
 
 		//Load the schema in its entirety 
@@ -244,9 +249,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			else {
 				widget = new NqGrid({
 					id: 'widget'+state.tabId,
+					store: _nqDataStore,
 					state: state,
 					extraPlugins: _extraPlugins,
-					store: _nqDataStore,
 					query: { parentId: state.selectedObjectIdPreviousLevel, childrenAttr: viewIdsArr}
 				}, domConstruct.create('div'));
 				tabNode.appendChild(widget.domNode);
@@ -288,6 +293,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			if(!widget){
 				widget = new NqProcessChart({
 					id: 'widget'+state.tabId,
+					store: _nqDataStore,
 					orgUnitRootId: '850/494', // Process Classes
 					orgUnitViewId: '1868',
 					orgUnitNameAttrId: '1926',
@@ -307,6 +313,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			if(!widget){
 				widget = new NqClassChart({
 					id: 'widget'+state.tabId,
+					store: _nqDataStore,
 					XYAxisRootId: '844/67', // Process Classes
 					viewId: state.viewId,
 					nameAttrId: 852,
@@ -324,6 +331,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			if(!widget){
 				widget = new NqForm({
 					id: 'widget'+state.tabId,
+					store: _nqDataStore,
 					state: state,
 					extraPlugins: _extraPlugins
 				}, domConstruct.create('div'));
@@ -336,6 +344,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			if(!widget){
 				widget = new NqContents({
 					id: 'widget'+state.tabId,
+					store: _nqDataStore,
 					state: state,
 					extraPlugins: _extraPlugins
 				}, domConstruct.create('div'));

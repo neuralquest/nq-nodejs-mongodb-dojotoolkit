@@ -14,12 +14,13 @@ p,ul,ol {text-align: justify; margin-top: 0em; margin-bottom: 0em; font-family: 
 h1, h2, h3, h4, h5, h6 {margin-top: 0.5em; margin-bottom: 0em;}
 .dojoDndContainerOver {	border: 0px;}
 
-.dgrid {height: auto;/* width: 20em;  make all the columns 80px wide*/}
+.dgrid {height: auto;}
+.field-rowSelector {width: 24px;}
 .dgrid .dgrid-scroller {position: relative;overflow: visible;max-height: 500px;}
 .dgrid-cell-padding {padding: 0px;}
-.dgrid-selected { background: #999; /* Make selected rows be gray */}
 .dgrid-row-odd {background: #F2F5F9;}
 .dgrid-cell {border: none;}
+/*.dgrid-selected { background: #999; / * Make selected rows be gray * /}*/
 
 
 .helpTextInvisable {color:navy; display:none;}
@@ -37,6 +38,8 @@ h1, h2, h3, h4, h5, h6 {margin-top: 0.5em; margin-bottom: 0em;}
 .cancelIcon {background-image: url('../img/Neuralquest/cancel.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 .saveIcon {background-image: url('../img/Neuralquest/save.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 .helpIcon {background-image: url('../img/Neuralquest/help.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.addIcon {background-image: url('../img/Neuralquest/add.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.removeIcon {background-image: url('../img/Neuralquest/remove.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 
 
 /* Gennerated by means of nqserver/nqSprites.txt */

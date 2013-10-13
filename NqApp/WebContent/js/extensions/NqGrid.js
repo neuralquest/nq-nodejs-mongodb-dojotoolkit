@@ -1,14 +1,16 @@
 define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox',
          'dijit/Editor', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", 
          "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff",
-        'dgrid/OnDemandGrid', 'dgrid/editor', 'dgrid/Selection', 'dgrid/Keyboard', 'dgrid/extensions/DijitRegistry',
+        'dgrid/OnDemandGrid', 'dgrid/editor', 'dgrid/Selection', 'dgrid/Keyboard', 'dgrid/extensions/DijitRegistry', "dgrid/extensions/DnD",
+        "dgrid/Selection", "dgrid/selector", "dijit/form/Button","dojo/_base/array",
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, arrayUtil, Select, Toolbar, DateTextBox, 
 			Editor, Memory, domConstruct, on, 
 			 _WidgetBase, ContentPane, domGeometry, has, 
-			Grid, editor, Selection, Keyboard, DijitRegistry){
+			Grid, editor, Selection, Keyboard, DijitRegistry, Dnd,
+			Selection, selector, Button, array){
 	var dijit;
    
 	return declare("NqGridWidget", [_WidgetBase], {
@@ -37,6 +39,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			//var viewDef = _nqSchemaMemoryStore.get(this.state.viewId);
 			var viewsArr = _nqSchemaMemoryStore.query({parentTabId: this.state.tabId, entity: 'view'});//get the views that belong to this tab
 			var viewDef = viewsArr[0];
+			var sortable = viewDef.relationship = 'ordered'?false:true;
 			var propsObj = viewDef.properties;
 			//create an array with the propertie in the right order
 			var propsArr = [];
@@ -50,9 +53,15 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			var toolbarDivNode = this.toolbarDivNode; 
 			var extraPlugins = this.extraPlugins; 
 			var columns = [];
+			columns.push(
+				selector({ field:'rowSelector', label: " ",  selectorType: "radio" })
+			);
+			var gridStyle = {};
 			arrayUtil.forEach(propsArr, function(prop) {	
-				//console.log('Create dijit:', prop.title, prop);				
 				var editorProps = getWidgetProperties(prop);
+				editorProps.sortable = sortable;
+				//get the width of the colomn
+				gridStyle[prop.name] = 'width:'+(prop.width<=0?"auto":prop.width+"em");
 
 				if('enum' in prop){
 					editorProps.renderCell = function(object, value, node, options){
@@ -72,21 +81,103 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					};
 					editorProps.editor = Select;
 				}
-				else if(prop.type=='string' && prop.format=='rtf') editorProps.editor = Editor;
-				else if(prop.type=='string' && prop.format=='date-time')editorProps.editor = DateTextBox;
+				else if(prop.type=='string' && prop.format=='rtf') {
+					var toolbar = new Toolbar({
+						//'style': {'display': 'none'}
+					});
+					toolbarDivNode.appendChild(toolbar.domNode);
+					editorProps.editorArgs = {
+//							'toolbar': toolbar, 
+//							'addStyleSheet': 'css/editor.css',
+//							'extraPlugins': this.extraPlugins,
+							'maxHeight': -1
+					};
+					editorProps.editor = Editor;
+				}
+				else if(prop.type=='string' && prop.format=='date-time') editorProps.editor = DateTextBox;
 				else if(prop.type=='string') editorProps.editor = 'text';
 				else if(prop.type=='integer') editorProps.editor = 'number';						
 				else if(prop.type=='number') editorProps.editor = 'number';						
 				else if(prop.type=='boolean') editorProps.editor = 'checkbox';						
 				columns.push(editor(editorProps));
 			});
-			this.grid = new (declare([Grid, Selection, Keyboard, DijitRegistry]))({
+			this.grid = new (declare([Grid, Selection, Keyboard, DijitRegistry, Dnd]))({
 				//'id' : 'widget'+state.tabId,
-				'store': _nqDataStore,
+				'store': this.store,
+				'selectionMode': "single",
+				'loadingMessage': 'Loading data...',
+				'noDataMessage': 'No data.',
 				'query': this.query,
-				'columns': columns
-			}, dojo.doc.createElement('div'));
+				'columns': columns,
+				'cleanAddedRules': true
+			}, domConstruct.create('div'));
+			for(var key in gridStyle){
+				this.grid.styleColumn(key, gridStyle[key]);
+			}
+			//this.grid.styleColumn('544', 'width: 100px');
 			this.pane.containerNode.appendChild(this.grid.domNode);
+			var mapsToClass = viewDef.mapsToClasses[0];
+		    var addButton = new Button({
+		        label: "Add Row",
+		        disabled:false, 
+		        iconClass:'addIcon',
+				classToCreate: mapsToClass,
+				viewDefToCreate: viewDef,
+				store: this.store,
+				parentId: this.query.parentId,
+				grid: this.grid
+		    }, dojo.doc.createElement('div'));
+		    addButton.on("click", function(evt){
+				var classToCreate = this.classToCreate;
+				var viewDefToCreate = this.viewDefToCreate;
+				var viewId = viewDefToCreate.id;
+				console.log(classToCreate.className); 
+				var addObj = {
+					'id': '',//cid will be added by our restStore exstension, we need a dummy id
+					'viewId': viewId, 
+					'classId': classToCreate.id
+				};
+				addObj[viewDefToCreate.label] = '[new '+classToCreate.className+']';
+				var newItem = this.store.add(addObj);
+				var parentItem = this.store.get(this.parentId);
+				if(!parentItem[viewId]) parentItem[viewId] = [];
+				parentItem[viewId].push(newItem.id);
+				this.store.put(parentItem);
+				this.grid.refresh();
+				this.grid.select(newItem);
+			});
+			this.pane.containerNode.appendChild(addButton.domNode);
+		    var removeButton = new Button({
+		        label: "Remove Row",
+//		        disabled: true, 
+		        iconClass: 'removeIcon',
+				viewDefToCreate: viewDef,
+				store: this.store,
+				parentId: this.query.parentId,
+				grid: this.grid
+		    }, dojo.doc.createElement('div'));
+		    removeButton.on("click", function(evt){
+		    	var selectedRows = this.grid.selection;
+		    	for(key in selectedRows) {
+			    	this.store.remove(key);
+					
+					var parentItem = this.store.get(this.parentId);
+					var viewId = this.viewDefToCreate.id;
+					index = array.indexOf(parentItem[viewId], key);
+					parentItem[viewId].splice(index, 1);
+					this.store.put(parentItem);
+		    	}
+				this.grid.refresh();
+			});
+			this.pane.containerNode.appendChild(removeButton.domNode);
+			this.grid.on(".dgrid-row:click", function(event){
+//				var row = grid.row(event);
+				console.log("Row clicked:", event);
+			});
+			this.grid.on("dgrid-refresh-complete", function(event){
+//				var row = grid.row(event);
+				console.log("Row complete:", event);
+			});
 		},
 		startup: function(){
 			this.inherited(arguments);
@@ -107,6 +198,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 	});
 	function getWidgetProperties(prop){
 		var properties = {
+				id: prop.name, 
 				field: prop.name, 
 				editOn: 'click', 
 				autoSave: true, 
@@ -115,8 +207,9 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 		if(prop.placeHolder) properties.placeHolder = prop.placeHolder;
 		if(prop['default']) properties.value = prop['default'];
 		if(prop.optional) properties.required = (prop.optional?false:true);
-		if(prop.readonly) properties.editable = (prop.readonly?false:true);
-		if(prop.width) properties.width = (prop.width<=0?"100%":prop.width+"em");
+		//if(prop.readonly && prop.readonly == true) properties.canEdit = function(object){ return false; }
+		//else properties.canEdit = function(object){ return true; }
+		//if(prop.width) properties.width = (prop.width<=0?"100%":prop.width+"em");
 		if(prop.placeHolder) properties.placeHolder = prop.placeHolder;
 		//if(prop.promptMessage) properties.promptMessage = prop.promptMessage;//we dont like this
 		if(prop.invalidMessage) properties.invalidMessage = prop.invalidMessage;

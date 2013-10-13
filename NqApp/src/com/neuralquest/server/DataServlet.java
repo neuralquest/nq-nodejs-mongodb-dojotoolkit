@@ -185,7 +185,7 @@ public class DataServlet extends HttpServlet implements Constants {
 		}
 		catch (Exception e) {
 			session.getTransaction().rollback();
-			throw new ServletException(e); // or display error message
+			throw new ServletException(e.getMessage()); // or display error message
 		}		
 	}
 
@@ -258,6 +258,7 @@ public class DataServlet extends HttpServlet implements Constants {
 		// add an array of children ids to the row object 
 		//----------------------------------------------------------------------------------
 		LinkedList<Cell> childViewList = viewObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(MANYTOMANY_ASSOC, VIEWS_ID );
+		addTabsViewLists(viewObj, childViewList);
 		for(Iterator<Cell> itr1=childViewList.iterator();itr1.hasNext();){
 			Cell childViewObj = itr1.next();
 			JSONArray childrenArray = new JSONArray();
@@ -275,7 +276,7 @@ public class DataServlet extends HttpServlet implements Constants {
 				childrenArray.put(childViewObj.getId()+"/"+childObj.getId());
 			}
 			rowObject.put(String.valueOf(childViewObj.getId()), childrenArray);
-			//if(1 == 2) continue;
+			if(1 == 2) continue;
 			LinkedList<Cell> childTabList = viewObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ACCTABS_ID );
 			for(Iterator<Cell> itr2=childTabList.iterator();itr2.hasNext();){
 				Cell childTabObj = itr2.next();
@@ -294,6 +295,17 @@ public class DataServlet extends HttpServlet implements Constants {
 		}
 		
 		return rowObject;
+	}
+	private void addTabsViewLists(Cell viewOrTabObj, LinkedList<Cell> childViewList){
+		LinkedList<Cell> childTabList = viewOrTabObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ACCTABS_ID );
+		for(Iterator<Cell> itr2=childTabList.iterator();itr2.hasNext();){
+			Cell childTabObj = itr2.next();
+			LinkedList<Cell> childViews = childTabObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(MANYTOMANY_ASSOC, VIEWS_ID );
+			//always returns true because of lazy loading
+			//			if(childViewList.containsAll(childViews)) return;//loop protection
+			childViewList.addAll(childViews);
+			addTabsViewLists(childTabObj, childViewList);//there may be sub tabs
+		}
 	}
 	// ********************************************************************************
 	// Update Row (use by PUT and POST)
@@ -426,8 +438,11 @@ public class DataServlet extends HttpServlet implements Constants {
 	
 
 		LinkedList<Cell> childViewList = viewObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(MANYTOMANY_ASSOC, VIEWS_ID );
+		addTabsViewLists(viewObj, childViewList);
 		for(Iterator<Cell> itr1=childViewList.iterator();itr1.hasNext();){
 			Cell childViewObj = itr1.next();
+			System.out.println(childViewObj.getId());
+			
 			//get the new children list for tihis view
 			LinkedList<Cell> newChildrenList = new LinkedList<Cell>();
 			JSONArray childrenArr = dataJsonObj.optJSONArray(String.valueOf(childViewObj.getId()));

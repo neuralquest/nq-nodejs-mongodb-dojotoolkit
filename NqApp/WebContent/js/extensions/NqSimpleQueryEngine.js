@@ -1,8 +1,7 @@
-define(["dojo/_base/array"], function(arrayUtil) {
-  //  module:
-  //    dojo/store/util/SimpleQueryEngine
-  //  summary:
-  //    The module defines a simple filtering query engine for object stores. 
+define(["dojo/_base/array" /*=====, "../api/Store" =====*/], function(arrayUtil /*=====, Store =====*/){
+
+// module:
+//		dojo/store/util/SimpleQueryEngine
 
 return function(query, options){
 	// summary:
@@ -26,10 +25,10 @@ return function(query, options){
 	//		An object hash with fields that may match fields of items in the store.
 	//		Values in the hash will be compared by normal == operator, but regular expressions
 	//		or any object that provides a test() method are also supported and can be
-	// 		used to match strings by more complex expressions
-	// 		(and then the regex's or object's test() method will be used to match values).
+	//		used to match strings by more complex expressions
+	//		(and then the regex's or object's test() method will be used to match values).
 	//
-	// options: dojo.store.util.SimpleQueryEngine.__queryOptions?
+	// options: dojo/store/api/Store.QueryOptions?
 	//		An object that contains optional information such as sort, start, and count.
 	//
 	// returns: Function
@@ -41,10 +40,10 @@ return function(query, options){
 	//
 	//	|	var myStore = function(options){
 	//	|		//	...more properties here
-	//	|		this.queryEngine = dojo.store.util.SimpleQueryEngine;
+	//	|		this.queryEngine = SimpleQueryEngine;
 	//	|		//	define our query method
 	//	|		this.query = function(query, options){
-	//	|			return dojo.store.util.QueryResults(this.queryEngine(query, options)(this.data));
+	//	|			return QueryResults(this.queryEngine(query, options)(this.data));
 	//	|		};
 	//	|	};
 
@@ -58,7 +57,8 @@ return function(query, options){
 				for(var key in queryObject){
 					var required = queryObject[key];
 					if(required && required.test){
-						if(!required.test(object[key])){
+						// an object can provide a test method, which makes it work with regex
+						if(!required.test(object[key], object)){
 							return false;
 						}
 					}else if(required != object[key]){
@@ -82,65 +82,49 @@ return function(query, options){
 		// execute the whole query, first we filter
 		var results = arrayUtil.filter(array, query);
 		//EXTENSION
-		//Presort by view name
-		results.sort(function(a, b){
-			var titleA = _nqSchemaMemoryStore.get(a.viewId).title;
-			var titleB = _nqSchemaMemoryStore.get(b.viewId).title;
-			if(titleA > titleB) return 1;
-			if(titleA < titleB) return -1;
-		});
-		var viewProps = _nqSchemaMemoryStore.get(array[0].viewId);//FIXME for now we assume the array contains only one view type
-		//var viewProps = _viewPropsStore.get(array[0].viewId);
-		if(viewProps.relationship = 'ordered'){//we're dealing with an ordered view (ie linkedList)
-			var map = []; //create a map of ids to next ids
-			for(var i=0;i<results.length;i++){
-				map[results[i].id] = results[i].insertBefore;
-			}
+		if(options && options.sortByViewLabel){
 			results.sort(function(a, b){
-				nextId = a.id;
-				//follow the linkedList to the end
-				for(var i=0;i<results.length;i++){//we use a for next loop here instead of a while, to prevent infinte loops incase there's an error in the linked list 
-					nextId = map[nextId];
-					if(!nextId) return 1; //b not found, so a index is higher than b index
-					if(nextId == b.id) return -1; //b found, so a index is lower than b index
-				}
-				return 0;//this is an error situation, the loop should have returned by now
+				//Presort by view name
+				var titleA = _nqSchemaMemoryStore.get(a.viewId).title;
+				var titleB = _nqSchemaMemoryStore.get(b.viewId).title;
+				if(titleA > titleB) return 1;
+				if(titleA < titleB) return -1;
+				//the views are the same
+				var viewDef = _nqSchemaMemoryStore.get(a.viewId);
+				if(viewDef.relationship == 'ordered') return 0;//we're dealing with an ordered view so leave the order alone
+				//Sort by label
+				var aLabel = a[viewDef.label].toLowerCase();
+				var bLabel = b[viewDef.label].toLowerCase();
+				if(aLabel > bLabel) return 1;
+				if(aLabel < bLabel) return -1;
+				return 0;
 			});
 		}
-		else {
-			if(options && options.sortByLabel){
-				results.sort(function(a, b){
-					var aLabel = toLowerCase(a[viewProps.label]);
-					var bLabel = toLowerCase(b[viewProps.label]);
-					if(aLabel > bLabel) return 1;
-					if(aLabel < bLabel) return -1;
-					return 0;
-				});
-			}
-			//END OF  EXTENSION
-			// next we sort
-			if(options && options.sort){
-				results.sort(function(a, b){
-					for(var sort, i=0; sort = options.sort[i]; i++){
-						var aValue = a[sort.attribute];
-						var bValue = b[sort.attribute];
-						if (aValue != bValue) {
-							return !!sort.descending == aValue > bValue ? -1 : 1;
-						}
+		//END OF  EXTENSION
+		// next we sort
+		var sortSet = options && options.sort;
+		if(sortSet){
+			results.sort(typeof sortSet == "function" ? sortSet : function(a, b){
+				for(var sort, i=0; sort = sortSet[i]; i++){
+					var aValue = a[sort.attribute];
+					var bValue = b[sort.attribute];
+					if (aValue != bValue){
+						return !!sort.descending == (aValue == null || aValue > bValue) ? -1 : 1;
 					}
-					return 0;
-				});
-			}
-			// now we paginate
-			if(options && (options.start || options.count)){
-				var total = results.length;
-				results = results.slice(options.start || 0, (options.start || 0) + (options.count || Infinity));
-				results.total = total;
-			}
+				}
+				return 0;
+			});
+		}
+		// now we paginate
+		if(options && (options.start || options.count)){
+			var total = results.length;
+			results = results.slice(options.start || 0, (options.start || 0) + (options.count || Infinity));
+			results.total = total;
 		}
 		return results;
 	}
 	execute.matches = query;
 	return execute;
 };
+
 });
