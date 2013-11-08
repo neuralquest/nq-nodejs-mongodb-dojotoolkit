@@ -129,8 +129,8 @@ public class SchemaServlet extends HttpServlet implements Constants {
 										long destClassId = assoc1.getDestFk().getId();
 										JSONObject resultJSONObject = new JSONObject();
 										resultJSONObject.put("id", destClassId);
-										resultJSONObject.put("label", "<i>"+assoc1.getName()+" </i><img class='icon"+assocType+"'/> "+assoc1.getDestFk().getName(50));
-										resultJSONObject.put("name", assoc1.getName()+" - "+assoc1.getDestFk().getName(50));
+										resultJSONObject.put("label", "<i>"+assoc1.getName()+" </i><img class='icon"+assocType+"'/> "+assoc1.getDestFk().getName(100));
+										resultJSONObject.put("name", assoc1.getName()+" - "+assoc1.getDestFk().getName(100));
 										resultJSONObject.put("selectedObjParentId", selectedObjParentId);
 										resultJSONObject.put("attrRefId", attrRefId);
 										resultJSONArray.put(resultJSONObject);
@@ -146,8 +146,8 @@ public class SchemaServlet extends HttpServlet implements Constants {
 										long sourceClassId = assoc1.getSourceFk().getId();
 										JSONObject resultJSONObject = new JSONObject();
 										resultJSONObject.put("id", sourceClassId);
-										resultJSONObject.put("label", "<i>"+translatedAssocObj.getName()+" </i><img class='icon"+assocType+"'/> "+assoc1.getSourceFk().getName(50));
-										resultJSONObject.put("name", translatedAssocObj.getName()+" - "+assoc1.getSourceFk().getName(50));
+										resultJSONObject.put("label", "<i>"+translatedAssocObj.getName()+" </i><img class='icon"+assocType+"'/> "+assoc1.getSourceFk().getName(100));
+										resultJSONObject.put("name", translatedAssocObj.getName()+" - "+assoc1.getSourceFk().getName(100));
 										resultJSONObject.put("selectedObjParentId", selectedObjParentId);
 										resultJSONObject.put("attrRefId", attrRefId);
 										resultJSONArray.put(resultJSONObject);
@@ -177,7 +177,7 @@ public class SchemaServlet extends HttpServlet implements Constants {
 		Cell accTabsCell = viewObj.getAttributeObjByDestClass(ACCORDION_TABS_ID);
 		schemaObj.put("containerType", accTabsCell==null ? "" : accTabsCell.getName());
 		Cell nameCell = viewObj.getAttributeObjByDestClass(PRIMARY_NAME_ID);
-		if(nameCell!=null) schemaObj.put("title", viewObj.getName(50));
+		if(nameCell!=null) schemaObj.put("title", viewObj.getName(100));
 		Cell descCell = viewObj.getAttributeObjByDestClass(DESCRIPTION_ID);
 		if(descCell!=null) schemaObj.put("description",descCell.getName());
 		// tell if the retationship to previous is ordered
@@ -252,7 +252,7 @@ public class SchemaServlet extends HttpServlet implements Constants {
 		String displayType = displyTypeObj==null ? "" : displyTypeObj.getName();
 		schemaObj.put("displayType",displayType);
 		Cell nameCell = tabObj.getAttributeObjByDestClass(PRIMARY_NAME_ID);
-		if(nameCell!=null) schemaObj.put("title", tabObj.getName(50));
+		if(nameCell!=null) schemaObj.put("title", tabObj.getName(100));
 		Cell descCell = tabObj.getAttributeObjByDestClass(DESCRIPTION_ID);
 		if(descCell!=null) schemaObj.put("description",descCell.getName());
 		else schemaObj.put("description", "<a href='#842.1787.1787.1802.1863'>update the description</a>");

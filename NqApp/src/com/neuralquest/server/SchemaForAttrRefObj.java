@@ -65,7 +65,7 @@ public class SchemaForAttrRefObj   implements Constants {
 		readonly = attrAccess!=null&&attrAccess.getId()==MODIFY_ID?false:true;
 		optional = attrAccess!=null&&attrAccess.getId()==MANDATORY_ID?false:true;
 		//title = attrRefObj.getAttributeObjByType(PRIMARY_NAME_ID)==null ? "null" : attrRefObj.getName(50);
-		title = attrRefObj.getAttributeObjByDestClass(PRIMARY_NAME_ID)==null?"unnamed":attrRefObj.getAttributeObjByDestClass(PRIMARY_NAME_ID).getName(50);//label
+		title = attrRefObj.getAttributeObjByDestClass(PRIMARY_NAME_ID)==null?"unnamed":attrRefObj.getAttributeObjByDestClass(PRIMARY_NAME_ID).getName(100);//label
 		initDescription();
 		initFieldWidth();
 		if(assocType==ATTRIBUTE_ASSOC){
@@ -582,7 +582,7 @@ public class SchemaForAttrRefObj   implements Constants {
 			Cell optionObj = (itr1.next());
 			JSONObject valueOptionObj = new JSONObject();
 			valueOptionObj.put("id", optionObj.getId());
-			valueOptionObj.put("name",optionObj.getName(20));
+			valueOptionObj.put("name",optionObj.getName(100));
 			valuesArray.put(valueOptionObj);
 		}
 		return valuesArray;
@@ -593,7 +593,7 @@ public class SchemaForAttrRefObj   implements Constants {
 			Cell optionObj = (itr1.next());
 			JSONObject valueOptionObj = new JSONObject();
 			valueOptionObj.put("id", optionObj.getId());
-			valueOptionObj.put("name",optionObj.getName(20));
+			valueOptionObj.put("name",optionObj.getName(100));
 			valuesArray.put(valueOptionObj);
 		}
 		JSONObject storeObj = new JSONObject();

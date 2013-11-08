@@ -102,6 +102,7 @@ public interface Constants {
 	// used by data servlet for class model
 	static final long CLASS_VIEW_ID = 844;
 	static final long ASSOCS_VIEW_ID = 1934;
+	static final long ASSOCS_CLASS_VIEW_ID = 733;
 
 	//used to get authorized views/object
 	static final long ORG_UNIT_ID = 70;

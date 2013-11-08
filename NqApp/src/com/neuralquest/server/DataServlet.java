@@ -200,7 +200,7 @@ public class DataServlet extends HttpServlet implements Constants {
 		rowObject.put("id",viewObj.getId()+"/"+selectedObj.getId());
 		rowObject.put("viewName",viewObj.getIdName(50));// debugging purposes
 		long selectedObjId = selectedObj.getId();
-		if(viewObj.getId()==CLASS_VIEW_ID) rowObject.put("classId",selectedObj.getType());//make an exception for the class model
+		if(viewObj.getId()==CLASS_VIEW_ID || viewObj.getId()==ASSOCS_CLASS_VIEW_ID) rowObject.put("classId",selectedObj.getType());//make an exception for the class model
 		else rowObject.put("classId",1 == selectedObjId?0:selectedObj.getCellByAssocType(PARENT_ASSOC).getId());// this is used by icons and DnD
 		//rowObject.put("class","css"+viewObj.getId());//used by tree menu to determin which menu to present
 		
@@ -264,7 +264,8 @@ public class DataServlet extends HttpServlet implements Constants {
 			JSONArray childrenArray = new JSONArray();
 			LinkedList<Cell> rowList = null;
 			if(childViewObj.getId()==ASSOCS_VIEW_ID){//make an exception for the class view
-				//rowList = assocsViewChildren(childrenArray, selectedObj, childViewObj, session);
+				assocsViewChildren(childrenArray, selectedObj, childViewObj, session);
+				rowObject.put(String.valueOf(childViewObj.getId()), childrenArray);
 				continue;
 			}
 			else if(childViewObj.getId()==CLASS_VIEW_ID){//make an exception for the class view
@@ -751,11 +752,10 @@ public class DataServlet extends HttpServlet implements Constants {
 			Cell permittedValue = (itr1.next());
 			long assocType = permittedValue.getId();
 			//if(assocType==CHILDREN_PASSOC) continue;//we are doing other than children
-			if(assocType==PARENT_ASSOC) continue;//causes loop in the tree//doesn;t help
+			//if(assocType==PARENT_ASSOC) continue;//causes loop in the tree//doesn;t help
 			//if(permittedValue.getId()!=ATTRIBUTE_ASSOC) continue;//we are doing other than children
-			LinkedList<Cell> thisAssocsList = selectedObj.getListOfRelatedObjectsByAssocTypeAndDestClass(permittedValue.getId(), null);
-			for(Iterator<Cell> itr2=thisAssocsList.iterator();itr2.hasNext();){
-				Cell destCell = (itr2.next());
+			LinkedList<Cell> thisAssocsList = selectedObj.getListOfRelatedObjectsByAssocTypeAndDestClass(assocType, null);
+			if(thisAssocsList.size()>0){
 				assocArray.put(viewObj.getId()+"/"+selectedObj.getId()+"."+assocType);
 			}
 		}
@@ -788,7 +788,8 @@ public class DataServlet extends HttpServlet implements Constants {
 		Cell sourceObj = (Cell) session.load(Cell.class, new Long(sourceObjId));
 		JSONObject rowObj = new JSONObject();
 		rowObj.put("id", viewIdString+"/"+assocIdString);
-		rowObj.put("1936", assocType+" "+assocObj.getName());
+		rowObj.put("1936", (assocType>9?assocType:"0"+assocType)+" "+assocObj.getName());
+		//rowObj.put("1936", assocType+" "+assocObj.getName());
 		rowObj.put("classId", assocType);
 		rowObj.put("view name", "associations");
 		rowObj.put("viewId", viewIdString);
@@ -796,9 +797,9 @@ public class DataServlet extends HttpServlet implements Constants {
 		LinkedList<Cell> destObjList = sourceObj.getListOfRelatedObjectsByAssocTypeAndDestClass(assocType, null);
 		for(Iterator<Cell> itr2=destObjList.iterator();itr2.hasNext();){
 			Cell destObj = itr2.next();
-			childrenArray.put(CLASS_VIEW_ID+"/"+destObj.getId());
+			childrenArray.put(ASSOCS_CLASS_VIEW_ID+"/"+destObj.getId());
 		}
-		rowObj.put(String.valueOf(CLASS_VIEW_ID), childrenArray);
+		rowObj.put(String.valueOf(ASSOCS_CLASS_VIEW_ID), childrenArray);
 		return rowObj;
 	}
 	private Cell getUserObj(HttpServletRequest req, Session session){

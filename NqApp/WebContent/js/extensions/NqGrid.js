@@ -35,20 +35,26 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			var tabDef = _nqSchemaMemoryStore.get(this.state.tabId);
 			this.pageHelpTextDiv.innerHTML = tabDef.description;
 
-			//var tableNode = domConstruct.create('table', null, this.pane.domNode);
-			//var viewDef = _nqSchemaMemoryStore.get(this.state.viewId);
+			var sortable = true;
+			var rowsUpdateable = false;
+
 			var viewsArr = _nqSchemaMemoryStore.query({parentTabId: this.state.tabId, entity: 'view'});//get the views that belong to this tab
-			var viewDef = viewsArr[0];
-			var sortable = viewDef.relationship = 'ordered'?false:true;
-			var propsObj = viewDef.properties;
-			//create an array with the propertie in the right order
+
+			if(viewsArr.length>1) rowsUpdateable = false;
+
 			var propsArr = [];
-			for(var key in propsObj){
-				//we have to copy the object to an array so we can make sure they're in the right order 
-			    //if(propsObj.hasOwnProperty(key)){
-				prop = propsObj[key];
-				prop.name = key;
-				propsArr[prop.sequence] = prop;
+			for(var i = 0;i<viewsArr.length;i++){
+				var viewDef = viewsArr[i];
+				if(viewDef.relationship = 'ordered') sortable = false;
+				var propsObj = viewDef.properties;
+				//create an array with the properties in the right order
+				for(var key in propsObj){
+					//we have to copy the object to an array so we can make sure they're in the right order 
+				    //if(propsObj.hasOwnProperty(key)){
+					prop = propsObj[key];
+					prop.name = key;
+					propsArr[prop.sequence] = prop;
+				}
 			}
 			var toolbarDivNode = this.toolbarDivNode; 
 			var extraPlugins = this.extraPlugins; 
@@ -114,62 +120,64 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			for(var key in gridStyle){
 				this.grid.styleColumn(key, gridStyle[key]);
 			}
-			//this.grid.styleColumn('544', 'width: 100px');
 			this.pane.containerNode.appendChild(this.grid.domNode);
-			var mapsToClass = viewDef.mapsToClasses[0];
-		    var addButton = new Button({
-		        label: "Add Row",
-		        disabled:false, 
-		        iconClass:'addIcon',
-				classToCreate: mapsToClass,
-				viewDefToCreate: viewDef,
-				store: this.store,
-				parentId: this.query.parentId,
-				grid: this.grid
-		    }, dojo.doc.createElement('div'));
-		    addButton.on("click", function(evt){
-				var classToCreate = this.classToCreate;
-				var viewDefToCreate = this.viewDefToCreate;
-				var viewId = viewDefToCreate.id;
-				console.log(classToCreate.className); 
-				var addObj = {
-					'id': '',//cid will be added by our restStore exstension, we need a dummy id
-					'viewId': viewId, 
-					'classId': classToCreate.id
-				};
-				addObj[viewDefToCreate.label] = '[new '+classToCreate.className+']';
-				var newItem = this.store.add(addObj);
-				var parentItem = this.store.get(this.parentId);
-				if(!parentItem[viewId]) parentItem[viewId] = [];
-				parentItem[viewId].push(newItem.id);
-				this.store.put(parentItem);
-				this.grid.refresh();
-				this.grid.select(newItem);
-			});
-			this.pane.containerNode.appendChild(addButton.domNode);
-		    var removeButton = new Button({
-		        label: "Remove Row",
-//		        disabled: true, 
-		        iconClass: 'removeIcon',
-				viewDefToCreate: viewDef,
-				store: this.store,
-				parentId: this.query.parentId,
-				grid: this.grid
-		    }, dojo.doc.createElement('div'));
-		    removeButton.on("click", function(evt){
-		    	var selectedRows = this.grid.selection;
-		    	for(key in selectedRows) {
-			    	this.store.remove(key);
-					
+
+			if(rowsUpdateable){
+				var mapsToClass = viewDef.mapsToClasses[0];
+			    var addButton = new Button({
+			        label: "Add Row",
+			        disabled:false, 
+			        iconClass:'addIcon',
+					classToCreate: mapsToClass,
+					viewDefToCreate: viewDef,
+					store: this.store,
+					parentId: this.query.parentId,
+					grid: this.grid
+			    }, dojo.doc.createElement('div'));
+			    addButton.on("click", function(evt){
+					var classToCreate = this.classToCreate;
+					var viewDefToCreate = this.viewDefToCreate;
+					var viewId = viewDefToCreate.id;
+					console.log(classToCreate.className); 
+					var addObj = {
+						'id': '',//cid will be added by our restStore exstension, we need a dummy id
+						'viewId': viewId, 
+						'classId': classToCreate.id
+					};
+					addObj[viewDefToCreate.label] = '[new '+classToCreate.className+']';
+					var newItem = this.store.add(addObj);
 					var parentItem = this.store.get(this.parentId);
-					var viewId = this.viewDefToCreate.id;
-					index = array.indexOf(parentItem[viewId], key);
-					parentItem[viewId].splice(index, 1);
+					if(!parentItem[viewId]) parentItem[viewId] = [];
+					parentItem[viewId].push(newItem.id);
 					this.store.put(parentItem);
-		    	}
-				this.grid.refresh();
-			});
-			this.pane.containerNode.appendChild(removeButton.domNode);
+					this.grid.refresh();
+					this.grid.select(newItem);
+				});
+				this.pane.containerNode.appendChild(addButton.domNode);
+			    var removeButton = new Button({
+			        label: "Remove Row",
+	//		        disabled: true, 
+			        iconClass: 'removeIcon',
+					viewDefToCreate: viewDef,
+					store: this.store,
+					parentId: this.query.parentId,
+					grid: this.grid
+			    }, dojo.doc.createElement('div'));
+			    removeButton.on("click", function(evt){
+			    	var selectedRows = this.grid.selection;
+			    	for(key in selectedRows) {
+				    	this.store.remove(key);
+						
+						var parentItem = this.store.get(this.parentId);
+						var viewId = this.viewDefToCreate.id;
+						index = array.indexOf(parentItem[viewId], key);
+						parentItem[viewId].splice(index, 1);
+						this.store.put(parentItem);
+			    	}
+					this.grid.refresh();
+				});
+				this.pane.containerNode.appendChild(removeButton.domNode);
+			}
 			this.grid.on(".dgrid-row:click", function(event){
 //				var row = grid.row(event);
 				console.log("Row clicked:", event);

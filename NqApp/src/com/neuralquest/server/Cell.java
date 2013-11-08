@@ -210,8 +210,9 @@ public class Cell extends BaseCell implements Constants {
 					list.add(ordered);
 					ordered.addNextToListByDestClass(list, destClassId);
 				}
+				return list;
 			}
-			return list;
+			else return orderedList; 
 		}
 		else if(assocType>=PARENT_ASSOC && assocType<=OWNS_ASSOC){
 			return lookForward(assocType, destClassId);

@@ -245,24 +245,30 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 
 		switch(tabDef.displayType){
 		case 'Table': 
-			if(widget)	widget.grid.set("query", { parentId: state.selectedObjectIdPreviousLevel, childrenAttr: viewIdsArr});
+			if(widget)	widget.grid.set("query", { parentId: state.selectedObjectIdPreviousLevel, joinViewAttributes: viewIdsArr});
 			else {
 				widget = new NqGrid({
 					id: 'widget'+state.tabId,
 					store: _nqDataStore,
 					state: state,
 					extraPlugins: _extraPlugins,
-					query: { parentId: state.selectedObjectIdPreviousLevel, childrenAttr: viewIdsArr}
+					query: { parentId: state.selectedObjectIdPreviousLevel, joinViewAttributes: viewIdsArr}
 				}, domConstruct.create('div'));
 				tabNode.appendChild(widget.domNode);
 				widget.startup();
 			}
 			break;
-		case 'Tree': 
-			if(!registry.byId('widget'+state.tabId)){
-				var query = {id: state.selectedObjectIdPreviousLevel};
-				if(tabDef.rootQuery) query = tabDef.rootQuery;
-				else query = {id: '2077'+'/'+'443'};
+		case 'Tree':
+			var query;
+			if(tabDef.rootQuery) query = tabDef.rootQuery;
+			else{
+				var objId = state.selectedObjectIdPreviousLevel.split('/')[1];
+				var query = {id: viewsArr[0].id+'/'+objId};
+			}
+			if(!widget || widget.model.query != query)	{
+				if(widget  && widget.model.query != query)	{
+					widget.destroy();
+				}
 				var treeModel = new NqObjectStoreModel({
 					childrenAttr: viewIdsArr,
 					store : _nqDataStore,

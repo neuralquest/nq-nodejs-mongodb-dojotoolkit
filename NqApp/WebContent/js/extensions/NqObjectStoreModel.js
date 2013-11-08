@@ -3,8 +3,8 @@ define(["dojo/_base/declare", "dijit/tree/ObjectStoreModel", "dojo/_base/lang", 
 	
 	var NqObjectStoreModel = declare(ObjectStoreModel, {
 		mayHaveChildren: function(item){
-			for(var i=0;i<this.childViewAttributes.length;i++){
-				var childAttr = this.childViewAttributes[i];
+			for(var i=0;i<this.childrenAttr.length;i++){
+				var childAttr = this.childrenAttr[i];
 				var childrenArr = item[childAttr];
 				if(childrenArr && childrenArr.length>0) return true;
 			}
@@ -18,7 +18,7 @@ define(["dojo/_base/declare", "dijit/tree/ObjectStoreModel", "dojo/_base/lang", 
 				res.observe(lang.hitch(this, function(obj, removedFrom, insertedInto){
 					console.log("_nqMemoryStore observe of : ", obj);
 					this.onChange(obj);
-					when(this.store.getChildren(obj, this.childViewAttributes),lang.hitch(this, function(results){
+					when(this.store.getChildren(obj, this.childrenAttr),lang.hitch(this, function(results){
 						console.dir(results);
 						this.onChildrenChange(obj, results);
 					}));
@@ -26,7 +26,7 @@ define(["dojo/_base/declare", "dijit/tree/ObjectStoreModel", "dojo/_base/lang", 
 				this.childrenCache[id] = true;
 			}
 			
-			when(this.store.getChildren(parentItem, this.childViewAttributes),lang.hitch(this, function(children){
+			when(this.store.getChildren(parentItem, this.childrenAttr),lang.hitch(this, function(children){
 				onComplete(children);
 			}),	onError);
 		},/*
@@ -42,7 +42,7 @@ define(["dojo/_base/declare", "dijit/tree/ObjectStoreModel", "dojo/_base/lang", 
 				return;
 			}
 
-			var res = this.childrenCache[id] = this.store.getChildren(parentItem, /*extension* /this.childViewAttributes);
+			var res = this.childrenCache[id] = this.store.getChildren(parentItem, /*extension* /this.childrenAttr);
 
 			// User callback
 			when(res, onComplete, onError);

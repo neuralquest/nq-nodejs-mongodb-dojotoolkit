@@ -99,34 +99,44 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 				//when(all(promisses), function(results){
 				//	return QueryResults(this.queryEngine(query, options)(results));
 				//});
+				/*
+				Still needs to be tested
+				var results = when(_nqDataStore.get(query.parentId), lang.hitch(this, function(parent){
+					return this.getChildren(parent, this.query.childViewAttributes);
+				}));
+				return QueryResults(results);
+				*/
 			}
 			else if(query.parentId && query.joinViewAttributes){
-				this.join(object, childViewAttributes, idx, rowItemArr);
+				var promise = when(_nqDataStore.get(query.parentId), lang.hitch(this, function(parent){
+					var rowItemArr = [];
+					return when(this.join(parent, query.joinViewAttributes, 0, rowItemArr, {}), lang.hitch(this, function(something){
+						return rowItemArr;
+					}));
+				}));
+				return QueryResults(promise);
 			}
 			else return JsonRest.prototype.query.call(this, query, options);
 		},
-		join: function(object, childViewAttributes, idx, rowItemArr){
-			var rowItem = {};
-			for(key in object){rowItem[key] = object[key];}
-			for(var i=0;i<childViewAttributes.length;i++){
-				var viewAttr = childViewAttributes[i];
-				when(_nqDataStore.get(object[viewAttr]), function(child){
-					for(key in child){rowItem[key] = child[key];}
-				});
-			}
-			var promisses = [];
-			when(_nqDataStore.get(object[childViewAttributes[idx]]), function(child){
-				for(var i=0;i<query.childViewAttributes.length;i++){
-					var viewAttr = query.childViewAttributes[i];
-					var childrenIds = parent[viewAttr];
-					if(!childrenIds) continue;
-					for(var j=0;j<childrenIds.length;j++){
-						var childId = childrenIds[j];
-						promisses.push(_nqDataStore.get(childId));
+		join: function(parent, joinViewAttributes, idx, rowItemArr, rowItemParentObjects){
+			return when(this.getChildren(parent, [joinViewAttributes[idx]]), lang.hitch(this, function(children){
+				for(var i=0;i<children.length;i++){
+					var child = children[i];
+					if(idx<joinViewAttributes.length-1) {
+						for(key in child){rowItemParentObjects[key] = child[key];}
+						return when(this.join(child, joinViewAttributes, idx+1, rowItemArr, rowItemParentObjects), lang.hitch(this, function(x){
+							return x;							
+						}));
+					}
+					else{
+						var rowItem = {};
+						for(key in rowItemParentObjects){rowItem[key] = rowItemParentObjects[key];}
+						for(key in child){rowItem[key] = child[key];}
+						rowItemArr.push(rowItem);
 					}
 				}
-			});
-			return QueryResults(all(promisses));
+				return children;
+			}));
 		},
 	    transaction: function(){
 	    	return {
