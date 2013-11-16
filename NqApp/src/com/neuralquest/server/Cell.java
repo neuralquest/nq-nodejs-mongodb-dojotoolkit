@@ -217,13 +217,16 @@ public class Cell extends BaseCell implements Constants {
 		else if(assocType>=PARENT_ASSOC && assocType<=OWNS_ASSOC){
 			return lookForward(assocType, destClassId);
 		}
-		else if(assocType==ORDERED_PARENT_PASSOC){
+		/*else if(assocType==ORDERED_PARENT_PASSOC){
 			LinkedList<Cell> list = new LinkedList<Cell>();
 			Cell orderedParent = findFirstReverse(destClassId); 
 			if(orderedParent!=null) list.add(orderedParent);
 			return list;
-		}
+		}*/
 		else if(assocType>=CHILDREN_PASSOC && assocType<=OWNED_BY_PASSOC){
+			if(assocType==ORDERED_PARENT_PASSOC){
+					int a = 0;
+			}
 			byte primitiveAssocType = (byte)(assocType - 12);// Big NoNo: here we do math with identifires
 			return lookBackward(primitiveAssocType, destClassId);
 		}

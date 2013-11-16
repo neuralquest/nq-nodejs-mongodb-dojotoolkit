@@ -40,7 +40,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 
 			var viewsArr = _nqSchemaMemoryStore.query({parentTabId: this.state.tabId, entity: 'view'});//get the views that belong to this tab
 
-			if(viewsArr.length>1) rowsUpdateable = false;
+			if(viewsArr.length == 1) rowsUpdateable = true;
 
 			var propsArr = [];
 			for(var i = 0;i<viewsArr.length;i++){
@@ -53,7 +53,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 				    //if(propsObj.hasOwnProperty(key)){
 					prop = propsObj[key];
 					prop.name = key;
-					propsArr[prop.sequence] = prop;
+					propsArr.push(prop);
 				}
 			}
 			var toolbarDivNode = this.toolbarDivNode; 
@@ -67,7 +67,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 				var editorProps = getWidgetProperties(prop);
 				editorProps.sortable = sortable;
 				//get the width of the colomn
-				gridStyle[prop.name] = 'width:'+(prop.width<=0?"auto":prop.width+"em");
+				//gridStyle[prop.name] = 'width:'+(prop.width<=0?"auto":prop.width+"em");
+				gridStyle[prop.name] = 'width: 40px';
 
 				if('enum' in prop){
 					editorProps.renderCell = function(object, value, node, options){
@@ -88,8 +89,9 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					editorProps.editor = Select;
 				}
 				else if(prop.type=='string' && prop.format=='rtf') {
+					/*
 					var toolbar = new Toolbar({
-						//'style': {'display': 'none'}
+						'style': {'display': 'none'}
 					});
 					toolbarDivNode.appendChild(toolbar.domNode);
 					editorProps.editorArgs = {
@@ -98,6 +100,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 //							'extraPlugins': this.extraPlugins,
 							'maxHeight': -1
 					};
+					*/
 					editorProps.editor = Editor;
 				}
 				else if(prop.type=='string' && prop.format=='date-time') editorProps.editor = DateTextBox;

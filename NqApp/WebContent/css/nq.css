@@ -15,8 +15,8 @@ h1, h2, h3, h4, h5, h6 {margin-top: 0.5em; margin-bottom: 0em;}
 .dojoDndContainerOver {	border: 0px;}
 
 .dgrid {height: auto;}
-.field-rowSelector {width: 24px;}
-.dgrid .dgrid-scroller {position: relative;overflow: visible;max-height: 500px;}
+.field-rowSelector {width: 5px;}
+/*.dgrid .dgrid-scroller {position: relative;overflow: visible;max-height: 500px;}*/
 .dgrid-cell-padding {padding: 0px;}
 .dgrid-row-odd {background: #F2F5F9;}
 .dgrid-cell {border: none;}
