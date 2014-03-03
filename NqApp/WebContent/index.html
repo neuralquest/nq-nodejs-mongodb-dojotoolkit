@@ -2,7 +2,7 @@
 <!DOCTYPE HTML>
 <html lang="en">
 	<head>
-		<meta http-equiv="Content-Type" content='text/html; charset=UTF-8' />
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 		<title>Neuralquest - Browser based process modeling and execution.</title>
 		<!--dojo seylesheets-->	
@@ -27,7 +27,7 @@
 		<script>	
 			dojoConfig = {
 				isDebug: true , 
-//				isDebug: false ,
+				useDeferredInstrumentation: true,
 				async: true,
 //				cacheBust: true,
 				parseOnLoad: true,
@@ -40,10 +40,10 @@
 				]
 		    };
 		</script>		
-		<!-- load dojo, must come after dojoConfig -->
-		<!-- <script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/dojo.js"></script> -->
+		<!-- load dojo, must come after dojoConfig
+		<script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/dojo.js"></script>  -->
 		<!-- use local library for debugging purposes -->
-		<script type='text/javascript' src="/js/dojo-release-1.9.1-src/dojo/dojo.js"></script>
+		<script type='text/javascript' src="/js/dojo-release-1.9.1-src/dojo/dojo.js"></script> 
 		<!-- nq magic -->
 		<script type="text/javascript" src="js/nq.js"></script>
 		<!-- Google Analytics -->

@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.*;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
@@ -30,7 +30,9 @@ import com.neuralquest.server.util.HibernateUtil;
 public class DataServlet extends HttpServlet implements Constants {
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {		
-		resp.setContentType("application/x-json");
+		resp.setCharacterEncoding("UTF-8");
+		resp.setContentType("application/json; charset=UTF-8");
+
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
 			session.beginTransaction();
@@ -114,13 +116,13 @@ public class DataServlet extends HttpServlet implements Constants {
 
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//new row
-		resp.setContentType("application/json");
+		resp.setCharacterEncoding("UTF-8");
+		resp.setContentType("application/json; charset=UTF-8");
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		try {
 			session.beginTransaction();
 			
 			if(!req.isUserInRole("user")) throw new RuntimeException("Authorization Needed");
-			
 			BufferedReader reader = req.getReader();
 			String line = reader.readLine();
 			JSONArray postArray = new JSONArray(line);
@@ -404,8 +406,6 @@ public class DataServlet extends HttpServlet implements Constants {
 					}			
 					else { // Normal attribute update
 						if(currentValueCell==null && newValueStr.isEmpty()) continue;
-						//newValueStr = StringEscapeUtils.unescapeXml(newValueStr);
-						newValueStr = StringEscapeUtils.unescapeHtml(newValueStr);
 						//Check to see if the newValueStr is valid, by asking the schema					
 						SchemaForAttrRefObj schemaPart = new SchemaForAttrRefObj(attrRefObj);
 						schemaPart.isValidAttributeValue(newValueStr);// This will throw an exception if anything is not right

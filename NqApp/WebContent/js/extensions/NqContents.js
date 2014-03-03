@@ -10,6 +10,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 
 	return declare("NqContentWidget", [_WidgetBase], {
 		extraPlugins: {},
+		store: null,
 		state: {},
 		editMode: false,
 		objectId: null,
@@ -135,6 +136,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			var headerNode = domConstruct.create('h'+headerLevel, null, this.pane.containerNode);
 			//var paragraphNode = domConstruct.create('div', { innerHTML: '<div>'+paragraphStr+'</div>', style: { float: 'left', width:'5%' }}, headerNode);
 			if(headerLevel>1) domConstruct.create('span', { innerHTML: paragraphStr, style: { display:'inline-block','min-width':'3em' }}, headerNode);
+			var _this = this;
 			var textDijit = new ValidationTextBox({
 			    'type': 'text',
 			    'trim': true,
@@ -143,9 +145,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			    'style':{width:'90%','background': 'rgba(0,0,255,0.04)', 'border-style': 'none'},
 				'placeHolder': 'Paragraph Header',
 				'onChange': function(evt){
-					when(this.store.get(item.id), function(item){
-						item[873] = textDijit.get('value');
-						this.store.put(item);
+					when(_this.store.get(item.id), function(item){
+						item[_this.headerAttrId] = textDijit.get('value');
+						_this.store.put(item);
 					});
 			    }
 			}, domConstruct.create('input'));
@@ -176,9 +178,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 //			    'value': storedRtf,
 				'toolbar': toolbar,
 				'onChange': function(evt){
-					when(this.store.get(item.id), function(item){
-						item[959] = editorDijit.get('value');
-						this.store.put(item);
+					when(_this.store.get(item.id), function(item){
+						item[_this.paragrphAttrId] = editorDijit.get('value');
+						_this.store.put(item);
 				});},
 				'onFocus': function(evt){
 					var widgets = registry.findWidgets(this.toolbarDivNode);

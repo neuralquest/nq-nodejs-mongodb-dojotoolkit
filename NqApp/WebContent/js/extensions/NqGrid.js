@@ -2,7 +2,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
          'dijit/Editor', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", 
          "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff",
         'dgrid/OnDemandGrid', 'dgrid/editor', 'dgrid/Selection', 'dgrid/Keyboard', 'dgrid/extensions/DijitRegistry', "dgrid/extensions/DnD",
-        "dgrid/Selection", "dgrid/selector", "dijit/form/Button","dojo/_base/array",
+        "dgrid/Selection", "dgrid/selector", "dgrid/selector", "dijit/form/Button","dojo/_base/array",
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
@@ -60,7 +60,20 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			var extraPlugins = this.extraPlugins; 
 			var columns = [];
 			columns.push(
-				selector({ field:'rowSelector', label: " ",  selectorType: "radio" })
+				//selector({ field:'rowSelector', label: " ",  
+				//selectorType: "radio",
+				//})
+				{
+					label : ' ',
+					field : 'rowSelector',
+					renderCell: function(object, value, node, options) {
+						var div = domConstruct.create("div");
+						div.className = "renderedCell";
+						div.innerHTML = '1';
+						return div;
+					}			    
+				}
+				//rowNumber({label:' '})
 			);
 			var gridStyle = {};
 			arrayUtil.forEach(propsArr, function(prop) {	

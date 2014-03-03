@@ -171,7 +171,7 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 					// commit the transaction, sending all the operations in a single request
 					request.post(this.target, {
 						// send all the operations in the body
-						headers: {'Content-Type': 'application/json'},
+						headers: {'Content-Type': 'application/json; charset=UTF-8'},
 //						handleAs: "json",
 						data: dojo.toJson(postOperations)//JSON.stringify(postOperations)
 					}).then( 
