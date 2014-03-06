@@ -11,4 +11,8 @@ p, ul, ol {
 	margin-bottom: 0em; 
 }
 
+/*used for html tables in the document -- doesn't work!*/
+.nqtable {border-collapse:collapse;}
+.nqtable td, .nqtable th{padding:3px; border-width:1px; border-color:gray; border-style:solid;}
+.nqtable th{text-align: center; font-weight: bold; background-color: silver; }
 

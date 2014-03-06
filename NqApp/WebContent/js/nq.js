@@ -412,7 +412,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	    {name: 'dojox.editor.plugins.TablePlugins', command: 'deleteTableRow'},
 	    {name: 'dojox.editor.plugins.TablePlugins', command: 'deleteTableColumn'},
 	    {name: 'dojox.editor.plugins.TablePlugins', command: 'colorTableCell'},
-//	    {name: 'dojox.editor.plugins.TablePlugins', command: 'tableContextMenu'},
+	    {name: 'dojox.editor.plugins.TablePlugins', command: 'tableContextMenu'},
 //	    {name: 'dojox.editor.plugins.TablePlugins', command: 'ResizeTableColumn'},
 	    '|',
 		'viewsource'
