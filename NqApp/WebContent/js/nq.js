@@ -4,14 +4,14 @@ require([
 'dojo/_base/declare', 'dojo/store/Observable', 'dojo/store/Cache', 'dojo/store/JsonRest', 'dojo/store/Memory',
 'dijit/tree/dndSource', 'dojo/Deferred', 'dojo/when', 'dojo/query', 'dijit/layout/BorderContainer', 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', 'dijit/Editor', 
-'nq/NqProcessChart', 'nq/NqClassChart', 'nq/NqForm', 'nq/NqGrid', 'nq/NqJsonRest', 'nq/NqTree', 'nq/NqObjectStoreModel', 'nq/NqContents',
+'nq/NqProcessChart', 'nq/NqClassChart', 'nq/NqForm', 'nq/NqGrid', 'nq/NqJsonRest', 'nq/NqTree', 'nq/NqObjectStoreModel', 'nq/NqDocument',
  'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct,
 		declare, Observable, Cache, JsonRest, Memory, 
 		dndSource, Deferred, when, query, BorderContainer, 
 		TabContainer, ContentPane, AccordionContainer, Editor, 
-		NqProcessChart, NqClassChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqContents, 
+		NqProcessChart, NqClassChart, NqForm, NqGrid, NqJsonRest, NqTree, NqObjectStoreModel, NqDocument, 
 		instrumentation, styles) {
 	
 	_nqMemoryStore = Observable(new Memory({}));
@@ -19,7 +19,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	var _transaction = _nqDataStore.transaction();
 	_nqSchemaMemoryStore = new Memory();
 	_nqSchemaStore = Cache(new JsonRest({target:"schema/"}), _nqSchemaMemoryStore);
-	var helpTextEnabled = false;
 	//////////////////////////////////////////////////////////////////////////////
 	// Initialize
 	//////////////////////////////////////////////////////////////////////////////
@@ -27,16 +26,11 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		topic.subscribe("/dojo/hashchange", interpritHash);
 		on(registry.byId('cancelButtonId'), 'click', function(event){_transaction.abort();});
 		on(registry.byId('saveButtonId'), 'click', function(event){_transaction.commit();});
-		on(registry.byId('helpButtonId'), 'click', function(event){
-			if(helpTextEnabled) {
-				dojox.html.insertCssRule('.helpTextInvisable', 'color:navy;display:none;', 'nq.css');
-				helpTextEnabled = false;
-			}
-			else{
-				dojox.html.insertCssRule('.helpTextInvisable', 'color:navy;display:block;', 'nq.css');
-				helpTextEnabled = true;
-			}
+		on(registry.byId('helpButtonId'), 'change', function(val){
+			if(val) dojox.html.insertCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
+			else dojox.html.insertCssRule('.helpTextInvisable', 'display:none;', 'nq.css');
 		});
+
 
 		//Load the schema in its entirety 
 		var viewId = getState(0).viewId;
@@ -244,6 +238,32 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		}
 
 		switch(tabDef.displayType){
+		case 'Document': 
+			if(!widget){
+				widget = new NqDocument({
+					id: 'widget'+state.tabId,
+					store: _nqDataStore,
+					state: state,
+					extraPlugins: _extraPlugins
+				}, domConstruct.create('div'));
+				tabNode.appendChild(widget.domNode);
+				widget.startup();
+			}
+			widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
+			break;	
+		case 'Form': 
+			if(!widget){
+				widget = new NqForm({
+					id: 'widget'+state.tabId,
+					store: _nqDataStore,
+					state: state,
+					extraPlugins: _extraPlugins
+				}, domConstruct.create('div'));
+				tabNode.appendChild(widget.domNode);
+				widget.startup();
+			}
+			widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
+			break;	
 		case 'Table': 
 			if(widget)	widget.grid.set("query", { parentId: state.selectedObjectIdPreviousLevel, joinViewAttributes: viewIdsArr});
 			else {
@@ -293,9 +313,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				widget.startup();
 			}
 			break;
-		case '2D Class Model': 
-			break;
-		case '2D Process Model': 
+		case 'Process Model': 
 			if(!widget){
 				widget = new NqProcessChart({
 					id: 'widget'+state.tabId,
@@ -332,32 +350,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				});
 			}
 			else widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
-			break;
-		case 'Form': 
-			if(!widget){
-				widget = new NqForm({
-					id: 'widget'+state.tabId,
-					store: _nqDataStore,
-					state: state,
-					extraPlugins: _extraPlugins
-				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
-				widget.startup();
-			}
-			widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
-			break;
-		case 'Contents': 
-			if(!widget){
-				widget = new NqContents({
-					id: 'widget'+state.tabId,
-					store: _nqDataStore,
-					state: state,
-					extraPlugins: _extraPlugins
-				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
-				widget.startup();
-			}
-			widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
 			break;
 		}
 	}

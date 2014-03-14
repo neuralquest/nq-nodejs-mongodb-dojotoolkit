@@ -40,10 +40,10 @@
 				]
 		    };
 		</script>		
-		<!-- load dojo, must come after dojoConfig  
-		<script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/dojo.js"></script>  -->
-		<!-- use local library for debugging purposes -->
-		<script type='text/javascript' src="/js/dojo-release-1.9.1-src/dojo/dojo.js"></script> 
+		<!-- load dojo, must come after dojoConfig   -->
+		<script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/dojo/1.9.3/dojo/dojo.js"></script> 
+		<!-- use local library for debugging purposes 
+		<script type='text/javascript' src="/js/dojo-release-1.9.1-src/dojo/dojo.js"></script> -->
 		<!-- nq magic -->
 		<script type="text/javascript" src="js/nq.js"></script>
 		<!-- Google Analytics -->
@@ -64,13 +64,13 @@
 				<div style="float: right;">
 					<button id="saveButtonId" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true, iconClass:'saveIcon'">Save</button>
 					<button id="cancelButtonId" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true, iconClass:'cancelIcon'">Cancel</button>
-					<button id="helpButtonId" data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'helpIcon'" >Help</button>
+					<button id="helpButtonId" data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'helpIcon'" >Help</button>
 					<img src="img/Neuralquest/neuralquest.png" align="middle" width="160px" height="24px">
 				</div>
 			</div>
 		</div>
 		<div id="loadingOverlay" class="loadingOverlay pageOverlay">
-			<div class="loadingMessage">Loading...</div>
+			<div class="loadingMessage">Loading...<br/>Doesn't work yet with Internet Explorer</div>
 		</div>
 		<div class="popUp" id="savedDlg">
 			<p style="text-align: center; margin-top: 10px;">Saved</p>
