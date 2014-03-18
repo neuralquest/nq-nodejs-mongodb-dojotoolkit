@@ -1,21 +1,25 @@
 define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/array', 'dijit/registry', 'dijit/layout/ContentPane', 
         'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "dijit/_WidgetBase", "dojo/on", "dojo/dom-geometry", 
         "dojo/sniff", "dijit/form/ToggleButton", "dojo/_base/lang", 'dijit/registry', "dojo/dom", "dojo/dom-attr",
+        'nq/NqClassChart',
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 'dijit/WidgetSet', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, domConstruct, when, arrayUtil, registry, ContentPane, 
 			Toolbar, ValidationTextBox, Editor, _WidgetBase, on, domGeometry, 
-			has, ToggleButton, lang, registry, dom, domAttr){
+			has, ToggleButton, lang, registry, dom, domAttr,
+			NqClassChart){
 
 	return declare("NqDocumentWidget", [_WidgetBase], {
+		foreignKey: null,
 		extraPlugins: {},
 		store: null,
-		state: {},
-		editMode: false,
-		objectId: null,
+		viewId: '846',
+		helpText: 'helpText',
 		headerAttrId: 873,
 		paragrphAttrId: 959,
+
+		editMode: false,
 		normalToolbar: null,
 		
 		buildRendering: function(){
@@ -58,8 +62,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			this.normalToolbar.addChild(button3);*/
 			var button4 = new ToggleButton({
 		        onChange: function(val){
-					if(val) dojox.html.insertCssRule('.floatright', 'display:block;', 'nq.css');
-					else dojox.html.insertCssRule('.floatright', 'display:none;', 'nq.css');
+					if(val) dojox.html.insertCssRule('.todofloatright', 'display:block;', 'nq.css');
+					else dojox.html.insertCssRule('.todofloatright', 'display:none;', 'nq.css');
 				},
 				label: 'ToDo',
 				iconClass: 'todoIcon'				
@@ -76,46 +80,27 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 		},
 		postCreate: function(){
 			this.inherited(arguments);
-			var tabDef = _nqSchemaMemoryStore.get(this.state.tabId);
-			this.pageHelpTextDiv.innerHTML = tabDef.description;
-		},/*
-		startup: function(){
-			arrayUtil.forEach(this.pane.getChildren(), function(widget){
-				if(widget.startup) widget.startup();
-			});
-			this.resize();
+			this.pageHelpTextDiv.innerHTML = this.helpText;
 		},
-		destroy: function(){
-			arrayUtil.forEach(this.pane.getChildren(), function(widget){
-				if(widget.destroyRecursive) widget.destroyRecursive();
-			});
-			//domConstruct.empty(this.pane.domNode);
-			this.inherited(arguments);
-		},
-*/
 		resize: function(changeSize){
 			this.inherited(arguments);
 			var positionInfo = dojo.position(this.toolbarDivNode, true);
 			changeSize.h -= positionInfo.h;
 			this.pane.resize(changeSize);
 		},
-		setSelectedObjectId: function(objectId){
-			if(objectId) this.objectId = objectId;
-			//if(this.editMode) this.normalToolbar.set('style', {'display': 'none'});
-			//else this.normalToolbar.set('style', {'display': ''});
-			this.wipeClean();
-			var viewId = this.state.viewId;
-			when(this.store.get(this.objectId), lang.hitch(this, function(item){
-				//if(this.editMode) this.generateNextLevelContentsEditMode(item, viewId, 1, []);
-				//else this.generateNextLevelContents(item, viewId, 1, []);
-				this.generateNextLevelContents(item, viewId, 1, []);
-			}));
+		_getForeignKeyAttr: function(){ 
+			return this.foreignKey;
 		},
-		wipeClean: function(){
-			arrayUtil.forEach(this.pane.getChildren(), function(widget){
-				if(widget.destroyRecursive) widget.destroyRecursive();
-			});	
+		_setForeignKeyAttr: function(value){
+			this.foreignKey = value;
+			this.closeEditors();
 			domConstruct.empty(this.pane.domNode);
+
+			var _this = this;
+			var viewId = this.viewId;
+			when(this.store.get(value), function(item){
+				_this.generateNextLevelContents(item, viewId, 1, []);
+			});
 		},
 		generateNextLevelContents: function(item, viewId, headerLevel, paragraphNrArr){
 			var _this = this;
@@ -138,6 +123,55 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 				}
 			}, headerNode);
 			
+			
+			//Illustration
+			if(item.id=="846/1213"){
+				var widgetDomNode = domConstruct.create('div', {
+					class: 'floatright',
+					objectId: item.id
+				}, this.pane.containerNode);
+				
+				_this.addWidget(widgetDomNode);
+
+				domConstruct.create('p', {
+					innerHTML: '<b>Page Model</b> example', 
+				}, widgetDomNode);
+			}
+			
+			//IFrame
+			if(item.id=="846/1510"){
+				var widgetDomNode = domConstruct.create('div', {
+					style: {width:'300px'},
+					class: 'floatright',
+					objectId: item.id
+				}, this.pane.containerNode);				
+				
+				var wrapper = domConstruct.create('div', {
+					style: {width:'300px', height:'200px', overflow: 'hidden'},
+				}, widgetDomNode);
+				domConstruct.create('iframe', {
+					sandbox:'allow-scripts allow-same-origin',
+					src:'http://neuralquest.org'
+				}, wrapper);
+				domConstruct.create('p', {
+					innerHTML: '<b>Iframe</b> example', 
+				}, widgetDomNode);
+			}
+			
+			
+			//ToDo
+			domConstruct.create('div', {
+				innerHTML: '<p><b>ToDo:</b> Elaborate</p>', 
+				class: 'todofloatright',
+				objectId: item.id,
+				onclick: function(evt){
+					if(_this.editMode) {
+						_this.closeEditors();
+						_this.replaceParagraphWithEditor(evt.currentTarget);
+					}
+				}
+			}, this.pane.containerNode);
+
 			
 			//Paragraph
 			domConstruct.create('div', {
@@ -251,5 +285,21 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 				editor.destroy();
 			});
 		},
+		addWidget: function(widgetDomNode){
+			widget = new NqClassChart({
+				store : this.store,
+				XYAxisRootId: '844/78', // Process Classes
+			}, domConstruct.create('div'));
+			widgetDomNode.appendChild(widget.domNode);
+			widget.startup().then(function(res){
+				//widget.setForeignKey(state.ForeignKeyPreviousLevel);
+			});
+
+		},
+		addIframe: function(widgetDomNode){
+			domConstruct.create('iframe', {
+				src:'http://neuralquest.org'
+			}, widgetDomNode);
+		}
 	});
 });

@@ -11,8 +11,19 @@ p, ul, ol {
 	margin-bottom: 0em; 
 }
 
-/*used for html tables in the document -- doesn't work!*/
+/*used for image floats*/
+.floatright { float: right; width: 400px; margin: 0 0 10px 10px; background-color: fff; padding: 3px; border-top: 1px solid #999; border-right: 2px solid #555; border-bottom: 2px solid #555; border-left: 1px solid #999; clear:right }
+div.floatright p {font-size: 90%; }
+div.floatright pre {font-size: 90%; padding:2px}
+
+/*used for todo floats*/
+.todofloatright { float: right; width: 400px; margin: 0 0 10px 10px; background-color: fff; padding: 3px; border-top: 1px solid #999; border-right: 2px solid #555; border-bottom: 2px solid #555; border-left: 1px solid #999; clear:right }
+div.todofloatright p {font-size: 90%; background-color: rgb(252, 252, 181);}
+
+
+/*used for html tables in the document*/
 .nqtable {border-collapse:collapse;}
-.nqtable td, .nqtable th{padding:3px; border-width:1px; border-color:gray; border-style:solid;}
+.nqtable td, .nqtable th{padding:3px; border-width:1px; border-color:gray; border-style:solid; vertical-align:top;}
 .nqtable th{text-align: center; font-weight: bold; background-color: silver; }
+
 

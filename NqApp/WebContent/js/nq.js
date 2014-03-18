@@ -243,13 +243,12 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				widget = new NqDocument({
 					id: 'widget'+state.tabId,
 					store: _nqDataStore,
-					state: state,
-					extraPlugins: _extraPlugins
+					extraPlugins: _extraPlugins,
+					helpText: tabDef.description
 				}, domConstruct.create('div'));
 				tabNode.appendChild(widget.domNode);
-				widget.startup();
 			}
-			widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
+			widget.set('foreignKey', state.selectedObjectIdPreviousLevel);
 			break;	
 		case 'Form': 
 			if(!widget){

@@ -40,7 +40,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 
 			var viewsArr = _nqSchemaMemoryStore.query({parentTabId: this.state.tabId, entity: 'view'});//get the views that belong to this tab
 
-			if(viewsArr.length == 1) rowsUpdateable = true;
+//			if(viewsArr.length == 1) rowsUpdateable = true;
 
 			var propsArr = [];
 			for(var i = 0;i<viewsArr.length;i++){
@@ -150,7 +150,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					parentId: this.query.parentId,
 					grid: this.grid
 			    }, dojo.doc.createElement('div'));
-			    addButton.on("click", function(evt){
+/*			    on(addButton,"click", function(evt){
 					var classToCreate = this.classToCreate;
 					var viewDefToCreate = this.viewDefToCreate;
 					var viewId = viewDefToCreate.id;
@@ -168,7 +168,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					this.store.put(parentItem);
 					this.grid.refresh();
 					this.grid.select(newItem);
-				});
+				});*/
 				this.pane.containerNode.appendChild(addButton.domNode);
 			    var removeButton = new Button({
 			        label: "Remove Row",
@@ -179,7 +179,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					parentId: this.query.parentId,
 					grid: this.grid
 			    }, dojo.doc.createElement('div'));
-			    removeButton.on("click", function(evt){
+/*			    on(removeButton,"click", function(evt){
 			    	var selectedRows = this.grid.selection;
 			    	for(key in selectedRows) {
 				    	this.store.remove(key);
@@ -191,9 +191,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 						this.store.put(parentItem);
 			    	}
 					this.grid.refresh();
-				});
+				});*/
 				this.pane.containerNode.appendChild(removeButton.domNode);
 			}
+			/*
 			this.grid.on(".dgrid-row:click", function(event){
 //				var row = grid.row(event);
 				console.log("Row clicked:", event);
@@ -202,6 +203,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 //				var row = grid.row(event);
 				console.log("Row complete:", event);
 			});
+			*/
 		},
 		startup: function(){
 			this.inherited(arguments);
@@ -215,9 +217,9 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 		},
 		destroy: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){
-				if(widget.destroyRecursive) widget.destroyRecursive();
+				//if(widget.destroyRecursive) widget.destroyRecursive();
 			});
-			this.inherited(arguments);
+			//this.inherited(arguments);
 		}
 	});
 	function getWidgetProperties(prop){

@@ -2,15 +2,17 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry){
 	return declare("NqWidgetBase", [_WidgetBase], {
 		store: null,
-		description: 'ToDo',
-		selectedItem: null,
+		helpText: 'ToDo',
+		rootId: null,
+		viewId: null,
+		selectedObjId: null,
 		
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
-			this.toolbarDivNode = domConstruct.create('div', {},this.domNode);//placeholder for the toolbars
+			this.toolbarDivNode = domConstruct.create('div', {}, this.domNode);//placeholder for the toolbars
 			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
-			this.pageHelpTextDiv.innerHTML = description;
+			this.pageHelpTextDiv.innerHTML = helpText;
 			this.pane = new ContentPane( {
 				'class' : 'backgroundClass',
 				'doLayout' : 'true',
@@ -18,14 +20,31 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			},  domConstruct.create('div'));
 			this.domNode.appendChild(this.pane.domNode);
 		},
+		resize: function(changeSize){
+			this.inherited(arguments);
+			var positionInfo = dojo.position(this.toolbarDivNode, true);
+			changeSize.h -= positionInfo.h;
+			var positionInfo = dojo.position(this.pageHelpTextDiv, true);
+			changeSize.h -= positionInfo.h;
+			this.pane.resize(changeSize);
+		},
+		_getRootIdAttr: function(){ 
+			return this.rootId;
+		},
+		_setRootIdAttr: function(value){
+			this.rootId = value;
+		},
+		_getSelectedObjIdAttr: function(){ 
+			return this.selectedObjId;
+		},
+		_setSelectedObjIdAttr: function(value){
+			this.selectedObjId = value;
+		},
 		startup: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){
 				if(widget.startup) widget.startup();
 			});
 			this.resize();
-		},
-		resize: function(changeSize){
-			this.pane.resize();
 		},
 		destroy: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){

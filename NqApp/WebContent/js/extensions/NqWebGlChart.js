@@ -6,6 +6,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 	return declare("NqWebGlChartWidget", [_WidgetBase], {
 		skyboxArray: [],
 		selectableObjects: [],
+		displayFPS: false,
 
 		buildRendering: function(){
 			this.inherited(arguments);
@@ -68,7 +69,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			}
 			//else see http://threejs.org/examples/webgl_multiple_views.html
 			// for canvas gradient
-			if(location.href.indexOf('localhost')){
+			if(this.displayFPS){
 				stats = new Stats();
 				stats.domElement.style.position = 'absolute';
 				stats.domElement.style.top = '0px';
@@ -236,7 +237,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		requestId = requestAnimationFrame( animate.bind(this) );
 		TWEEN.update();
 		controls.update();
-		if(stats) stats.update();
+		if(this.displayFPS) stats.update();
 	}
 	function cancelAnimation(){
 		if(requestId) cancelAnimationFrame(requestId);

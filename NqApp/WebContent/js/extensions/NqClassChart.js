@@ -3,13 +3,14 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 	function(declare, when, all, arrayUtil, NqWebGlChart, domConstruct, lang, domGeom, Deferred){
 
 	return declare("NqClassChartWidget", [NqWebGlChart], {
-		XYAxisRootId: null,
-		ZYAxisRootId: null,
-		viewId: null,
-		nameAttrId: null,
+		XYAxisRootId: '844/67', // Process Classes 
+		ZYAxisRootId: '844/53', //Attributes
+		viewId: '844',
+		nameAttrId: 852,
 		bodyViewHeight: 400,
 		bodyViewWidth: 800,
 		bodyViewDepth: 800,
+		skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg'],
 		classGeometry: null,
 
 		startup: function(){
