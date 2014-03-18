@@ -1,46 +1,49 @@
-define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/array', 'dijit/registry', 'dijit/layout/ContentPane', 
-        'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "dijit/_WidgetBase", "dojo/on", "dojo/dom-geometry", 
+define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry', 'dijit/layout/ContentPane', 
+        'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "nq/NqWidgetBase", "dojo/on", "dojo/dom-geometry", 
         "dojo/sniff", "dijit/form/ToggleButton", "dojo/_base/lang", 'dijit/registry', "dojo/dom", "dojo/dom-attr",
-        'nq/NqClassChart',
+        'nq/NqClassChart', "dojo/dom-style",
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 'dijit/WidgetSet', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
-	function(declare, domConstruct, when, arrayUtil, registry, ContentPane, 
-			Toolbar, ValidationTextBox, Editor, _WidgetBase, on, domGeometry, 
+	function(declare, domConstruct, when, registry, ContentPane, 
+			Toolbar, ValidationTextBox, Editor, NqWidgetBase, on, domGeometry, 
 			has, ToggleButton, lang, registry, dom, domAttr,
-			NqClassChart){
+			NqClassChart, domStyle){
 
-	return declare("NqDocumentWidget", [_WidgetBase], {
-		foreignKey: null,
+	return declare("NqDocumentWidget", [NqWidgetBase], {
+		parentId: null,
 		extraPlugins: {},
-		store: null,
 		viewId: '846',
-		helpText: 'helpText',
 		headerAttrId: 873,
 		paragrphAttrId: 959,
 
 		editMode: false,
 		normalToolbar: null,
-		
-		buildRendering: function(){
-			this.inherited(arguments);
-			this.domNode = domConstruct.create("div");
-			this.toolbarDivNode = domConstruct.create('div', {},this.domNode);//placeholder for the toolbars
+
+		postCreate: function(){
+			//initially hide the editor toolbar div
+			domStyle.set(this.editorToolbarDivNode, 'display' , 'none');
 			// Create toolbar and place it at the top of the page
 			this.normalToolbar = new Toolbar({});
+			this.inherited(arguments);
 			var _this = this;
+			// Add edit mode toggle button
 			var button1 = new ToggleButton({
 		        showLabel: true,
 		        checked: false,
-		        //onChange: function(val){this.set('label',val);},
 		        label: 'Edit Mode',
 				iconClass: 'editIcon',
 		        onChange: function(val){
 		        	_this.editMode = val;
-		        	if(!val) _this.closeEditors();
+		        	if(val) domStyle.set(_this.editorToolbarDivNode, 'display' , '');
+		        	else {
+		        		_this.closeEditors();
+		        		domStyle.set(_this.editorToolbarDivNode, 'display' , 'none');
+		        	}
 				}
 			});
 			this.normalToolbar.addChild(button1);
+			// Add images toggle button
 			var button2 = new ToggleButton({
 		        showLabel: true,
 		        checked: true,
@@ -52,14 +55,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 				iconClass: 'annoIcon'				
 			});
 			this.normalToolbar.addChild(button2);
-			/*var button3 = new ToggleButton({
-		        showLabel: true,
-		        checked: false,
-		        //onChange: function(val){this.set('label',val);},
-				label: 'Rules',
-				iconClass: 'rulesIcon'				
-			});
-			this.normalToolbar.addChild(button3);*/
+			// Add ToDo toggle button
 			var button4 = new ToggleButton({
 		        onChange: function(val){
 					if(val) dojox.html.insertCssRule('.todofloatright', 'display:block;', 'nq.css');
@@ -69,30 +65,10 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 				iconClass: 'todoIcon'				
 			});
 			this.normalToolbar.addChild(button4);
-			this.toolbarDivNode.appendChild(this.normalToolbar.domNode);
-			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
-			this.pane = new ContentPane( {
-				'class' : 'backgroundClass',
-				'doLayout' : 'true',
-				'style' : { 'overflow': 'auto', 'padding': '10px', 'margin': '0px'}
-			},  domConstruct.create('div'));
-			this.domNode.appendChild(this.pane.domNode);
+			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
 		},
-		postCreate: function(){
+		_setParentIdAttr: function(value){
 			this.inherited(arguments);
-			this.pageHelpTextDiv.innerHTML = this.helpText;
-		},
-		resize: function(changeSize){
-			this.inherited(arguments);
-			var positionInfo = dojo.position(this.toolbarDivNode, true);
-			changeSize.h -= positionInfo.h;
-			this.pane.resize(changeSize);
-		},
-		_getForeignKeyAttr: function(){ 
-			return this.foreignKey;
-		},
-		_setForeignKeyAttr: function(value){
-			this.foreignKey = value;
 			this.closeEditors();
 			domConstruct.empty(this.pane.domNode);
 
@@ -127,42 +103,36 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			//Illustration
 			if(item.id=="846/1213"){
 				var widgetDomNode = domConstruct.create('div', {
-					class: 'floatright',
+					'class': 'floatright',
 					objectId: item.id
 				}, this.pane.containerNode);
 				
 				_this.addWidget(widgetDomNode);
 
-				domConstruct.create('p', {
-					innerHTML: '<b>Page Model</b> example', 
-				}, widgetDomNode);
+				domConstruct.create('p', {innerHTML: '<b>Page Model</b> example'}, widgetDomNode);
 			}
 			
 			//IFrame
 			if(item.id=="846/1510"){
 				var widgetDomNode = domConstruct.create('div', {
 					style: {width:'300px'},
-					class: 'floatright',
+					'class': 'floatright',
 					objectId: item.id
 				}, this.pane.containerNode);				
 				
-				var wrapper = domConstruct.create('div', {
-					style: {width:'300px', height:'200px', overflow: 'hidden'},
-				}, widgetDomNode);
+				var wrapper = domConstruct.create('div', {style: {width:'300px', height:'200px', overflow: 'hidden'}}, widgetDomNode);
 				domConstruct.create('iframe', {
 					sandbox:'allow-scripts allow-same-origin',
 					src:'http://neuralquest.org'
 				}, wrapper);
-				domConstruct.create('p', {
-					innerHTML: '<b>Iframe</b> example', 
-				}, widgetDomNode);
+				domConstruct.create('p', {innerHTML: '<b>Iframe</b> example'}, widgetDomNode);
 			}
 			
 			
 			//ToDo
 			domConstruct.create('div', {
 				innerHTML: '<p><b>ToDo:</b> Elaborate</p>', 
-				class: 'todofloatright',
+				'class': 'todofloatright',
 				objectId: item.id,
 				onclick: function(evt){
 					if(_this.editMode) {
@@ -228,7 +198,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 			var storedRtf = item[this.paragrphAttrId];
 			// Create toolbar and place it at the top of the page
 			var toolbar = new Toolbar();
-			this.toolbarDivNode.appendChild(toolbar.domNode);
+			this.editorToolbarDivNode.appendChild(toolbar.domNode);
 			//Paragraph
 			var editorDijit = new Editor({
 				objectId: objectId,
@@ -288,18 +258,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dojo/_base/arr
 		addWidget: function(widgetDomNode){
 			widget = new NqClassChart({
 				store : this.store,
-				XYAxisRootId: '844/78', // Process Classes
+				XYAxisRootId: '844/78' // Process Classes
 			}, domConstruct.create('div'));
 			widgetDomNode.appendChild(widget.domNode);
 			widget.startup().then(function(res){
-				//widget.setForeignKey(state.ForeignKeyPreviousLevel);
+				//widget.setParentId(state.ParentIdPreviousLevel);
 			});
-
-		},
-		addIframe: function(widgetDomNode){
-			domConstruct.create('iframe', {
-				src:'http://neuralquest.org'
-			}, widgetDomNode);
 		}
 	});
 });

@@ -1,17 +1,16 @@
-<!-- need this, or else left button select wont work. See http://bugs.dojotoolkit.org/ticket/15404 -->
-<!DOCTYPE HTML>
+<!DOCTYPE HTML> <!-- need this for IE, Also See http://bugs.dojotoolkit.org/ticket/15404 -->
 <html lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 		<title>Neuralquest - Browser based process modeling and execution.</title>
 		<!--dojo seylesheets-->	
-		<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojo/resources/dojo.css" media="screen"/>
-		<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dijit/themes/soria/soria.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.9.3/dojo/resources/dojo.css" media="screen"/>
+		<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.9.3/dijit/themes/soria/soria.css" media="screen">
 		<!--for the grid -->
 		<link rel="stylesheet" type="text/css" href="js/dgrid/css/skins/soria.css"> 
 		<!--for the editor  -->
-		<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dojox/editor/plugins/resources/editorPlugins.css"/>
+		<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/dojo/1.9.3/dojox/editor/plugins/resources/editorPlugins.css"/>
 		<!--the nq stylesheet-->
 		<link rel="stylesheet"  type="text/css" href="css/nq.css" />
 		<!-- load Threejs scripts -->
@@ -70,7 +69,7 @@
 			</div>
 		</div>
 		<div id="loadingOverlay" class="loadingOverlay pageOverlay">
-			<div class="loadingMessage">Loading...<br/>Doesn't work yet with Internet Explorer</div>
+			<div class="loadingMessage">Loading...<br/>Works best with Chrome or Firefox</div>
 		</div>
 		<div class="popUp" id="savedDlg">
 			<p style="text-align: center; margin-top: 10px;">Saved</p>

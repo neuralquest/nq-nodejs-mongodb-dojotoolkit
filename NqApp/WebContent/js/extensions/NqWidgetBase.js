@@ -1,38 +1,41 @@
-define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry"],
-	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry){
+define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry",
+        'dojo/_base/array'],
+	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, arrayUtil){
 	return declare("NqWidgetBase", [_WidgetBase], {
 		store: null,
-		helpText: 'ToDo',
-		rootId: null,
+		tabDef: {},
+		viewDef: {},
+		parentId: null,
 		viewId: null,
 		selectedObjId: null,
 		
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
-			this.toolbarDivNode = domConstruct.create('div', {}, this.domNode);//placeholder for the toolbars
-			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
-			this.pageHelpTextDiv.innerHTML = helpText;
+			this.headerDivNode = domConstruct.create('div', {}, this.domNode);//placeholder for header
+			this.pageToolbarDivNode = domConstruct.create('div', {}, this.headerDivNode);//placeholder for the page toolbar
+			this.editorToolbarDivNode = domConstruct.create('div', {'style' : { 'min-height': '23px'} }, this.headerDivNode);//placeholder for the editor toolbar
+			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.headerDivNode);//placeholder for the helptext
+			this.pageHelpTextDiv.innerHTML = this.tabDef.description;
 			this.pane = new ContentPane( {
 				'class' : 'backgroundClass',
 				'doLayout' : 'true',
-				'style' : { 'overflow': 'auto', 'padding': '10px', 'margin': '0px', width: '100%', height: '100%', }
+				'style' : { 'overflow': 'auto', 'padding': '10px', 'margin': '0px', width: '100%', height: '100%' }
 			},  domConstruct.create('div'));
 			this.domNode.appendChild(this.pane.domNode);
 		},
 		resize: function(changeSize){
-			this.inherited(arguments);
-			var positionInfo = dojo.position(this.toolbarDivNode, true);
-			changeSize.h -= positionInfo.h;
-			var positionInfo = dojo.position(this.pageHelpTextDiv, true);
-			changeSize.h -= positionInfo.h;
+			if(!changeSize) return;
+//			this.inherited(arguments);
+			var hDiv = dojo.position(this.headerDivNode);
+			changeSize.h -= hDiv.h;
 			this.pane.resize(changeSize);
 		},
-		_getRootIdAttr: function(){ 
-			return this.rootId;
+		_getParentIdAttr: function(){ 
+			return this.parentId;
 		},
-		_setRootIdAttr: function(value){
-			this.rootId = value;
+		_setParentIdAttr: function(value){
+			this.parentId = value;
 		},
 		_getSelectedObjIdAttr: function(){ 
 			return this.selectedObjId;
@@ -45,12 +48,12 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				if(widget.startup) widget.startup();
 			});
 			this.resize();
-		},
+		}/*,
 		destroy: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){
-				if(widget.destroyRecursive) widget.destroyRecursive();
+				//if(widget.destroyRecursive) widget.destroyRecursive();
 			});
 			this.inherited(arguments);
-		}	
+		}*/	
 	});
 });

@@ -226,7 +226,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 					return selectableObject;
 				}				
 			}			
-		}, 
+		} 
 	});
 	function render(){
 		//console.log(camera.position.x);

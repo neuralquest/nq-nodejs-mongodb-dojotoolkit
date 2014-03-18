@@ -1,38 +1,22 @@
 define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox',  'dijit/form/NumberTextBox', 
         'dijit/form/CheckBox', 'dijit/Editor', 'dijit/form/CurrencyTextBox', 'dijit/form/ValidationTextBox', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", 
-        "dojo/when", "dojo/query", 'dijit/registry', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/_base/lang",
+        "dojo/when", "dojo/query", 'dijit/registry', "nq/NqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/_base/lang",
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, arrayUtil, Form, Select, Toolbar, DateTextBox, NumberTextBox, 
 			CheckBox, Editor, CurrencyTextBox, ValidationTextBox, Memory, domConstruct, on, 
-			when, query, registry, _WidgetBase, ContentPane, domGeometry, has, lang){
+			when, query, registry, NqWidgetBase, ContentPane, domGeometry, has, lang){
    
-	return declare("NqFormWidget", [_WidgetBase], {
+	return declare("NqFormWidget", [NqWidgetBase], {
 		extraPlugins: {},
-		state: {},
-		objectId: 0,
 		
-		buildRendering: function(){
-			this.inherited(arguments);
-			this.domNode = domConstruct.create("div");
-			this.toolbarDivNode = domConstruct.create('div', {},this.domNode);//placeholder for the toolbars
-			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
-			this.pane = new ContentPane( {
-				'class' : 'backgroundClass',
-				'doLayout' : 'true',
-				'style' : { 'overflow': 'auto', 'padding': '10px', 'margin': '0px', width: '100%', height: '100%', }
-			},  domConstruct.create('div'));
-			this.domNode.appendChild(this.pane.domNode);
-		},
 		postCreate: function(){
 			this.inherited(arguments);
-			var tabDef = _nqSchemaMemoryStore.get(this.state.tabId);
-			this.pageHelpTextDiv.innerHTML = tabDef.description;
 			
 			var tableNode = domConstruct.create('table', null, this.pane.domNode);
-			var viewDef = _nqSchemaMemoryStore.get(this.state.viewId);
-			var propsObj = viewDef.properties;
+			
+			var propsObj = this.viewDef.properties;
 			//create an array with the propertie in the right order
 			var propsArr = [];
 			for(var key in propsObj){
@@ -56,8 +40,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 				
 				//the dijit
 				var tdDom = domConstruct.create("td", {style: "padding-right: 5px"}, row);
-				if('enum' in prop){
-					var selectStore = new Memory({data: prop.enum});
+				if('permittedValues' in prop){
+					var selectStore = new Memory({data: prop.permittedValues});
 					dijit = new Select({
 					    'store': selectStore,
 						'name': prop.name,
@@ -65,14 +49,14 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 						'style': "width: "+prop.width+"em;",
 						'maxHeight': -1, // tells _HasDropDown to fit menu within viewport
 						'fetchProperties': { sort : [ { attribute : "name" }]},
-						'queryOptions': { ignoreCase: true },//doesnt work
+						'queryOptions': { ignoreCase: true }//doesnt work
 					}, domConstruct.create('div'));
 				}
 				else if(prop.type=='string' && prop.format=='rtf'){
 					var toolbar = new Toolbar({
 						//'style': {'display': 'none'}
 					});
-					toolbarDivNode.appendChild(toolbar.domNode);
+					this.editorToolbarDivNode.appendChild(toolbar.domNode);
 					var widgetProperties = getWidgetProperties(prop);
 					widgetProperties.height = '';//auto grow
 					widgetProperties.extraPlugins = extraPlugins;
@@ -103,14 +87,13 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 				else tdDom.innerHTML = "[unknown poperty type in schema]";
 
 				tdDom.appendChild(dijit.domNode);
-//				dijit.startup();
 				
 				var _this = this;
 				dijit.on('change', lang.hitch(dijit, function(evt){
-					var _objectId = _this.objectId;
+					var _parentId = _this.parentId;
 					var _name = this.name;
 					var _value = evt;
-					when(_this.store.get(_objectId), function(item){
+					when(_this.store.get(_parentId), function(item){
 						item[_name] = _value;
 						_this.store.put(item);
 					});
@@ -119,25 +102,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 				//the help text
 				domConstruct.create("td", { innerHTML: (prop.description?prop.description:""), style: "padding-right: 5px", 'class': 'helpTextInvisable'}, row);
 			};
-		},
-		startup: function(){
-			arrayUtil.forEach(this.pane.getChildren(), function(widget){
-				if(widget.startup) widget.startup();
-			});
-			this.resize();
-		},
-		resize: function(changeSize){
-			this.pane.resize();
-		},
-		destroy: function(){
-			arrayUtil.forEach(this.pane.getChildren(), function(widget){
-				if(widget.destroyRecursive) widget.destroyRecursive();
-			});
+		},	
+		_setParentIdAttr: function(value){
 			this.inherited(arguments);
-		},		
-		setSelectedObjectId: function(objectId){
-			this.set('objectId', objectId);
-			when(this.store.get(objectId), function(item){
+			when(this.store.get(value), function(item){
 				for(attr in item){
 					if(item[attr].isNaN) continue;
 					var attrQuery = "[name='"+attr+"']";
@@ -149,7 +117,6 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 			     }
 			});
 		}
-
 	});
 	function getWidgetProperties(prop){
 		properties = {'name': prop.name};

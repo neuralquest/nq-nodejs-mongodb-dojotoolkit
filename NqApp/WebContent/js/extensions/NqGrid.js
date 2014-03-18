@@ -1,6 +1,6 @@
 define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox',
          'dijit/Editor', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", 
-         "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff",
+         "nq/NqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff",
         'dgrid/OnDemandGrid', 'dgrid/editor', 'dgrid/Selection', 'dgrid/Keyboard', 'dgrid/extensions/DijitRegistry', "dgrid/extensions/DnD",
         "dgrid/Selection", "dgrid/selector", "dgrid/selector", "dijit/form/Button","dojo/_base/array",
         
@@ -8,43 +8,27 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, arrayUtil, Select, Toolbar, DateTextBox, 
 			Editor, Memory, domConstruct, on, 
-			 _WidgetBase, ContentPane, domGeometry, has, 
+			NqWidgetBase, ContentPane, domGeometry, has, 
 			Grid, editor, Selection, Keyboard, DijitRegistry, Dnd,
 			Selection, selector, Button, array){
-	var dijit;
    
-	return declare("NqGridWidget", [_WidgetBase], {
+	return declare("NqGridWidget", [NqWidgetBase], {
 		extraPlugins: {},
-		state: {},
+		viewsArr: [],
 		query: {},
 		
-		buildRendering: function(){
-			this.inherited(arguments);
-			this.domNode = domConstruct.create("div");
-			this.toolbarDivNode = domConstruct.create('div', {},this.domNode);//placeholder for the toolbars
-			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
-			this.pane = new ContentPane( {
-				'class' : 'backgroundClass',
-				'doLayout' : 'true',
-				'style' : { 'overflow': 'auto', 'padding': '0px', 'margin': '0px', width: '100%', height: '100%', }
-			},  domConstruct.create('div'));
-			this.domNode.appendChild(this.pane.domNode);
-		},
 		postCreate: function(){
 			this.inherited(arguments);
-			var tabDef = _nqSchemaMemoryStore.get(this.state.tabId);
-			this.pageHelpTextDiv.innerHTML = tabDef.description;
+			this.pageHelpTextDiv.innerHTML = this.tabDef.description;
 
 			var sortable = true;
 			var rowsUpdateable = false;
 
-			var viewsArr = _nqSchemaMemoryStore.query({parentTabId: this.state.tabId, entity: 'view'});//get the views that belong to this tab
-
 //			if(viewsArr.length == 1) rowsUpdateable = true;
 
 			var propsArr = [];
-			for(var i = 0;i<viewsArr.length;i++){
-				var viewDef = viewsArr[i];
+			for(var i = 0;i<this.viewsArr.length;i++){
+				var viewDef = this.viewsArr[i];
 				if(viewDef.relationship = 'ordered') sortable = false;
 				var propsObj = viewDef.properties;
 				//create an array with the properties in the right order
@@ -56,8 +40,6 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					propsArr.push(prop);
 				}
 			}
-			var toolbarDivNode = this.toolbarDivNode; 
-			var extraPlugins = this.extraPlugins; 
 			var columns = [];
 			columns.push(
 				//selector({ field:'rowSelector', label: " ",  
@@ -76,6 +58,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 				//rowNumber({label:' '})
 			);
 			var gridStyle = {};
+			var _this = this;
 			arrayUtil.forEach(propsArr, function(prop) {	
 				var editorProps = getWidgetProperties(prop);
 				editorProps.sortable = sortable;
@@ -83,13 +66,13 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 				//gridStyle[prop.name] = 'width:'+(prop.width<=0?"auto":prop.width+"em");
 				gridStyle[prop.name] = 'width: 40px';
 
-				if('enum' in prop){
+				if('permittedValues' in prop){
 					editorProps.renderCell = function(object, value, node, options){
 						var selectedOptionArr = selectStore.query({id: value});
 						if(selectedOptionArr.length>0) node.appendChild(document.createTextNode(selectedOptionArr[0].name));
 						else node.appendChild(document.createTextNode('id: '+value));
 					};
-					var selectStore = new Memory({data: prop.enum});
+					var selectStore = new Memory({data: prop.permittedValues});
 					editorProps.editorArgs = {
 							'store': selectStore, 
 							'style': "width:99%;",
@@ -102,18 +85,18 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					editorProps.editor = Select;
 				}
 				else if(prop.type=='string' && prop.format=='rtf') {
-					/*
+					
 					var toolbar = new Toolbar({
-						'style': {'display': 'none'}
+						//'style': {'display': 'none'}
 					});
-					toolbarDivNode.appendChild(toolbar.domNode);
+					_this.editorToolbarDivNode.appendChild(toolbar.domNode);
 					editorProps.editorArgs = {
-//							'toolbar': toolbar, 
-//							'addStyleSheet': 'css/editor.css',
-//							'extraPlugins': this.extraPlugins,
+							'toolbar': toolbar, 
+							'addStyleSheet': 'css/editor.css',
+							'extraPlugins': _this.extraPlugins,
 							'maxHeight': -1
 					};
-					*/
+					
 					editorProps.editor = Editor;
 				}
 				else if(prop.type=='string' && prop.format=='date-time') editorProps.editor = DateTextBox;
@@ -205,21 +188,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			});
 			*/
 		},
-		startup: function(){
-			this.inherited(arguments);
-			this.grid.startup();
-		},
-		resize: function(changeSize){
-			this.pane.resize(changeSize);
-		},
 		_setQuery: function(query, queryOptions){
 			this.grid.set('query',query);
-		},
-		destroy: function(){
-			arrayUtil.forEach(this.pane.getChildren(), function(widget){
-				//if(widget.destroyRecursive) widget.destroyRecursive();
-			});
-			//this.inherited(arguments);
 		}
 	});
 	function getWidgetProperties(prop){

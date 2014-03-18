@@ -231,6 +231,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var tabPane = registry.byId('tab'+state.tabId);
 		var widget = registry.byId('widget'+state.tabId);
 		var tabDef = _nqSchemaStore.get(state.tabId);		 
+		var viewDef = _nqSchemaMemoryStore.get(state.viewId);
 		var viewsArr = _nqSchemaMemoryStore.query({parentTabId: state.tabId, entity: 'view'});//get the views that belong to this tab
 		var viewIdsArr = [];
 		for(var i=0;i<viewsArr.length;i++){
@@ -239,38 +240,44 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 
 		switch(tabDef.displayType){
 		case 'Document': 
-			if(!widget){
+			if(widget) widget.set('parentId', state.selectedObjectIdPreviousLevel);
+			else {
 				widget = new NqDocument({
 					id: 'widget'+state.tabId,
 					store: _nqDataStore,
 					extraPlugins: _extraPlugins,
-					helpText: tabDef.description
-				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
-			}
-			widget.set('foreignKey', state.selectedObjectIdPreviousLevel);
-			break;	
-		case 'Form': 
-			if(!widget){
-				widget = new NqForm({
-					id: 'widget'+state.tabId,
-					store: _nqDataStore,
-					state: state,
-					extraPlugins: _extraPlugins
+					tabDef: tabDef
 				}, domConstruct.create('div'));
 				tabNode.appendChild(widget.domNode);
 				widget.startup();
+				widget.set('parentId', state.selectedObjectIdPreviousLevel);
 			}
-			widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
+			break;	
+		case 'Form': 
+			if(widget) widget.set('parentId', state.selectedObjectIdPreviousLevel);
+			else {
+				widget = new NqForm({
+					id: 'widget'+state.tabId,
+					store: _nqDataStore,
+					extraPlugins: _extraPlugins,
+					tabDef: tabDef,
+					viewDef: viewDef
+				}, domConstruct.create('div'));
+				tabNode.appendChild(widget.domNode);
+				widget.startup();
+				widget.set('parentId', state.selectedObjectIdPreviousLevel);
+			}
 			break;	
 		case 'Table': 
-			if(widget)	widget.grid.set("query", { parentId: state.selectedObjectIdPreviousLevel, joinViewAttributes: viewIdsArr});
+			if(widget) widget.grid.set("query", { parentId: state.selectedObjectIdPreviousLevel, joinViewAttributes: viewIdsArr});
 			else {
 				widget = new NqGrid({
 					id: 'widget'+state.tabId,
 					store: _nqDataStore,
-					state: state,
 					extraPlugins: _extraPlugins,
+					tabDef: tabDef,
+					viewDef: viewDef,
+					viewsArr: viewsArr,
 					query: { parentId: state.selectedObjectIdPreviousLevel, joinViewAttributes: viewIdsArr}
 				}, domConstruct.create('div'));
 				tabNode.appendChild(widget.domNode);
@@ -394,7 +401,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	    '|',
 		'createLink', 'unlink', 'insertImage',
 	    '|',
-	    {name: 'dojox.editor.plugins.TablePlugins', command: 'insertTable'},
+/*	    {name: 'dojox.editor.plugins.TablePlugins', command: 'insertTable'},
 	   	{name: 'dojox.editor.plugins.TablePlugins', command: 'modifyTable'},
 	    {name: 'dojox.editor.plugins.TablePlugins', command: 'InsertTableRowBefore'},
 	    {name: 'dojox.editor.plugins.TablePlugins', command: 'InsertTableRowAfter'},
@@ -405,7 +412,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	    {name: 'dojox.editor.plugins.TablePlugins', command: 'colorTableCell'},
 	    {name: 'dojox.editor.plugins.TablePlugins', command: 'tableContextMenu'},
 //	    {name: 'dojox.editor.plugins.TablePlugins', command: 'ResizeTableColumn'},
-	    '|',
+	    '|',*/
 		'viewsource'
     ];		
 	

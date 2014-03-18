@@ -403,12 +403,12 @@ public class SchemaForAttrRefObj   implements Constants {
 			if(attrRefMTClass.isA(TO_ONE_ASSOC_TYPES_ID)){// Do this first, these are also a permitted value
 				//dynamic
 				schemaObj.put("type","integer");
-				schemaObj.put("enum",getKeyvaluePairs());
+				schemaObj.put("permittedValues",getKeyvaluePairs());
 			}
 			else if(attrRefMTClass.isA(TO_MANY_ASSOC_TYPES_ID)){// Do this first, these are also a permitted value
 				//dynamic
 				schemaObj.put("type","integer");
-				schemaObj.put("enum",getKeyvaluePairs());
+				schemaObj.put("permittedValues",getKeyvaluePairs());
 			}
 			else if(attrRefMTClass.isA(BOOLEAN_ID)){// boolean, Do this first, boolean is also a permitted value
 				schemaObj.put("type","boolean");
@@ -416,7 +416,7 @@ public class SchemaForAttrRefObj   implements Constants {
 			}
 			else if(attrRefMTClass.isA(PERMITTED_VALUES_ID)){
 				schemaObj.put("type","integer");
-				schemaObj.put("enum",getKeyvaluePairs());
+				schemaObj.put("permittedValues",getKeyvaluePairs());
 			}			
 			else if(attrRefMTClass.isA(DATE_ID)) {
 				//see http://groups.google.com/group/json-schema/web/json-schema-possible-formats
@@ -464,7 +464,7 @@ public class SchemaForAttrRefObj   implements Constants {
 		}
 		else if(assocTypeObj!=null && assocTypeObj.isA(TO_ONE_ASSOC_TYPES_ID)){
 			schemaObj.put("type","integer");
-			schemaObj.put("enum",getKeyvaluePairs());
+			schemaObj.put("permittedValues",getKeyvaluePairs());
 		}
 	
 		return schemaObj;
