@@ -19,7 +19,7 @@ public interface Constants {
 	static final byte ONETOMANY_ASSOC = 11;		//TO MANY
 	static final byte OWNS_ASSOC = 12;			//TO MANY
 	// Pseudo Assoc tppes (reverse of the real assocs)
-	static final long CHILDREN_PASSOC = 15;		//TO MANY
+	static final long SUBCLASSES_PASSOC = 15;		//TO MANY
 	static final long ATTRIBUTE_OF_PASSOC = 16;	//TO MANY
 	static final long MAPPED_TO_BY_PASSOC = 17;	//TO MANY
 	static final long DEFAULT_OF_PASSOC = 18;	//TO MANY
@@ -30,12 +30,9 @@ public interface Constants {
 	static final long MANYTOONE_PASSOC = 23;	//TO ONE
 	static final long OWNED_BY_PASSOC = 24;		//TO ONE
 	//Special
-	//static final long INHERITED_RELATIONSHIPS_PASSOC = 27;	//TO MANY
+	static final long INSTANTIATIONS_PASSOC = 27;	//TO MANY
 	static final long THE_USER_PASSOC = 28;					//TO MANY
-	//static final long PERMITTED_ONE_ASSOC_DEST_PASSOC = 29;	//TO ONE
-	//static final long PERMITTED_MANY_ASSOC_DEST_PASSOC = 30;//TO ONE
-	static final long OTHER_ASSOCS_PASSOC = 31; 			//TO MANY
-	//static final long BY_ORG_UNIT_PASSOC = 32; 			//TO MANY
+	static final long ASSOCS_PASSOC = 31; 			//TO MANY
 
 	static final long DISPLAY_TYPE_ID = 92; 
 	static final long ACCORDION_TABS_ID = 91; 

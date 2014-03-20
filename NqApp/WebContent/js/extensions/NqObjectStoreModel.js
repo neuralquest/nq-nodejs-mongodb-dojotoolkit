@@ -9,64 +9,29 @@ define(["dojo/_base/declare", "dijit/tree/ObjectStoreModel", "dojo/_base/lang", 
 				if(childrenArr && childrenArr.length>0) return true;
 			}
 			return false;
-		},
-		
+		},		
 		getChildren: function(/*Object*/ parentItem,/*function(items)*/ onComplete, /*function*/ onError){
-			var id = this.store.getIdentity(parentItem);
-			if(!this.childrenCache[id]){
-				res = _nqMemoryStore.query({'id': id});
-				res.observe(lang.hitch(this, function(obj, removedFrom, insertedInto){
-					console.log("_nqMemoryStore observe of : ", obj);
-					this.onChange(obj);
-					when(this.store.getChildren(obj, this.childrenAttr),lang.hitch(this, function(results){
-						console.dir(results);
-						this.onChildrenChange(obj, results);
-					}));
-				}), true);
-				this.childrenCache[id] = true;
-			}
-			
-			when(this.store.getChildren(parentItem, this.childrenAttr),lang.hitch(this, function(children){
-				onComplete(children);
-			}),	onError);
-		},/*
-		getChildren: function(/*Object* / parentItem, /*function(items)* / onComplete, /*function* / onError){
-			// summary:
-			//		Calls onComplete() with array of child items of given parent item.
-			// parentItem:
-			//		Item from the dojo/store
-
-			var id = this.store.getIdentity(parentItem);
-			if(this.childrenCache[id]){
-				when(this.childrenCache[id], onComplete, onError);
-				return;
-			}
-
-			var res = this.childrenCache[id] = this.store.getChildren(parentItem, /*extension* /this.childrenAttr);
-
-			// User callback
-			when(res, onComplete, onError);
-
-			// Setup listener in case children list changes, or the item(s) in the children list are
-			// updated in some way.
-			if(res.observe){
-				res.observe(lang.hitch(this, function(obj, removedFrom, insertedInto){
-					console.log("observe on children of ", id, ": ", obj, removedFrom, insertedInto);
-
-					// If removedFrom == insertedInto, this call indicates that the item has changed.
-					// Even if removedFrom != insertedInto, the item may have changed.
-					this.onChange(obj);
-
-					if(removedFrom != insertedInto){
-						// Indicates an item was added, removed, or re-parented.  The children[] array (returned from
-						// res.then(...)) has already been updated (like a live collection), so just use it.
-						console.dir(res);
-						when(res, lang.hitch(this, "onChildrenChange", parentItem));
+			var _this = this;
+			when(this.store.getChildren(parentItem, this.childrenAttr),function(children){
+				for(var i=0;i<children.length;i++){
+					var childId = children[i].id;
+					if(!_this.childrenCache[childId]){
+						res = _nqMemoryStore.query({'id': childId});
+						res.observe(function(obj, removedFrom, insertedInto){
+							//console.log("_nqMemoryStore observe of : ", obj);
+							_this.onChange(obj);
+							//Make sure the children of this child are also in sync
+							when(_this.store.getChildren(obj, _this.childrenAttr), function(grandChildren){
+								//console.dir(grandChildren);
+								_this.onChildrenChange(obj, grandChildren);
+							});
+						}, true);
+						_this.childrenCache[childId] = true;					
 					}
-				}), true);	// true means to notify on item changes
-			}
+				}
+				onComplete(children);
+			}, onError);
 		},
-		*/
 		pasteItem: function(/*Item*/ childItem, /*Item*/ oldParentItem, /*Item*/ newParentItem,
 					/*Boolean*/ bCopy, /*int?*/ insertIndex, /*Item*/ before){
 			// summary:

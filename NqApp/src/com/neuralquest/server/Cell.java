@@ -223,7 +223,7 @@ public class Cell extends BaseCell implements Constants {
 			if(orderedParent!=null) list.add(orderedParent);
 			return list;
 		}*/
-		else if(assocType>=CHILDREN_PASSOC && assocType<=OWNED_BY_PASSOC){
+		else if(assocType>=SUBCLASSES_PASSOC && assocType<=OWNED_BY_PASSOC){
 			if(assocType==ORDERED_PARENT_PASSOC){
 					int a = 0;
 			}

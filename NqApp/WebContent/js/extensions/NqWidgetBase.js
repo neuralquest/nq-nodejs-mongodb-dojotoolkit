@@ -25,8 +25,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.domNode.appendChild(this.pane.domNode);
 		},
 		resize: function(changeSize){
-			if(!changeSize) return;
-//			this.inherited(arguments);
+			this.inherited(arguments);
 			var hDiv = dojo.position(this.headerDivNode);
 			changeSize.h -= hDiv.h;
 			this.pane.resize(changeSize);
@@ -35,19 +34,19 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			return this.parentId;
 		},
 		_setParentIdAttr: function(value){
-			this.parentId = value;
+			if(value) this.parentId = value;
 		},
 		_getSelectedObjIdAttr: function(){ 
 			return this.selectedObjId;
 		},
 		_setSelectedObjIdAttr: function(value){
-			this.selectedObjId = value;
+			if(value) this.selectedObjId = value;
 		},
 		startup: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){
 				if(widget.startup) widget.startup();
 			});
-			this.resize();
+			this.pane.resize();
 		}/*,
 		destroy: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){

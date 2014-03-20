@@ -141,7 +141,7 @@ public class SchemaServlet extends HttpServlet implements Constants {
 									for(Iterator<Assoc> itr=sourceParentClass.getDestAssocs().iterator();itr.hasNext();){
 										Assoc assoc1 = (Assoc)itr.next();
 										int assocType = assoc1.getType()+12;
-										if(assocType==CHILDREN_PASSOC || assocType==MAPPED_TO_BY_PASSOC) continue;
+										if(assocType==SUBCLASSES_PASSOC || assocType==MAPPED_TO_BY_PASSOC) continue;
 										Cell translatedAssocObj = (Cell)session.load(Cell.class, new Long(assocType));
 										long sourceClassId = assoc1.getSourceFk().getId();
 										JSONObject resultJSONObject = new JSONObject();

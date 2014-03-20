@@ -38,6 +38,7 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 							};
 							addObj[viewDefToCreate.label] = '[new '+classToCreate.className+']';;
 							var newItem = _nqDataStore.add(addObj);
+							//this should be done automaticly some where
 							var x = model.getChildren(newItem, viewsArr);//we need this to create an observer on the newly created item
 							
 							var selectedItem = tree.get("selectedItem");

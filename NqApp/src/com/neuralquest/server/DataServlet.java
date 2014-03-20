@@ -132,18 +132,18 @@ public class DataServlet extends HttpServlet implements Constants {
 			for(int i = 0; i < postArray.length(); i++){
 				JSONObject actionObj = postArray.getJSONObject(i);
 				String action = actionObj.optString("action", "");
-				JSONObject dataObj = actionObj.optJSONObject("data");
-				Cell selectedObj = getOrMakeBasedOnCid(dataObj.getString("id"), session, idMap);
+				String idString = actionObj.optString("data", "");
+//				Cell selectedObj = getOrMakeBasedOnCid(dataObj.getString("id"), session, idMap);
 				if(action.equals("delete")){
-					deleteObj(dataObj, session);
+					deleteObj(idString, session);
 				}
 			}
 			for(int i = 0; i < postArray.length(); i++){
 				JSONObject actionObj = postArray.getJSONObject(i);
 				String action = actionObj.optString("action", "");
-				JSONObject dataObj = actionObj.optJSONObject("data");
-				Cell selectedObj = getOrMakeBasedOnCid(dataObj.getString("id"), session, idMap);
 				if(action.equals("put")){
+					JSONObject dataObj = actionObj.optJSONObject("data");
+					Cell selectedObj = getOrMakeBasedOnCid(dataObj.getString("id"), session, idMap);
 					//give the new obj a parent
 					long classId = Long.parseLong(dataObj.getString("classId"));
 					Cell parentClass = (Cell) session.load(Cell.class, new Long(classId));
@@ -154,9 +154,8 @@ public class DataServlet extends HttpServlet implements Constants {
 			for(int i = 0; i < postArray.length(); i++){
 				JSONObject actionObj = postArray.getJSONObject(i);
 				String action = actionObj.optString("action", "");
-				JSONObject dataObj = actionObj.optJSONObject("data");
-				Cell selectedObj = getOrMakeBasedOnCid(dataObj.getString("id"), session, idMap);
 				if(action.equals("post")){
+					JSONObject dataObj = actionObj.optJSONObject("data");
 					updateRowData(dataObj, session, idMap);
 				}
 			}
@@ -510,9 +509,10 @@ public class DataServlet extends HttpServlet implements Constants {
 	
 	}
 
-	private void deleteObj(JSONObject dataObj, Session session) throws ServletException, IOException {
+	private void deleteObj(String idString, Session session) throws ServletException, IOException {
 
-		long objId = Long.parseLong(dataObj.getString("id"));
+		String[] idStringArr = idString.split("/");
+		long objId = Long.parseLong(idStringArr[1]);
 		Cell selectedObj = (Cell) session.load(Cell.class, new Long(objId));
 
 		if(selectedObj.getType()==OBJECT){
@@ -571,7 +571,7 @@ public class DataServlet extends HttpServlet implements Constants {
 				isAssocAllowed(sourceObj, (byte)assocType, destObj);
 				makeAssoc(sourceObj, (byte)assocType, destObj, session);// no existing assoc to this dest, make a new one
 			}
-			else if(assocType>=CHILDREN_PASSOC && assocType<=OWNED_BY_PASSOC){
+			else if(assocType>=SUBCLASSES_PASSOC && assocType<=OWNED_BY_PASSOC){
 				byte primitiveAssocType = (byte)(assocType - 12);// Big NoNo: here we do math with identifires
 				// Check to make sure the association is allowed
 				isAssocAllowed(destObj, primitiveAssocType, sourceObj);
@@ -589,7 +589,7 @@ public class DataServlet extends HttpServlet implements Constants {
 					makeAssoc(sourceObj, (byte)assocType, destObj, session);// no existing assoc to this dest, make a new one
 				}
 				else if(assocType==ORDERED_PARENT_PASSOC) throw new RuntimeException("Cannot update ordered parent");
-				else if(assocType>=CHILDREN_PASSOC && assocType<=OWNED_BY_PASSOC){
+				else if(assocType>=SUBCLASSES_PASSOC && assocType<=OWNED_BY_PASSOC){
 					byte primitiveAssocType = (byte)(assocType - 12);// Big NoNo: here we do math with identifires
 					// Check to make sure the association is allowed
 					isAssocAllowed(destObj, primitiveAssocType, sourceObj);
@@ -619,7 +619,7 @@ public class DataServlet extends HttpServlet implements Constants {
 					}
 				}
 				else if(assocType==ORDERED_PARENT_PASSOC) throw new RuntimeException("Cannot update ordered parent");
-				else if(assocType>=CHILDREN_PASSOC && assocType<=OWNED_BY_PASSOC){
+				else if(assocType>=SUBCLASSES_PASSOC && assocType<=OWNED_BY_PASSOC){
 					byte primitiveAssocType = (byte)(assocType - 12);// Big NoNo: hier we do math with identifires
 					// Check to make sure the association is allowed
 					isAssocAllowed(destObj, primitiveAssocType, sourceObj);
@@ -677,7 +677,7 @@ public class DataServlet extends HttpServlet implements Constants {
 			destroySourceAssoc(sourceObj, (byte)assocType, destObj, session);
 		}
 		else if(assocType==ORDERED_PARENT_PASSOC) throw new RuntimeException("Cannot destroy ordered parent");
-		else if(assocType>=CHILDREN_PASSOC && assocType<=OWNED_BY_PASSOC){
+		else if(assocType>=SUBCLASSES_PASSOC && assocType<=OWNED_BY_PASSOC){
 			byte primitiveAssocType = (byte)(assocType - 12);// Big NoNo: here we do math with identifires
 			destroyDestAssoc(destObj, primitiveAssocType, sourceObj, session);// destroy the invers relation
 		}

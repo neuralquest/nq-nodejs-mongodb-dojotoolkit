@@ -249,7 +249,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					tabDef: tabDef
 				}, domConstruct.create('div'));
 				tabNode.appendChild(widget.domNode);
-				widget.startup();
+				//widget.startup();
 				widget.set('parentId', state.selectedObjectIdPreviousLevel);
 			}
 			break;	

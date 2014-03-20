@@ -46,6 +46,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			// projector
 			projector = new THREE.Projector();
 			// renderer
+			//renderer = new THREE.WebGLRenderer( {antialias: true} );
 			if ( Detector.webgl ) renderer = new THREE.WebGLRenderer( {antialias: true} );
 			else if(Detector.canvas) renderer = new THREE.CanvasRenderer();
 			//else;
