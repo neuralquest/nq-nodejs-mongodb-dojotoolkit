@@ -1,25 +1,25 @@
 define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox',
-         'dijit/Editor', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", 
-         "nq/NqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff",
+         'dijit/Editor', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", "dojo/cookie", "dojo/hash",
+         "nq/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff",
         'dgrid/OnDemandGrid', 'dgrid/editor', 'dgrid/Selection', 'dgrid/Keyboard', 'dgrid/extensions/DijitRegistry', "dgrid/extensions/DnD",
-        "dgrid/Selection", "dgrid/selector", "dgrid/selector", "dijit/form/Button","dojo/_base/array",
+        "dgrid/Selection", "dgrid/selector", "dgrid/selector", "dijit/form/Button","dojo/_base/array", "dijit/registry",
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, arrayUtil, Select, Toolbar, DateTextBox, 
-			Editor, Memory, domConstruct, on, 
-			NqWidgetBase, ContentPane, domGeometry, has, 
+			Editor, Memory, domConstruct, on, cookie, hash, 
+			nqWidgetBase, ContentPane, domGeometry, has, 
 			Grid, editor, Selection, Keyboard, DijitRegistry, Dnd,
-			Selection, selector, Button, array){
+			Selection, selector, Button, array, registry){
    
-	return declare("NqGridWidget", [NqWidgetBase], {
+	return declare("nqGridWidget", [nqWidgetBase], {
 		extraPlugins: {},
 		viewsArr: [],
 		query: {},
 		
 		postCreate: function(){
 			this.inherited(arguments);
-			this.pageHelpTextDiv.innerHTML = this.tabDef.description;
+			this.pageHelpTextDiv.innerHTML = this.widgetDef.description;
 
 			var sortable = true;
 			var rowsUpdateable = false;
@@ -60,7 +60,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			var gridStyle = {};
 			var _this = this;
 			arrayUtil.forEach(propsArr, function(prop) {	
-				var editorProps = getWidgetProperties(prop);
+				var editorProps = _this.getWidgetProperties(prop);
 				editorProps.sortable = sortable;
 				//get the width of the colomn
 				//gridStyle[prop.name] = 'width:'+(prop.width<=0?"auto":prop.width+"em");
@@ -177,12 +177,40 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 				});*/
 				this.pane.containerNode.appendChild(removeButton.domNode);
 			}
-			/*
+			
 			this.grid.on(".dgrid-row:click", function(event){
-//				var row = grid.row(event);
-				console.log("Row clicked:", event);
+				var level = _this.level;
+				var state = nq.getState(level);
+				//var nextState = getState(level+1);
+//				var tabPane = registry.byId('tab'+_this.widgetDef.id);
+//				document.title = 'NQ - '+(tabPane?tabPane.title+' - ':'')+this.getLabel(item);
+
+				var item = _this.grid.row(event).data;
+				var newViewId = item.viewId;
+				var ids = _nqDataStore.getIdentity(item).split('/');
+				
+				var currentHash = hash();
+				var hashArr = currentHash.split('.');
+				hashArr[level*3+1] = ''+_this.widgetDef.id;//it may have changed
+				hashArr[level*3+2] = ''+ids[1];//it will have changed
+				if(hashArr[(level+1)*3+0] != newViewId){//if its changed
+					//remove anything following this level in the hash since it is nolonger valid
+					hashArr = hashArr.slice(0,(level+1)*3+0);
+					
+					hashArr[(level+1)*3+0] = newViewId;
+					//if there is a cookie for this acctab, use if to set the hash tabId (we can prevent unnessasary interperitHash())//FIXME remove set tabId
+					var cookieValue = cookie('acctab'+newViewId+'_selectedChild');
+					if(cookieValue) hashArr[(level+1)*3+1] = cookieValue.substr(3);
+					else{//find the first tab and use it
+						var tabsArr = _nqSchemaMemoryStore.query({parentViewId: newViewId, entity: 'tab'});//get the tabs		 
+						if(tabsArr.length>0) hashArr[(level+1)*3+1] = tabsArr[0].id;
+					}
+				}
+
+				var newHash = hashArr.join('.');
+				hash(newHash);			
 			});
-			this.grid.on("dgrid-refresh-complete", function(event){
+			/*this.grid.on("dgrid-refresh-complete", function(event){
 //				var row = grid.row(event);
 				console.log("Row complete:", event);
 			});
@@ -190,38 +218,46 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 		},
 		_setQuery: function(query, queryOptions){
 			this.grid.set('query',query);
+		},
+		_retQuery: function(query, queryOptions){
+			return this.grid.set('query');
+		},
+		getWidgetProperties: function(prop){
+			var properties = {
+					id: prop.name, 
+					field: prop.name, 
+					editOn: 'click', 
+					autoSave: true, 
+					label: prop.title 
+			};
+			if(prop.placeHolder) properties.placeHolder = prop.placeHolder;
+			if(prop['default']) properties.value = prop['default'];
+			if(prop.optional) properties.required = (prop.optional?false:true);
+			//if(prop.readonly && prop.readonly == true) properties.canEdit = function(object){ return false; }
+			//else properties.canEdit = function(object){ return true; }
+			//if(prop.width) properties.width = (prop.width<=0?"100%":prop.width+"em");
+			if(prop.placeHolder) properties.placeHolder = prop.placeHolder;
+			//if(prop.promptMessage) properties.promptMessage = prop.promptMessage;//we dont like this
+			if(prop.invalidMessage) properties.invalidMessage = prop.invalidMessage;
+
+			if(prop.maxLength) properties.maxLength = prop.maxLength;
+			if(prop.minLength) properties.minLength = prop.minLength;
+			if(prop.curency) properties.curency = prop.curency;
+			if(prop.regExp) properties.regExp = prop.regExp;//e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
+			constraints = {};
+			if(prop.minimum) constraints.minimum = prop.minimum;
+			if(prop.maximum) constraints.maximum = prop.maximum;
+			if(prop.maxDecimal) constraints.places = prop.maxDecimal;
+			if(prop.type=='curency') constraints.fractional = true;
+			properties.constraints = constraints;
+			
+			return properties;
+		},
+		formatGridDate: function(theDate, rowIndex) {
+			var rowdata = this.grid.getItem(rowIndex);
+			var theDate = new Date(parseInt(rowdata.datefieldname));
+			theDateString = dojo.date.locale.format(theDate, {selector: 'date', datePattern: 'MM/dd/yyyy' });
+			return theDateString;
 		}
 	});
-	function getWidgetProperties(prop){
-		var properties = {
-				id: prop.name, 
-				field: prop.name, 
-				editOn: 'click', 
-				autoSave: true, 
-				label: prop.title 
-		};
-		if(prop.placeHolder) properties.placeHolder = prop.placeHolder;
-		if(prop['default']) properties.value = prop['default'];
-		if(prop.optional) properties.required = (prop.optional?false:true);
-		//if(prop.readonly && prop.readonly == true) properties.canEdit = function(object){ return false; }
-		//else properties.canEdit = function(object){ return true; }
-		//if(prop.width) properties.width = (prop.width<=0?"100%":prop.width+"em");
-		if(prop.placeHolder) properties.placeHolder = prop.placeHolder;
-		//if(prop.promptMessage) properties.promptMessage = prop.promptMessage;//we dont like this
-		if(prop.invalidMessage) properties.invalidMessage = prop.invalidMessage;
-
-		if(prop.maxLength) properties.maxLength = prop.maxLength;
-		if(prop.minLength) properties.minLength = prop.minLength;
-		if(prop.curency) properties.curency = prop.curency;
-		if(prop.regExp) properties.regExp = prop.regExp;//e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
-		constraints = {};
-		if(prop.minimum) constraints.minimum = prop.minimum;
-		if(prop.maximum) constraints.maximum = prop.maximum;
-		if(prop.maxDecimal) constraints.places = prop.maxDecimal;
-		if(prop.type=='curency') constraints.fractional = true;
-		properties.constraints = constraints;
-		
-		return properties;
-	}
-
 });

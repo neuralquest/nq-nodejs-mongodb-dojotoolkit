@@ -274,7 +274,12 @@ public class ConsistancyServlet extends HttpServlet  implements Constants {
 		LinkedList<Cell> refsList = view.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ATTRIBUTE_REFS_ID);
 		for(Iterator<Cell> itr0=refsList.iterator();itr0.hasNext();){
 			objList.add(itr0.next());
-		}
+		}/*
+		LinkedList<Cell> widgetsList = view.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, WIDGET_ID);
+		for(Iterator<Cell> itr0=widgetsList.iterator();itr0.hasNext();){
+			Cell widget = itr0.next();
+			walkTheViews(widget, objList, session);
+		}*/
 		LinkedList<Cell> tabsList = view.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ACCTABS_ID);
 		for(Iterator<Cell> itr0=tabsList.iterator();itr0.hasNext();){
 			Cell childAccTabs = itr0.next();
@@ -330,9 +335,32 @@ public class ConsistancyServlet extends HttpServlet  implements Constants {
 			listEl3.addElement("li").addText("display type: "+(dispTypeObj==null?"null":dispTypeObj.getIdName(50)));
 			listEl3.addElement("li").addText("fk: "+(tabMTObj==null?"null":tabMTObj.getIdName(50)));
 			
+			reportWidgets(listEl3, childAccTabs, objList);
 			reportTabs(listEl3, childAccTabs, objList);
 			
 			LinkedList<Cell> viewsList = childAccTabs.getListOfRelatedObjectsByAssocTypeAndDestClassId(MANYTOMANY_ASSOC, VIEWS_ID);
+			for(Iterator<Cell> itr0=viewsList.iterator();itr0.hasNext();){
+				Cell childView = itr0.next();
+				reportViews(listEl3, childView, objList);
+			}
+		}
+	}
+	private void reportWidgets(Element listEl, Cell viewTab, LinkedList<Cell> objList){
+		
+		LinkedList<Cell> widgetsList = viewTab.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, WIDGET_ID);
+		for(Iterator<Cell> itr1=widgetsList.iterator();itr1.hasNext();){
+			Cell childWidget = itr1.next();
+			//listEl.addElement("h3").addText("AccTab: "+childWidget.getIdName(50));
+			listEl.addElement("h4").addAttribute("style", "color:orange;").addText("Widget: "+childWidget.getIdName(50));
+			Cell dispTypeObj = childWidget.getAttributeObjByDestClass(DISPLAY_TYPE_ID);
+			Cell tabMTObj = childWidget.getCellByAssocType(MAPSTO_ASSOC);
+			Element listEl3 = listEl.addElement("ul").addText("");
+			listEl3.addElement("li").addText("display type: "+(dispTypeObj==null?"null":dispTypeObj.getIdName(50)));
+			listEl3.addElement("li").addText("parentId: "+(tabMTObj==null?"null":tabMTObj.getIdName(50)));
+			
+			reportTabs(listEl3, childWidget, objList);
+			
+			LinkedList<Cell> viewsList = childWidget.getListOfRelatedObjectsByAssocTypeAndDestClassId(MANYTOMANY_ASSOC, VIEWS_ID);
 			for(Iterator<Cell> itr0=viewsList.iterator();itr0.hasNext();){
 				Cell childView = itr0.next();
 				reportViews(listEl3, childView, objList);

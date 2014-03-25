@@ -1,13 +1,13 @@
-define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqSimpleQueryEngine", 'dijit/registry', 'dojo/when', "dojo/store/util/QueryResults",
+define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/nqSimpleQueryEngine", 'dijit/registry', 'dojo/when', "dojo/store/util/QueryResults",
         "dojo/request", "dojo/store/JsonRest", "dojo/_base/lang"],
-	function(declare, JsonRest, all, NqSimpleQueryEngine, registry, when, QueryResults, request, JsonRest, lang){
+	function(declare, JsonRest, all, nqSimpleQueryEngine, registry, when, QueryResults, request, JsonRest, lang){
 
-	return declare("NqJsonRest", [JsonRest], {
+	return declare("nqJsonRest", [JsonRest], {
 		target:"",
 		addObjects: {},
 		putObjects: {},
 		removeObjects: {},
-		queryEngine: NqSimpleQueryEngine,
+		queryEngine: nqSimpleQueryEngine,
 
 		/*getChildren: function(object, childViewAttributes, options){
 			var genQuery ={parentId: object.id, childViewAttributes: childViewAttributes};
@@ -108,36 +108,57 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/NqS
 				*/
 			}
 			else if(query.parentId && query.joinViewAttributes){
-				var promise = when(_nqDataStore.get(query.parentId), lang.hitch(this, function(parent){
-					var rowItemArr = [];
-					return when(this.join(parent, query.joinViewAttributes, 0, rowItemArr, {}), lang.hitch(this, function(something){
-						return rowItemArr;
-					}));
-				}));
+				var _this = this;
+				var resultUntilNow = {};
+				var resultsArr = [];
+				var promise = when(_nqDataStore.get(query.parentId), function(parent){
+					return when(_this.join(parent, query.joinViewAttributes, 0, resultUntilNow, resultsArr), function(res){
+						return resultsArr;
+					});
+
+				});
 				return QueryResults(promise);
 			}
 			else return JsonRest.prototype.query.call(this, query, options);
 		},
-		join: function(parent, joinViewAttributes, idx, rowItemArr, rowItemParentObjects){
-			return when(this.getChildren(parent, [joinViewAttributes[idx]]), lang.hitch(this, function(children){
-				for(var i=0;i<children.length;i++){
-					var child = children[i];
-					if(idx<joinViewAttributes.length-1) {
-						for(key in child){rowItemParentObjects[key] = child[key];}
-						return when(this.join(child, joinViewAttributes, idx+1, rowItemArr, rowItemParentObjects), lang.hitch(this, function(x){
-							return x;							
-						}));
+
+		join: function(parent, joinViewAttributes, idx, resultUntilNow, resultsArr){
+			var _this = this;
+			return when(_this.getChildren(parent, [joinViewAttributes[idx]]), function(children){
+				//console.log(idx, children);
+				if(idx == joinViewAttributes.length - 1) {
+					for(var i=0;i<children.length;i++){
+						var child = children[i];
+						var newObject = lang.mixin(lang.clone(resultUntilNow), child);
+						resultsArr.push(newObject);
 					}
-					else{
-						var rowItem = {};
-						for(key in rowItemParentObjects){rowItem[key] = rowItemParentObjects[key];}
-						for(key in child){rowItem[key] = child[key];}
-						rowItemArr.push(rowItem);
-					}
+					//console.log(idx, results);
+					return children;
 				}
-				return children;
-			}));
-		},
+				else {
+					var promisses = [];
+					for(var i=0;i<children.length;i++){
+						var child = children[i];
+						var newObject = lang.mixin(lang.clone(resultUntilNow), child);
+						promisses.push(_this.join(child, joinViewAttributes, idx+1, newObject, resultsArr));
+					}
+					return all(promisses);
+					/*
+					return when(all(promisses), function(results){
+						var newArr = [];
+						for(var i=0;i<results.length;i++){
+							var result = results[i];
+							for(var i=0;i<result.length;i++){
+								var child = result[i];
+								var newObject = lang.mixin(lang.clone(result), child);
+								newArr.push(newObject);
+							}
+						}
+						return newArr;
+					});*/
+				}
+			});
+		},		
 	    transaction: function(){
 	    	return {
 		    	commit: lang.hitch(this, function(){

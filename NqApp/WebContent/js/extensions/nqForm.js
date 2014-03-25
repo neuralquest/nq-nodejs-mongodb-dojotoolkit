@@ -1,14 +1,14 @@
 define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox',  'dijit/form/NumberTextBox', 
         'dijit/form/CheckBox', 'dijit/Editor', 'dijit/form/CurrencyTextBox', 'dijit/form/ValidationTextBox', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", 
-        "dojo/when", "dojo/query", 'dijit/registry', "nq/NqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/_base/lang",
+        "dojo/when", "dojo/query", 'dijit/registry', "nq/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/_base/lang",
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, arrayUtil, Form, Select, Toolbar, DateTextBox, NumberTextBox, 
 			CheckBox, Editor, CurrencyTextBox, ValidationTextBox, Memory, domConstruct, on, 
-			when, query, registry, NqWidgetBase, ContentPane, domGeometry, has, lang){
+			when, query, registry, nqWidgetBase, ContentPane, domGeometry, has, lang){
    
-	return declare("NqFormWidget", [NqWidgetBase], {
+	return declare("nqFormWidget", [nqWidgetBase], {
 		extraPlugins: {},
 		
 		postCreate: function(){

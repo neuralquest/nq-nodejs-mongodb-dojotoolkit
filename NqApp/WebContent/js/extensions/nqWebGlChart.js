@@ -3,7 +3,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 	function(declare, when, all, arrayUtil, _WidgetBase, domConstruct, lang, domGeom, Deferred){
 	var renderer, camera, scene, controls, projector, stats, requestId;
 	
-	return declare("NqWebGlChartWidget", [_WidgetBase], {
+	return declare("nqWebGlChartWidget", [_WidgetBase], {
 		skyboxArray: [],
 		selectableObjects: [],
 		displayFPS: false,

@@ -1,8 +1,8 @@
-define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array", "nq/NqWebGlChart", 'dojo/dom-construct', "dojo/_base/lang", 
+define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array", "nq/nqWebGlChart", 'dojo/dom-construct', "dojo/_base/lang", 
         "dojo/dom-geometry", "dojo/Deferred"],
-	function(declare, when, all, arrayUtil, NqWebGlChart, domConstruct, lang, domGeom, Deferred){
+	function(declare, when, all, arrayUtil, nqWebGlChart, domConstruct, lang, domGeom, Deferred){
 
-	return declare("NqProcessChartWidget", [NqWebGlChart], {
+	return declare("nqProcessChartWidget", [nqWebGlChart], {
 		orgUnitRootId: null,
 		orgUnitViewId: null,
 		orgUnitNameAttrId: null,

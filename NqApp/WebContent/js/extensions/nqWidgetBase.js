@@ -1,9 +1,9 @@
 define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry",
         'dojo/_base/array'],
 	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, arrayUtil){
-	return declare("NqWidgetBase", [_WidgetBase], {
+	return declare("nqWidgetBase", [_WidgetBase], {
 		store: null,
-		tabDef: {},
+		widgetDef: {},
 		viewDef: {},
 		parentId: null,
 		viewId: null,
@@ -16,7 +16,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.pageToolbarDivNode = domConstruct.create('div', {}, this.headerDivNode);//placeholder for the page toolbar
 			this.editorToolbarDivNode = domConstruct.create('div', {'style' : { 'min-height': '23px'} }, this.headerDivNode);//placeholder for the editor toolbar
 			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.headerDivNode);//placeholder for the helptext
-			this.pageHelpTextDiv.innerHTML = this.tabDef.description;
+			this.pageHelpTextDiv.innerHTML = this.widgetDef.description;
 			this.pane = new ContentPane( {
 				'class' : 'backgroundClass',
 				'doLayout' : 'true',

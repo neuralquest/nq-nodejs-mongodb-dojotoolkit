@@ -1,16 +1,16 @@
 define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry', 'dijit/layout/ContentPane', 
-        'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "nq/NqWidgetBase", "dojo/on", "dojo/dom-geometry", 
+        'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "nq/nqWidgetBase", "dojo/on", "dojo/dom-geometry", 
         "dojo/sniff", "dijit/form/ToggleButton", "dojo/_base/lang", 'dijit/registry', "dojo/dom", "dojo/dom-attr",
-        'nq/NqClassChart', "dojo/dom-style", "dojo/query", "dojo/mouse", 
+        'nq/nqClassChart', "dojo/dom-style", "dojo/query", "dojo/mouse", 
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 'dijit/WidgetSet', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, domConstruct, when, registry, ContentPane, 
-			Toolbar, ValidationTextBox, Editor, NqWidgetBase, on, domGeometry, 
+			Toolbar, ValidationTextBox, Editor, nqWidgetBase, on, domGeometry, 
 			has, ToggleButton, lang, registry, dom, domAttr,
-			NqClassChart, domStyle, query, mouse){
+			nqClassChart, domStyle, query, mouse){
 
-	return declare("NqDocumentWidget", [NqWidgetBase], {
+	return declare("nqDocumentWidget", [nqWidgetBase], {
 		parentId: null,
 		extraPlugins: {},
 		viewId: '846',
@@ -133,21 +133,21 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			var _this = this;
 			var viewId = this.viewId;
 			when(this.store.get(this.parentId), function(item){
-				when(_this.generateNextLevelContents(item, viewId, 1, [], null), function(item){
-					registry.byId('tab'+_this.tabDef.id).resize();
+				when(_this.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
+					registry.byId('tab'+_this.tabId).resize();
 				});
 			});
 		},
-		generateNextLevelContents: function(item, viewId, headerLevel, paragraphNrArr, parentId){
+		generateNextLevelContents: function(item, viewId, headerLevel, paragraphNrArr, parentId, previousParagrphHasRightFloat){
 			var _this = this;
 			//Create an ordinary HTML page recursivly by obtaining data from the server
 			var storedHeader = item[this.headerAttrId];
 			var storedRtf = item[this.paragraphAttrId];
 
 			//Header
-			var paragraphStr = paragraphNrArr.length==0?'':paragraphNrArr.join('.');
-			var headerNode = domConstruct.create('h'+headerLevel, null, this.pane.containerNode);
-			if(headerLevel>1) domConstruct.create('span', { innerHTML: paragraphStr, style: { 'margin-right':'30px'}}, headerNode);
+			var paragraphNrStr = paragraphNrArr.length==0?'':paragraphNrArr.join('.');
+			var headerNode = domConstruct.create('h'+headerLevel, {style: {'clear': previousParagrphHasRightFloat?'both':'none'}}, this.pane.containerNode);
+			if(headerLevel>1) domConstruct.create('span', { innerHTML: paragraphNrStr, style: { 'margin-right':'30px'}}, headerNode);
 			var headerSpan = domConstruct.create('span', { 
 				innerHTML: storedHeader,
 				objectId: item.id,
@@ -217,7 +217,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					   _this.siblingButton.get('checked') ||
 					   _this.childButton.get('checked') ||
 					   _this.deleteButton.get('checked')){
-					domStyle.set(headerSpan, "backgroundColor", "rgba(250, 250, 121, 0.28)");
+					domStyle.set(headerSpan, 'border', '1px solid gray');// "backgroundColor", "rgba(250, 250, 121, 0.28)"
 				}
 			});
 			on(headerSpan, mouse.leave, function(evt){
@@ -225,7 +225,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					   _this.siblingButton.get('checked') ||
 					   _this.childButton.get('checked') ||
 					   _this.deleteButton.get('checked')){
-					domStyle.set(headerSpan, "backgroundColor", "");
+					domStyle.set(headerSpan, 'border', '1px none gray');
 				}
 			});
 			
@@ -286,12 +286,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 
 			on(paragraphNode, mouse.enter, function(evt){
 				if(_this.editModeButton.get('checked')) {
-					domStyle.set(paragraphNode, "backgroundColor", "rgba(250, 250, 121, 0.28)");
+					domStyle.set(paragraphNode, 'border', '1px solid gray');
 				}
 			});
 			on(paragraphNode, mouse.leave, function(evt){
 				if(_this.editModeButton.get('checked')) {
-					domStyle.set(paragraphNode, "backgroundColor", "");
+					domStyle.set(paragraphNode, 'border', '1px none gray');
 				}
 			});
 
@@ -299,11 +299,13 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			
 			//Get the sub- headers/paragraphs
 			return when(this.store.getChildren(item, [846]), function(children){
+				var previousParagrphHasRightFloat = false;
 				for(var i=0;i<children.length;i++){
 					var childItem = children[i];
 					paragraphNrArr[headerLevel-1] = i+1;
-					_this.generateNextLevelContents(childItem, viewId, headerLevel+1, paragraphNrArr, item.id);
+					_this.generateNextLevelContents(childItem, viewId, headerLevel+1, paragraphNrArr, item.id, previousParagrphHasRightFloat);
 					paragraphNrArr.splice(headerLevel,100);//remove old shit
+					previousParagrphHasRightFloat = childItem[_this.paragraphAttrId].indexOf('floatright')==-1?false:true;
 				}
 			});
 		},
@@ -395,7 +397,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			});
 		},
 		addWidget: function(widgetDomNode){
-			widget = new NqClassChart({
+			widget = new nqClassChart({
 				store : this.store,
 				XYAxisRootId: '844/78' // Process Classes
 			}, domConstruct.create('div'));

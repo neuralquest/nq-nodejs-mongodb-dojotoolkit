@@ -35,6 +35,7 @@ public interface Constants {
 	static final long ASSOCS_PASSOC = 31; 			//TO MANY
 
 	static final long DISPLAY_TYPE_ID = 92; 
+	static final long PARENTID_ID = 100; 
 	static final long ACCORDION_TABS_ID = 91; 
 	static final long DISP_TYPE_TREES_ID = 1779; 
 
@@ -77,6 +78,7 @@ public interface Constants {
 	static final long ATTRIBUTE_REFS_ID = 63;
 	static final long ACCTABS_ID = 90;
 	static final long VIEWS_ID = 74;
+	static final long WIDGET_ID = 99;
 	
 	//used by site map
 	static final long FIRSTPAGE_ID = 810;

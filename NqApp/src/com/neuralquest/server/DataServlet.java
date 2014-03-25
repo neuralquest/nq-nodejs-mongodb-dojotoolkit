@@ -259,6 +259,9 @@ public class DataServlet extends HttpServlet implements Constants {
 		// add an array of children ids to the row object 
 		//----------------------------------------------------------------------------------
 		LinkedList<Cell> childViewList = viewObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(MANYTOMANY_ASSOC, VIEWS_ID );
+		if(viewObj.getId() == 2293) {
+			int a = 1;
+		}
 		addTabsViewLists(viewObj, childViewList);
 		for(Iterator<Cell> itr1=childViewList.iterator();itr1.hasNext();){
 			Cell childViewObj = itr1.next();
@@ -278,7 +281,7 @@ public class DataServlet extends HttpServlet implements Constants {
 				childrenArray.put(childViewObj.getId()+"/"+childObj.getId());
 			}
 			rowObject.put(String.valueOf(childViewObj.getId()), childrenArray);
-			if(1 == 2) continue;
+			/*
 			LinkedList<Cell> childTabList = viewObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ACCTABS_ID );
 			for(Iterator<Cell> itr2=childTabList.iterator();itr2.hasNext();){
 				Cell childTabObj = itr2.next();
@@ -293,7 +296,7 @@ public class DataServlet extends HttpServlet implements Constants {
 					}			
 					rowObject.put(String.valueOf(tabChildViewObj.getId()), tabChildrenArray);
 				}
-			}
+			}*/
 		}
 		
 		return rowObject;
@@ -302,11 +305,21 @@ public class DataServlet extends HttpServlet implements Constants {
 		LinkedList<Cell> childTabList = viewOrTabObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ACCTABS_ID );
 		for(Iterator<Cell> itr2=childTabList.iterator();itr2.hasNext();){
 			Cell childTabObj = itr2.next();
+			// remove in future
 			LinkedList<Cell> childViews = childTabObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(MANYTOMANY_ASSOC, VIEWS_ID );
-			//always returns true because of lazy loading
-			//			if(childViewList.containsAll(childViews)) return;//loop protection
 			childViewList.addAll(childViews);
+			//
 			addTabsViewLists(childTabObj, childViewList);//there may be sub tabs
+			addWidgetViewLists(childTabObj, childViewList);//get the sub wib widgets
+		}
+	}
+	private void addWidgetViewLists(Cell viewOrTabObj, LinkedList<Cell> childViewList){
+		LinkedList<Cell> childWidgetList = viewOrTabObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, WIDGET_ID );
+		for(Iterator<Cell> itr2=childWidgetList.iterator();itr2.hasNext();){
+			Cell childWidgetObj = itr2.next();
+			LinkedList<Cell> childViews = childWidgetObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(MANYTOMANY_ASSOC, VIEWS_ID );
+			childViewList.addAll(childViews);
+			addTabsViewLists(childWidgetObj, childViewList);//there may be sub tabs
 		}
 	}
 	// ********************************************************************************

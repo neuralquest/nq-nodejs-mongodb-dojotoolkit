@@ -75,7 +75,7 @@ public class SchemaServlet extends HttpServlet implements Constants {
 				}
 				if(viewId>0){
 					Cell viewObj = (Cell) session.load(Cell.class, new Long(viewId));
-					getJsonSchemaForView(viewObj, null, null, resultJSONArray, new LinkedList<Cell>(), session);
+					getJsonSchemaForView(viewObj, null, null, null, resultJSONArray, new LinkedList<Cell>(), session);
 				}
 				else{
 					LinkedList<Cell> attrsList = new LinkedList<Cell>();
@@ -167,7 +167,7 @@ public class SchemaServlet extends HttpServlet implements Constants {
 			throw new ServletException(e); // or display error message
 		}
 	}
-	private void getJsonSchemaForView(Cell viewObj, Cell parenttViewObj, Cell parenttTabObj, JSONArray resultJSONArray, LinkedList<Cell> loopProtection, Session session) throws Exception {
+	private void getJsonSchemaForView(Cell viewObj, Cell parenttViewObj, Cell parenttTabObj, Cell parenttWidgetObj, JSONArray resultJSONArray, LinkedList<Cell> loopProtection, Session session) throws Exception {
 		loopProtection.add(viewObj);
 		//childrenAttrsArr.put(viewObj.getId());
 		JSONObject schemaObj = new JSONObject();
@@ -204,7 +204,10 @@ public class SchemaServlet extends HttpServlet implements Constants {
 		schemaObj.put("classId", mapsToClass==null?0:mapsToClass.getId());				
 		schemaObj.put("className", mapsToClass==null?"[view not mapped to a class]":mapsToClass.getName());				
 		//if(parenttViewObj!=null) schemaObj.put("parentViewId", parenttViewObj.getId());
+
 		if(parenttTabObj!=null) schemaObj.put("parentTabId", parenttTabObj.getId());
+		if(parenttWidgetObj!=null) schemaObj.put("parentWidgetId", "w"+parenttWidgetObj.getId());
+
 		JSONArray childViewsArr = new JSONArray(); 
 		schemaObj.put("childViews", childViewsArr);
 		
@@ -235,7 +238,7 @@ public class SchemaServlet extends HttpServlet implements Constants {
 		for(Iterator<Cell> itr1=childViewList.iterator();itr1.hasNext();){
 			Cell childViewObj = itr1.next();
 			childViewsArr.put(childViewObj.getId());
-			if(!loopProtection.contains(childViewObj)) getJsonSchemaForView(childViewObj, viewObj, parenttTabObj, resultJSONArray, loopProtection, session);
+			if(!loopProtection.contains(childViewObj)) getJsonSchemaForView(childViewObj, viewObj, parenttTabObj, parenttWidgetObj, resultJSONArray, loopProtection, session);
 		}
 		
 		LinkedList<Cell> tabList = viewObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ACCTABS_ID );
@@ -248,23 +251,23 @@ public class SchemaServlet extends HttpServlet implements Constants {
 		JSONObject schemaObj = new JSONObject();
 		schemaObj.put("id",tabObj.getId());
 		schemaObj.put("entity","tab");
-		Cell displyTypeObj = tabObj.getAttributeObjByDestClass(DISPLAY_TYPE_ID);
-		String displayType = displyTypeObj==null ? "" : displyTypeObj.getName();
-		schemaObj.put("displayType",displayType);
+//		Cell displyTypeObj = tabObj.getAttributeObjByDestClass(DISPLAY_TYPE_ID);
+//		String displayType = displyTypeObj==null ? "" : displyTypeObj.getName();
+//		schemaObj.put("displayType",displayType);
 		Cell nameCell = tabObj.getAttributeObjByDestClass(PRIMARY_NAME_ID);
 		if(nameCell!=null) schemaObj.put("title", tabObj.getName(100));
 		Cell descCell = tabObj.getAttributeObjByDestClass(DESCRIPTION_ID);
 		if(descCell!=null) schemaObj.put("description",descCell.getName());
 		else schemaObj.put("description", "<a href='#842.1787.1787.1802.1863'>update the description</a>");
 		if(parenttViewObj!=null) schemaObj.put("parentViewId", String.valueOf(parenttViewObj.getId()));
-
+/*
 		if(tabObj.getId()==1784) schemaObj.put("rootQuery",new JSONObject().put("id", "846/810"));
 		if(tabObj.getId()==1785) schemaObj.put("rootQuery",new JSONObject().put("id", "1714/460"));
 		if(tabObj.getId()==1786) schemaObj.put("rootQuery",new JSONObject().put("id", "850/702"));
 		if(tabObj.getId()==1787) schemaObj.put("rootQuery",new JSONObject().put("id", "538/842"));
 		if(tabObj.getId()==1788) schemaObj.put("rootQuery",new JSONObject().put("id", "844/1"));
 		if(tabObj.getId()==1972) schemaObj.put("rootQuery",new JSONObject().put("id", "1975/50"));
-
+*/
 		resultJSONArray.put(schemaObj);
 		
 		LinkedList<Cell> tabList = tabObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ACCTABS_ID );
@@ -273,6 +276,14 @@ public class SchemaServlet extends HttpServlet implements Constants {
 			getJsonSchemaForTab(childTabObj, tabObj, resultJSONArray, loopProtection, session);
 		}
 		
+		LinkedList<Cell> widgetList = tabObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, WIDGET_ID );
+		for(Iterator<Cell> itr2=widgetList.iterator();itr2.hasNext();){
+			Cell childWidgetObj = itr2.next();
+			getJsonSchemaForWidget(childWidgetObj, tabObj, resultJSONArray, loopProtection, session);
+		}
+		//temp
+		if(widgetList.size() == 0) getJsonSchemaForWidget(tabObj, tabObj, resultJSONArray, loopProtection, session);
+/*		
 		//JSONArray childrenAttrsArr = new JSONArray(); 
 		LinkedList<Cell> childViewList = tabObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(MANYTOMANY_ASSOC, VIEWS_ID );
 		for(Iterator<Cell> itr1=childViewList.iterator();itr1.hasNext();){
@@ -281,6 +292,40 @@ public class SchemaServlet extends HttpServlet implements Constants {
 			if(!loopProtection.contains(childViewObj)) getJsonSchemaForView(childViewObj, parenttViewObj, tabObj, resultJSONArray, loopProtection, session);//, childrenAttrsArr);
 		}
 		//schemaObj.put("childrenAttrs", childrenAttrsArr);
+		 
+*/
 	}
-
+	private void getJsonSchemaForWidget(Cell widgetObj, Cell parenttTabObj, JSONArray resultJSONArray, LinkedList<Cell> loopProtection, Session session) throws Exception {
+		JSONObject schemaObj = new JSONObject();
+		schemaObj.put("id","w"+widgetObj.getId());
+		schemaObj.put("entity","widget");
+		Cell displyTypeObj = widgetObj.getAttributeObjByDestClass(DISPLAY_TYPE_ID);
+		String displayType = displyTypeObj==null ? "" : displyTypeObj.getName();
+		schemaObj.put("displayType",displayType);
+		Cell nameCell = widgetObj.getAttributeObjByDestClass(PRIMARY_NAME_ID);
+		if(nameCell!=null) schemaObj.put("title", widgetObj.getName(100));
+		Cell parentIdObj = widgetObj.getAttributeObjByDestClass(PARENTID_ID);
+		if(parentIdObj!=null) schemaObj.put("parentId", parentIdObj.getName());
+		Cell descCell = widgetObj.getAttributeObjByDestClass(DESCRIPTION_ID);
+		if(descCell!=null) schemaObj.put("description",descCell.getName());
+		else schemaObj.put("description", "<a href='#842.1787.1787.1802.1863'>update the description</a>");
+		if(parenttTabObj!=null) schemaObj.put("parentTabId", String.valueOf(parenttTabObj.getId()));
+/*
+		if(widgetObj.getId()==2387) schemaObj.put("rootQuery",new JSONObject().put("id", "846/810"));		
+		if(widgetObj.getId()==2401) schemaObj.put("rootQuery",new JSONObject().put("id", "1714/460"));
+		if(widgetObj.getId()==2428) schemaObj.put("rootQuery",new JSONObject().put("id", "850/702"));
+		if(widgetObj.getId()==2438) schemaObj.put("rootQuery",new JSONObject().put("id", "538/842"));
+		if(widgetObj.getId()==2419) schemaObj.put("rootQuery",new JSONObject().put("id", "844/1"));
+		if(widgetObj.getId()==2411) schemaObj.put("rootQuery",new JSONObject().put("id", "1975/50"));
+*/
+		resultJSONArray.put(schemaObj);
+		//JSONArray childrenAttrsArr = new JSONArray(); 
+		LinkedList<Cell> childViewList = widgetObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(MANYTOMANY_ASSOC, VIEWS_ID );
+		for(Iterator<Cell> itr1=childViewList.iterator();itr1.hasNext();){
+			Cell childViewObj = itr1.next();
+			//schemaObj.put("firstViewId",childViewObj.getId());//assumong there is only one here
+			if(!loopProtection.contains(childViewObj)) getJsonSchemaForView(childViewObj, parenttTabObj, widgetObj, widgetObj, resultJSONArray, loopProtection, session);//, childrenAttrsArr);
+		}
+		//schemaObj.put("childrenAttrs", childrenAttrsArr);
+	}
 }

@@ -1,15 +1,13 @@
 define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "dojo/hash", 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dojo/query!css2'],
 	function(declare, Tree, registry, cookie, hash, Menu, MenuItem, PopupMenuItem){
 	
-	var NqTree = declare(Tree, {
+	var nqTree = declare(Tree, {
 		postCreate: function(){
 			this.inherited(arguments);
 			
-			var state = nq.getState(this.level);
-			var viewsArr = _nqSchemaMemoryStore.query({parentTabId: state.tabId, entity: 'view'});//get the views that belong to this tab
 			// walk through all the views that are allowed as seen from this tab
-			for(var i=0;i<viewsArr.length;i++){
-				var childView = viewsArr[i];			
+			for(var i=0;i<this.viewsArr.length;i++){
+				var childView = this.viewsArr[i];			
 				var parentMenu = new Menu({targetNodeIds: [this.domNode], selector: ".css"+childView.id});
 				for(var k=0;k<childView.childViews.length;k++){
 					var allowedViewId = childView.childViews[k];			
@@ -38,14 +36,14 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 							};
 							addObj[viewDefToCreate.label] = '[new '+classToCreate.className+']';;
 							var newItem = _nqDataStore.add(addObj);
-							//this should be done automaticly some where
-							var x = model.getChildren(newItem, viewsArr);//we need this to create an observer on the newly created item
 							
 							var selectedItem = tree.get("selectedItem");
 							if(!selectedItem[viewId]) selectedItem[viewId] = [];
 							selectedItem[viewId].push(newItem.id);
 							_nqDataStore.put(selectedItem);
-							//interpritHash(0);//force page refresh of the content pane. we could do providedataforwidget, but we dont know the level
+
+							//TODO this should be done automaticly some where
+							var x = model.getChildren(selectedItem, viewsArr);//we need this to create an observer on the newly created item
 							
 							var selectedNodes = tree.getNodesByItem(selectedItem);
 							if(!selectedNodes[0].isExpanded){
@@ -116,9 +114,8 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 		onClick: function(item, node, evt){
 			this.inherited('onClick',arguments);
 			var level = this.level;
-			var state = nq.getState(level);
-			//var nextState = getState(level+1);
-			var tabPane = registry.byId('tab'+state.tabId);
+
+			var tabPane = registry.byId('tab'+this.tabId);
 			document.title = 'NQ - '+(tabPane?tabPane.title+' - ':'')+this.getLabel(item);
 
 			var newViewId = item.viewId;
@@ -145,14 +142,15 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 			hash(newHash);			
 		},
 		_onNodeMouseEnter: function (node,evt) {
-			if(location.href.indexOf('debug'))
+			if(location.href.indexOf('localhost'))
 			dijit.showTooltip(node.item.id,node.domNode);
 		},
 		_onNodeMouseLeave: function (node,evt) {
+			if(location.href.indexOf('localhost'))
 			dijit.hideTooltip(node.domNode);
 		}
 
 	});
-	return NqTree;
+	return nqTree;
 });
 

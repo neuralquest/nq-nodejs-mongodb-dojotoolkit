@@ -1,7 +1,7 @@
 define(["dojo/_base/declare", "dijit/tree/ObjectStoreModel", "dojo/_base/lang", "dojo/when","dojo/_base/array"],
 	function(declare, ObjectStoreModel, lang, when, array){
 	
-	var NqObjectStoreModel = declare(ObjectStoreModel, {
+	var nqObjectStoreModel = declare(ObjectStoreModel, {
 		mayHaveChildren: function(item){
 			for(var i=0;i<this.childrenAttr.length;i++){
 				var childAttr = this.childrenAttr[i];
@@ -88,6 +88,6 @@ define(["dojo/_base/declare", "dijit/tree/ObjectStoreModel", "dojo/_base/lang", 
 		}
 
 	});
-	return NqObjectStoreModel;
+	return nqObjectStoreModel;
 });
 
