@@ -274,12 +274,12 @@ public class ConsistancyServlet extends HttpServlet  implements Constants {
 		LinkedList<Cell> refsList = view.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ATTRIBUTE_REFS_ID);
 		for(Iterator<Cell> itr0=refsList.iterator();itr0.hasNext();){
 			objList.add(itr0.next());
-		}/*
+		}
 		LinkedList<Cell> widgetsList = view.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, WIDGET_ID);
 		for(Iterator<Cell> itr0=widgetsList.iterator();itr0.hasNext();){
 			Cell widget = itr0.next();
 			walkTheViews(widget, objList, session);
-		}*/
+		}
 		LinkedList<Cell> tabsList = view.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ACCTABS_ID);
 		for(Iterator<Cell> itr0=tabsList.iterator();itr0.hasNext();){
 			Cell childAccTabs = itr0.next();

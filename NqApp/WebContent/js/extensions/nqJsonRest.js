@@ -108,11 +108,11 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/nqS
 				*/
 			}
 			else if(query.parentId && query.joinViewAttributes){
-				var _this = this;
+				var self = this;
 				var resultUntilNow = {};
 				var resultsArr = [];
 				var promise = when(_nqDataStore.get(query.parentId), function(parent){
-					return when(_this.join(parent, query.joinViewAttributes, 0, resultUntilNow, resultsArr), function(res){
+					return when(self.join(parent, query.joinViewAttributes, 0, resultUntilNow, resultsArr), function(res){
 						return resultsArr;
 					});
 
@@ -123,8 +123,8 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/nqS
 		},
 
 		join: function(parent, joinViewAttributes, idx, resultUntilNow, resultsArr){
-			var _this = this;
-			return when(_this.getChildren(parent, [joinViewAttributes[idx]]), function(children){
+			var self = this;
+			return when(self.getChildren(parent, [joinViewAttributes[idx]]), function(children){
 				//console.log(idx, children);
 				if(idx == joinViewAttributes.length - 1) {
 					for(var i=0;i<children.length;i++){
@@ -140,7 +140,7 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/nqS
 					for(var i=0;i<children.length;i++){
 						var child = children[i];
 						var newObject = lang.mixin(lang.clone(resultUntilNow), child);
-						promisses.push(_this.join(child, joinViewAttributes, idx+1, newObject, resultsArr));
+						promisses.push(self.join(child, joinViewAttributes, idx+1, newObject, resultsArr));
 					}
 					return all(promisses);
 					/*
@@ -204,7 +204,9 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/nqS
 							dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
 			    		},
 			    		function(error){
-			    	    	new dijit.Dialog({title: "Rollback",content: error.response.data,style: "width: 700px"}).show();
+			    			var message = error.response.data;
+			    			if(!message) message = error.message;
+			    	    	new dijit.Dialog({title: "Rollback", extractContent: true, content: message}).show();
 							this.removeObjects = {};
 							this.addObjects = {};
 							this.putObjects = {};

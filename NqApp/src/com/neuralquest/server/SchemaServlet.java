@@ -206,7 +206,7 @@ public class SchemaServlet extends HttpServlet implements Constants {
 		//if(parenttViewObj!=null) schemaObj.put("parentViewId", parenttViewObj.getId());
 
 		if(parenttTabObj!=null) schemaObj.put("parentTabId", parenttTabObj.getId());
-		if(parenttWidgetObj!=null) schemaObj.put("parentWidgetId", "w"+parenttWidgetObj.getId());
+		if(parenttWidgetObj!=null) schemaObj.put("parentWidgetId", parenttWidgetObj.getId());
 
 		JSONArray childViewsArr = new JSONArray(); 
 		schemaObj.put("childViews", childViewsArr);
@@ -297,7 +297,7 @@ public class SchemaServlet extends HttpServlet implements Constants {
 	}
 	private void getJsonSchemaForWidget(Cell widgetObj, Cell parenttTabObj, JSONArray resultJSONArray, LinkedList<Cell> loopProtection, Session session) throws Exception {
 		JSONObject schemaObj = new JSONObject();
-		schemaObj.put("id","w"+widgetObj.getId());
+		schemaObj.put("id",widgetObj.getId());
 		schemaObj.put("entity","widget");
 		Cell displyTypeObj = widgetObj.getAttributeObjByDestClass(DISPLAY_TYPE_ID);
 		String displayType = displyTypeObj==null ? "" : displyTypeObj.getName();

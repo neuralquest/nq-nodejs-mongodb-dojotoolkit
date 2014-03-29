@@ -15,23 +15,38 @@ h1, h2, h3, h4, h5, h6 {margin-top: 0.5em; margin-bottom: 0em;}
 code {border:none; font-size: 100%;}
 .dojoDndContainerOver {	border: 0px;}
 
-.dgrid {height: auto;}
-.field-rowSelector {width: 5px;}
-/*.dgrid .dgrid-scroller {position: relative;overflow: visible;max-height: 500px;}*/
-.dgrid-cell-padding {padding: 0px;}
-.dgrid-row-odd {background: #F2F5F9;}
-.dgrid-cell {border: none;}
+/*needed for auto grow tables? view-source:http://dojofoundation.org/packages/dgrid/js/dgrid/test/autoheight.html*/
+/* styles for autoheight */
+.nqGrid {height: auto;}
+.nqGrid .dgrid-scroller {position: relative;overflow-y: hidden;}
+.has-ie-6 .nqGrid .dgrid-scroller {
+	/* IE6 doesn't react properly to hidden on this page for some reason */
+	overflow-y: visible;
+}
+.nqGrid .dgrid-header-scroll {display: none;}
+.nqGrid .dgrid-header {right: 0;}
+.nqGrid .field-rowSelector {width: 5px;}
+/*.nqGrid .dgrid .dgrid-scroller {position: relative;overflow: visible;max-height: 500px;}*/
+.nqGrid .dgrid-cell-padding {padding: 0px;}
+.nqGrid .dgrid-row-odd {background: #F2F5F9;}
+.nqGrid .dgrid-cell {border: none;}
 /*.dgrid-selected { background: #999; / * Make selected rows be gray * /}*/
+
+/*make dijits transparent*/
+.soria .dijitTextBox, .soria .dijitSelect, .soria .dijitSelect .dijitButtonContents {border: none; background: transparent;}
 
 
 .helpTextInvisable {color:navy; display:none;}
 
+/*reward*/
 .popUp {border: 2px solid gray;	border-radius: 5px; position: fixed; z-index: 2; opacity: 0;background-color: lime; top: 30%; left: 40%; width: 100px; height: 50px; font-weight: bold; font-size: 16px;}
 
+/*the startup page*/
 .pageOverlay {top: 0;left: 0;position: absolute;height: 100%;width: 100%;z-index: 1001;display: block;}
 #loadingOverlay {background:  #fff url('../img/Neuralquest/loadingAnimation.gif') no-repeat 10px 23px;}
 .loadingMessage {padding: 25px 40px;color: #999;}
 
+/*our icons*/
 .editIcon {background-image: url('../img/Neuralquest/edit.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 .annoIcon {background-image: url('../img/Neuralquest/anno.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 .rulesIcon {background-image: url('../img/Neuralquest/rules.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}

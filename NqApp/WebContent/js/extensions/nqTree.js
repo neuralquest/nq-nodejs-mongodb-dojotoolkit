@@ -99,6 +99,11 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 			if(!item) return '';
 			return 'css'+item.viewId;//used by tree menu to determin which menu to show
 		},
+		getTooltip: function(item, opened){
+			if(!item) return '';
+			if(location.href.indexOf('localhost') >= 0)
+			return item.id;
+		},
 		checkItemAcceptance: function(target, source, position){
 			var targetItem = dijit.getEnclosingWidget(target).item;
 			var mapsToClassesArr = _nqSchemaMemoryStore.get(targetItem.viewId).mapsToClasses;
@@ -140,16 +145,7 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 
 			var newHash = hashArr.join('.');
 			hash(newHash);			
-		},
-		_onNodeMouseEnter: function (node,evt) {
-			if(location.href.indexOf('localhost'))
-			dijit.showTooltip(node.item.id,node.domNode);
-		},
-		_onNodeMouseLeave: function (node,evt) {
-			if(location.href.indexOf('localhost'))
-			dijit.hideTooltip(node.domNode);
 		}
-
 	});
 	return nqTree;
 });

@@ -1,18 +1,17 @@
 define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry', 'dijit/layout/ContentPane', 
         'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "nq/nqWidgetBase", "dojo/on", "dojo/dom-geometry", 
-        "dojo/sniff", "dijit/form/ToggleButton", "dojo/_base/lang", 'dijit/registry', "dojo/dom", "dojo/dom-attr",
+        "dojo/sniff", "dijit/form/ToggleButton", 'dijit/registry', "dojo/dom", "dojo/dom-attr",
         'nq/nqClassChart', "dojo/dom-style", "dojo/query", "dojo/mouse", 
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 'dijit/WidgetSet', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, domConstruct, when, registry, ContentPane, 
 			Toolbar, ValidationTextBox, Editor, nqWidgetBase, on, domGeometry, 
-			has, ToggleButton, lang, registry, dom, domAttr,
+			has, ToggleButton, registry, dom, domAttr,
 			nqClassChart, domStyle, query, mouse){
 
 	return declare("nqDocumentWidget", [nqWidgetBase], {
 		parentId: null,
-		extraPlugins: {},
 		viewId: '846',
 		headerAttrId: 873,
 		paragraphAttrId: 959,
@@ -21,12 +20,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		normalToolbar: null,
 
 		postCreate: function(){
-			//initially hide the editor toolbar div
-			domStyle.set(this.editorToolbarDivNode, 'display' , 'none');
+			this.inherited(arguments);
+			//initially show the toolbar div
+			domStyle.set(this.pageToolbarDivNode, 'display' , '');
 			// Create toolbar and place it at the top of the page
 			this.normalToolbar = new Toolbar({});
-			this.inherited(arguments);
-			var _this = this;
+			var self = this;
 			// Add edit mode toggle button
 			this.editModeButton = new ToggleButton({
 		        showLabel: true,
@@ -35,14 +34,14 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				iconClass: 'editIcon',
 		        onChange: function(val){
 		        	if(val) {
-		        		domStyle.set(_this.editorToolbarDivNode, 'display' , '');
-		        		_this.siblingButton.set('checked', false);
-		        		_this.childButton.set('checked', false);
-		        		_this.deleteButton.set('checked', false);
+		        		domStyle.set(self.editorToolbarDivNode, 'display' , '');
+		        		self.siblingButton.set('checked', false);
+		        		self.childButton.set('checked', false);
+		        		self.deleteButton.set('checked', false);
 		        	}
 		        	else {
-		        		_this.closeEditors();
-		        		domStyle.set(_this.editorToolbarDivNode, 'display' , 'none');
+		        		self.closeEditors();
+		        		domStyle.set(self.editorToolbarDivNode, 'display' , 'none');
 		        	}
 				},
 				style : {'margin-left':'10px'} 
@@ -56,9 +55,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				iconClass: 'addIcon',
 		        onChange: function(val){ 
 		        	if(val) {
-		        		_this.editModeButton.set('checked', false);
-		        		_this.childButton.set('checked', false);
-		        		_this.deleteButton.set('checked', false);
+		        		self.editModeButton.set('checked', false);
+		        		self.childButton.set('checked', false);
+		        		self.deleteButton.set('checked', false);
 		        	}
 		        },
 				style : {'margin-left':'5px'} 
@@ -72,9 +71,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				iconClass: 'addIcon',
 		        onChange: function(val){
 		        	if(val) {
-		        		_this.editModeButton.set('checked', false);
-		        		_this.siblingButton.set('checked', false);
-		        		_this.deleteButton.set('checked', false);
+		        		self.editModeButton.set('checked', false);
+		        		self.siblingButton.set('checked', false);
+		        		self.deleteButton.set('checked', false);
 			        }
 	        },
 				style : {'margin-left':'5px'} 
@@ -88,9 +87,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				iconClass: 'removeIcon',
 		        onChange: function(val){ 
 		        	if(val) {
-		        		_this.editModeButton.set('checked', false);
-		        		_this.siblingButton.set('checked', false);
-		        		_this.childButton.set('checked', false);
+		        		self.editModeButton.set('checked', false);
+		        		self.siblingButton.set('checked', false);
+		        		self.childButton.set('checked', false);
 		        	}
 		        },
 				style : {'margin-left':'5px'} 
@@ -130,16 +129,17 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			this.closeEditors();
 			domConstruct.empty(this.pane.domNode);
 
-			var _this = this;
+			var self = this;
 			var viewId = this.viewId;
 			when(this.store.get(this.parentId), function(item){
-				when(_this.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
-					registry.byId('tab'+_this.tabId).resize();
+				when(self.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
+					registry.byId('tab'+self.tabId).resize();
+//					self.pane.resize();
 				});
 			});
 		},
 		generateNextLevelContents: function(item, viewId, headerLevel, paragraphNrArr, parentId, previousParagrphHasRightFloat){
-			var _this = this;
+			var self = this;
 			//Create an ordinary HTML page recursivly by obtaining data from the server
 			var storedHeader = item[this.headerAttrId];
 			var storedRtf = item[this.paragraphAttrId];
@@ -153,78 +153,78 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				objectId: item.id,
 				parentId: parentId,
 				onclick: function(evt){
-					_this.closeEditors();
-					if(_this.siblingButton.get('checked')){
-						_this.siblingButton.set('checked', false);
-						_this.editModeButton.set('checked', true);
+					self.closeEditors();
+					if(self.siblingButton.get('checked')){
+						self.siblingButton.set('checked', false);
+						self.editModeButton.set('checked', true);
 						var addObj = {
 							'id': '',//cid will be added by our restStore exstension, we need a dummy id
 							'viewId': item.viewId, 
 							'classId': item.classId
 						};
-						addObj[_this.headerAttrId] = '[header]';
-						addObj[_this.paragraphAttrId] = '<p>[paragraph]</p>';
-						var newItem = _this.store.add(addObj);
+						addObj[self.headerAttrId] = '[header]';
+						addObj[self.paragraphAttrId] = '<p>[paragraph]</p>';
+						var newItem = self.store.add(addObj);
 						
-						var parentItem = _this.store.get(parentId);
+						var parentItem = self.store.get(parentId);
 						var pos = parentItem[viewId].indexOf(item.id);
 						parentItem[viewId].splice(pos+1, 0, newItem.id);
 						_nqDataStore.put(parentItem);
 						
-						_this.set('parentId');// redraw the page TODO should be using observe
+						self.set('parentId');// redraw the page TODO should be using observe
 						var newDiv = query('span[objectId="'+newItem.id+'"]')[0];
-						_this.replaceHeaderWithEditor(newDiv);
+						self.replaceHeaderWithEditor(newDiv);
 					}
-					else if(_this.childButton.get('checked')){
-						_this.childButton.set('checked', false);
-						_this.editModeButton.set('checked', true);
+					else if(self.childButton.get('checked')){
+						self.childButton.set('checked', false);
+						self.editModeButton.set('checked', true);
 						var addObj = {
 							'id': '',//cid will be added by our restStore exstension, we need a dummy id
 							'viewId': item.viewId, 
 							'classId': item.classId
 						};
-						addObj[_this.headerAttrId] = '[new header]';
-						addObj[_this.paragraphAttrId] = '<p>new paragraph</p>';
-						var newItem = _this.store.add(addObj);
+						addObj[self.headerAttrId] = '[new header]';
+						addObj[self.paragraphAttrId] = '<p>new paragraph</p>';
+						var newItem = self.store.add(addObj);
 						if(!item[viewId]) item[viewId] = [];
 						item[viewId].push(newItem.id);
 						_nqDataStore.put(item);
 						
-						_this.set('parentId');// redraw the page
+						self.set('parentId');// redraw the page
 						var newDiv = query('span[objectId="'+newItem.id+'"]')[0];
-						_this.replaceHeaderWithEditor(newDiv);
+						self.replaceHeaderWithEditor(newDiv);
 					}
-					else if(_this.deleteButton.get('checked')){
+					else if(self.deleteButton.get('checked')){
 						if(!item[viewId] || item[viewId].length == 0){
-							_this.deleteButton.set('checked', false);
-							_this.store.remove(item.id);
+							self.deleteButton.set('checked', false);
+							self.store.remove(item.id);
 							
-							var parentItem = _this.store.get(parentId);
+							var parentItem = self.store.get(parentId);
 							var pos = parentItem[viewId].indexOf(item.id);
 							parentItem[viewId].splice(pos, 1);
 							_nqDataStore.put(parentItem);
-							_this.set('parentId');// redraw the page
+							self.set('parentId');// redraw the page
 						}
 					}
-					else if(_this.editModeButton.get('checked')) {
-						 _this.replaceHeaderWithEditor(evt.currentTarget);
+					else if(self.editModeButton.get('checked')) {
+						 self.replaceHeaderWithEditor(evt.currentTarget);
 					}
 				}
 			}, headerNode);
 			
 			on(headerSpan, mouse.enter, function(evt){
-				if(_this.editModeButton.get('checked') ||
-					   _this.siblingButton.get('checked') ||
-					   _this.childButton.get('checked') ||
-					   _this.deleteButton.get('checked')){
+				if(self.editModeButton.get('checked') ||
+					   self.siblingButton.get('checked') ||
+					   self.childButton.get('checked') ||
+					   self.deleteButton.get('checked')){
 					domStyle.set(headerSpan, 'border', '1px solid gray');// "backgroundColor", "rgba(250, 250, 121, 0.28)"
 				}
 			});
 			on(headerSpan, mouse.leave, function(evt){
-				if(_this.editModeButton.get('checked') ||
-					   _this.siblingButton.get('checked') ||
-					   _this.childButton.get('checked') ||
-					   _this.deleteButton.get('checked')){
+				if(self.editModeButton.get('checked') ||
+					   self.siblingButton.get('checked') ||
+					   self.childButton.get('checked') ||
+					   self.deleteButton.get('checked')){
 					domStyle.set(headerSpan, 'border', '1px none gray');
 				}
 			});
@@ -236,7 +236,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					objectId: item.id
 				}, this.pane.containerNode);
 				
-				_this.addWidget(widgetDomNode);
+				self.addWidget(widgetDomNode);
 
 				domConstruct.create('p', {innerHTML: '<b>Page Model</b> example'}, widgetDomNode);
 			}
@@ -264,9 +264,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				'class': 'todofloatright',
 				objectId: item.id,
 				onclick: function(evt){
-					if(_this.editModeButton.get('checked')) {
-						_this.closeEditors();
-						_this.replaceParagraphWithEditor(evt.currentTarget);
+					if(self.editModeButton.get('checked')) {
+						self.closeEditors();
+						self.replaceParagraphWithEditor(evt.currentTarget);
 					}
 				}
 			}, this.pane.containerNode);
@@ -277,20 +277,20 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				innerHTML: storedRtf, 
 				objectId: item.id,
 				onclick: function(evt){
-					if(_this.editModeButton.get('checked')) {
-						_this.closeEditors();
-						_this.replaceParagraphWithEditor(evt.currentTarget);
+					if(self.editModeButton.get('checked')) {
+						self.closeEditors();
+						self.replaceParagraphWithEditor(evt.currentTarget);
 					}
 				}
 			}, this.pane.containerNode);
 
 			on(paragraphNode, mouse.enter, function(evt){
-				if(_this.editModeButton.get('checked')) {
+				if(self.editModeButton.get('checked')) {
 					domStyle.set(paragraphNode, 'border', '1px solid gray');
 				}
 			});
 			on(paragraphNode, mouse.leave, function(evt){
-				if(_this.editModeButton.get('checked')) {
+				if(self.editModeButton.get('checked')) {
 					domStyle.set(paragraphNode, 'border', '1px none gray');
 				}
 			});
@@ -303,14 +303,14 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				for(var i=0;i<children.length;i++){
 					var childItem = children[i];
 					paragraphNrArr[headerLevel-1] = i+1;
-					_this.generateNextLevelContents(childItem, viewId, headerLevel+1, paragraphNrArr, item.id, previousParagrphHasRightFloat);
+					self.generateNextLevelContents(childItem, viewId, headerLevel+1, paragraphNrArr, item.id, previousParagrphHasRightFloat);
 					paragraphNrArr.splice(headerLevel,100);//remove old shit
-					previousParagrphHasRightFloat = childItem[_this.paragraphAttrId].indexOf('floatright')==-1?false:true;
+					previousParagrphHasRightFloat = childItem[self.paragraphAttrId].indexOf('floatright')==-1?false:true;
 				}
 			});
 		},
 		replaceHeaderWithEditor: function(replaceDiv){
-			var _this = this;
+			var self = this;
 			var objectId = domAttr.get(replaceDiv,'objectId');
 			var item = this.store.get(objectId);
 			var storedHeader = item[this.headerAttrId];
@@ -323,9 +323,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			    'style':{width:'90%','background': 'rgba(250, 250, 121, 0.28)', 'border-style': 'none'},//rgba(0,0,255,0.04)
 				'placeHolder': 'Paragraph Header',
 				'onChange': function(evt){
-					when(_this.store.get(objectId), function(item){
-						item[_this.headerAttrId] = textDijit.get('value');
-						_this.store.put(item);
+					when(self.store.get(objectId), function(item){
+						item[self.headerAttrId] = textDijit.get('value');
+						self.store.put(item);
 					});
 			    }
 			}, domConstruct.create('input'));
@@ -333,7 +333,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			textDijit.focus();			
 		},
 		replaceParagraphWithEditor: function(replaceDiv){
-			var _this = this;
+			var self = this;
 			var objectId = domAttr.get(replaceDiv,'objectId');
 			var item = this.store.get(objectId);
 			var storedRtf = item[this.paragraphAttrId];
@@ -350,9 +350,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				'toolbar': toolbar,
 				focusOnLoad: true,
 				'onChange': function(evt){
-					when(_this.store.get(objectId), function(item){
-						item[_this.paragraphAttrId] = editorDijit.get('value');
-						_this.store.put(item);
+					when(self.store.get(objectId), function(item){
+						item[self.paragraphAttrId] = editorDijit.get('value');
+						self.store.put(item);
 				});}
 			}, domConstruct.create('div'));
 			editorDijit.addStyleSheet('css/editor.css');
@@ -368,15 +368,15 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			editorDijit.startup();			
 		},
 		closeEditors: function(){
-			var _this = this;
+			var self = this;
 			registry.byClass("dijit.form.ValidationTextBox",this.pane.containerNode).forEach(function(tb){
 				domConstruct.create('span', { 
 					innerHTML: tb.get('value'),
 					objectId: tb.objectId,
 					onclick: function(evt){
-						if(_this.editModeButton.get('checked')) {
-							_this.closeEditors();
-							_this.replaceHeaderWithEditor(evt.currentTarget);
+						if(self.editModeButton.get('checked')) {
+							self.closeEditors();
+							self.replaceHeaderWithEditor(evt.currentTarget);
 						}
 					}
 				}, tb.domNode, 'replace');
@@ -387,9 +387,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					innerHTML: editor.get('value'), 
 					objectId: editor.objectId,
 					onclick: function(evt){
-						if(_this.editModeButton.get('checked')) {
-							_this.closeEditors();
-							_this.replaceParagraphWithEditor(evt.currentTarget);
+						if(self.editModeButton.get('checked')) {
+							self.closeEditors();
+							self.replaceParagraphWithEditor(evt.currentTarget);
 						}
 					}
 				}, editor.domNode, 'replace');

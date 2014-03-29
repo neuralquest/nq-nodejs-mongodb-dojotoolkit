@@ -4,14 +4,14 @@ require([
 'dojo/_base/declare', 'dojo/store/Observable', 'dojo/store/Cache', 'dojo/store/JsonRest', 'dojo/store/Memory',
 'dijit/tree/dndSource', 'dojo/Deferred', 'dojo/when', 'dojo/query', 'dijit/layout/BorderContainer', 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', 'dijit/Editor', 
-'nq/nqProcessChart', 'nq/nqClassChart', 'nq/nqForm', 'nq/nqTable', 'nq/nqJsonRest', 'nq/nqTree', 'nq/nqObjectStoreModel', 'nq/nqDocument',
+'nq/nqProcessChart', 'nq/nqClassChart', 'nq/nqForm', 'nq/nqTable', 'nq/nqJsonRest', 'nq/nqTree', 'nq/nqObjectStoreModel', 'nq/nqDocument', 'nq/nqReport',
  'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct,
 		declare, Observable, Cache, JsonRest, Memory, 
 		dndSource, Deferred, when, query, BorderContainer, 
 		TabContainer, ContentPane, AccordionContainer, Editor, 
-		nqProcessChart, nqClassChart, nqForm, nqTable, nqJsonRest, nqTree, nqObjectStoreModel, nqDocument, 
+		nqProcessChart, nqClassChart, nqForm, nqTable, nqJsonRest, nqTree, nqObjectStoreModel, nqDocument, nqReport,
 		instrumentation, styles) {
 	
 	_nqMemoryStore = Observable(new Memory({}));
@@ -68,18 +68,10 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			var widgetDef = _nqSchemaStore.get(viewDef.parentWidgetId);
 			if(widgetDef.parentTabId) {
 				var tabDef = _nqSchemaStore.get(widgetDef.parentTabId);
-				parentViewDef = _nqSchemaStore.get(tabDef.parentViewId);
-			}
-		}
-		else {
-			if(viewDef.parentTabId) {
-				var tabDef = _nqSchemaStore.get(viewDef.parentTabId);
-				parentViewDef = _nqSchemaStore.get(tabDef.parentViewId);
+				if(tabDef.parentViewId) parentViewDef = _nqSchemaStore.get(tabDef.parentViewId);
 			}
 		}
 		if(parentViewDef) {
-//			var tabDef = _nqSchemaStore.get(viewDef.parentTabId);
-//			var parentViewDef = _nqSchemaStore.get(tabDef.parentViewId);
 			if(parentViewDef.entity == 'tab'){
 				if(parentViewDef.displayType == 'Sub Accordion') {
 					var parentContentPane = registry.byId('slave'+parentViewDef.id);
@@ -250,17 +242,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var state = getState(level);
 		if(!state.tabId) return;
 		var tabNode = dom.byId('tab'+state.tabId);
-//		var nextState = getState(level+1);
 		var widget = registry.byId('widget'+widgetDef.id);
 		var viewDef = _nqSchemaMemoryStore.get(state.viewId);
-		var viewsArr = _nqSchemaMemoryStore.query({parentTabId: state.tabId, entity: 'view'});//get the views that belong to this tab
-
-var temp = false;
-if(viewsArr.length == 0) {
-	temp = true;
-}
-if(temp) viewsArr = _nqSchemaMemoryStore.query({parentWidgetId: widgetDef.id, entity: 'view'});//get the views that belong to this wdiget
-	
+		viewsArr = _nqSchemaMemoryStore.query({parentWidgetId: widgetDef.id, entity: 'view'});//get the views that belong to this wdiget	
 		var viewIdsArr = [];
 		for(var i=0;i<viewsArr.length;i++){
 			viewIdsArr.push(viewsArr[i].id);
@@ -273,7 +257,6 @@ if(temp) viewsArr = _nqSchemaMemoryStore.query({parentWidgetId: widgetDef.id, en
 				widget = new nqDocument({
 					id: 'widget'+widgetDef.id,
 					store: _nqDataStore,
-					extraPlugins: _extraPlugins,
 					widgetDef: widgetDef,
 					tabId: state.tabId // used by resize
 				}, domConstruct.create('div'));
@@ -288,7 +271,20 @@ if(temp) viewsArr = _nqSchemaMemoryStore.query({parentWidgetId: widgetDef.id, en
 				widget = new nqForm({
 					id: 'widget'+widgetDef.id,
 					store: _nqDataStore,
-					extraPlugins: _extraPlugins,
+					widgetDef: widgetDef,
+					viewDef: viewDef
+				}, domConstruct.create('div'));
+				tabNode.appendChild(widget.domNode);
+				widget.startup();
+				widget.set('parentId', state.selectedObjectIdPreviousLevel);
+			}
+			break;	
+		case 'Report': 
+			if(widget) widget.set('parentId', state.selectedObjectIdPreviousLevel);
+			else {
+				widget = new nqReport({
+					id: 'widget'+widgetDef.id,
+					store: _nqDataStore,
 					widgetDef: widgetDef,
 					viewDef: viewDef
 				}, domConstruct.create('div'));
@@ -307,7 +303,6 @@ if(temp) viewsArr = _nqSchemaMemoryStore.query({parentWidgetId: widgetDef.id, en
 				widget = new nqTable({
 					id: 'widget'+widgetDef.id,
 					store: _nqDataStore,
-					extraPlugins: _extraPlugins,
 					widgetDef: widgetDef,
 					viewDef: viewDef,
 					viewsArr: viewsArr,
@@ -323,12 +318,16 @@ if(temp) viewsArr = _nqSchemaMemoryStore.query({parentWidgetId: widgetDef.id, en
 			if(widgetDef.parentId) query = {'id': widgetDef.parentId};
 			else{
 				var objId = state.selectedObjectIdPreviousLevel.split('/')[1];
-				var query = {id: viewsArr[0].id+'/'+objId};
+				query = {id: viewsArr[0].id+'/'+objId};
 			}
-			if(!widget || widget.model.query != query)	{
-				if(widget  && widget.model.query != query)	{
+			if(widget){
+				var curQuery = widget.model.query;
+				if(curQuery.Id != query.Id) {
 					widget.destroy();
+					widget = null;
 				}
+			}
+			if(!widget)	{
 				var treeModel = new nqObjectStoreModel({
 					childrenAttr: viewIdsArr,
 					store : _nqDataStore,
@@ -422,36 +421,5 @@ if(temp) viewsArr = _nqSchemaMemoryStore.query({parentWidgetId: widgetDef.id, en
 		//newHash = newHash.replace(/,/g,'.');
 		hash(newHash, true);// update history, instead of adding a new record			
 	}
-
-
-
-
-
-	
-	
-	
-	var _extraPlugins = [
-		'|',
-		'foreColor','hiliteColor',
-	    '|',
-		'createLink', 'unlink', 'insertImage',
-	    '|',
-/*	    {name: 'dojox.editor.plugins.TablePlugins', command: 'insertTable'},
-	   	{name: 'dojox.editor.plugins.TablePlugins', command: 'modifyTable'},
-	    {name: 'dojox.editor.plugins.TablePlugins', command: 'InsertTableRowBefore'},
-	    {name: 'dojox.editor.plugins.TablePlugins', command: 'InsertTableRowAfter'},
-	    {name: 'dojox.editor.plugins.TablePlugins', command: 'insertTableColumnBefore'},
-	    {name: 'dojox.editor.plugins.TablePlugins', command: 'insertTableColumnAfter'},
-	    {name: 'dojox.editor.plugins.TablePlugins', command: 'deleteTableRow'},
-	    {name: 'dojox.editor.plugins.TablePlugins', command: 'deleteTableColumn'},
-	    {name: 'dojox.editor.plugins.TablePlugins', command: 'colorTableCell'},
-	    {name: 'dojox.editor.plugins.TablePlugins', command: 'tableContextMenu'},
-//	    {name: 'dojox.editor.plugins.TablePlugins', command: 'ResizeTableColumn'},
-	    '|',*/
-		'viewsource'
-    ];		
-	
-
-
 });
 

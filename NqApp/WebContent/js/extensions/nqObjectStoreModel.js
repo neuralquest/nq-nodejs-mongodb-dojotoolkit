@@ -11,22 +11,22 @@ define(["dojo/_base/declare", "dijit/tree/ObjectStoreModel", "dojo/_base/lang", 
 			return false;
 		},		
 		getChildren: function(/*Object*/ parentItem,/*function(items)*/ onComplete, /*function*/ onError){
-			var _this = this;
+			var self = this;
 			when(this.store.getChildren(parentItem, this.childrenAttr),function(children){
 				for(var i=0;i<children.length;i++){
 					var childId = children[i].id;
-					if(!_this.childrenCache[childId]){
+					if(!self.childrenCache[childId]){
 						res = _nqMemoryStore.query({'id': childId});
 						res.observe(function(obj, removedFrom, insertedInto){
 							//console.log("_nqMemoryStore observe of : ", obj);
-							_this.onChange(obj);
+							self.onChange(obj);
 							//Make sure the children of this child are also in sync
-							when(_this.store.getChildren(obj, _this.childrenAttr), function(grandChildren){
+							when(self.store.getChildren(obj, self.childrenAttr), function(grandChildren){
 								//console.dir(grandChildren);
-								_this.onChildrenChange(obj, grandChildren);
+								self.onChildrenChange(obj, grandChildren);
 							});
 						}, true);
-						_this.childrenCache[childId] = true;					
+						self.childrenCache[childId] = true;					
 					}
 				}
 				onComplete(children);

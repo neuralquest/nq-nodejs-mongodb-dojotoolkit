@@ -9,12 +9,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 			when, query, registry, nqWidgetBase, ContentPane, domGeometry, has, lang){
    
 	return declare("nqFormWidget", [nqWidgetBase], {
-		extraPlugins: {},
-		
 		postCreate: function(){
 			this.inherited(arguments);
-			
-			var tableNode = domConstruct.create('table', null, this.pane.domNode);
+
+			var tableNode = domConstruct.create('table', {style: 'border-spacing:5px;'}, this.pane.containerNode);
 			
 			var propsObj = this.viewDef.properties;
 			//create an array with the propertie in the right order
@@ -26,20 +24,17 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 				prop.name = key;
 				propsArr[prop.sequence] = prop;
 			}
-			var toolbarDivNode = this.toolbarDivNode; 
-			var extraPlugins = this.extraPlugins; 
 			for(var i=0; i<propsArr.length;i++){
 				var dijit;
 				var prop = propsArr[i];
 
-				//console.log('Create dijit:', prop.title, prop);				
 				var row = domConstruct.create("tr", null, tableNode);
 				
 				//the label
-				domConstruct.create("td", {innerHTML: (prop.title), style: "padding-right: 5px"}, row);
+				domConstruct.create("td", {innerHTML: (prop.title), style: "padding: 3px"}, row);
 				
 				//the dijit
-				var tdDom = domConstruct.create("td", {style: "padding-right: 5px"}, row);
+				var tdDom = domConstruct.create("td", {style: "padding: 3px; background: rgba(249, 249, 182, 0.5);"}, row);
 				if('permittedValues' in prop){
 					var selectStore = new Memory({data: prop.permittedValues});
 					dijit = new Select({
@@ -59,7 +54,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 					this.editorToolbarDivNode.appendChild(toolbar.domNode);
 					var widgetProperties = getWidgetProperties(prop);
 					widgetProperties.height = '';//auto grow
-					widgetProperties.extraPlugins = extraPlugins;
+					widgetProperties.extraPlugins = this.extraPlugins;
 					widgetProperties.toolbar = toolbar;
 					//widgetProperties.styleSheet = 'css/editor.css';
 					dijit = new Editor(widgetProperties, domConstruct.create('div'));
@@ -88,19 +83,19 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 
 				tdDom.appendChild(dijit.domNode);
 				
-				var _this = this;
+				var self = this;
 				dijit.on('change', lang.hitch(dijit, function(evt){
-					var _parentId = _this.parentId;
+					var _parentId = self.parentId;
 					var _name = this.name;
 					var _value = evt;
-					when(_this.store.get(_parentId), function(item){
+					when(self.store.get(_parentId), function(item){
 						item[_name] = _value;
-						_this.store.put(item);
+						self.store.put(item);
 					});
 				}));	
 				
 				//the help text
-				domConstruct.create("td", { innerHTML: (prop.description?prop.description:""), style: "padding-right: 5px", 'class': 'helpTextInvisable'}, row);
+				domConstruct.create("td", { innerHTML: (prop.description?prop.description:""), style: "padding: 3px", 'class': 'helpTextInvisable'}, row);
 			};
 		},	
 		_setParentIdAttr: function(value){

@@ -1,16 +1,18 @@
-define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox',
-         'dijit/Editor', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", "dojo/cookie", "dojo/hash",
-         "nq/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff",
+define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-style",'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox',
+         'dijit/Editor', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", "dojo/cookie", "dojo/hash", "dijit/form/ToggleButton",
+         "nq/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/date/locale", "dojo/html",
         'dgrid/OnDemandGrid', 'dgrid/editor', 'dgrid/Selection', 'dgrid/Keyboard', 'dgrid/extensions/DijitRegistry', "dgrid/extensions/DnD",
         "dgrid/Selection", "dgrid/selector", "dgrid/selector", "dijit/form/Button","dojo/_base/array", "dijit/registry",
+        "dojo/date/stamp",
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
-	function(declare, arrayUtil, Select, Toolbar, DateTextBox, 
-			Editor, Memory, domConstruct, on, cookie, hash, 
-			nqWidgetBase, ContentPane, domGeometry, has, 
+	function(declare, arrayUtil, lang, domStyle, Select, Toolbar, DateTextBox, 
+			Editor, Memory, domConstruct, on, cookie, hash, ToggleButton,
+			nqWidgetBase, ContentPane, domGeometry, has, locale, html, 
 			Grid, editor, Selection, Keyboard, DijitRegistry, Dnd,
-			Selection, selector, Button, array, registry){
+			Selection, selector, Button, array, registry,
+			stamp){
    
 	return declare("nqGridWidget", [nqWidgetBase], {
 		extraPlugins: {},
@@ -26,6 +28,51 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 
 //			if(viewsArr.length == 1) rowsUpdateable = true;
 
+			//initially show the toolbar div
+			domStyle.set(this.pageToolbarDivNode, 'display' , '');
+			// Create toolbar and place it at the top of the page
+			this.normalToolbar = new Toolbar({});
+			var self = this;
+			// Add sibling toggle button
+			var siblingButton = new ToggleButton({
+		        showLabel: true,
+		        label: 'Add Row',
+				iconClass: 'addIcon',
+		        onClick: function(evt){ 
+					var classToCreate = self.viewDef.mapsToClasses[0];
+					var viewId = self.viewsArr[0].id;
+					console.log(classToCreate.className);
+					//add the child
+					var addObj = {
+						'id': '',//cid will be added by our restStore exstension, we need a dummy id
+						'viewId': viewId, 
+						'classId': classToCreate.id
+					};
+					addObj[self.viewDef.label] = '[new '+classToCreate.className+']';
+					var newItem = self.store.add(addObj);
+					//update the parent
+					var parentItem = self.store.get(self.query.parentId);
+					if(!parentItem[viewId]) parentItem[viewId] = [];
+					parentItem[viewId].push(newItem.id);
+					self.store.put(parentItem);
+					self.grid.refresh();
+					self.grid.select(newItem);
+		        },
+				style : {'margin-left':'5px'} 
+			});
+			this.normalToolbar.addChild(siblingButton);
+			// Add delete toggle button
+			this.deleteButton = new ToggleButton({
+		        showLabel: true,
+		        checked: false,
+		        label: 'Delete Row',
+				iconClass: 'removeIcon',
+				style : {'margin-left':'5px'} 
+			});
+			this.normalToolbar.addChild(this.deleteButton);
+			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
+			
+			
 			var propsArr = [];
 			for(var i = 0;i<this.viewsArr.length;i++){
 				var viewDef = this.viewsArr[i];
@@ -58,9 +105,9 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 				//rowNumber({label:' '})
 			);
 			var gridStyle = {};
-			var _this = this;
+			var self = this;
 			arrayUtil.forEach(propsArr, function(prop) {	
-				var editorProps = _this.getWidgetProperties(prop);
+				var editorProps = self.getWidgetProperties(prop);
 				editorProps.sortable = sortable;
 				//get the width of the colomn
 				//gridStyle[prop.name] = 'width:'+(prop.width<=0?"auto":prop.width+"em");
@@ -84,22 +131,40 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					};
 					editorProps.editor = Select;
 				}
+				else if(prop.type=='string' && prop.format=='date-time'){
+					editorProps.renderCell = function(object, value, node, options) {
+						console.log('value', value);
+						if(!value || value=='') return;
+						var date = null;
+						if(lang.isObject(value)) date = value;
+						else date = dojo.date.stamp.fromISOString(value);
+						html.set(node, date.toLocaleDateString());
+					};
+					editorProps.set = function(item) {
+						var value = item[prop.name];
+						return value.toISOString();
+					};
+					editorProps.autoSave = true;
+					editorProps.editor = DateTextBox;
+				}
 				else if(prop.type=='string' && prop.format=='rtf') {
 					
 					var toolbar = new Toolbar({
 						//'style': {'display': 'none'}
 					});
-					_this.editorToolbarDivNode.appendChild(toolbar.domNode);
+					self.editorToolbarDivNode.appendChild(toolbar.domNode);
 					editorProps.editorArgs = {
 							'toolbar': toolbar, 
 							'addStyleSheet': 'css/editor.css',
-							'extraPlugins': _this.extraPlugins,
+							'extraPlugins': self.extraPlugins,
 							'maxHeight': -1
-					};
-					
+					};					
 					editorProps.editor = Editor;
+					editorProps.renderCell = function(object, value, node, options) {
+						html.set(node, value);
+					}
+
 				}
-				else if(prop.type=='string' && prop.format=='date-time') editorProps.editor = DateTextBox;
 				else if(prop.type=='string') editorProps.editor = 'text';
 				else if(prop.type=='integer') editorProps.editor = 'number';						
 				else if(prop.type=='number') editorProps.editor = 'number';						
@@ -108,6 +173,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			});
 			this.grid = new (declare([Grid, Selection, Keyboard, DijitRegistry, Dnd]))({
 				//'id' : 'widget'+state.tabId,
+				'class': '.nqGrid',
 				'store': this.store,
 				'selectionMode': "single",
 				'loadingMessage': 'Loading data...',
@@ -122,7 +188,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			this.pane.containerNode.appendChild(this.grid.domNode);
 
 			if(rowsUpdateable){
-				var mapsToClass = viewDef.mapsToClasses[0];
+/*				var mapsToClass = viewDef.mapsToClasses[0];
 			    var addButton = new Button({
 			        label: "Add Row",
 			        disabled:false, 
@@ -151,7 +217,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					this.store.put(parentItem);
 					this.grid.refresh();
 					this.grid.select(newItem);
-				});*/
+				});* /
 				this.pane.containerNode.appendChild(addButton.domNode);
 			    var removeButton = new Button({
 			        label: "Remove Row",
@@ -174,41 +240,53 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 						this.store.put(parentItem);
 			    	}
 					this.grid.refresh();
-				});*/
-				this.pane.containerNode.appendChild(removeButton.domNode);
+				});* /
+				this.pane.containerNode.appendChild(removeButton.domNode);*/
 			}
 			
 			this.grid.on(".dgrid-row:click", function(event){
-				var level = _this.level;
-				var state = nq.getState(level);
-				//var nextState = getState(level+1);
-//				var tabPane = registry.byId('tab'+_this.widgetDef.id);
-//				document.title = 'NQ - '+(tabPane?tabPane.title+' - ':'')+this.getLabel(item);
-
-				var item = _this.grid.row(event).data;
-				var newViewId = item.viewId;
-				var ids = _nqDataStore.getIdentity(item).split('/');
-				
-				var currentHash = hash();
-				var hashArr = currentHash.split('.');
-				hashArr[level*3+1] = ''+_this.widgetDef.id;//it may have changed
-				hashArr[level*3+2] = ''+ids[1];//it will have changed
-				if(hashArr[(level+1)*3+0] != newViewId){//if its changed
-					//remove anything following this level in the hash since it is nolonger valid
-					hashArr = hashArr.slice(0,(level+1)*3+0);
+				var item = self.grid.row(event).data;
+				if(self.deleteButton.get('checked')){
+					self.deleteButton.set('checked', false);
+					self.store.remove(item.id);
 					
-					hashArr[(level+1)*3+0] = newViewId;
-					//if there is a cookie for this acctab, use if to set the hash tabId (we can prevent unnessasary interperitHash())//FIXME remove set tabId
-					var cookieValue = cookie('acctab'+newViewId+'_selectedChild');
-					if(cookieValue) hashArr[(level+1)*3+1] = cookieValue.substr(3);
-					else{//find the first tab and use it
-						var tabsArr = _nqSchemaMemoryStore.query({parentViewId: newViewId, entity: 'tab'});//get the tabs		 
-						if(tabsArr.length>0) hashArr[(level+1)*3+1] = tabsArr[0].id;
-					}
+					var viewId = self.viewsArr[0].id;
+					var parentItem = self.store.get(self.query.parentId);
+					var pos = parentItem[viewId].indexOf(item.id);
+					parentItem[viewId].splice(pos, 1);
+					_nqDataStore.put(parentItem);
+					self.grid.refresh();
 				}
+				else{
+					var level = self.level;
+					//var nextState = getState(level+1);
+//					var tabPane = registry.byId('tab'+self.widgetDef.id);
+//					document.title = 'NQ - '+(tabPane?tabPane.title+' - ':'')+this.getLabel(item);
 
-				var newHash = hashArr.join('.');
-				hash(newHash);			
+					var newViewId = item.viewId;
+					var ids = _nqDataStore.getIdentity(item).split('/');
+					
+					var currentHash = hash();
+					var hashArr = currentHash.split('.');
+					hashArr[level*3+1] = ''+self.widgetDef.id;//it may have changed
+					hashArr[level*3+2] = ''+ids[1];//it will have changed
+					if(hashArr[(level+1)*3+0] != newViewId){//if its changed
+						//remove anything following this level in the hash since it is nolonger valid
+						hashArr = hashArr.slice(0,(level+1)*3+0);
+						
+						hashArr[(level+1)*3+0] = newViewId;
+						//if there is a cookie for this acctab, use if to set the hash tabId (we can prevent unnessasary interperitHash())//FIXME remove set tabId
+						var cookieValue = cookie('acctab'+newViewId+'_selectedChild');
+						if(cookieValue) hashArr[(level+1)*3+1] = cookieValue.substr(3);
+						else{//find the first tab and use it
+							var tabsArr = _nqSchemaMemoryStore.query({parentViewId: newViewId, entity: 'tab'});//get the tabs		 
+							if(tabsArr.length>0) hashArr[(level+1)*3+1] = tabsArr[0].id;
+						}
+					}
+
+					var newHash = hashArr.join('.');
+					hash(newHash);		
+				}
 			});
 			/*this.grid.on("dgrid-refresh-complete", function(event){
 //				var row = grid.row(event);
@@ -252,12 +330,6 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			properties.constraints = constraints;
 			
 			return properties;
-		},
-		formatGridDate: function(theDate, rowIndex) {
-			var rowdata = this.grid.getItem(rowIndex);
-			var theDate = new Date(parseInt(rowdata.datefieldname));
-			theDateString = dojo.date.locale.format(theDate, {selector: 'date', datePattern: 'MM/dd/yyyy' });
-			return theDateString;
 		}
 	});
 });
