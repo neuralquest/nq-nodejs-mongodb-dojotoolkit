@@ -38,22 +38,24 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 		        showLabel: true,
 		        label: 'Add Row',
 				iconClass: 'addIcon',
-		        onClick: function(evt){ 
-					var classToCreate = self.viewDef.mapsToClasses[0];
+		        onClick: function(evt){
+		        	var viewDefToCreate = self.viewsArr[0];//TODO what about more than one 
+					var classToCreate = viewDefToCreate.mapsToClasses[0];
 					var viewId = self.viewsArr[0].id;
-					console.log(classToCreate.className);
+//					console.log(classToCreate.className);
 					//add the child
 					var addObj = {
 						'id': '',//cid will be added by our restStore exstension, we need a dummy id
 						'viewId': viewId, 
 						'classId': classToCreate.id
 					};
+					//TODO add default values
 					addObj[self.viewDef.label] = '[new '+classToCreate.className+']';
 					var newItem = self.store.add(addObj);
 					//update the parent
 					var parentItem = self.store.get(self.query.parentId);
 					if(!parentItem[viewId]) parentItem[viewId] = [];
-					parentItem[viewId].push(newItem.id);
+					parentItem[viewId].unshift(newItem.id);
 					self.store.put(parentItem);
 					self.grid.refresh();
 					self.grid.select(newItem);
@@ -142,6 +144,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 					};
 					editorProps.set = function(item) {
 						var value = item[prop.name];
+						if(!value) return;
 						return value.toISOString();
 					};
 					editorProps.autoSave = true;
@@ -187,61 +190,13 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			}
 			this.pane.containerNode.appendChild(this.grid.domNode);
 
+			this.grid.on("dgrid-error", function(event) {
+				// Display an error message above the grid when an error occurs.
+    	    	new dijit.Dialog({title: "Get Error", extractContent: true, content: event.error.message}).show();
+			});
+			
 			if(rowsUpdateable){
-/*				var mapsToClass = viewDef.mapsToClasses[0];
-			    var addButton = new Button({
-			        label: "Add Row",
-			        disabled:false, 
-			        iconClass:'addIcon',
-					classToCreate: mapsToClass,
-					viewDefToCreate: viewDef,
-					store: this.store,
-					parentId: this.query.parentId,
-					grid: this.grid
-			    }, dojo.doc.createElement('div'));
-/*			    on(addButton,"click", function(evt){
-					var classToCreate = this.classToCreate;
-					var viewDefToCreate = this.viewDefToCreate;
-					var viewId = viewDefToCreate.id;
-					console.log(classToCreate.className); 
-					var addObj = {
-						'id': '',//cid will be added by our restStore exstension, we need a dummy id
-						'viewId': viewId, 
-						'classId': classToCreate.id
-					};
-					addObj[viewDefToCreate.label] = '[new '+classToCreate.className+']';
-					var newItem = this.store.add(addObj);
-					var parentItem = this.store.get(this.parentId);
-					if(!parentItem[viewId]) parentItem[viewId] = [];
-					parentItem[viewId].push(newItem.id);
-					this.store.put(parentItem);
-					this.grid.refresh();
-					this.grid.select(newItem);
-				});* /
-				this.pane.containerNode.appendChild(addButton.domNode);
-			    var removeButton = new Button({
-			        label: "Remove Row",
-	//		        disabled: true, 
-			        iconClass: 'removeIcon',
-					viewDefToCreate: viewDef,
-					store: this.store,
-					parentId: this.query.parentId,
-					grid: this.grid
-			    }, dojo.doc.createElement('div'));
-/*			    on(removeButton,"click", function(evt){
-			    	var selectedRows = this.grid.selection;
-			    	for(key in selectedRows) {
-				    	this.store.remove(key);
-						
-						var parentItem = this.store.get(this.parentId);
-						var viewId = this.viewDefToCreate.id;
-						index = array.indexOf(parentItem[viewId], key);
-						parentItem[viewId].splice(index, 1);
-						this.store.put(parentItem);
-			    	}
-					this.grid.refresh();
-				});* /
-				this.pane.containerNode.appendChild(removeButton.domNode);*/
+
 			}
 			
 			this.grid.on(".dgrid-row:click", function(event){
@@ -268,7 +223,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 					
 					var currentHash = hash();
 					var hashArr = currentHash.split('.');
-					hashArr[level*3+1] = ''+self.widgetDef.id;//it may have changed
+					hashArr[level*3+1] = self.tabId;//it may have changed
 					hashArr[level*3+2] = ''+ids[1];//it will have changed
 					if(hashArr[(level+1)*3+0] != newViewId){//if its changed
 						//remove anything following this level in the hash since it is nolonger valid

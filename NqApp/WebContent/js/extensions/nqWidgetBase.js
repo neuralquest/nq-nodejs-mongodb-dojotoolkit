@@ -1,7 +1,7 @@
 define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry",
-        'dojo/_base/array', 'dojo/dom-attr', 
+        'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", 
         'dijit/Toolbar', 'dijit/form/Select', 'dijit/form/DateTextBox',  'dijit/form/NumberTextBox', 'dijit/form/CheckBox', 'dijit/Editor', 'dijit/form/CurrencyTextBox', 'dijit/form/ValidationTextBox', ],
-	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, arrayUtil, domAttr,
+	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, arrayUtil, domAttr, Deferred,
 			Toolbar, Select, DateTextBox, NumberTextBox, CheckBox, Editor, CurrencyTextBox, ValidationTextBox){
 	return declare("nqWidgetBase", [_WidgetBase], {
 		readOnly: false,
@@ -12,6 +12,24 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		viewId: null,
 		selectedObjId: null,
 		
+		startupDeferred: new Deferred(),
+		setParentDeferred: new Deferred(),
+		setSelectedDeferred: new Deferred(),
+		
+		_setParentIdAttr: function(value){
+			if(value) this.parentId = value;
+			//return this.setParentDeferred;
+		},
+		_getParentIdAttr: function(){ 
+			return this.parentId;
+		},
+		_setSelectedObjIdAttr: function(value){
+			if(value) this.selectedObjId = value;
+			//return this.setSelectedDeferred;
+		},
+		_getSelectedObjIdAttr: function(){ 
+			return this.selectedObjId;
+		},
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
@@ -35,23 +53,12 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			if(hDiv) changeSize.h -= hDiv.h;
 			this.pane.resize(changeSize);
 		},
-		_getParentIdAttr: function(){ 
-			return this.parentId;
-		},
-		_setParentIdAttr: function(value){
-			if(value) this.parentId = value;
-		},
-		_getSelectedObjIdAttr: function(){ 
-			return this.selectedObjId;
-		},
-		_setSelectedObjIdAttr: function(value){
-			if(value) this.selectedObjId = value;
-		},
 		startup: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){
 				if(widget.startup) widget.startup();
 			});
 			this.pane.resize();
+			//return this.startupDeferred;
 		},/*
 		destroy: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){

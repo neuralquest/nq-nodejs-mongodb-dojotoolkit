@@ -8,6 +8,20 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		selectableObjects: [],
 		displayFPS: false,
 
+		_getParentIdAttr: function(){ 
+			return this.parentId;
+		},
+		_setParentIdAttr: function(value){
+			if(value) this.parentId = value;
+			return true;
+		},
+		_getSelectedObjIdAttr: function(){ 
+			return this.selectedObjId;
+		},
+		_setSelectedObjIdAttr: function(value){
+			if(value) this.selectedObjId = value;
+			return true;
+		},
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");

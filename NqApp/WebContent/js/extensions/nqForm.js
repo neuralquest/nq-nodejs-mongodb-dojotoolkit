@@ -13,7 +13,12 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Form', 'dijit/form
 			this.inherited(arguments);
 
 			var tableNode = domConstruct.create('table', {style: 'border-spacing:5px;'}, this.pane.containerNode);
-			
+/*
+			var ATTRREFERENCE_VIEW_ID = 537;
+			return when(this.store.getChildren(this.viewObj, [ATTRREFERENCE_VIEW_ID]), function(attrs){
+				
+			});
+*/			
 			var propsObj = this.viewDef.properties;
 			//create an array with the propertie in the right order
 			var propsArr = [];

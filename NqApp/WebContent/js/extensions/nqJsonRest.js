@@ -12,7 +12,7 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/nqS
 		/*getChildren: function(object, childViewAttributes, options){
 			var genQuery ={parentId: object.id, childViewAttributes: childViewAttributes};
 			return this.query(genQuery, options);
-		},*/
+		},
 		getChildren: function(object, childViewAttributes){
 			var promisses = [];
 			for(var i=0;i<childViewAttributes.length;i++){
@@ -44,7 +44,7 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/nqS
 				});
 				return results;
 			});
-		},		
+		},	*/	
 		put: function(object, options){
 			registry.byId('cancelButtonId').set('disabled',false);
 			registry.byId('saveButtonId').set('disabled',false);
@@ -79,7 +79,7 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/nqS
 				// add it to the queue of removed Objects
 				this.removeObjects[id] = originalObject;
 			}
-	    },
+	    },/*
 		query: function(query, options){
 			if(query.parentId && query.childViewAttributes){				
 				var promisses = [];
@@ -105,7 +105,7 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/nqS
 					return this.getChildren(parent, this.query.childViewAttributes);
 				}));
 				return QueryResults(results);
-				*/
+				* /
 			}
 			else if(query.parentId && query.joinViewAttributes){
 				var self = this;
@@ -155,10 +155,10 @@ define(["dojo/_base/declare", "dojo/store/JsonRest", "dojo/promise/all", "nq/nqS
 							}
 						}
 						return newArr;
-					});*/
+					});* /
 				}
 			});
-		},		
+		},	*/	
 	    transaction: function(){
 	    	return {
 		    	commit: lang.hitch(this, function(){

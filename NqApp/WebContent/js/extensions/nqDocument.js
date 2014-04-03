@@ -131,10 +131,11 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 
 			var self = this;
 			var viewId = this.viewId;
-			when(this.store.get(this.parentId), function(item){
-				when(self.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
+			return when(this.store.get(this.parentId), function(item){
+				return when(self.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
 					registry.byId('tab'+self.tabId).resize();
 //					self.pane.resize();
+					return true;
 				});
 			});
 		},

@@ -79,9 +79,10 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 
 			};		
 		},
+		/*
 		onLoad: function(){
 			fullPage.resize();//need this for lazy loaded trees
-		},
+		},*/
 		getIconClass: function(/*dojo.data.Item*/ item, /*Boolean*/ opened){
 			if(!item) return 'icondefault';
 			return 'icon'+item.classId;
