@@ -13,12 +13,12 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg'],
 		classGeometry: null,
 
-		startup: function(){
-			this.inherited(arguments);
+
+		postCreate: function(){
+			this.inherited(arguments);//create the scene
 			
 			// load any meshes, return a defered so that selecting the object can wait
 			var loader = new THREE.JSONLoader(true);			
-			var deferred = new Deferred();
 			loader.load("img/Neuralquest/mesh/classMesh.js", lang.hitch(this, function(geometry, materials) {
 				this.classGeometry = geometry;
 				var parentChildrenArray = [];
@@ -46,11 +46,11 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 						sceneObject3D.position = ourVec;
 						this.addToScene(sceneObject3D);
 						this.drawAssociations(cellPositionsObj, attrPositionsObj);
-						deferred.resolve(classItem);
+
+						this.createDeferred.resolve(this);//tell the caller that the diagram is done	
 					}));
 				}));
 			}));
-			return deferred;
 		},
 		buildHierarchy: function(objectId, cellPositionsObj, parentChildrenArray){
 			if(objectId in cellPositionsObj) return;//loop protection

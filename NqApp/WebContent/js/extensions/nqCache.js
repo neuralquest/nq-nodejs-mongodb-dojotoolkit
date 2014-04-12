@@ -1,5 +1,5 @@
-define(["dojo/_base/lang","dojo/when", "dojo/promise/all", "dojo/store/util/QueryResults" /*=====, "../_base/declare", "./api/Store" =====*/],
-function(lang, when, all, QueryResults /*=====, declare, Store =====*/){
+define(["dojo/_base/lang","dojo/when", "dojo/promise/all", "dojo/store/util/QueryResults", 'dojo/promise/instrumentation' /*=====, "../_base/declare", "./api/Store" =====*/],
+function(lang, when, all, QueryResults, instrumentation /*=====, declare, Store =====*/){
 
 // module:
 //		dojo/store/Cache
@@ -26,7 +26,7 @@ var nqCache = function(masterStore, cachingStore, options){
 					}
 					return result;
 				});
-			});
+			}, nq.errorDialog);
 		},
 		add: function(object, directives){
 			return when(masterStore.add(object, directives), function(result){
@@ -118,7 +118,7 @@ var nqCache = function(masterStore, cachingStore, options){
 						return newArr;
 					});*/
 				}
-			});
+			}, nq.errorDialog);
 		},		
 		getChildren: function(object, childViewAttributes){
 			var promisses = [];
@@ -149,10 +149,59 @@ var nqCache = function(masterStore, cachingStore, options){
 					if(aLabel < bLabel) return -1;
 					return 0;
 				});
+				//console.dir(results);
 				return results;
-			});
+			}, nq.errorDialog);
+		},
+		getManyClassesFromClassByAssocType: function(classId, assocType, recursive){
+			var promisses = [];
+			if(recursive) this.getClassesFromClassByAssocType(classId, assocType, recursive);
+			return all(promisses);
+		},
+		getManyObjectsFromClassByAssocType: function(classId, assocType, recursive){
+			var promisses = [];
+			if(recursive) this.getClassesFromClassByAssocType(classId, assocType, recursive);
+			return all(promisses);
+		},
+		getManyObjectsFromObjectByAssocType: function(objectId, assocType, recursive){
+			var promisses = [];
+			if(recursive) this.getClassesFromClassByAssocType(classId, assocType, recursive);
+			return all(promisses);
+		},
+		getOneClassFromClassByAssocType: function(classId, assocType){
+		},
+		getOneObjectFromClassByAssocType: function(classId, assocType){
+		},
+		getOneObjectFromObjectByAssocType: function(objectId, assocType){
 		}
+
 	});
+	// Primitive Assoc types (used by the Assoc table)
+	var PARENT_ASSOC = 3;			//TO ONE
+	var ATTRIBUTE_ASSOC = 4;		//TO ONE
+	var MAPSTO_ASSOC = 5;			//TO ONE
+	var DEFAULT_ASSOC = 6;		//TO ONE
+	var ONETOONE_ASSOC = 7;		//TO ONE
+	var ORDERED_ASSOC = 8;		//TO MANY
+	var NEXT_ASSOC = 9;			//TO ONE Only used internaly
+	var MANYTOMANY_ASSOC = 10;	//TO MANY
+	var ONETOMANY_ASSOC = 11;		//TO MANY
+	var OWNS_ASSOC = 12;			//TO MANY
+	// Pseudo Assoc tppes (reverse of the real assocs)
+	var SUBCLASSES_PASSOC = 15;		//TO MANY
+	var ATTRIBUTE_OF_PASSOC = 16;	//TO MANY
+	var MAPPED_TO_BY_PASSOC = 17;	//TO MANY
+	var DEFAULT_OF_PASSOC = 18;	//TO MANY
+	var ONETOONE_REVERSE_PASSOC = 19;	//TO ONE
+	var ORDERED_PARENT_PASSOC = 20;//TO ONE
+	//var PREVIOUS_PASSOC = 21;	//TO ONE Not implemented
+	var MANYTOMANY_REVERSE_PASSOC = 22;	//TO MANY
+	var MANYTOONE_PASSOC = 23;	//TO ONE
+	var OWNED_BY_PASSOC = 24;		//TO ONE
+	//Special
+	var INSTANTIATIONS_PASSOC = 27;	//TO MANY
+	var THE_USER_PASSOC = 28;					//TO MANY
+	var ASSOCS_PASSOC = 31; 			//TO MANY		
 };
 lang.setObject("dojo.store.Cache", nqCache);
 

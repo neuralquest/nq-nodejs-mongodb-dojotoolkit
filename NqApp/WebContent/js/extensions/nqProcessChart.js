@@ -18,7 +18,10 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		stateColors: [],
 		swimlaneColors: [],
 		
-		startup: function(){
+				
+		postCreate: function(){
+			this.inherited(arguments);//create the scene
+
 			this.highlightColors.push(new THREE.Color( 0xFFFFEF ));
 			this.highlightColors.push(new THREE.Color( 0xFFFFEF ));
 			this.highlightColors.push(new THREE.Color( 0xFFFF00 ));
@@ -39,8 +42,6 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			this.swimlaneColors.push(new THREE.Color( 0x85D6FF ));
 			this.swimlaneColors.push(new THREE.Color( 0x5CB8E6 ));
 
-			this.inherited(arguments);
-			var deferred = new Deferred();
 			
 			var parentChildrenArray = [];
 			var rowHeaderPositionsObj = {};
@@ -66,11 +67,10 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 					//sceneObject3D.rotation.y += Math.PI / 2;;
 					//sceneObject3D.position = ourVec;
 					this.addToScene(sceneObject3D, 'body');
-					deferred.resolve(attrItem);
+					
+					this.createDeferred.resolve(this);//tell the caller that the diagram is done
 				}));
 			}));
-			
-			return deferred;
 		},
 		buildHierarchy: function(objectId, cellPositionsObj, parentChildrenArray, viewId, nameAttrId){
 			if(objectId in cellPositionsObj) return;//loop protection

@@ -123,21 +123,28 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			this.normalToolbar.addChild(button6);
 			
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
+			
+			this.createDeferred.resolve(this);//ready to be loaded with data
 		},
-		_setParentIdAttr: function(value){
-			this.inherited(arguments);
+		_setSelectedObjIdPreviousLevelAttr: function(value){
+			//load the data
+			if(this.selectedObjIdPreviousLevel == value) return this;
+			this.selectedObjIdPreviousLevel = value;
+			
 			this.closeEditors();
 			domConstruct.empty(this.pane.domNode);
 
 			var self = this;
 			var viewId = this.viewId;
-			return when(this.store.get(this.parentId), function(item){
+			when(this.store.get(this.selectedObjIdPreviousLevel), function(item){
 				return when(self.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
 					registry.byId('tab'+self.tabId).resize();
 //					self.pane.resize();
-					return true;
+					self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
+					return item;
 				});
-			});
+			}, nq.errorDialog);
+			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
 		generateNextLevelContents: function(item, viewId, headerLevel, paragraphNrArr, parentId, previousParagrphHasRightFloat){
 			var self = this;
@@ -308,7 +315,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					paragraphNrArr.splice(headerLevel,100);//remove old shit
 					previousParagrphHasRightFloat = childItem[self.paragraphAttrId].indexOf('floatright')==-1?false:true;
 				}
-			});
+			}, nq.errorDialog);
 		},
 		replaceHeaderWithEditor: function(replaceDiv){
 			var self = this;

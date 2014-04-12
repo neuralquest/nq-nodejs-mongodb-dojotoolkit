@@ -1,7 +1,8 @@
 define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry",
-        'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", 
+        'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", "dojo/promise/all", "dojo/when",
         'dijit/Toolbar', 'dijit/form/Select', 'dijit/form/DateTextBox',  'dijit/form/NumberTextBox', 'dijit/form/CheckBox', 'dijit/Editor', 'dijit/form/CurrencyTextBox', 'dijit/form/ValidationTextBox', ],
-	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, arrayUtil, domAttr, Deferred,
+	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, 
+			arrayUtil, domAttr, Deferred, all, when,
 			Toolbar, Select, DateTextBox, NumberTextBox, CheckBox, Editor, CurrencyTextBox, ValidationTextBox){
 	return declare("nqWidgetBase", [_WidgetBase], {
 		readOnly: false,
@@ -10,25 +11,26 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		viewDef: {},
 		parentId: null,
 		viewId: null,
-		selectedObjId: null,
+		selectedObjIdPreviousLevel: null,
+		selectedObjIdThisLevel: null,
 		
-		startupDeferred: new Deferred(),
-		setParentDeferred: new Deferred(),
-		setSelectedDeferred: new Deferred(),
+		createDeferred: null,
+		setSelectedObjIdPreviousLevelDeferred: new Deferred(),
+		setSelectedObjIdThisLevelDeferred: new Deferred(),
 		
-		_setParentIdAttr: function(value){
-			if(value) this.parentId = value;
-			//return this.setParentDeferred;
+		_setSelectedObjIdPreviousLevelAttr: function(value){
+			this.selectedObjIdPreviousLevel = value;
+			return this;
 		},
-		_getParentIdAttr: function(){ 
-			return this.parentId;
+		_getSelectedObjIdPreviousLevelAttr: function(){ 
+			return this.selectedObjIdPreviousLevel;
 		},
-		_setSelectedObjIdAttr: function(value){
-			if(value) this.selectedObjId = value;
-			//return this.setSelectedDeferred;
+		_setSelectedObjIdThisLevelAttr: function(value){
+			this.selectedObjIdThisLevel = value;
+			return this;
 		},
-		_getSelectedObjIdAttr: function(){ 
-			return this.selectedObjId;
+		_getSelectedObjIdIdAttr: function(){ 
+			return this.selectedObjIdThisLevel;
 		},
 		buildRendering: function(){
 			this.inherited(arguments);
@@ -59,6 +61,86 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			});
 			this.pane.resize();
 			//return this.startupDeferred;
+		},
+		getAttrRefProperties: function(viewObj){
+			var ATTRREFERENCE_VIEW_ID = 537;
+
+			var self = this;
+			return when(this.store.getChildren(viewObj, [ATTRREFERENCE_VIEW_ID]), function(attrRefs){
+				var promisses = [];
+				for(var i=0;i<attrRefs.length;i++){
+					var attrRef = attrRefs[i];
+					promisses.push(self.makeProperties(attrRef));
+				};
+				return all(promisses);
+			}, nq.errorDialog);
+		},
+		makeProperties: function(attrRef){
+			var CLASS_MODEL_VIEWS_ID = 844;
+			var MAPSTO_ATTR_ID = 571;
+			var ASSOCIATIONS_VIEW_ID = 1613;
+			var PARENTASSOC_ID = 3;
+			
+			var BUILDASSOCTYPE_ATTR_ID = 2085;
+			var NAME_ATTR_ID = 544;
+			var HLEPTEXT_ATTR_ID = 1405;
+			var ACCESS_ATTR_ID = 554;
+			var PLACEHOLDER_ATTR_ID = 0;
+			var DEFAULT_ATTR_ID = 0;
+			var WIDTH_ATTR_ID = 0;
+			var INVALIDMESSAGE_ATTR_ID = 0;
+			var MAXLENGTH_ATTR_ID = 0;
+			var CURRENCY_ATTR_ID = 0;
+			var REGEX_ATTR_ID = 0;
+			var MINIMUM_ATTR_ID = 0;
+			var MAXIMUM_ATTR_ID = 0;
+			var PLACES_ATTR_ID = 0;
+			var FRACTIONAL_ATTR_ID = 0;
+
+			var MODIFY_VALUE_ID = 289;
+			var MANDATORY_VALUE_ID = 290;
+			
+			var mapsToAttrClass = attrRef[MAPSTO_ATTR_ID];
+			var attrClassId = CLASS_MODEL_VIEWS_ID+'/'+mapsToAttrClass;
+			return when(this.store.get(attrClassId), function(attrClass){
+				var attrClassType = 0;
+				if(attrClass[ASSOCIATIONS_VIEW_ID] && attrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID]) {
+					attrClassType = attrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID][0];
+				}
+				var property = {
+					field: attrRef.id.split('/')[1], // for dgrid
+					name: attrRef.id.split('/')[1], //for input
+					attrClassType: attrClassType==0?0:attrClassType.split('/')[1],
+					label: attrRef[NAME_ATTR_ID],
+					helpText: attrRef[HLEPTEXT_ATTR_ID],
+					required: attrRef[ACCESS_ATTR_ID]==MANDATORY_VALUE_ID?true:false,
+					editable: attrRef[ACCESS_ATTR_ID]==MODIFY_VALUE_ID||MANDATORY_VALUE_ID?true:false,
+					trim: true,
+					//placeholder: attrRef[PLACEHOLDER_ATTR_ID],
+					//'default': attrRef[DEFAULT_ATTR_ID],
+					//width: attrRef[WIDTH_ATTR_ID]+'em',
+					width: '30em',
+//					style: {width: '30em'}, causes editor to crash
+					//invalidMessage: attrRef[INVALIDMESSAGE_ATTR_ID],
+					//maxLength: attrRef[MAXLENGTH_ATTR_ID],
+					//minLength: attrRef[MINLENGTH_ATTR_ID],
+					//currency: attrRef[CURRENCY_ATTR_ID],
+					//regRex: attrRef[REGEX_ATTR_ID], //e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
+					constraints: {
+						//minimum: attrRef[MINIMUM_ATTR_ID],
+						//maximum: attrRef[MAXIMUM_ATTR_ID],
+						//places: attrRef[PLACES_ATTR_ID],
+						//fractional: attrRef[FRACTIONAL_ATTR_ID]
+					},
+					permittedValues:[{ id:0, name:'undefined'}], 
+					editOn: 'click',  // for dgrid
+					autoSave: true // for dgrid
+				};
+				if(property.label == 'Label'){
+				console.dir(property);
+				}
+				return property;
+			}, nq.errorDialog);			
 		},/*
 		destroy: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){

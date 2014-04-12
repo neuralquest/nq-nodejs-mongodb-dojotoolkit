@@ -1,6 +1,6 @@
 define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array", "dijit/_WidgetBase", 'dojo/dom-construct', "dojo/_base/lang", 
-        "dojo/dom-geometry", "dojo/Deferred"],
-	function(declare, when, all, arrayUtil, _WidgetBase, domConstruct, lang, domGeom, Deferred){
+        "dojo/dom-geometry", "dojo/Deferred", 'dijit/registry'],
+	function(declare, when, all, arrayUtil, _WidgetBase, domConstruct, lang, domGeom, Deferred, registry){
 	var renderer, camera, scene, controls, projector, stats, requestId;
 	
 	return declare("nqWebGlChartWidget", [_WidgetBase], {
@@ -8,19 +8,31 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		selectableObjects: [],
 		displayFPS: false,
 
-		_getParentIdAttr: function(){ 
-			return this.parentId;
+		selectedObjIdPreviousLevel: null,
+		selectedObjIdThisLevel: null,
+		
+		createDeferred: null,
+		setSelectedObjIdPreviousLevel: new Deferred(),
+		setSelectedObjIdThisLevel: new Deferred(),
+		
+		_setSelectedObjIdPreviousLevelAttr: function(objectId){
+			if(objectId == this.selectedObjIdPreviousLevel) return this;
+			this.selectedObjIdPreviousLevel = objectId;
+			
+			//goto selected object
+			var mesh = this.getMeshByName(objectId);
+			if(mesh) this.moveCameraToMesh(mesh);
+			return this;
 		},
-		_setParentIdAttr: function(value){
-			if(value) this.parentId = value;
-			return true;
+		_getSelectedObjIdPreviousLevelAttr: function(){ 
+			return this.selectedObjIdPreviousLevel;
 		},
-		_getSelectedObjIdAttr: function(){ 
-			return this.selectedObjId;
+		_setSelectedObjIdThisLevelAttr: function(value){
+			this.selectedObjIdThisLevel = value;
+			return this;
 		},
-		_setSelectedObjIdAttr: function(value){
-			if(value) this.selectedObjId = value;
-			return true;
+		_getSelectedObjIdIdAttr: function(){ 
+			return this.selectedObjIdThisLevel;
 		},
 		buildRendering: function(){
 			this.inherited(arguments);
@@ -28,6 +40,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		},
 		postCreate: function(){
 			this.inherited(arguments);
+			
 			var sceneObject3D = new THREE.Object3D();
 			//camera
 			camera = new THREE.PerspectiveCamera( 60, 3 / 2, 1, 100000 );
@@ -93,6 +106,8 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			this.connect(this.domNode, "onclick", "gotoObject");
 			sceneObject3D.name = 'Boilerplate';
 			scene.add(sceneObject3D);
+			
+//			this.startup();
 		},
 		gotoObject: function(event){
 			//see http://stackoverflow.com/questions/11161674/dragging-and-clicking-objects-with-controls
@@ -113,11 +128,6 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				this.moveCameraToMesh(selectedMesh);
 			}
 		},		
-		setSelectedObjectId: function(objectId){
-			if(objectId == this.selectedItemId) return;
-			var mesh = this.getMeshByName(objectId);
-			if(mesh) this.moveCameraToMesh(mesh);
-		},
 		moveCameraToMesh: function(selectedMesh){
 			this.swapSelectedItemMaterial(selectedMesh);
 			
@@ -161,7 +171,9 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 
 		},
 		startup: function(){
-			this.resize();
+			//this.resize();
+			var pane = registry.byId('tab'+this.tabId);
+			pane.resize();
 			this.loadingMessage();
 			animate();
 		},

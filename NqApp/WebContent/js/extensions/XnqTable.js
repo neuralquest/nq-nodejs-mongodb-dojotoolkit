@@ -3,7 +3,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
          "nq/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/date/locale", "dojo/html",
         'dgrid/OnDemandGrid', 'dgrid/editor', 'dgrid/Selection', 'dgrid/Keyboard', 'dgrid/extensions/DijitRegistry', "dgrid/extensions/DnD",
         "dgrid/Selection", "dgrid/selector", "dgrid/selector", "dijit/form/Button","dojo/_base/array", "dijit/registry",
-        "dojo/date/stamp", "dojo/when", 'dojo/promise/instrumentation', 
+        "dojo/date/stamp",
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
@@ -12,20 +12,21 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			nqWidgetBase, ContentPane, domGeometry, has, locale, html, 
 			Grid, editor, Selection, Keyboard, DijitRegistry, Dnd,
 			Selection, selector, Button, array, registry,
-			stamp, when, instrumentation){
+			stamp){
    
 	return declare("nqGridWidget", [nqWidgetBase], {
+		extraPlugins: {},
+		viewsArr: [],
+		query: {},
+		
 		postCreate: function(){
 			this.inherited(arguments);
+			this.pageHelpTextDiv.innerHTML = this.widgetDef.description;
 
-			var PERMITTEDVAULE_CLASS_ID = '58';
-			var RTF_CLASS_ID = '65';
-			var DATE_CLASS_ID = '52';
-			var STRING_CLASS_ID = '54';
-			var INTEGER_CLASS_ID = '55';
-			var NUMBER_CLASS_ID = '56';
-			var BOOLEAN_CLASS_ID = '57';
-			
+			var sortable = true;
+			var rowsUpdateable = false;
+
+//			if(viewsArr.length == 1) rowsUpdateable = true;
 
 			//initially show the toolbar div
 			domStyle.set(this.pageToolbarDivNode, 'display' , '');
@@ -49,7 +50,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 						'classId': classToCreate.id
 					};
 					//TODO add default values
-					//addObj[self.viewDef.label] = '[new '+classToCreate.className+']';
+					addObj[self.viewDef.label] = '[new '+classToCreate.className+']';
 					var newItem = self.store.add(addObj);
 					//update the parent
 					var parentItem = self.store.get(self.query.parentId);
@@ -72,185 +73,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			});
 			this.normalToolbar.addChild(this.deleteButton);
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
-	
-			var VIEWS_VIEW_ID = 538;
-			dojo.when(_nqDataStore.getChildren(this.widgetObj, [VIEWS_VIEW_ID]), function(viewObjArr){
-				var viewObj = viewObjArr[0];
-				//something wierd just happend. I have to add dojo. to when, else it dont work: object is not a function
-				return dojo.when(self.getAttrRefProperties(viewObj), function(propertiesArr){
-					for(var i=0;i<propertiesArr.length;i++){
-						property = propertiesArr[i];
-							
-						switch(property.attrClassType){
-						case PERMITTEDVAULE_CLASS_ID: 
-							property.renderCell = function(object, value, node, options){
-								var selectedOptionArr = selectStore.query({id: value});
-								if(selectedOptionArr.length>0) node.appendChild(document.createTextNode(selectedOptionArr[0].name));
-								else node.appendChild(document.createTextNode('id: '+value));
-							};
-							var selectStore = new Memory({data: property.permittedValues});
-							property.editorArgs = {
-									'store': selectStore, 
-									'style': "width:99%;",
-									'labelAttr': 'name',
-									'maxHeight': -1, // tells _HasDropDown to fit menu within viewport
-									'fetchProperties': { sort : [ { attribute : "name" }]},
-									'queryOptions': { ignoreCase: true }//doesnt work
-									//value: 749
-							};
-							property.editor = Select;
-							break;	
-						case RTF_CLASS_ID: 
-							var toolbar = new Toolbar({
-								//'style': {'display': 'none'}
-							});
-							self.editorToolbarDivNode.appendChild(toolbar.domNode);
-							property.editorArgs = {
-									'toolbar': toolbar, 
-									'addStyleSheet': 'css/editor.css',
-									'extraPlugins': self.extraPlugins,
-									'maxHeight': -1
-							};					
-							property.editor = Editor;
-							property.renderCell = function(object, value, node, options) {
-								html.set(node, value);
-							}
-							break;	
-						case DATE_CLASS_ID:
-							property.renderCell = function(object, value, node, options) {
-								console.log('value', value);
-								if(!value || value=='') return;
-								var date = null;
-								if(lang.isObject(value)) date = value;//the date widget returns an date object
-								else date = dojo.date.stamp.fromISOString(value);
-								html.set(node, date.toLocaleDateString());
-							};
-							property.set = function(item) {
-								var value = item[prop.name];
-								if(!value) return;
-								return value.toISOString();
-							};
-							property.autoSave = true;
-							property.editor = DateTextBox;
-							break;	
-						case STRING_CLASS_ID:
-							property.editor = 'text';
-							break;	
-						case INTEGER_CLASS_ID: 
-							property.editor = 'number';
-							break;	
-						case NUMBER_CLASS_ID: 
-							property.editor = 'number';
-							break;	
-						case BOOLEAN_CLASS_ID: 
-							property.editor = 'checkbox';
-							break;	
-						};
-					}
-//			console.log('propertiesArr', propertiesArr);
-					self.grid = new (declare([Grid, Selection, Keyboard, DijitRegistry, Dnd]))({
-						//'id' : 'widget'+state.tabId,
-						'class': '.nqGrid',
-						'store': self.store,
-						'selectionMode': "single",
-						'loadingMessage': 'Loading data...',
-						'noDataMessage': 'No data.',
-						'query': {parentId: self.selectedObjIdPreviousLevel, joinViewAttributes: self.viewIdsArr},
-						'columns': propertiesArr,
-						'cleanAddedRules': true,
-						'className': "dgrid-autoheight"// version dgrid 0.3.14
-					}, domConstruct.create('div'));
-//					for(var key in gridStyle){
-//						this.grid.styleColumn(key, gridStyle[key]);
-//					}
-					self.pane.containerNode.appendChild(self.grid.domNode);
-
-					self.grid.on("dgrid-error", function(event) {
-						//nq.errorDialog;
-						// Display an error message above the grid when an error occurs.
-		    	    	new dijit.Dialog({title: "Get Error", extractContent: true, content: event.error.message}).show();
-					});
-									
-					self.grid.on(".dgrid-row:click", function(event){
-						var item = self.grid.row(event).data;
-						if(self.deleteButton.get('checked')){
-							self.deleteButton.set('checked', false);
-							self.store.remove(item.id);
-							
-							var viewId = self.viewsArr[0].id;
-							var parentItem = self.store.get(self.query.parentId);
-							var pos = parentItem[viewId].indexOf(item.id);
-							parentItem[viewId].splice(pos, 1);
-							_nqDataStore.put(parentItem);
-							self.grid.refresh();
-						}
-						else{
-							var item = self.grid.row(event).data;
-							//var level = self.level;
-							nq.setHashViewId(self.level, item.viewId, self.tabId, item.id.split('/')[1]);
-	return;
-							//var nextState = getState(level+1);
-//							var tabPane = registry.byId('tab'+self.widgetDef.id);
-//							document.title = 'NQ - '+(tabPane?tabPane.title+' - ':'')+this.getLabel(item);
-
-							var newViewId = item.viewId;
-							var ids = _nqDataStore.getIdentity(item).split('/');
-							
-							var currentHash = hash();
-							var hashArr = currentHash.split('.');
-							hashArr[level*3+1] = self.tabId;//it may have changed
-							hashArr[level*3+2] = ''+ids[1];//it will have changed
-							if(hashArr[(level+1)*3+0] != newViewId){//if its changed
-								//remove anything following this level in the hash since it is nolonger valid
-								hashArr = hashArr.slice(0,(level+1)*3+0);
-								
-								hashArr[(level+1)*3+0] = newViewId;
-								//if there is a cookie for this acctab, use if to set the hash tabId (we can prevent unnessasary interperitHash())//FIXME remove set tabId
-								var cookieValue = cookie('acctab'+newViewId+'_selectedChild');
-								if(cookieValue) hashArr[(level+1)*3+1] = cookieValue.substr(3);
-								else{//find the first tab and use it
-									var tabsArr = _nqSchemaMemoryStore.query({parentViewId: newViewId, entity: 'tab'});//get the tabs		 
-									if(tabsArr.length>0) hashArr[(level+1)*3+1] = tabsArr[0].id;
-								}
-							}
-
-							var newHash = hashArr.join('.');
-							hash(newHash);		
-						}
-					});
-					/*self.grid.on("dgrid-refresh-complete", function(event){
-//						var row = grid.row(event);
-						console.log("Row complete:", event);
-					});
-					*/
-					self.grid.startup();
-
-				}, nq.errorDialog);				
-				self.createDeferred.resolve(self);//ready to be loaded with data
-			});
-
-		},
-		_setSelectedObjIdPreviousLevelAttr: function(value){
-			//load the data
-			if(this.selectedObjIdPreviousLevel == value) return this;
-			this.selectedObjIdPreviousLevel = value;
 			
-			//does this return a promise?
-			this.grid.set('query',{parentId: value, joinViewAttributes: this.viewIdsArr});
-			var promise = this.grid.refresh();
-			
-			this.setSelectedObjIdPreviousLevelDeferred.resolve(this);
-		}/*,
-		postCreate: function(){
-			this.inherited(arguments);
-			this.pageHelpTextDiv.innerHTML = this.widgetDef.description;
-
-			var sortable = true;
-			var rowsUpdateable = false;
-
-//			if(viewsArr.length == 1) rowsUpdateable = true;
-
-		
 			
 			var propsArr = [];
 			for(var i = 0;i<this.viewsArr.length;i++){
@@ -424,7 +247,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 //				var row = grid.row(event);
 				console.log("Row complete:", event);
 			});
-			* /
+			*/
 		},
 		_setQuery: function(query, queryOptions){
 			this.grid.set('query',query);
@@ -462,6 +285,6 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			properties.constraints = constraints;
 			
 			return properties;
-		}*/
+		}
 	});
 });

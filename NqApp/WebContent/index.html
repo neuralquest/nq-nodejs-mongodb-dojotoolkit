@@ -25,10 +25,11 @@
 		<!-- provide config -->
 		<script>	
 			dojoConfig = {
-				isDebug: true , 
-				useDeferredInstrumentation: true,
+				isDebug: true ,
+				deferredInstrumentation: true,
+				useDeferredInstrumentation: "report-unhandled-rejections",
 				async: true,
-				locale: "en-GB",
+	//			locale: "en-GB",
 				parseOnLoad: true,
 	            dojoBlankHtmlUrl:'/blank.html',
 				packages: [

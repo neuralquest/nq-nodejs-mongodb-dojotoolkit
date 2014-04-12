@@ -1,10 +1,12 @@
-define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "dojo/hash", 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dojo/query!css2'],
-	function(declare, Tree, registry, cookie, hash, Menu, MenuItem, PopupMenuItem){
-	
-	var nqTree = declare(Tree, {
+define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", "dijit/registry", 'nq/nqObjectStoreModel',"dojo/hash", 
+        'dojo/dom-construct', 'dijit/tree/dndSource', 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dojo/query!css2'],
+	function(declare, nqWidgetBase, Tree, registry, nqObjectStoreModel, hash, 
+			domConstruct, dndSource, Menu, MenuItem, PopupMenuItem){
+
+	return declare("nqTreeWidget", [nqWidgetBase], {
 		postCreate: function(){
 			this.inherited(arguments);
-			
+			/*
 			// walk through all the views that are allowed as seen from this tab
 			for(var i=0;i<this.viewsArr.length;i++){
 				var childView = this.viewsArr[i];			
@@ -77,77 +79,89 @@ define(["dojo/_base/declare", "dijit/Tree", "dijit/registry", "dojo/cookie", "do
 				}));
 				parentMenu.startup();
 
-			};		
-		},
-		/*
-		onLoad: function(){
-			fullPage.resize();//need this for lazy loaded trees
-		},*/
-		getIconClass: function(/*dojo.data.Item*/ item, /*Boolean*/ opened){
-			if(!item) return 'icondefault';
-			return 'icon'+item.classId;
-			//must fix page model for contents firstm before we can use this
-			var schema = _nqSchemaMemoryStore.get(item.viewId);
-			return 'icon'+schema.classId;
-		},
-		getLabel: function(/*dojo.data.Item*/ item){
-			if(!item) return 'no item';
-			var schema = _nqSchemaMemoryStore.get(item.viewId);
-			if(!schema) return 'no schema';
-			return item[schema.label];
-		},
-		getRowClass: function(item, opened){
-			if(!item) return '';
-			return 'css'+item.viewId;//used by tree menu to determin which menu to show
-		},
-		getTooltip: function(item, opened){
-			if(!item) return '';
-			if(location.href.indexOf('localhost') >= 0)
-			return item.id;
-		},
-		checkItemAcceptance: function(target, source, position){
-			var targetItem = dijit.getEnclosingWidget(target).item;
-			var mapsToClassesArr = _nqSchemaMemoryStore.get(targetItem.viewId).mapsToClasses;
-			var sourceItemClassId = source.current.item.classId;
-			//console.log('sourceItemClassId', sourceItemClassId);
-			for(var i = 0;i<mapsToClassesArr.length;i++){
-				var mapsToClassId = mapsToClassesArr[i].id
-				//console.log('mapsToClassId', mapsToClassId);
-				if(mapsToClassId === sourceItemClassId) return true;
-			}
-			return false;
-		},
-		onClick: function(item, node, evt){
-			this.inherited('onClick',arguments);
-			var level = this.level;
-
-			var tabPane = registry.byId('tab'+this.tabId);
-			document.title = 'NQ - '+(tabPane?tabPane.title+' - ':'')+this.getLabel(item);
-
-			var newViewId = item.viewId;
-			var ids = _nqDataStore.getIdentity(item).split('/');
+			};*/
+			var treeModel = new nqObjectStoreModel({
+				childrenAttr: this.viewIdsArr,
+				store : this.store,
+				query : {id: this.parentId}
+			});
+			this.tree = new Tree({
+				id: 'tree'+this.widgetObj.id,
+				store: this.store,
+				model: treeModel,
+				dndController: dndSource,
+				betweenThreshold: 5, 
+				persist: 'true',
+			}, domConstruct.create('div'));
+			this.pane.containerNode.appendChild(this.tree.domNode);
 			
-			var hashArr = hash().split('.');
-			hashArr[level*3+1] = this.tabId;//it may have changed
-			hashArr[level*3+2] = ids[1];//it will have changed
-			if(hashArr[(level+1)*3+0] != newViewId){//if its changed
-				//remove anything following this level in the hash since it is nolonger valid
-				hashArr = hashArr.slice(0,(level+1)*3+0);
-				
-				hashArr[(level+1)*3+0] = newViewId;
-				//if there is a cookie for this acctab, use if to set the hash tabId (we can prevent unnessasary interperitHash())//FIXME remove set tabId
-				var cookieValue = cookie('acctab'+newViewId+'_selectedChild');
-				if(cookieValue) hashArr[(level+1)*3+1] = cookieValue.substr(3);
-				else{//find the first tab and use it
-					var tabsArr = _nqSchemaMemoryStore.query({parentViewId: newViewId, entity: 'tab'});//get the tabs		 
-					if(tabsArr.length>0) hashArr[(level+1)*3+1] = tabsArr[0].id;
+			this.tree.getIconClass = function(/*dojo.data.Item*/ item, /*Boolean*/ opened){
+				if(!item) return 'icondefault';
+				return 'icon'+item.classId;
+				//must fix page model for contents firstm before we can use this
+				var schema = _nqSchemaMemoryStore.get(item.viewId);
+				return 'icon'+schema.classId;
+			};
+			this.tree.getLabel = function(/*dojo.data.Item*/ item){
+				if(!item) return 'no item';
+				var schema = _nqSchemaMemoryStore.get(item.viewId);
+				if(!schema) return 'no schema';
+				return item[schema.label];
+			};
+			this.tree.getRowClass = function(item, opened){
+				if(!item) return '';
+				return 'css'+item.viewId;//used by tree menu to determin which menu to show
+			};
+			this.tree.getTooltip = function(item, opened){
+				if(!item) return '';
+				if(location.href.indexOf('localhost') >= 0)
+				return item.id;
+			};
+			this.tree.checkItemAcceptance = function(target, source, position){
+				var targetItem = this.tree.getEnclosingWidget(target).item;
+				var mapsToClassesArr = _nqSchemaMemoryStore.get(targetItem.viewId).mapsToClasses;
+				var sourceItemClassId = source.current.item.classId;
+				//console.log('sourceItemClassId', sourceItemClassId);
+				for(var i = 0;i<mapsToClassesArr.length;i++){
+					var mapsToClassId = mapsToClassesArr[i].id
+					//console.log('mapsToClassId', mapsToClassId);
+					if(mapsToClassId === sourceItemClassId) return true;
 				}
-			}
+				return false;
+			};
+			var self = this;
+			this.tree.onClick = function(item, node, evt){
+				this.inherited('onClick',arguments);
+				nq.setHashViewId(self.level, item.viewId, self.tabId, item.id.split('/')[1]);
+			};
+			
+			this.tree.startup();
+			this.createDeferred.resolve(this);//ready to be loaded with data
 
-			var newHash = hashArr.join('.');
-			hash(newHash);			
-		}
+		},
+		_setSelectedObjIdPreviousLevelAttr: function(value){
+			//load the data
+			if(this.selectedObjIdPreviousLevel == value) return this;
+			this.selectedObjIdPreviousLevel = value;
+			//destroy tree
+			//this.setSelectedObjIdPreviousLevelDeferred.resolve(self);
+			//return setSelectedObjIdPreviousLevelDeferred.promise;
+			return this;
+		},
+		_setSelectedObjIdThisLevelAttr: function(value){
+			//select the node
+			//TODO expand tree
+			if(this.selectedObjIdThisLevel == value) return this;
+			this.selectedObjIdThisLevel = value;
+			if(value == 824) this.tree.set('paths', [['846/810','846/2016','846/2020', '846/824']]);
+			else this.tree.set('selectedItem', value);
+			return this;
+		},
+
+		onLoad: function(){
+			fullPage.resize();//need this for lazy loaded trees, some how the first tree lags behind
+		},
+
+		
 	});
-	return nqTree;
 });
-
