@@ -52,7 +52,7 @@ var nqCache = function(masterStore, cachingStore, options){
 		evict: function(id){
 			return cachingStore.remove(id);
 		},
-		//Our exstention
+		//Our extention
 		query: function(query, directives){
 			if(query.parentId && query.childViewAttributes){
 				var results = when(_nqDataStore.get(query.parentId), lang.hitch(this, function(parent){
@@ -121,6 +121,7 @@ var nqCache = function(masterStore, cachingStore, options){
 			}, nq.errorDialog);
 		},		
 		getChildren: function(object, childViewAttributes){
+			var self = this;
 			var promisses = [];
 			for(var i=0;i<childViewAttributes.length;i++){
 				var childAttr = childViewAttributes[i];
@@ -149,32 +150,133 @@ var nqCache = function(masterStore, cachingStore, options){
 					if(aLabel < bLabel) return -1;
 					return 0;
 				});
-				//console.dir(results);
+				console.log('getChildren',results);
 				return results;
 			}, nq.errorDialog);
 		},
-		getManyClassesFromClassByAssocType: function(classId, assocType, recursive){
+		getManyByParentWidgetOrView: function(source, parentWidgetOrView){
+			var CLASS_MODEL_VIEW_ID = 844;
+			var MANYTOMANY_ASSOC = 10;	//TO MANY
+			var VIEW_ID = CLASS_MODEL_VIEW_ID+'/'+74;
+			var self = this;
+			return when(this.getManyByAssocTypeAndDestClass(parentWidgetOrView, MANYTOMANY_ASSOC, VIEW_ID), function(subViewsArr){
+				var promisses = [];
+				for(var j=0;j<subViewsArr.length;j++){
+					var viewObj = subViewsArr[j];
+					promisses.push(getManyByView(source, viewObj));
+				}
+				return when(all(promisses), function(ArrayOfArrays){
+					var resultArr = [];
+					for(var i=0;i<ArrayOfArrays.length;i++){
+						var objArr = ArrayOfArrays[i];
+						for(var j=0;j<objArr.length;j++){
+							resultArr.push(objArr[j]);
+						}
+					}
+					return resultArr;
+				});
+			});
+		},
+		getManyByView: function(source, view){
+			var MAPSTO_ASSOC = 5;			//TO ONE
+			var ATTRIBUTE_ASSOC = 4;		//TO ONE
+			var CLASS_TYPE = 0;
+			var ASSOCS_CLASS_TYPE = 87;//94;
+			var self = this;
+			return when(this.resolveObjectOrId(view), function(viewObj){
+				var attrPromises = [];
+				attrPromises.push(self.getOneByAssocType(viewObj, MAPSTO_ASSOC, CLASS_TYPE));
+				attrPromises.push(self.getOneByAssocTypeAndDestClass(viewObj, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE));
+				return when(all(attrPromises), function(attrArr){
+					var destClass = attrArr[0];
+					var assocType = attrArr[1].id.split('/')[1];
+					return self.getManyByAssocTypeAndDestClass(source, assocType, destClass);
+				});
+			});
+		},
+		//used for navigating the object model where the source is an object and we're interested in a paricular type of object 
+		getManyByAssocTypeAndDestClass: function(source, assocType, destClass){
+			var ASSOCS_ATTR_ID = 1613;
+			var self = this;
+			var destClassId = lang.isObject(destClass)?destClass.id:destClass;
+			return when(this.resolveObjectOrId(source), function(object){
+				var childrenIds = object[ASSOCS_ATTR_ID][assocType];
+				if(!childrenIds) return [];
+				var promisses = [];
+				var resultArr = [];
+				for(var j=0;j<childrenIds.length;j++){
+					var childId = childrenIds[j];
+					promisses.push(when(self.get(childId), function(destObj){
+						return when(self.isA(destObj, destClassId), function(trueFalse){
+							if(trueFalse) resultArr.push(destObj);
+							return trueFalse;
+						});
+					}));
+				}
+				return when(all(promisses), function(results){
+					return resultArr;
+				});
+			});
+		},
+		//used for navigating the classmodel where the source is a class and we're looking for either classes or objects
+		getManyByAssocType: function(source, assocType, classOrObjectType, recursive){
+			var self = this;
+			var _classOrObjectType = classOrObjectType==null?1:classOrObjectType;//default object type
+			var _recursive = recursive==null?false:recursive;//default non recursive
+			var resultArr = [];
+			return when(this.resolveObjectOrId(source), function(sourceObj){
+				return when(self.getManyByAssocTypeRecursive(sourceObj, assocType, _classOrObjectType, _recursive, resultArr), function(arrayOfArrays){
+					return resultArr;
+				});
+			});
+		},
+		getManyByAssocTypeRecursive: function(sourceObj, assocType, classOrObjectType, recursive, resultArr){
+			var ASSOCS_ATTR_ID = 1613;
+			var self = this;
+			var childrenIds = sourceObj[ASSOCS_ATTR_ID][assocType];
+			if(!childrenIds) return [];
 			var promisses = [];
-			if(recursive) this.getClassesFromClassByAssocType(classId, assocType, recursive);
+			for(var j=0;j<childrenIds.length;j++){
+				var childId = childrenIds[j];
+				promisses.push(when(this.get(childId), function(childObject){
+					if(childObject.classId==classOrObjectType) resultArr.push(childObject);
+					if(recursive) return self.getManyByAssocTypeRecursive(childObject, assocType, classOrObjectType, recursive, resultArr);
+					else return childObject;
+				}));
+			}
 			return all(promisses);
 		},
-		getManyObjectsFromClassByAssocType: function(classId, assocType, recursive){
-			var promisses = [];
-			if(recursive) this.getClassesFromClassByAssocType(classId, assocType, recursive);
-			return all(promisses);
+		getOneByAssocTypeAndDestClass: function(source, assocType, destClass){
+			return when(this.getManyByAssocTypeAndDestClass(source, assocType, destClass), function(objects){
+				//return 'ccc';
+				return objects[0];
+			});
 		},
-		getManyObjectsFromObjectByAssocType: function(objectId, assocType, recursive){
-			var promisses = [];
-			if(recursive) this.getClassesFromClassByAssocType(classId, assocType, recursive);
-			return all(promisses);
+		getOneByAssocType: function(source, assocType, classOrObjectType){
+			return when(this.getManyByAssocType(source, assocType, classOrObjectType, false, false), function(objects){
+				return objects[0];
+			});
 		},
-		getOneClassFromClassByAssocType: function(classId, assocType){
+		resolveObjectOrId: function(objectOrId){
+			var CLASS_MODEL_VIEW_ID = 844;
+			if(lang.isObject(objectOrId)) return objectOrId;
+			return when(this.get(CLASS_MODEL_VIEW_ID+'/'+objectOrId));
 		},
-		getOneObjectFromClassByAssocType: function(classId, assocType){
+		isA: function(object, destClassId){
+			var ASSOCS_ATTR_ID = 1613;
+			var PARENT_ASSOC = 3;
+			if(object.id.split('/')[1] == destClassId) return true;
+			if(!object[ASSOCS_ATTR_ID]) return false;
+			if(!object[ASSOCS_ATTR_ID][PARENT_ASSOC]) return false;
+			if(object[ASSOCS_ATTR_ID][PARENT_ASSOC].length<1) return false;
+			var parentId = object[ASSOCS_ATTR_ID][PARENT_ASSOC][0];
+			var self = this;
+			return when(this.get(parentId), function(parent){
+				return self.isA(parent, destClassId);
+			});
 		},
-		getOneObjectFromObjectByAssocType: function(objectId, assocType){
-		}
-
+		
+		
 	});
 	// Primitive Assoc types (used by the Assoc table)
 	var PARENT_ASSOC = 3;			//TO ONE

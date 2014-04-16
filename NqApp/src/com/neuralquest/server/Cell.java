@@ -176,7 +176,7 @@ public class Cell extends BaseCell implements Constants {
 			Assoc assoc = itr1.next();
 			if(assoc.getType() != PARENT_ASSOC) continue;// if not, go to the next
 			Cell subclass = assoc.getSourceFk();
-			if(subclass.getType()==OBJECT) continue;
+//			if(subclass.getType()==OBJECT) continue;
 			list.add(assoc.getSourceFk());
 		}
 		return list;

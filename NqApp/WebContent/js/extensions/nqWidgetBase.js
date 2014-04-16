@@ -76,11 +76,30 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			}, nq.errorDialog);
 		},
 		makeProperties: function(attrRef){
-			var CLASS_MODEL_VIEWS_ID = 844;
+			var CLASS_MODEL_VIEW_ID = 844;
 			var MAPSTO_ATTR_ID = 571;
 			var ASSOCIATIONS_VIEW_ID = 1613;
-			var PARENTASSOC_ID = 3;
+			var PARENTASSOC_ID = 3;			
+			var PERMITTEDVAULE_CLASS_ID = '58';
 			
+			var mapsToAttrClass = attrRef[MAPSTO_ATTR_ID];
+			var attrClassId = CLASS_MODEL_VIEW_ID+'/'+mapsToAttrClass;
+			var self = this;
+			return when(this.store.get(attrClassId), function(attrClass){
+				var attrClassType = 0;
+				if(attrClass[ASSOCIATIONS_VIEW_ID] && attrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID]) {
+					attrClassType = attrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID][0];
+					attrClassType = attrClassType.split('/')[1];
+				}
+				if(attrClassType==PERMITTEDVAULE_CLASS_ID){
+					return when(self.getIdNamePairs(attrClass), function(nameValuePairs){
+						return self.makeProperiesObjects(attrRef, attrClassType, nameValuePairs);
+					}, nq.errorDialog);	
+				}
+				else return self.makeProperiesObjects(attrRef, attrClassType, []);
+			}, nq.errorDialog);	
+		},
+		makeProperiesObjects: function(attrRef, attrClassType, nameValuePairs){
 			var BUILDASSOCTYPE_ATTR_ID = 2085;
 			var NAME_ATTR_ID = 544;
 			var HLEPTEXT_ATTR_ID = 1405;
@@ -100,19 +119,13 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			var MODIFY_VALUE_ID = 289;
 			var MANDATORY_VALUE_ID = 290;
 			
-			var mapsToAttrClass = attrRef[MAPSTO_ATTR_ID];
-			var attrClassId = CLASS_MODEL_VIEWS_ID+'/'+mapsToAttrClass;
-			return when(this.store.get(attrClassId), function(attrClass){
-				var attrClassType = 0;
-				if(attrClass[ASSOCIATIONS_VIEW_ID] && attrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID]) {
-					attrClassType = attrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID][0];
-				}
-				var property = {
+			var property = {
 					field: attrRef.id.split('/')[1], // for dgrid
 					name: attrRef.id.split('/')[1], //for input
-					attrClassType: attrClassType==0?0:attrClassType.split('/')[1],
+					attrClassType: attrClassType,
 					label: attrRef[NAME_ATTR_ID],
-					helpText: attrRef[HLEPTEXT_ATTR_ID],
+					//helpText: attrRef[HLEPTEXT_ATTR_ID],
+					helpText: 'undefined',
 					required: attrRef[ACCESS_ATTR_ID]==MANDATORY_VALUE_ID?true:false,
 					editable: attrRef[ACCESS_ATTR_ID]==MODIFY_VALUE_ID||MANDATORY_VALUE_ID?true:false,
 					trim: true,
@@ -132,15 +145,26 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 						//places: attrRef[PLACES_ATTR_ID],
 						//fractional: attrRef[FRACTIONAL_ATTR_ID]
 					},
-					permittedValues:[{ id:0, name:'undefined'}], 
+					permittedValues: nameValuePairs,
+					//permittedValues:[{ id:0, name:'undefined'}], 
 					editOn: 'click',  // for dgrid
 					autoSave: true // for dgrid
 				};
-				if(property.label == 'Label'){
-				console.dir(property);
+			return property;
+		},
+		getIdNamePairs: function(attrClass){
+			var SUBCLASSES_PASSOC = 15;		//TO MANY
+			var OBJECT_TYPE = 1;
+			var OBJVALUE_ATTR_ID = 852;
+			var permittedObjsArr = [];
+			return when(this.store.getManyByAssocType(attrClass, SUBCLASSES_PASSOC, OBJECT_TYPE, true, false), function(permittedObjsArr){
+				var pairsArr = [];
+				for(var j=0;j<permittedObjsArr.length;j++){
+					var obj = permittedObjsArr[j];
+					pairsArr.push({id:obj.id, name:obj[OBJVALUE_ATTR_ID]});
 				}
-				return property;
-			}, nq.errorDialog);			
+				return pairsArr;
+			});
 		},/*
 		destroy: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){

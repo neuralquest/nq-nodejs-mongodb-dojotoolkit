@@ -2,17 +2,17 @@ require([
 'dojo/_base/array', 'dojo/dom-style', 'dojo/_base/fx', 'dojo/ready', 'dojo/topic', "dojo/on", 'dojo/hash', 'dijit/registry', 
 'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct', 
 'dojo/_base/declare', 'dojo/store/Observable', 'dojo/store/Cache', 'dojo/store/JsonRest', 'dojo/store/Memory',
-'dijit/tree/dndSource', 'dojo/Deferred', 'dojo/when', 'dojo/query', 'dijit/layout/BorderContainer', 
+'dojo/Deferred', 'dojo/when', 'dojo/query', 'dijit/layout/BorderContainer', 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", 
 'nq/nqProcessChart', 'nq/nqClassChart', 'nq/nqForm', 'nq/nqTable', 'nq/nqJsonRest', 'nq/nqTree', 'nq/nqObjectStoreModel', 'nq/nqDocument', 'nq/nqCache',
-"dojo/Deferred", 'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
+'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct,
 		declare, Observable, Cache, JsonRest, Memory, 
-		dndSource, Deferred, when, query, BorderContainer, 
+		Deferred, when, query, BorderContainer, 
 		TabContainer, ContentPane, AccordionContainer, cookie, 
 		nqProcessChart, nqClassChart, nqForm, nqTable, nqJsonRest, nqTree, nqObjectStoreModel, nqDocument, nqCache,
-		Deferred, instrumentation, styles) {
+		instrumentation, styles) {
 	
 	_nqMemoryStore = Observable(new Memory({}));
 	_nqDataStore = new nqCache(new nqJsonRest({target:"data/"}), _nqMemoryStore);
@@ -29,10 +29,17 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		topic.subscribe("/dojo/hashchange", interpritHash);
 		on(registry.byId('cancelButtonId'), 'click', function(event){_transaction.abort();});
 		on(registry.byId('saveButtonId'), 'click', function(event){_transaction.commit();});
-		on(registry.byId('helpButtonId'), 'change', function(val){
-			dojox.html.insertCssRule('.helpTextInvisable', 'display:'+val?"block":"none"+';', 'nq.css');
+		on(registry.byId('helpButtonId'), 'change', function(value){
+			if(value) dojox.html.insertCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
+			else dojox.html.removeCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
 		});
 
+//		when(_nqDataStore.getManyByParentWidgetOrViewId('844/842', '844/2438'), function(results){
+//			console.log('getManyByParentWidgetOrViewId',results);					
+//		}, errorDialog);
+		when(_nqDataStore.getManyByView('844/824','844/846'), function(results){
+			console.log('getManyByView',results);					
+		}, errorDialog);
 
 		//Load the schema in its entirety 
 		var viewId = getState(0).viewId;
@@ -60,26 +67,29 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var ACCORDION_ID = 1777;
 		var WIDGETS_VIEW_ID = 2378;
 		var parentViewPane = null;
-		if(!state.viewIdPreviousLevel) parentViewPane = registry.byId('placeholder');
-		else parentViewPane = registry.byId('slave'+state.viewIdPreviousLevel);
+		//find the parent pane to display in
+		if(!state.viewIdPreviousLevel) parentViewPane = registry.byId('placeholder');//no previous level. use placeholder defined in index.html
+		else parentViewPane = registry.byId('slave'+state.viewIdPreviousLevel);//use the slave from the previous level
+		//get the view for this level
 		return when(_nqDataStore.get(PAGE_MODEL_VIEWS_ID+'/'+state.viewId), function(viewObj){
+			//are we createing an accordion container in a border container or a tab container?
 			var viewPanePaneCreated = null;
 			if(viewObj[ACCORTAB_ATTR_ID]==ACCORDION_ID) viewPanePaneCreated = createAccordionInBorderContainer(parentViewPane, viewObj, state.tabId, level);
 			else viewPanePaneCreated = createTabs(parentViewPane, viewObj, state.tabId, level);
 			return when((viewPanePaneCreated), function(selectedTabObj){//returns the selected tab!
 				parentViewPane.resize();//this is a must
-				//when(createNqWidget(selectedTabObj, level), function(widgets){
-					when(_nqDataStore.getChildren(selectedTabObj, [WIDGETS_VIEW_ID]), function(widgets){
-						for(var i=0;i<widgets.length;i++){
-							var widgetObj = widgets[i];
-							when(createNqWidget(widgetObj, selectedTabObj, viewObj, level), function(widget){
-								widget.set('selectedObjIdPreviousLevel', state.selectedObjectIdPreviousLevel);
-								return widget;
-							}, errorDialog);
-						}
-						return widgets;
-					}, errorDialog);
-				//}, errorDialog);
+				//start the creation of the widgets as a separate thread
+				when(_nqDataStore.getChildren(selectedTabObj, [WIDGETS_VIEW_ID]), function(widgets){
+					for(var i=0;i<widgets.length;i++){
+						var widgetObj = widgets[i];
+						when(createNqWidget(widgetObj, selectedTabObj, viewObj, level), function(widget){
+							//when the widget is created fill the form, set the query for the table, recreate the tree, fly to the object in 3D
+							widget.set('selectedObjIdPreviousLevel', state.selectedObjectIdPreviousLevel);
+							return widget;
+						}, errorDialog);
+					}
+					return widgets;
+				}, errorDialog);
 				//We do not have to wait for the widgets to be completed. Instead we can continue with a recurssive call to interpritHash
 				return when(interpritHash(hash, level+1), function(result){
 					return result;
@@ -191,7 +201,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	//////////////////////////////////////////////////////////////////////////////
 	// Add a tab container
 	//////////////////////////////////////////////////////////////////////////////
-	function createTabs(patentPane, viewObj, selectedTabId, level){
+	function createTabs(parentPane, viewObj, selectedTabId, level){
 		var ACCORTAB_VIEW_ID = 1802;
 		return when(_nqDataStore.getChildren(viewObj, [ACCORTAB_VIEW_ID]), function(tabs){
 			var selectedTabObj = tabs[0];//use this one for the return value.
@@ -205,7 +215,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				return selectedTabObj;
 			}
 			// We're filling a slave, clean it first. It may have been used by another view before
-			arrayUtil.forEach(patentPane.getChildren(), function(childWidget){
+			arrayUtil.forEach(parentPane.getChildren(), function(childWidget){
 				if(childWidget.destroyRecursive) childWidget.destroyRecursive();
 			});
 
@@ -252,7 +262,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					else createTabs(tabPane, tab.id, selectedTabId, level);
 				}*/
 			};
-			patentPane.addChild(container);
+			parentPane.addChild(container);
 			container.startup();
 			if(tabs.length>1) container.resize();
 			
@@ -279,24 +289,18 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var viewId = viewObj.id.split('/')[1];
 		
 		var state = getState(level);
-//		if(!state.tabId) return;
 		var tabNode = dom.byId('tab'+tabId);
 
 		// if the widget already exists we can simply return widgets
 		var widget = registry.byId('nqWidget'+widgetId);
 		
-//		var disp = widgetObj[DISPLAYTYPE_ATTR];
 		if(widget) return widget;
 
-//		var viewDef = _nqSchemaMemoryStore.get(viewId);
-//		var widgetId = widgetObj.id.split('/')[1];
-//		var widgetDef = _nqSchemaMemoryStore.get(widgetId);
 		viewsArr = _nqSchemaMemoryStore.query({parentWidgetId: widgetId, entity: 'view'});//get the views that belong to this wdiget	
 		var viewIdsArr = [];
 		for(var i=0;i<viewsArr.length;i++){
 			viewIdsArr.push(viewsArr[i].id);
 		}
-
 
 		switch(widgetObj[DISPLAYTYPE_ATTR]){
 		case DOCUMENT_DISPTYPE_ID:
@@ -304,36 +308,16 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				id: 'nqWidget'+widgetId,
 				store: _nqDataStore,
 				createDeferred: createDeferred, //tell us when your done by returning the widget
-				//widgetObj: widgetObj,
-				//viewObj: viewObj,
 				tabId: tabId // used by resize
 			}, domConstruct.create('div'));
 			tabNode.appendChild(widget.domNode);
 			break;	
-		/*case DOCUMENT_DISPTYPE_ID: 
-			if(widget) widget.set('parentId', state.selectedObjectIdPreviousLevel);
-			else {
-				widget = new nqDocument({
-					id: 'nqWidget'+widgetId,
-					store: _nqDataStore,
-					createDeferred: createDeferred, //tell us when your done by returning the widget
-					//widgetObj: widgetObj,
-					//viewObj: viewObj,
-					tabId: tabId // used by resize
-				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
-				//widget.startup();
-				widget.set('parentId', state.selectedObjectIdPreviousLevel);
-			}
-			break;	*/
 		case FORM_DISPTYPE_ID: 
 			widget = new nqForm({
 				id: 'nqWidget'+widgetId,
 				store: _nqDataStore,
 				createDeferred: createDeferred, //tell us when your done by returning the widget
-				//widgetObj: widgetObj,
 				viewObj: viewObj,
-				//viewDef: viewDef
 			}, domConstruct.create('div'));
 			tabNode.appendChild(widget.domNode);
 			break;	
@@ -343,11 +327,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				store: _nqDataStore,
 				createDeferred: createDeferred, //tell us when your done by returning the widget
 				widgetObj: widgetObj,
-				//viewObj: viewObj,
 				viewIdsArr: viewIdsArr,
 				selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//dgrid needs an initial query
-				//widgetDef: widgetDef,
-				//viewDef: viewDef,
 				viewsArr: viewsArr,
 				level: level, // used by onClick
 				tabId: tabId, // used by onClick
@@ -355,31 +336,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			}, domConstruct.create('div'));
 			tabNode.appendChild(widget.domNode);
 			break;
-		/*case TABLE_DISPTYPE_ID:
-			var query = {parentId: state.selectedObjectIdPreviousLevel, joinViewAttributes: viewIdsArr};
-			if(widget){
-				var curQuery = widget.get("query");
-				if(curQuery.parentId != state.selectedObjectIdPreviousLevel || curQuery.joinViewAttributes != viewIdsArr) widget.set("query", query);
-			}
-			else {
-				widget = new nqTable({
-					id: 'nqWidget'+widgetId,
-					store: _nqDataStore,
-					createDeferred: createDeferred, //tell us when your done by returning the widget
-					widgetObj: widgetObj,
-					viewObj: viewObj,
-					viewIdsArr: viewIdsArr,
-					widgetDef: widgetDef,
-					viewDef: viewDef,
-					viewsArr: viewsArr,
-					level: level, // used by onClick
-					tabId: tabId, // used by onClick
-					query: query
-				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
-				widget.startup();
-			}
-			break;*/
 		case TREE_DISPTYPE_ID:
 			widget = new nqTree({
 				viewIdsArr: viewIdsArr,
@@ -394,56 +350,10 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			}, domConstruct.create('div'));
 			tabNode.appendChild(widget.domNode);
 			break;	
-		/*case TREE_DISPTYPE_ID:
-			var query;
-			if(widgetObj[ROOT_ATTR]) query = {'id': widgetObj[ROOT_ATTR]};
-			else{
-				var objId = state.selectedObjectIdPreviousLevel.split('/')[1];
-				query = {id: viewsArr[0].id+'/'+objId};
-			}
-			if(widget){
-				var curQuery = widget.model.query;
-				if(curQuery.Id != query.Id) {
-					widget.destroy();
-					widget = null;
-				}
-			}
-			if(!widget)	{
-				var treeModel = new nqObjectStoreModel({
-					childrenAttr: viewIdsArr,
-					store : _nqDataStore,
-					query : query
-				});
-				var widget = new nqTree({
-					id: 'nqWidget'+widgetId,
-					store: _nqDataStore,
-					widgetObj: widgetObj,
-					viewObj: viewObj,
-					model: treeModel,
-					dndController: dndSource,
-					betweenThreshold: 5, 
-					persist: 'true',
-					viewsArr: viewsArr,
-					level: level, // used by onClick
-					tabId: tabId // used by onClick
-				}, domConstruct.create('div'));
-				
-				widget.onLoadDeferred.then(function(){
-					//fullPage.resize();
-					widget.resize();//need this for lazy loaded trees
-					var nextState = getState(level+1);
-					if(state.selectedObjId == 824) widget.set('paths', [['846/810','846/2016','846/2020', '846/824']]);
-					else if(state.selectedObjId && nextState.viewId) widget.set('selectedItem', nextState.viewId+'/'+state.selectedObjId);	
-				});
-				tabNode.appendChild(widget.domNode);
-				widget.startup();
-			}
-			break;*/
 		case PROCESS_MODEL_DISPTYPE_ID: 
 			widget = new nqProcessChart({
 				id: 'nqWidget'+widgetId,
 				store: _nqDataStore,
-				//widgetObj: widgetObj,
 				createDeferred: createDeferred, //tell us when your done by returning the widget
 				//viewObj: viewObj,
 				tabId: tabId, // used by resize
@@ -458,36 +368,11 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			tabNode.appendChild(widget.domNode);
 			widget.startup();
 			break;
-/*		case PROCESS_MODEL_DISPTYPE_ID: 
-			if(!widget){
-				widget = new nqProcessChart({
-					id: 'nqWidget'+widgetId,
-					store: _nqDataStore,
-					widgetObj: widgetObj,
-					createDeferred: createDeferred, //tell us when your done by returning the widget
-					viewObj: viewObj,
-					orgUnitRootId: '850/494', // Process Classes
-					orgUnitViewId: '1868',
-					orgUnitNameAttrId: '1926',
-					stateRootId: '2077/443',
-					stateViewId: '2077',
-					stateNameAttrId: '2081'
-					//skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
-				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
-				widget.startup().then(function(res){
-					widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
-				});
-			}
-			else widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
-			break;*/
 		case CLASS_MODEL_DISPTYPE_ID: 
 			widget = new nqClassChart({
 				id: 'nqWidget'+widgetId,
 				store: _nqDataStore,
 				createDeferred: createDeferred, //tell us when your done by returning the widget
-				//widgetObj: widgetObj,
-				//viewObj: viewObj,
 				tabId: tabId, // used by resize
 				XYAxisRootId: '844/67', // Process Classes
 				viewId: viewId,
@@ -498,27 +383,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			tabNode.appendChild(widget.domNode);
 			widget.startup();
 			break;
-/*		case CLASS_MODEL_DISPTYPE_ID: 
-			if(!widget){
-				widget = new nqClassChart({
-					id: 'nqWidget'+widgetId,
-					store: _nqDataStore,
-					createDeferred: createDeferred, //tell us when your done by returning the widget
-					widgetObj: widgetObj,
-					viewObj: viewObj,
-					XYAxisRootId: '844/67', // Process Classes
-					viewId: viewId,
-					nameAttrId: 852,
-					ZYAxisRootId: '844/53', //Attributes
-					skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
-				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
-				widget.startup().then(function(res){
-					widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
-				});
-			}
-			else widget.setSelectedObjectId(state.selectedObjectIdPreviousLevel);
-			break;*/
 		};
 		return createDeferred.promise;
 	}	
@@ -585,11 +449,16 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	}
 	lang.setObject("nq.errorDialog", errorDialog);//make the function globally accessable
 	function errorDialog(err){
-		new dijit.Dialog({
-			title: "Interprit Hash Error", 
-			extractContent: true, 
-			content: err.responseText?err.responseText:err.message
-		}).show();
-		console.error(err); 
+		var self = this;
+		var dlg = new dijit.Dialog({
+			title: err.message, 
+			extractContent: true,
+			onClick: function(evt){this.hide();},
+			content: err.responseText?err.responseText:err.stack
+		});
+		dlg.show();
+		//fx.fadeOut({node: dlg.domNode, delay: 2000, duration: 0, onEnd: function(node){dlg.hide();}}).play();
+
+		throw err.stack; 
 	};
 });
