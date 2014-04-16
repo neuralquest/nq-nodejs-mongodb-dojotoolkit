@@ -34,12 +34,12 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			else dojox.html.removeCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
 		});
 
-//		when(_nqDataStore.getManyByParentWidgetOrViewId('844/842', '844/2438'), function(results){
-//			console.log('getManyByParentWidgetOrViewId',results);					
-//		}, errorDialog);
-		when(_nqDataStore.getManyByView('844/824','844/846'), function(results){
-			console.log('getManyByView',results);					
+		when(_nqDataStore.getManyByAssocType('844/842', '844/2438'), function(results){
+			console.log('getManyByAssocType',results);					
 		}, errorDialog);
+//		when(_nqDataStore.getManyByParentWidgetOrView('844/824','844/2387'), function(results){
+//			console.log('getManyByParentWidgetOrView',results);					
+//		}, errorDialog);
 
 		//Load the schema in its entirety 
 		var viewId = getState(0).viewId;
@@ -93,8 +93,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				//We do not have to wait for the widgets to be completed. Instead we can continue with a recurssive call to interpritHash
 				return when(interpritHash(hash, level+1), function(result){
 					return result;
-				}, errorDialog);
-			}, errorDialog);
+				});
+			});
 		}, errorDialog);
 	}	
 	//////////////////////////////////////////////////////////////////////////////
@@ -449,7 +449,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	}
 	lang.setObject("nq.errorDialog", errorDialog);//make the function globally accessable
 	function errorDialog(err){
-		var self = this;
 		var dlg = new dijit.Dialog({
 			title: err.message, 
 			extractContent: true,

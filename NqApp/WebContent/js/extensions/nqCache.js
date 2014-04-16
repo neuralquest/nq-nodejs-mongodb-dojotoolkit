@@ -150,7 +150,7 @@ var nqCache = function(masterStore, cachingStore, options){
 					if(aLabel < bLabel) return -1;
 					return 0;
 				});
-				console.log('getChildren',results);
+				//console.log('getChildren',results);
 				return results;
 			}, nq.errorDialog);
 		},
@@ -163,38 +163,68 @@ var nqCache = function(masterStore, cachingStore, options){
 				var promisses = [];
 				for(var j=0;j<subViewsArr.length;j++){
 					var viewObj = subViewsArr[j];
-					promisses.push(getManyByView(source, viewObj));
+					promisses.push(self.getManyByView(source, viewObj));
 				}
 				return when(all(promisses), function(ArrayOfArrays){
 					var resultArr = [];
 					for(var i=0;i<ArrayOfArrays.length;i++){
-						var objArr = ArrayOfArrays[i];
-						for(var j=0;j<objArr.length;j++){
-							resultArr.push(objArr[j]);
-						}
+						resultArr = resultArr.concat(ArrayOfArrays[i]);
 					}
 					return resultArr;
 				});
 			});
 		},
 		getManyByView: function(source, view){
-			var MAPSTO_ASSOC = 5;			//TO ONE
+			var CLASS_MODEL_VIEW_ID = 844;
+			var ASSOCS_ATTR_ID = 1613;
 			var ATTRIBUTE_ASSOC = 4;		//TO ONE
-			var CLASS_TYPE = 0;
-			var ASSOCS_CLASS_TYPE = 87;//94;
+			var MAPSTO_ASSOC = 5;			//TO ONE
+			var ORDERED_ASSOC = 8;		//TO MANY
+			var CELNAME_ATTR = 852;
+			var ASSOCS_CLASS_TYPE = CLASS_MODEL_VIEW_ID+'/'+94;
+			var ATTRREF_CLASS_TYPE = CLASS_MODEL_VIEW_ID+'/'+63;
 			var self = this;
 			return when(this.resolveObjectOrId(view), function(viewObj){
 				var attrPromises = [];
-				attrPromises.push(self.getOneByAssocType(viewObj, MAPSTO_ASSOC, CLASS_TYPE));
-				attrPromises.push(self.getOneByAssocTypeAndDestClass(viewObj, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE));
+				//get the assocication type that this view has as an attribute
+				attrPromises[0] = self.getOneByAssocTypeAndDestClass(viewObj, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
+				//get the attribute references that belong to this view
+				attrPromises[1] = self.getManyByAssocTypeAndDestClass(viewObj, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
 				return when(all(attrPromises), function(attrArr){
-					var destClass = attrArr[0];
-					var assocType = attrArr[1].id.split('/')[1];
-					return self.getManyByAssocTypeAndDestClass(source, assocType, destClass);
+					var assocType = attrArr[0].id.split('/')[1];
+					var attrRefArr = attrArr[1];
+					//get the class that this view maps to
+					var destClassId = viewObj[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
+					//get the objects that result from this source, view
+					return when(self.getManyByAssocTypeAndDestClass(source, assocType, destClassId), function(objArr){
+						//for each related object 
+						var itemsDonePromises = [];
+						for(var i=0;i<objArr.length;i++){
+							var obj = objArr[i];
+							var valuePromises = [];
+							for(var j=0;j<attrRefArr.length;j++){
+								var attrRef = attrRefArr[j];
+								var attrClassId = attrRef[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
+								valuePromises.push(self.getOneByAssocTypeAndDestClass(obj, ATTRIBUTE_ASSOC, attrClassId));
+							}
+							itemsDonePromises.push(when(all(valuePromises), function(valueObjArr){
+								//build the item that we will return
+								var item = {id: obj.id, classId: destClassId.split('/')[1], viewName: viewObj.id+' - '+viewObj[CELNAME_ATTR]};
+								for(var j=0;j<attrRefArr.length;j++){
+									var attrRef = attrRefArr[j];
+									var attrRefId = attrRef.id.split('/')[1];
+									var valueObj = valueObjArr[j];
+									item[attrRefId] = valueObj[CELNAME_ATTR];
+								}
+								return item;
+							}));
+						}
+						return all(itemsDonePromises);
+					});
 				});
 			});
 		},
-		//used for navigating the object model where the source is an object and we're interested in a paricular type of object 
+		//used for navigating the object model where the source is an object and we're interested in related objects of type 'destination class' 
 		getManyByAssocTypeAndDestClass: function(source, assocType, destClass){
 			var ASSOCS_ATTR_ID = 1613;
 			var self = this;
@@ -248,7 +278,6 @@ var nqCache = function(masterStore, cachingStore, options){
 		},
 		getOneByAssocTypeAndDestClass: function(source, assocType, destClass){
 			return when(this.getManyByAssocTypeAndDestClass(source, assocType, destClass), function(objects){
-				//return 'ccc';
 				return objects[0];
 			});
 		},
@@ -265,10 +294,8 @@ var nqCache = function(masterStore, cachingStore, options){
 		isA: function(object, destClassId){
 			var ASSOCS_ATTR_ID = 1613;
 			var PARENT_ASSOC = 3;
-			if(object.id.split('/')[1] == destClassId) return true;
-			if(!object[ASSOCS_ATTR_ID]) return false;
-			if(!object[ASSOCS_ATTR_ID][PARENT_ASSOC]) return false;
-			if(object[ASSOCS_ATTR_ID][PARENT_ASSOC].length<1) return false;
+			if(object.id == destClassId) return true;
+			if(!object[ASSOCS_ATTR_ID] || !object[ASSOCS_ATTR_ID][PARENT_ASSOC] || object[ASSOCS_ATTR_ID][PARENT_ASSOC].length<1) return false;
 			var parentId = object[ASSOCS_ATTR_ID][PARENT_ASSOC][0];
 			var self = this;
 			return when(this.get(parentId), function(parent){
