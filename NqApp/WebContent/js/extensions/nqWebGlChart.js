@@ -15,7 +15,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		setSelectedObjIdPreviousLevel: new Deferred(),
 		setSelectedObjIdThisLevel: new Deferred(),
 		
-		_setSelectedObjIdPreviousLevelAttr: function(objectId){
+		setSelectedObjIdPreviousLevel: function(objectId){
 			if(objectId == this.selectedObjIdPreviousLevel) return this;
 			this.selectedObjIdPreviousLevel = objectId;
 			
@@ -27,7 +27,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		_getSelectedObjIdPreviousLevelAttr: function(){ 
 			return this.selectedObjIdPreviousLevel;
 		},
-		_setSelectedObjIdThisLevelAttr: function(value){
+		setSelectedObjIdThisLevel: function(value){
 			this.selectedObjIdThisLevel = value;
 			return this;
 		},

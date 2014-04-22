@@ -34,9 +34,25 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			else dojox.html.removeCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
 		});
 
-		when(_nqDataStore.getManyByAssocType('844/842', '844/2438'), function(results){
-			console.log('getManyByAssocType',results);					
-		}, errorDialog);
+/*		when(_nqDataStore.getManyByAssocType('844/846', 10, 1, true), function(viewObjArr){
+			var ASSOCS_ATTR_ID = 1613;
+			var MAPSTO_ASSOC = 5;			//TO ONE
+			var SUBCLASSES_PASSOC = 15;		//TO MANY
+			var CLASS_TYPE = 0;
+			console.log('getManyByAssocType', viewObjArr);					
+			//get the class that this view maps to
+			for(var i=0;i<viewObjArr.length;i++){
+				viewObj = viewObjArr[i];
+				var destClassId = viewObj[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
+				//get the subclasses as seen from the destClass
+				when(_nqDataStore.getManyByAssocType(destClassId, SUBCLASSES_PASSOC, CLASS_TYPE, true), function(subClassArr){
+					for(var j=0;j<subClassArr.length;j++){
+						var subClass = subClassArr[j];
+						console.log(subClass);
+					}
+				}, errorDialog);
+			}
+		}, errorDialog);*/
 //		when(_nqDataStore.getManyByParentWidgetOrView('844/824','844/2387'), function(results){
 //			console.log('getManyByParentWidgetOrView',results);					
 //		}, errorDialog);
@@ -77,15 +93,19 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			if(viewObj[ACCORTAB_ATTR_ID]==ACCORDION_ID) viewPanePaneCreated = createAccordionInBorderContainer(parentViewPane, viewObj, state.tabId, level);
 			else viewPanePaneCreated = createTabs(parentViewPane, viewObj, state.tabId, level);
 			return when((viewPanePaneCreated), function(selectedTabObj){//returns the selected tab!
+				//when the viewpane is created, fill the selected tab
 				parentViewPane.resize();//this is a must
 				//start the creation of the widgets as a separate thread
 				when(_nqDataStore.getChildren(selectedTabObj, [WIDGETS_VIEW_ID]), function(widgets){
+					//when we've got all the child widgets that belong to this tab, create them
 					for(var i=0;i<widgets.length;i++){
 						var widgetObj = widgets[i];
 						when(createNqWidget(widgetObj, selectedTabObj, viewObj, level), function(widget){
-							//when the widget is created fill the form, set the query for the table, recreate the tree, fly to the object in 3D
-							widget.set('selectedObjIdPreviousLevel', state.selectedObjectIdPreviousLevel);
-							return widget;
+							//when the widget is created tell it which object was selected on the previous level
+							//widget types will responde diferently: fill the form, set the query for the table, recreate the tree, fly to the object in 3D, etc.
+							when(widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel), function(wid){
+								wid.setSelectedObjIdThisLevel(state.selectedObjId);
+							}, errorDialog);
 						}, errorDialog);
 					}
 					return widgets;
@@ -154,7 +174,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				accordianContainer = new ContentPane( {
 					'id' : 'viewPane'+viewObj.id.split('/')[1],
 					'region' : 'center',
-//					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
+					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
 				});
 			}
 			else {
@@ -163,8 +183,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					'region' : 'center',
 					'duration' : 0,//animation screws out layout. Is there a better solution?
 					//'persist' : true,//cookies override our hash tabId
-					'class': 'noOverFlow'
-//					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
+					'class': 'noOverFlow',
+					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
 				});
 			}
 			leftPane.addChild(accordianContainer);
@@ -178,7 +198,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 //					'viewPane': viewObj.id,
 					'title' : tab[TAB_TITLE_ATTR],
 					'selected' : tabId==selectedTabId?true:false,
-					'class' : 'backgroundClass'
+					'class' : 'backgroundClass',
+					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
 				});
 				accordianContainer.addChild(tabPane);
 				//when we create a tab we can know if we have to create a border container in it. 
@@ -433,9 +454,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			hashArr[(level+1)*3+0] = viewId;
 			
 			//if there is a cookie for this acctab, use if to set the hash tabId (we can prevent unnessasary interperitHash())//FIXME remove set tabId
-			/*var cookieValue = cookie('viewPane'+viewId+'_selectedChild');
+			var cookieValue = cookie('viewPane'+viewId+'_selectedChild');
 			if(cookieValue) hashArr[(level+1)*3+1] = cookieValue.substr(3);
-			else{//find the first tab and use it
+			/*else{//find the first tab and use it
 				var tabsArr = _nqSchemaMemoryStore.query({parentViewId: viewId, entity: 'tab'});//get the tabs		 
 				if(tabsArr.length>0) hashArr[(level+1)*3+1] = tabsArr[0].id;
 			}

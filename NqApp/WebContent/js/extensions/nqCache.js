@@ -214,7 +214,7 @@ var nqCache = function(masterStore, cachingStore, options){
 									var attrRef = attrRefArr[j];
 									var attrRefId = attrRef.id.split('/')[1];
 									var valueObj = valueObjArr[j];
-									item[attrRefId] = valueObj[CELNAME_ATTR];
+									item[attrRefId] = valueObj?valueObj[CELNAME_ATTR]:'';
 								}
 								return item;
 							}));
@@ -248,19 +248,21 @@ var nqCache = function(masterStore, cachingStore, options){
 				});
 			});
 		},
-		//used for navigating the classmodel where the source is a class and we're looking for either classes or objects
+		//used for navigating the classmodel where the source is a object or class and we're looking for either classes or objects
 		getManyByAssocType: function(source, assocType, classOrObjectType, recursive){
 			var self = this;
 			var _classOrObjectType = classOrObjectType==null?1:classOrObjectType;//default object type
 			var _recursive = recursive==null?false:recursive;//default non recursive
 			var resultArr = [];
+			var loopProtectionArr = [];
 			return when(this.resolveObjectOrId(source), function(sourceObj){
-				return when(self.getManyByAssocTypeRecursive(sourceObj, assocType, _classOrObjectType, _recursive, resultArr), function(arrayOfArrays){
+				return when(self.getManyByAssocTypeRecursive(sourceObj, assocType, _classOrObjectType, _recursive, resultArr, loopProtectionArr), function(arrayOfArrays){
 					return resultArr;
 				});
 			});
 		},
-		getManyByAssocTypeRecursive: function(sourceObj, assocType, classOrObjectType, recursive, resultArr){
+		getManyByAssocTypeRecursive: function(sourceObj, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr){
+			//TODO does not return the source as a possible candidate
 			var ASSOCS_ATTR_ID = 1613;
 			var self = this;
 			var childrenIds = sourceObj[ASSOCS_ATTR_ID][assocType];
@@ -268,9 +270,14 @@ var nqCache = function(masterStore, cachingStore, options){
 			var promisses = [];
 			for(var j=0;j<childrenIds.length;j++){
 				var childId = childrenIds[j];
+				if(loopProtectionArr[childId]) continue;
+				loopProtectionArr[childId] = true;
 				promisses.push(when(this.get(childId), function(childObject){
-					if(childObject.classId==classOrObjectType) resultArr.push(childObject);
-					if(recursive) return self.getManyByAssocTypeRecursive(childObject, assocType, classOrObjectType, recursive, resultArr);
+					if(childObject.classId==classOrObjectType) {
+							resultArr.push(childObject);
+							loopProtectionArr[childId] = true;
+					}
+					if(recursive) return self.getManyByAssocTypeRecursive(childObject, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
 					else return childObject;
 				}));
 			}

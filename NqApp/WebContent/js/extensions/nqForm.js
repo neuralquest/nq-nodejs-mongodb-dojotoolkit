@@ -142,7 +142,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 
 			}, nq.errorDialog);
 		},
-		_setSelectedObjIdPreviousLevelAttr: function(value){
+		setSelectedObjIdPreviousLevel: function(value){
 			//load the data
 			//if(this.selectedObjIdPreviousLevel == value) return this;
 			this.selectedObjIdPreviousLevel = value;

@@ -126,7 +126,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			
 			this.createDeferred.resolve(this);//ready to be loaded with data
 		},
-		_setSelectedObjIdPreviousLevelAttr: function(value){
+		setSelectedObjIdPreviousLevel: function(value){
 			//load the data
 			if(this.selectedObjIdPreviousLevel == value) return this;
 			this.selectedObjIdPreviousLevel = value;

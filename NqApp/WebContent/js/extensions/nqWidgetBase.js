@@ -16,22 +16,15 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		
 		createDeferred: null,
 		setSelectedObjIdPreviousLevelDeferred: new Deferred(),
-		setSelectedObjIdThisLevelDeferred: new Deferred(),
 		
-		_setSelectedObjIdPreviousLevelAttr: function(value){
+		setSelectedObjIdPreviousLevel: function(value){
 			this.selectedObjIdPreviousLevel = value;
 			return this;
 		},
-		_getSelectedObjIdPreviousLevelAttr: function(){ 
-			return this.selectedObjIdPreviousLevel;
-		},
-		_setSelectedObjIdThisLevelAttr: function(value){
+		setSelectedObjIdThisLevel: function(value){
 			this.selectedObjIdThisLevel = value;
-			return this;
 		},
-		_getSelectedObjIdIdAttr: function(){ 
-			return this.selectedObjIdThisLevel;
-		},
+
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
@@ -64,8 +57,46 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		},
 		getAttrRefProperties: function(viewObj){
 			var ATTRREFERENCE_VIEW_ID = 537;
+			var CLASS_MODEL_VIEW_ID = 844;
+			var PAGE_MODEL_VIEW_ID = 1802;
+			var ORDERED_ASSOC = 8;		//TO MANY
+			var ATTREF_CLASS_ID = CLASS_MODEL_VIEW_ID+'/'+63;
+			var CLASS_MODEL_VIEW_ID = 844;
+			var MAPSTO_ATTR_ID = 571;
+			var ASSOCIATIONS_VIEW_ID = 1613;
+			var PARENTASSOC_ID = 3;			
+			var PERMITTEDVAULE_CLASS_ID = '58';
+			var MAPSTO_ASSOC = 5;
 
 			var self = this;
+			
+			return when(this.store.getManyByView(CLASS_MODEL_VIEW_ID+'/'+viewObj.id.split('/')[1], CLASS_MODEL_VIEW_ID+'/'+ATTRREFERENCE_VIEW_ID), function(attrRefs){
+				console.log('attrRefs', attrRefs);
+				var promisses = [];
+				for(var i=0;i<attrRefs.length;i++){
+					var attrRef = attrRefs[i];
+					promisses.push(when(self.store.getOneByAssocType(CLASS_MODEL_VIEW_ID+'/'+attrRef.id.split('/')[1], MAPSTO_ASSOC), function(mapsToAttrClass){
+						var attrClassType = 0;
+						if(mapsToAttrClass[ASSOCIATIONS_VIEW_ID] && mapsToAttrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID]) {
+							attrClassType = attrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID][0];
+							attrClassType = attrClassType.split('/')[1];
+						}
+						if(attrClassType==PERMITTEDVAULE_CLASS_ID){
+							return when(self.resolvePermittedValues(CLASS_MODEL_VIEW_ID+'/'+attrRef.id.split('/')[1]), function(nameValuePairs){
+								return self.makeProperiesObjects(attrRef, attrClassType, nameValuePairs);
+							});	
+						}
+						else return self.makeProperiesObjects(attrRef, attrClassType, []);
+					}));
+				};
+				return all(promisses);
+			});
+		},
+		XgetAttrRefProperties: function(viewObj){
+			var ATTRREFERENCE_VIEW_ID = 537;
+			var CLASS_MODEL_VIEW_ID = 844;
+			var self = this;			
+			//return when(this.store.getManyByAssocTypeAndDestClass(viewObj, ORDERED_ASSOC, ATTREF_CLASS_ID), function(attrRefs){
 			return when(this.store.getChildren(viewObj, [ATTRREFERENCE_VIEW_ID]), function(attrRefs){
 				var promisses = [];
 				for(var i=0;i<attrRefs.length;i++){
@@ -92,7 +123,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 					attrClassType = attrClassType.split('/')[1];
 				}
 				if(attrClassType==PERMITTEDVAULE_CLASS_ID){
-					return when(self.getIdNamePairs(attrClass), function(nameValuePairs){
+					return when(self.resolvePermittedValues(attrClass), function(nameValuePairs){
 						return self.makeProperiesObjects(attrRef, attrClassType, nameValuePairs);
 					}, nq.errorDialog);	
 				}
@@ -133,7 +164,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 					//'default': attrRef[DEFAULT_ATTR_ID],
 					//width: attrRef[WIDTH_ATTR_ID]+'em',
 					width: '30em',
-//					style: {width: '30em'}, causes editor to crash
+//						style: {width: '30em'}, causes editor to crash
 					//invalidMessage: attrRef[INVALIDMESSAGE_ATTR_ID],
 					//maxLength: attrRef[MAXLENGTH_ATTR_ID],
 					//minLength: attrRef[MINLENGTH_ATTR_ID],
@@ -150,9 +181,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 					editOn: 'click',  // for dgrid
 					autoSave: true // for dgrid
 				};
-			return property;
+				return property;
+			
 		},
-		getIdNamePairs: function(attrClass){
+		resolvePermittedValues: function(attrClass){
 			var SUBCLASSES_PASSOC = 15;		//TO MANY
 			var OBJECT_TYPE = 1;
 			var OBJVALUE_ATTR_ID = 852;
