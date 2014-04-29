@@ -92,7 +92,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			var viewPanePaneCreated = null;
 			if(viewObj[ACCORTAB_ATTR_ID]==ACCORDION_ID) viewPanePaneCreated = createAccordionInBorderContainer(parentViewPane, viewObj, state.tabId, level);
 			else viewPanePaneCreated = createTabs(parentViewPane, viewObj, state.tabId, level);
-			return when((viewPanePaneCreated), function(selectedTabObj){//returns the selected tab!
+			return when(viewPanePaneCreated, function(selectedTabObj){//returns the selected tab!
 				//when the viewpane is created, fill the selected tab
 				parentViewPane.resize();//this is a must
 				//start the creation of the widgets as a separate thread
@@ -477,8 +477,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			content: err.responseText?err.responseText:err.stack
 		});
 		dlg.show();
-		//fx.fadeOut({node: dlg.domNode, delay: 2000, duration: 0, onEnd: function(node){dlg.hide();}}).play();
 
-		throw err.stack; 
+		if(!err.responseText)throw err.stack; 
 	};
 });

@@ -116,7 +116,17 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 						break;	
 					case BOOLEAN_CLASS_ID: 
 						dijit = new CheckBox(property, domConstruct.create('input'));
-						break;	
+						break;
+					default:
+						dijit = new Select({
+						    'store': new Memory({data: property.permittedValues}),
+							'name': property.field,
+							'labelAttr': 'name',
+							'style': "width: "+property.width,
+							'maxHeight': -1, // tells _HasDropDown to fit menu within viewport
+							'fetchProperties': { sort : [ { attribute : "name" }]},
+							'queryOptions': { ignoreCase: true }//doesnt work
+						}, domConstruct.create('div'));
 					};
 					if(dijit){
 						tdDom.appendChild(dijit.domNode);
@@ -132,7 +142,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 						});
 						dijit.startup();
 					}
-					else html.set(tdDom, 'unknown attribute type: '+property.attrClassType); 
+					//else html.set(tdDom, 'unknown attribute type: '+property.attrClassType); 
 					
 					//the help text
 					domConstruct.create("td", { innerHTML: (property.helpText), style: "padding: 3px", 'class': 'helpTextInvisable'}, row);

@@ -180,7 +180,6 @@ var nqCache = function(masterStore, cachingStore, options){
 			var ATTRIBUTE_ASSOC = 4;		//TO ONE
 			var MAPSTO_ASSOC = 5;			//TO ONE
 			var ORDERED_ASSOC = 8;		//TO MANY
-			var CELNAME_ATTR = 852;
 			var ASSOCS_CLASS_TYPE = CLASS_MODEL_VIEW_ID+'/'+94;
 			var ATTRREF_CLASS_TYPE = CLASS_MODEL_VIEW_ID+'/'+63;
 			var self = this;
@@ -190,9 +189,9 @@ var nqCache = function(masterStore, cachingStore, options){
 				attrPromises[0] = self.getOneByAssocTypeAndDestClass(viewObj, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
 				//get the attribute references that belong to this view
 				attrPromises[1] = self.getManyByAssocTypeAndDestClass(viewObj, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
-				return when(all(attrPromises), function(attrArr){
-					var assocType = attrArr[0].id.split('/')[1];
-					var attrRefArr = attrArr[1];
+				return when(all(attrPromises), function(arr){
+					var assocType = arr[0].id.split('/')[1];
+					var attrRefArr = arr[1];
 					//get the class that this view maps to
 					var destClassId = viewObj[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
 					//get the objects that result from this source, view
@@ -201,25 +200,54 @@ var nqCache = function(masterStore, cachingStore, options){
 						var itemsDonePromises = [];
 						for(var i=0;i<objArr.length;i++){
 							var obj = objArr[i];
-							var valuePromises = [];
-							for(var j=0;j<attrRefArr.length;j++){
-								var attrRef = attrRefArr[j];
-								var attrClassId = attrRef[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
-								valuePromises.push(self.getOneByAssocTypeAndDestClass(obj, ATTRIBUTE_ASSOC, attrClassId));
-							}
-							itemsDonePromises.push(when(all(valuePromises), function(valueObjArr){
-								//build the item that we will return
-								var item = {id: obj.id, classId: destClassId.split('/')[1], viewName: viewObj.id+' - '+viewObj[CELNAME_ATTR]};
-								for(var j=0;j<attrRefArr.length;j++){
-									var attrRef = attrRefArr[j];
-									var attrRefId = attrRef.id.split('/')[1];
-									var valueObj = valueObjArr[j];
-									item[attrRefId] = valueObj?valueObj[CELNAME_ATTR]:'';
-								}
-								return item;
-							}));
+							itemsDonePromises.push(self.createItem(obj, attrRefArr, viewObj));
 						}
 						return all(itemsDonePromises);
+					});
+				});
+			});
+		},		
+		createItem: function(obj, attrRefArr, viewObj){
+			var ASSOCS_ATTR_ID = 1613;
+			var MAPSTO_ASSOC = 5;			//TO ONE
+			var CELNAME_ATTR = 852;
+			var destClassId = viewObj[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
+			var viewId = viewObj.id.split('/')[1];
+			var valuePromises = [];
+			var item = {id: viewId+'/'+obj.id.split('/')[1], viewId: viewId, classId: destClassId.split('/')[1], viewName: viewId+' - '+viewObj[CELNAME_ATTR]};
+			for(var j=0;j<attrRefArr.length;j++){
+				var attrRef = attrRefArr[j];
+				valuePromises.push(this.addValuesToItem(item, obj, attrRef));
+			}
+			return when(all(valuePromises), function(valueObjArr){return item;});
+		},
+		addValuesToItem: function(item, obj, attrRef){
+			var CLASS_MODEL_VIEW_ID = 844;
+			var PERTMITTEDVALUE_CLASS = CLASS_MODEL_VIEW_ID+'/'+58;
+			var ATTRIBUTE_ASSOC = 4;		//TO ONE
+			var ASSOCS_CLASS_TYPE = CLASS_MODEL_VIEW_ID+'/'+94;
+			var CLASS_TYPE = 0;
+			var MAPSTO_ASSOC = 5;			//TO ONE
+			var CELNAME_ATTR = 852;
+			var self = this;
+			//get the assocication type that this attribute reference has as an attribute
+			return when(self.getOneByAssocTypeAndDestClass(attrRef, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE), function(attrRefAssocTypeObj){
+				var attrRefAssocType = attrRefAssocTypeObj.id.split('/')[1];
+				//get the attribute class that this attribute reference maps to
+				return when(self.getOneByAssocType(attrRef, MAPSTO_ASSOC, CLASS_TYPE), function(attrClassObj){
+					//get the value for this object, attribute reference
+					return when(self.getOneByAssocTypeAndDestClass(obj, attrRefAssocType, attrClassObj.id), function(valueObj){
+						var attrRefId = attrRef.id.split('/')[1];
+						if(attrRefAssocType == ATTRIBUTE_ASSOC){
+							//find out if the attribute class is a permitted value
+							return when(self.isA(attrClassObj, PERTMITTEDVALUE_CLASS), function(trueFalse){
+								if(trueFalse) item[attrRefId] = valueObj?valueObj.id.split('/')[1]:'';//add the identifier
+								else item[attrRefId] = valueObj?valueObj[CELNAME_ATTR]:'';//add the value
+								return valueObj;
+							});
+						}
+						else item[attrRefId] = valueObj?valueObj.id.split('/')[1]:'';//add the identifier
+						return valueObj;
 					});
 				});
 			});
@@ -296,7 +324,8 @@ var nqCache = function(masterStore, cachingStore, options){
 		resolveObjectOrId: function(objectOrId){
 			var CLASS_MODEL_VIEW_ID = 844;
 			if(lang.isObject(objectOrId)) return objectOrId;
-			return when(this.get(CLASS_MODEL_VIEW_ID+'/'+objectOrId));
+			//return when(this.get(CLASS_MODEL_VIEW_ID+'/'+objectOrId));
+			return when(this.get(objectOrId));
 		},
 		isA: function(object, destClassId){
 			var ASSOCS_ATTR_ID = 1613;
@@ -310,7 +339,77 @@ var nqCache = function(masterStore, cachingStore, options){
 			});
 		},
 		
-		
+		XgetManyByView: function(source, view){
+			var CLASS_MODEL_VIEW_ID = 844;
+			var ASSOCS_ATTR_ID = 1613;
+			var ATTRIBUTE_ASSOC = 4;		//TO ONE
+			var MAPSTO_ASSOC = 5;			//TO ONE
+			var ORDERED_ASSOC = 8;		//TO MANY
+			var CELNAME_ATTR = 852;
+			var ASSOCS_CLASS_TYPE = CLASS_MODEL_VIEW_ID+'/'+94;
+			var ATTRREF_CLASS_TYPE = CLASS_MODEL_VIEW_ID+'/'+63;
+			var self = this;
+			return when(this.resolveObjectOrId(view), function(viewObj){
+				var attrPromises = [];
+				//get the assocication type that this view has as an attribute
+				attrPromises[0] = self.getOneByAssocTypeAndDestClass(viewObj, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
+				//get the attribute references that belong to this view
+				attrPromises[1] = self.getManyByAssocTypeAndDestClass(viewObj, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
+				return when(all(attrPromises), function(arr){
+					var assocType = arr[0].id.split('/')[1];
+					var attrRefArr = arr[1];
+					//get the class that this view maps to
+					var destClassId = viewObj[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
+					//get the objects that result from this source, view
+					return when(self.getManyByAssocTypeAndDestClass(source, assocType, destClassId), function(objArr){
+						//for each related object 
+						var itemsDonePromises = [];
+						for(var i=0;i<objArr.length;i++){
+							var obj = objArr[i];
+							var valuePromises = [];
+							for(var j=0;j<attrRefArr.length;j++){
+								var attrRef = attrRefArr[j];
+								var attrClassId = attrRef[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
+								valuePromises.push(self.getOneByAssocTypeAndDestClass(obj, ATTRIBUTE_ASSOC, attrClassId));
+							}
+							itemsDonePromises.push(all(valuePromises));
+							itemsDonePromises.push(when(all(valuePromises), function(valueObjArr){
+								//build the item that we will return
+								var item = {id: obj.id, classId: destClassId.split('/')[1], viewName: viewObj.id+' - '+viewObj[CELNAME_ATTR]};
+								for(var j=0;j<attrRefArr.length;j++){
+									var attrRef = attrRefArr[j];
+									var attrRefId = attrRef.id.split('/')[1];
+									var valueObj = valueObjArr[j];
+									item[attrRefId] = valueObj?valueObj[CELNAME_ATTR]:'';
+								}
+								return item;
+							}));
+						}
+						return all(itemsDonePromises);
+					});
+				});
+			});
+		},
+		XcreateItem: function(obj, attrRef, viewObj){
+			var ASSOCS_ATTR_ID = 1613;
+			var ATTRIBUTE_ASSOC = 4;		//TO ONE
+			var MAPSTO_ASSOC = 5;			//TO ONE
+			var CELNAME_ATTR = 852;
+			//get the class that this view maps to
+			var destClassId = viewObj[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
+			var attrClassId = attrRef[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
+			return when(this.getOneByAssocTypeAndDestClass(obj, ATTRIBUTE_ASSOC, attrClassId), function(valueObjArr){
+				//build the item that we will return
+				var item = {id: obj.id, classId: destClassId.split('/')[1], viewName: viewObj.id+' - '+viewObj[CELNAME_ATTR]};
+				for(var j=0;j<attrRefArr.length;j++){
+					//var attrRef = attrRefArr[j];
+					var attrRefId = attrRef.id.split('/')[1];
+					var valueObj = valueObjArr[j];
+					item[attrRefId] = valueObj?valueObj[CELNAME_ATTR]:'';
+				}
+				return item;
+			});
+		},
 	});
 	// Primitive Assoc types (used by the Assoc table)
 	var PARENT_ASSOC = 3;			//TO ONE

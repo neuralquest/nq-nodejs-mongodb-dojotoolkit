@@ -221,7 +221,7 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", "dijit/registry",
 			
 			var self = this;
 			when(self.store.getManyByAssocType(CLASS_MODEL_VIEW_ID+'/'+this.widgetObj.id.split('/')[1], MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewObjArr){
-				console.log('getManyByAssocType', viewObjArr);					
+				//console.log('getManyByAssocType', viewObjArr);					
 				for(var i=0;i<viewObjArr.length;i++){
 					viewObj = viewObjArr[i];
 					var parentMenu = new Menu({targetNodeIds: [self.tree.domNode], selector: ".css"+viewObj.id.split('/')[1]});					
