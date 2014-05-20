@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -39,21 +40,86 @@ public class DataServlet extends HttpServlet implements Constants {
 
 			Cell userObj = getUserObj(req, session);			
 			
-			if(req.getQueryString()==null) { //used by contents to get first object
+			if(req.getQueryString()==null) {
+				String[] reqUri = req.getPathInfo().split("/");
+				String tableName = reqUri[reqUri.length-2];
+				String prefetch = reqUri[reqUri.length-1];
+				JSONObject rowObject = new JSONObject();
 				// No query has been sent, so this is a request for a single object  
 				// Example: /viewId/objId
-				String[] reqUri = req.getPathInfo().split("/");
-				JSONObject rowObject = new JSONObject();
-				long viewObjId = Long.parseLong(reqUri[reqUri.length-2]);
-				if(viewObjId==ASSOCS_VIEW_ID){//make an exception for the association view
-					rowObject = assocsViewAssoc(viewObjId, reqUri[reqUri.length-1], session);
+				if(prefetch.equals("prefetch")){
+					long THEROOT = 1;
+					long PAGES = 62;
+					long DOCUMENTS = 78;
+					JSONArray cellArray = new JSONArray();
+					JSONArray assocArray = new JSONArray();
+					JSONArray queryCacheForwardArray = new JSONArray();
+					JSONArray queryCacheBackwardArray = new JSONArray();
+					Cell rootCell = (Cell) session.get(Cell.class, THEROOT);
+					LinkedList<Cell> cellList = rootCell.getLsitOfAllSubClasses();
+					Cell pageModelCell = (Cell) session.get(Cell.class, PAGES);
+					LinkedList<Cell> pagemodelList = pageModelCell.getListOfInstances();
+					Cell documentCell = (Cell) session.get(Cell.class, DOCUMENTS);
+					LinkedList<Cell> documentList = documentCell.getListOfInstances();
+					cellList.addAll(pagemodelList);
+					cellList.addAll(documentList);
+					for(Iterator<Cell> itr0=cellList.iterator();itr0.hasNext();){
+						Cell cellObj = itr0.next();
+						JSONObject cellObject = new JSONObject();
+						cellObject.put("id", cellObj.getId());
+						cellObject.put("type", cellObj.getType());
+						String cellName = cellObj.getName();
+						cellObject.put("name", cellName!=null?cellName:null);
+						cellArray.put(cellObject);
+						for(Iterator<Assoc> itr=cellObj.getSourceAssocs().iterator();itr.hasNext();){
+							Assoc assoc = (Assoc)itr.next();
+							JSONObject assocObject = new JSONObject();
+							assocObject.put("id", assoc.getId());
+							assocObject.put("sourceFk", assoc.getSourceFk().getId());
+							assocObject.put("type", assoc.getType());
+							assocObject.put("destFk", assoc.getDestFk().getId());
+							assocArray.put(assocObject);
+							
+							JSONObject sourceTypePairs = new JSONObject();
+							sourceTypePairs.put("sourceFk", cellObj.getId());
+							sourceTypePairs.put("type", assoc.getType());
+							queryCacheForwardArray.put(sourceTypePairs);
+						}
+					}
+					rowObject.put("cell", cellArray);
+					rowObject.put("assoc", assocArray);
+					rowObject.put("queryCacheForward", queryCacheForwardArray);
+					rowObject.put("queryCacheBackward", queryCacheBackwardArray);
 				}
-				else {
-					long selObjId = Long.parseLong(reqUri[reqUri.length-1]);
-					if(selObjId > 0 && viewObjId > 0) {
-						Cell viewObj = (Cell) session.get(Cell.class, new Long(viewObjId));
-						Cell selObj = (Cell) session.get(Cell.class, new Long(selObjId));
-						rowObject = getRowData(selObj, viewObj, session, userObj);
+				else if(tableName.equals("cell")){
+					String cellIdStr = reqUri[reqUri.length-1];
+					long cellId = Long.parseLong(cellIdStr);
+					Cell cellObj = (Cell) session.get(Cell.class, new Long(cellId));
+					rowObject.put("id", cellObj.getId());
+					rowObject.put("type", cellObj.getType());
+					String cellName = cellObj.getName();
+					rowObject.put("name", cellName!=null?cellName:null);
+				}
+				else if(tableName.equals("assoc")){
+					long assocId = Long.parseLong(reqUri[reqUri.length-1]);
+					Assoc assoc = (Assoc)session.get(Assoc.class, assocId);
+					rowObject.put("id", assoc.getId());
+					rowObject.put("sourceFk", assoc.getSourceFk().getId());
+					rowObject.put("type", assoc.getType());
+					rowObject.put("destFk", assoc.getDestFk().getId());
+				}
+				else{
+					long viewObjId = Long.parseLong(tableName);
+					if(viewObjId==ASSOCS_VIEW_ID){//make an exception for the association view
+						rowObject = assocsViewAssoc(viewObjId, reqUri[reqUri.length-1], session);
+					}
+					else {
+						long selObjId = Long.parseLong(reqUri[reqUri.length-1]);
+						if(selObjId > 0 && viewObjId > 0) {
+							Cell viewObj = (Cell) session.get(Cell.class, new Long(viewObjId));
+							Cell selObj = (Cell) session.get(Cell.class, new Long(selObjId));
+							rowObject = getRowData(selObj, viewObj, session, userObj);
+						}
 					}
 				}
 				resp.getWriter().print(rowObject.toString(4));
@@ -61,35 +127,52 @@ public class DataServlet extends HttpServlet implements Constants {
 			else{
 				// We've recieved a query so we must return an array	
 				// Example: /?id=468&parentId=viewId/objectId
+				//String[] reqUri = req.getPathInfo().split("/");
+				//String tableName = reqUri[reqUri.length-1];
 				JSONArray tableArray = new JSONArray();
 				String[] queryStringArr = URLDecoder.decode(req.getQueryString(), "UTF-8").split("&");
 				long objectId = 0;
 				long viewId = 0;
 				long parentObjectId = 0;
 				long parentViewId = 0;
-				boolean deep = false;
+				long sourceFk = 0;
+				long type = 0;
+				long destFk = 0;
+				boolean preFetch = false;
 				for(int i=0; i<queryStringArr.length; i++){
 					String[] queryStringParts = queryStringArr[i].split("=");
 					if("id".equals(queryStringParts[0])){						
-						//objectId = Long.parseLong(queryStringParts[1]);
-						String[] reqUri = queryStringParts[1].split("/");
-						viewId = Long.parseLong(reqUri[reqUri.length-2]);
-						objectId = Long.parseLong(reqUri[reqUri.length-1]);
+						//viewId = Long.parseLong(reqUri[reqUri.length-2]);
+						//objectId = Long.parseLong(reqUri[reqUri.length-1]);
+						String[] ids = queryStringParts[1].split("/");
+						viewId = Long.parseLong(ids[0]);
+						objectId = Long.parseLong(ids[1]);
+
 					}
 					else if("viewId".equals(queryStringParts[0])){						
 						viewId = Long.parseLong(queryStringParts[1]);
 					}
 					else if("parentId".equals(queryStringParts[0])){						
-						//parentObjectId = Long.parseLong(queryStringParts[1]);
-						String[] reqUri = queryStringParts[1].split("/");
-						parentViewId = Long.parseLong(reqUri[reqUri.length-2]);
-						parentObjectId = Long.parseLong(reqUri[reqUri.length-1]);
+						//parentViewId = Long.parseLong(reqUri[reqUri.length-2]);
+						//parentObjectId = Long.parseLong(reqUri[reqUri.length-1]);
+						String[] ids = queryStringParts[1].split("/");
+						parentViewId = Long.parseLong(ids[0]);
+						parentObjectId = Long.parseLong(ids[1]);
 					}
 					else if("parentViewId".equals(queryStringParts[0])){						
 						//parentViewId = Long.parseLong(queryStringParts[1]);
 					}
-					else if("deep".equals(queryStringParts[0])){						
-						deep = Boolean.parseBoolean(queryStringParts[1]);
+					else if("sourceFk".equals(queryStringParts[0])){						
+						sourceFk = Long.parseLong(queryStringParts[1]);
+					}
+					else if("type".equals(queryStringParts[0])){						
+						type = Long.parseLong(queryStringParts[1]);
+					}
+					else if("destFk".equals(queryStringParts[0])){						
+						destFk = Long.parseLong(queryStringParts[1]);
+					}
+					else if("prefetch".equals(queryStringParts[0])){						
+						preFetch = true;
 					}
 				}
 				if(objectId != 0 && viewId != 0){//used by tree and contents to get array with the root
@@ -97,6 +180,73 @@ public class DataServlet extends HttpServlet implements Constants {
 					Cell viewObj = (Cell) session.get(Cell.class, new Long(viewId));
 					JSONObject rowObject = getRowData(requestedObj, viewObj, session, userObj);
 					tableArray.put(rowObject);				
+				}
+				else if(sourceFk != 0 && type != 0){
+					Cell sourceCell = (Cell) session.get(Cell.class, sourceFk);
+					for(Iterator<Assoc> itr=sourceCell.getSourceAssocs().iterator();itr.hasNext();){
+						Assoc assoc = (Assoc)itr.next();
+						long assocType = assoc.getType();
+						//System.out.println("type:\t"+type+" assocType:\t"+assocType);
+						if(assocType == type){
+							JSONObject rowObject = new JSONObject();
+							rowObject.put("id", assoc.getId());
+							rowObject.put("sourceFk", sourceFk);
+							rowObject.put("type", type);
+							rowObject.put("destFk", assoc.getDestFk().getId());
+							tableArray.put(rowObject);
+						}
+					}			
+				}
+				else if(destFk != 0 && type != 0){
+					Cell destCell = (Cell) session.get(Cell.class, destFk);
+					for(Iterator<Assoc> itr=destCell.getDestAssocs().iterator();itr.hasNext();){
+						Assoc assoc = (Assoc)itr.next();
+						long assocType = assoc.getType();
+						//System.out.println("type:\t"+type+" assocType:\t"+assocType);
+						if(assocType == type){
+							JSONObject rowObject = new JSONObject();
+							rowObject.put("id", assoc.getId());
+							rowObject.put("sourceFk", assoc.getSourceFk().getId());
+							rowObject.put("type", type);
+							rowObject.put("destFk", destFk);
+							tableArray.put(rowObject);
+						}
+					}			
+				}
+				else if(preFetch){
+					long THEROOT = 1;
+					long PAGES = 62;
+					long DOCUMENTS = 78;
+					Cell rootCell = (Cell) session.get(Cell.class, THEROOT);
+					LinkedList<Cell> cellList = rootCell.getLsitOfAllSubClasses();
+					Cell pageModelCell = (Cell) session.get(Cell.class, PAGES);
+					LinkedList<Cell> pagemodelList = pageModelCell.getListOfInstances();
+					Cell documentCell = (Cell) session.get(Cell.class, DOCUMENTS);
+					LinkedList<Cell> documentList = documentCell.getListOfInstances();
+					cellList.addAll(pagemodelList);
+					cellList.addAll(documentList);
+					for(Iterator<Cell> itr0=cellList.iterator();itr0.hasNext();){
+						Cell cellObj = itr0.next();
+						JSONObject cellObject = new JSONObject();
+						cellObject.put("id", cellObj.getId());
+						cellObject.put("type", cellObj.getType());
+						String cellName = cellObj.getName();
+						cellObject.put("name", cellName!=null?cellName:null);
+						JSONObject cellWrapper = new JSONObject();
+						cellWrapper.put("cell", cellObject);
+						tableArray.put(cellWrapper);
+						for(Iterator<Assoc> itr=cellObj.getSourceAssocs().iterator();itr.hasNext();){
+							Assoc assoc = (Assoc)itr.next();
+							JSONObject assocObject = new JSONObject();
+							assocObject.put("id", assoc.getId());
+							assocObject.put("sourceFk", assoc.getSourceFk().getId());
+							assocObject.put("type", assoc.getType());
+							assocObject.put("destFk", assoc.getDestFk().getId());
+							JSONObject assocWrapper = new JSONObject();
+							assocWrapper.put("assoc", assocObject);
+							tableArray.put(assocWrapper);
+						}			
+					}
 				}
 				 
 				resp.getWriter().print(tableArray.toString(4));

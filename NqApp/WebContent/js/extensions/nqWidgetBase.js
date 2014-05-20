@@ -55,14 +55,16 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.pane.resize();
 			//return this.startupDeferred;
 		},
-		getAttrRefProperties: function(viewObj){
-			//console.log('viewObj', viewObj);
-			var ATTRREFERENCE_VIEW_ID = 537;
-			var CLASS_MODEL_VIEW_ID = 844;
+		getAttrRefProperties: function(_viewId){
+			//remove when we're done with the transformation
+			var viewId = (typeof _viewId == 'string' && _viewId.indexOf('/')>0)?_viewId.split('/')[1]:_viewId;
+
+			//console.log('viewId', viewId);
+			var ORDERED_ASSOC = 8;		//TO MANY
+			var ATTRREF_CLASS_TYPE = 63;
 			var self = this;			
-			//return when(this.store.getManyByAssocTypeAndDestClass(CLASS_MODEL_VIEW_ID+'/'+viewObj.id.split('/')[1], ORDERED_ASSOC, ATTREF_CLASS_ID), function(attrRefs){
-			//return when(this.store.getChildren(viewObj, [ATTRREFERENCE_VIEW_ID]), function(attrRefs){
-			return when(this.store.getManyByView(CLASS_MODEL_VIEW_ID+'/'+viewObj.id.split('/')[1], CLASS_MODEL_VIEW_ID+'/'+ATTRREFERENCE_VIEW_ID), function(attrRefs){
+			if(viewId==2378) debugger;
+			return when(this.store.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefs){
 				//console.log('attrRefs', attrRefs);
 				var promisses = [];
 				for(var i=0;i<attrRefs.length;i++){
@@ -72,40 +74,57 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				return all(promisses);
 			});
 		},
-		makeProperties: function(attrRef){
-			var PARENTASSOC_ID = 3;			
-			var CLASS_MODEL_VIEW_ID = 844;
-			var PERTMITTEDVALUE_CLASS = CLASS_MODEL_VIEW_ID+'/'+58;
-			var ATTRIBUTE_ASSOC = 4;		//TO ONE
-			var ASSOCS_CLASS_TYPE = CLASS_MODEL_VIEW_ID+'/'+94;
+		makeProperties: function(attrRefId){
 			var CLASS_TYPE = 0;
+			var PERTMITTEDVALUE_CLASS = 58;
+			var ATTRIBUTE_ASSOC = 4;		//TO ONE
+			var TOONEASSOCS_TYPE = 81;
 			var MAPSTO_ASSOC = 5;			//TO ONE
-			var ASSOCS_ATTR_ID = 1613;
+			var PRIMARY_NAMES = 69;
+			var ATTRIBUTE_ACCESS = 59;
+			var DESCRIPTION = 77;
+			var SUBCLASSES_PASSOC = 15;		//TO MANY
 			
 			var self = this;
+			var attrPromises = [];
+			//get the label that this attribute reference has as an attribute
+			attrPromises[0] = this.store.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, PRIMARY_NAMES);
 			//get the assocication type that this attribute reference has as an attribute
-			return when(self.store.getOneByAssocTypeAndDestClass(CLASS_MODEL_VIEW_ID+'/'+attrRef.id.split('/')[1], ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE), function(attrRefAssocTypeObj){
-				var attrRefAssocType = attrRefAssocTypeObj.id.split('/')[1];
-				//get the attribute class that this attribute reference maps to
-				return when(self.store.getOneByAssocType(CLASS_MODEL_VIEW_ID+'/'+attrRef.id.split('/')[1], MAPSTO_ASSOC, CLASS_TYPE), function(attrClassObj){
-					if(attrRefAssocType == ATTRIBUTE_ASSOC){
-						var attrClassTypeId = attrClassObj[ASSOCS_ATTR_ID][PARENTASSOC_ID][0].split('/')[1];
-						//find out if the attribute class is a permitted value
-						return when(self.store.isA(attrClassObj, PERTMITTEDVALUE_CLASS), function(trueFalse){
-							if(trueFalse) {
-								return when(self.resolvePermittedValues(attrClassObj), function(nameValuePairs){
-									return self.makeProperiesObjects(attrRef, attrClassTypeId, nameValuePairs);
-								});	
-							}
-							else return self.makeProperiesObjects(attrRef, attrClassTypeId, []);
-						});
-					}
-					else return self.makeProperiesObjects(attrRef, 0, []);
+			attrPromises[1] = this.store.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, TOONEASSOCS_TYPE);
+			//get the attribute class that this attribute reference maps to
+			//attrPromises[2] = this.store.getOneByAssocTypeAndDestClass(attrRefId, MAPSTO_ASSOC, ATTRIBUTE);
+			attrPromises[2] = this.store.getOneByAssocType(attrRefId, MAPSTO_ASSOC, CLASS_TYPE, false);
+			//get the attribute access that this attribute reference has as an attribute
+			attrPromises[3] = this.store.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ATTRIBUTE_ACCESS);
+			//get the helptext that this attribute reference has as an attribute
+			attrPromises[4] = this.store.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, DESCRIPTION);
+			return when(all(attrPromises), function(propertiesArr){
+				if(!propertiesArr[1]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
+				var assocType = propertiesArr[1];
+				if(!propertiesArr[2]) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
+				var destClassId = propertiesArr[2];
+				if(assocType == ATTRIBUTE_ASSOC){
+					//find out if the attribute class is a permitted value
+					return when(self.store.isA(destClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
+						if(trueFalse) {
+							return when(self.resolvePermittedValues(destClassId, SUBCLASSES_PASSOC), function(nameValuePairs){
+								return self.makeProperiesObjects(attrRefId, propertiesArr, nameValuePairs);
+							});	
+						}
+						else return self.makeProperiesObjects(attrRefId, propertiesArr, []);
+					});
+					
+				}
+				else return when(self.resolvePermittedValues(destClassId, assocType), function(nameValuePairs){
+					return self.makeProperiesObjects(attrRefId, propertiesArr, nameValuePairs);
 				});	
+
 			});	
 		},
 
-		makeProperiesObjects: function(attrRef, attrClassTypeId, nameValuePairs){
+		makeProperiesObjects: function(attrRefId, propertiesArr, nameValuePairs){
+//			var PARENT_ASSOC = 3;
+			var CLASS_TYPE = 0;
 			var BUILDASSOCTYPE_ATTR_ID = 2085;
 			var NAME_ATTR_ID = 544;
 			var HLEPTEXT_ATTR_ID = 1405;
@@ -124,117 +143,71 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
 			var MODIFY_VALUE_ID = 289;
 			var MANDATORY_VALUE_ID = 290;
-			var property = {
-					field: attrRef.id.split('/')[1], // for dgrid
-					name: attrRef.id.split('/')[1], //for input
-					attrClassType: attrClassTypeId,
-					label: attrRef[NAME_ATTR_ID],
-					//helpText: attrRef[HLEPTEXT_ATTR_ID],
-					helpText: 'undefined',
-					required: attrRef[ACCESS_ATTR_ID]==MANDATORY_VALUE_ID?true:false,
-					editable: attrRef[ACCESS_ATTR_ID]==MODIFY_VALUE_ID||MANDATORY_VALUE_ID?true:false,
-					trim: true,
-					//placeholder: attrRef[PLACEHOLDER_ATTR_ID],
-					//'default': attrRef[DEFAULT_ATTR_ID],
-					//width: attrRef[WIDTH_ATTR_ID]+'em',
-					width: '30em',
-//						style: {width: '30em'}, causes editor to crash
-					//invalidMessage: attrRef[INVALIDMESSAGE_ATTR_ID],
-					//maxLength: attrRef[MAXLENGTH_ATTR_ID],
-					//minLength: attrRef[MINLENGTH_ATTR_ID],
-					//currency: attrRef[CURRENCY_ATTR_ID],
-					//regRex: attrRef[REGEX_ATTR_ID], //e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
-					constraints: {
-						//minimum: attrRef[MINIMUM_ATTR_ID],
-						//maximum: attrRef[MAXIMUM_ATTR_ID],
-						//places: attrRef[PLACES_ATTR_ID],
-						//fractional: attrRef[FRACTIONAL_ATTR_ID]
-					},
-					permittedValues: nameValuePairs,
-					//permittedValues:[{ id:0, name:'undefined'}], 
-					editOn: 'click',  // for dgrid
-					autoSave: true // for dgrid
-				};
-				return property;
-			
+
+			var labelId = propertiesArr[0];
+			var assocType = propertiesArr[1];
+			var destClassId = propertiesArr[2];
+			var access = propertiesArr[3];
+			var helptextId = propertiesArr[4];
+
+			var attrPromises = [];
+			//get the label that this attribute reference has as an attribute
+			attrPromises[0] = this.store.get(labelId);
+			//get the parent of the attribute class that this attribute reference maps to
+			attrPromises[1] = this.store.getOneByAssocType(destClassId, PARENT_ASSOC, CLASS_TYPE, true, false);
+			//get the helptext that this attribute reference has as an attribute
+			if(helptextId) attrPromises[2] = this.store.get(helptextId);
+			return when(all(attrPromises), function(propertiesArr){
+				var label = propertiesArr[0].name;
+				var attrClassType = propertiesArr[1];
+				var helptext = propertiesArr[2]?propertiesArr[2].name:'undefined';
+				var property = {
+						field: attrRefId.toString(), // for dgrid
+						name: attrRefId.toString(), //for input
+						assocType: assocType,
+						attrClassType: attrClassType,
+						label: label,
+						helpText: helptext,
+						required: access==MANDATORY_VALUE_ID?true:false,
+						editable: access==MODIFY_VALUE_ID||MANDATORY_VALUE_ID?true:false,
+						trim: true,
+						//placeholder: attrRef[PLACEHOLDER_ATTR_ID],
+						//'default': attrRef[DEFAULT_ATTR_ID],
+						//width: attrRef[WIDTH_ATTR_ID]+'em',
+						width: '30em',
+//							style: {width: '30em'}, causes editor to crash
+						//invalidMessage: attrRef[INVALIDMESSAGE_ATTR_ID],
+						//maxLength: attrRef[MAXLENGTH_ATTR_ID],
+						//minLength: attrRef[MINLENGTH_ATTR_ID],
+						//currency: attrRef[CURRENCY_ATTR_ID],
+						//regRex: attrRef[REGEX_ATTR_ID], //e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
+						constraints: {
+							//minimum: attrRef[MINIMUM_ATTR_ID],
+							//maximum: attrRef[MAXIMUM_ATTR_ID],
+							//places: attrRef[PLACES_ATTR_ID],
+							//fractional: attrRef[FRACTIONAL_ATTR_ID]
+						},
+						permittedValues: nameValuePairs,
+						//permittedValues:[{ id:0, name:'undefined'}], 
+						editOn: 'click',  // for dgrid
+						autoSave: true // for dgrid
+					};
+					return property;
+			});	
 		},
-		resolvePermittedValues: function(attrClass){
-			var SUBCLASSES_PASSOC = 15;		//TO MANY
+		resolvePermittedValues: function(sourceId, assocType){
 			var OBJECT_TYPE = 1;
-			var OBJVALUE_ATTR_ID = 852;
-			var permittedObjsArr = [];
-			return when(this.store.getManyByAssocType(attrClass, SUBCLASSES_PASSOC, OBJECT_TYPE, true, false), function(permittedObjsArr){
-				var pairsArr = [];
-				for(var j=0;j<permittedObjsArr.length;j++){
-					var obj = permittedObjsArr[j];
-					pairsArr.push({id:obj.id, name:obj[OBJVALUE_ATTR_ID]});
+			var self = this;
+			return when(this.store.getManyByAssocType(sourceId, assocType, OBJECT_TYPE, true), function(permittedObjIdsArr){
+				var pairsArrPromisses = [];
+				for(var j=0;j<permittedObjIdsArr.length;j++){
+					var objId = permittedObjIdsArr[j];
+					pairsArrPromisses.push(self.store.get(objId));
 				}
-				return pairsArr;
+				return all(pairsArrPromisses);
 			});
 		},		
-		XgetAttrRefProperties: function(viewObj){
-			//console.log('viewObj', viewObj);
-			var ATTRREFERENCE_VIEW_ID = 537;
-			var CLASS_MODEL_VIEW_ID = 844;
-			var self = this;
-			
-			return when(this.store.getManyByView(CLASS_MODEL_VIEW_ID+'/'+viewObj.id.split('/')[1], CLASS_MODEL_VIEW_ID+'/'+ATTRREFERENCE_VIEW_ID), function(attrRefs){
-				console.log('attrRefs', attrRefs);
-				var promisses = [];
-				for(var i=0;i<attrRefs.length;i++){
-					var attrRef = attrRefs[i];
-					promisses.push(self.makeProperties(attrRef));
-				};
-				return all(promisses);
-			});
-		},
-		XmakeProperties: function(attrRef){
-			var CLASS_MODEL_VIEW_ID = 844;
-			var MAPSTO_ASSOC = 5;
-			var CLASS_TYPE = 0;
-			var ASSOCIATIONS_VIEW_ID = 1613;
-			var PARENTASSOC_ID = 3;			
-			var PERMITTEDVAULE_CLASS_ID = '58';
-			var self = this;
-			
-			return when(this.store.getOneByAssocType(CLASS_MODEL_VIEW_ID+'/'+attrRef.id.split('/')[1], MAPSTO_ASSOC, CLASS_TYPE), function(mapsToAttrClass){
-				var attrClassType = 0;
-				if(mapsToAttrClass[ASSOCIATIONS_VIEW_ID] && mapsToAttrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID]) {
-					attrClassType = mapsToAttrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID][0];
-					attrClassType = attrClassType.split('/')[1];
-				}
-				if(attrClassType==PERMITTEDVAULE_CLASS_ID){
-					return when(self.resolvePermittedValues(CLASS_MODEL_VIEW_ID+'/'+attrRef.id.split('/')[1]), function(nameValuePairs){
-						return self.makeProperiesObjects(attrRef, attrClassType, nameValuePairs);
-					});	
-				}
-				else return self.makeProperiesObjects(attrRef, attrClassType, []);
-			});		
-		},
-		XmakeProperties: function(attrRef){
-			var CLASS_MODEL_VIEW_ID = 844;
-			var MAPSTO_ATTR_ID = 571;
-			var ASSOCIATIONS_VIEW_ID = 1613;
-			var PARENTASSOC_ID = 3;			
-			var PERMITTEDVAULE_CLASS_ID = '58';
-			
-			var mapsToAttrClass = attrRef[MAPSTO_ATTR_ID];
-			var attrClassId = CLASS_MODEL_VIEW_ID+'/'+mapsToAttrClass;
-			var self = this;
-			return when(this.store.get(attrClassId), function(attrClass){
-				var attrClassType = 0;
-				if(attrClass[ASSOCIATIONS_VIEW_ID] && attrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID]) {
-					attrClassType = attrClass[ASSOCIATIONS_VIEW_ID][PARENTASSOC_ID][0];
-					attrClassType = attrClassType.split('/')[1];
-				}
-				if(attrClassType==PERMITTEDVAULE_CLASS_ID){
-					return when(self.resolvePermittedValues(attrClass), function(nameValuePairs){
-						return self.makeProperiesObjects(attrRef, attrClassType, nameValuePairs);
-					}, nq.errorDialog);	
-				}
-				else return self.makeProperiesObjects(attrRef, attrClassType, []);
-			}, nq.errorDialog);	
-		},
+
 /*
 		destroy: function(){
 			arrayUtil.forEach(this.pane.getChildren(), function(widget){

@@ -3,6 +3,7 @@ define(["dojo/_base/declare", "dijit/tree/ObjectStoreModel", "dojo/_base/lang", 
 	
 	var nqObjectStoreModel = declare(ObjectStoreModel, {
 		mayHaveChildren: function(item){
+			return true;
 			for(var i=0;i<this.childrenAttr.length;i++){
 				var childAttr = this.childrenAttr[i];
 				var childrenArr = item[childAttr];

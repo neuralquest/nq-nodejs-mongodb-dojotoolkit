@@ -4,14 +4,14 @@ require([
 'dojo/_base/declare', 'dojo/store/Observable', 'dojo/store/Cache', 'dojo/store/JsonRest', 'dojo/store/Memory',
 'dojo/Deferred', 'dojo/when', 'dojo/query', 'dijit/layout/BorderContainer', 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", 
-'nq/nqProcessChart', 'nq/nqClassChart', 'nq/nqForm', 'nq/nqTable', 'nq/nqJsonRest', 'nq/nqTree', 'nq/nqObjectStoreModel', 'nq/nqDocument', 'nq/nqCache',
+'nq/nqStore', 'nq/nqProcessChart', 'nq/nqClassChart', 'nq/nqForm', 'nq/nqTable', 'nq/nqJsonRest', 'nq/nqTree', 'nq/nqObjectStoreModel', 'nq/nqDocument', 'nq/nqCache',
 'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct,
 		declare, Observable, Cache, JsonRest, Memory, 
 		Deferred, when, query, BorderContainer, 
 		TabContainer, ContentPane, AccordionContainer, cookie, 
-		nqProcessChart, nqClassChart, nqForm, nqTable, nqJsonRest, nqTree, nqObjectStoreModel, nqDocument, nqCache,
+		nqStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqJsonRest, nqTree, nqObjectStoreModel, nqDocument, nqCache,
 		instrumentation, styles) {
 	
 	_nqMemoryStore = Observable(new Memory({}));
@@ -19,13 +19,15 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	var _transaction = _nqDataStore.transaction();
 	_nqSchemaMemoryStore = new Memory();
 	_nqSchemaStore = Cache(new JsonRest({target:"schema/"}), _nqSchemaMemoryStore);
+	
+	var store = new nqStore();
+
 	/*
 */
 	//////////////////////////////////////////////////////////////////////////////
 	// Initialize
 	//////////////////////////////////////////////////////////////////////////////
 	ready( function() {
-		fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();
 		topic.subscribe("/dojo/hashchange", interpritHash);
 		on(registry.byId('cancelButtonId'), 'click', function(event){_transaction.abort();});
 		on(registry.byId('saveButtonId'), 'click', function(event){_transaction.commit();});
@@ -33,43 +35,32 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			if(value) dojox.html.insertCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
 			else dojox.html.removeCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
 		});
+/*
+		when(store.get(846), function(results){
+			console.log('get',results);					
+		}, errorDialog);
+		
+		when(store.getManyByView(824, 846), function(results){
+			console.log('getManyByView',results);					
+		}, errorDialog);
+	*/	
+		when(store.preFetch(), function(results){
+			fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();
+		
+			//Load the schema in its entirety 
+			var viewId = getState(0).viewId;
+			if(!viewId) viewId = 842;
+			var query = _nqSchemaStore.query({viewId: viewId});
+			when(query, function(objects){
+				if(hash() == "") {
+					var neuralquestState = cookie('neuralquestState');
+					if(neuralquestState) hash(neuralquestState, true);
+					else hash("842.1784.824.846.1866", true);
+				}
+				else interpritHash();
+			}, errorDialog);
+		}, errorDialog);
 
-/*		when(_nqDataStore.getManyByAssocType('844/846', 10, 1, true), function(viewObjArr){
-			var ASSOCS_ATTR_ID = 1613;
-			var MAPSTO_ASSOC = 5;			//TO ONE
-			var SUBCLASSES_PASSOC = 15;		//TO MANY
-			var CLASS_TYPE = 0;
-			console.log('getManyByAssocType', viewObjArr);					
-			//get the class that this view maps to
-			for(var i=0;i<viewObjArr.length;i++){
-				viewObj = viewObjArr[i];
-				var destClassId = viewObj[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
-				//get the subclasses as seen from the destClass
-				when(_nqDataStore.getManyByAssocType(destClassId, SUBCLASSES_PASSOC, CLASS_TYPE, true), function(subClassArr){
-					for(var j=0;j<subClassArr.length;j++){
-						var subClass = subClassArr[j];
-						console.log(subClass);
-					}
-				}, errorDialog);
-			}
-		}, errorDialog);*/
-//		when(_nqDataStore.getManyByParentWidgetOrView('844/824','844/2387'), function(results){
-//			console.log('getManyByParentWidgetOrView',results);					
-//		}, errorDialog);
-
-		//Load the schema in its entirety 
-		var viewId = getState(0).viewId;
-		if(!viewId) viewId = 842;
-		var query = _nqSchemaStore.query({viewId: viewId});
-		when(query, function(objects){
-//			fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();
-			if(hash() == "") {
-				var neuralquestState = cookie('neuralquestState');
-				if(neuralquestState) hash(neuralquestState, true);
-				else hash("842.1784.824.846.1866", true);
-			}
-			else interpritHash();
-		});
 	});
 	//////////////////////////////////////////////////////////////////////////////
 	// Interprit the Hash Change
@@ -95,7 +86,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			return when(viewPanePaneCreated, function(selectedTabObj){//returns the selected tab!
 				//when the viewpane is created, fill the selected tab
 				parentViewPane.resize();//this is a must
-				//start the creation of the widgets as a separate thread
+				//start the creation of the widgets as a separate thread (so no return from this when)
 				when(_nqDataStore.getChildren(selectedTabObj, [WIDGETS_VIEW_ID]), function(widgets){
 					//when we've got all the child widgets that belong to this tab, create them
 					for(var i=0;i<widgets.length;i++){
@@ -327,7 +318,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		case DOCUMENT_DISPTYPE_ID:
 			widget = new nqDocument({
 				id: 'nqWidget'+widgetId,
-				store: _nqDataStore,
+				//store: _nqDataStore,
+				store: store,
 				createDeferred: createDeferred, //tell us when your done by returning the widget
 				tabId: tabId // used by resize
 			}, domConstruct.create('div'));
@@ -336,21 +328,21 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		case FORM_DISPTYPE_ID: 
 			widget = new nqForm({
 				id: 'nqWidget'+widgetId,
-				store: _nqDataStore,
+				store: store,
 				createDeferred: createDeferred, //tell us when your done by returning the widget
-				viewObj: viewObj,
+				viewId: viewId,
 			}, domConstruct.create('div'));
 			tabNode.appendChild(widget.domNode);
 			break;	
 		case TABLE_DISPTYPE_ID:
 			widget = new nqTable({
 				id: 'nqWidget'+widgetId,
-				store: _nqDataStore,
+				store: store,
 				createDeferred: createDeferred, //tell us when your done by returning the widget
-				widgetObj: widgetObj,
-				viewIdsArr: viewIdsArr,
+				widgetId: widgetId,
+				//viewIdsArr: viewIdsArr,
 				selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//dgrid needs an initial query
-				viewsArr: viewsArr,
+				viewsArr: viewsArr,//still used by create item
 				level: level, // used by onClick
 				tabId: tabId, // used by onClick
 				query: query
@@ -359,15 +351,18 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			break;
 		case TREE_DISPTYPE_ID:
 			widget = new nqTree({
-				viewIdsArr: viewIdsArr,
+//				viewIdsArr: viewIdsArr,
 				id: 'nqWidget'+widgetId,
-				store: _nqDataStore,
+//				store: _nqDataStore,
+				store: store,
 				createDeferred: createDeferred, //tell us when your done by returning the widget
-				widgetObj: widgetObj,
-				viewObj: viewObj,
+				widgetId: widgetId,
 				level: level, // used by onClick
 				tabId: tabId, // used by onClick
-				parentId: widgetObj[ROOT_ATTR]
+
+				widgetObj: widgetObj,
+				viewObj: viewObj
+//				parentId: widgetObj[ROOT_ATTR]
 			}, domConstruct.create('div'));
 			tabNode.appendChild(widget.domNode);
 			break;	
@@ -480,4 +475,31 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 
 		if(!err.responseText)throw err.stack; 
 	};
+	// Primitive Assoc types (used by the Assoc table)
+	PARENT_ASSOC = 3;			//TO ONE
+	ATTRIBUTE_ASSOC = 4;		//TO ONE
+	MAPSTO_ASSOC = 5;			//TO ONE
+	DEFAULT_ASSOC = 6;		//TO ONE
+	ONETOONE_ASSOC = 7;		//TO ONE
+	ORDERED_ASSOC = 8;		//TO MANY
+	NEXT_ASSOC = 9;			//TO ONE Only used internaly
+	MANYTOMANY_ASSOC = 10;	//TO MANY
+	ONETOMANY_ASSOC = 11;		//TO MANY
+	OWNS_ASSOC = 12;			//TO MANY
+	// Pseudo Assoc tppes (reverse of the real assocs)
+	SUBCLASSES_PASSOC = 15;		//TO MANY
+	ATTRIBUTE_OF_PASSOC = 16;	//TO MANY
+	MAPPED_TO_BY_PASSOC = 17;	//TO MANY
+	DEFAULT_OF_PASSOC = 18;	//TO MANY
+	ONETOONE_REVERSE_PASSOC = 19;	//TO ONE
+	ORDERED_PARENT_PASSOC = 20;//TO ONE
+	//PREVIOUS_PASSOC = 21;	//TO ONE Not implemented
+	MANYTOMANY_REVERSE_PASSOC = 22;	//TO MANY
+	MANYTOONE_PASSOC = 23;	//TO ONE
+	OWNED_BY_PASSOC = 24;		//TO ONE
+	//Special
+	INSTANTIATIONS_PASSOC = 27;	//TO MANY
+	THE_USER_PASSOC = 28;					//TO MANY
+	ASSOCS_PASSOC = 31; 			//TO MANY		
+
 });

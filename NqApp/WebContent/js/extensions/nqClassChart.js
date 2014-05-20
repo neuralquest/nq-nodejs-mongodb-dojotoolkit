@@ -3,9 +3,9 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 	function(declare, when, all, arrayUtil, nqWebGlChart, domConstruct, lang, domGeom, Deferred){
 
 	return declare("nqClassChartWidget", [nqWebGlChart], {
-		XYAxisRootId: '844/67', // Process Classes 
-		ZYAxisRootId: '844/53', //Attributes
-		viewId: '844',
+		XYAXISROOTID: 68, // Process Classes 
+		ZYAXISROOTID: 53, //Attributes
+		viewId: 844,
 		nameAttrId: 852,
 		bodyViewHeight: 400,
 		bodyViewWidth: 800,
@@ -23,24 +23,24 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				this.classGeometry = geometry;
 				var parentChildrenArray = [];
 				var cellPositionsObj = {};
-				when(this.buildHierarchy(this.XYAxisRootId, cellPositionsObj, parentChildrenArray), lang.hitch(this, function(classItem){
+				when(this.buildHierarchy(this.XYAXISROOTID, cellPositionsObj, parentChildrenArray), lang.hitch(this, function(classItem){
 					var newPos = new THREE.Vector3( 0, 0, 0 );
-					this.postionObjectsXY(this.XYAxisRootId, newPos, cellPositionsObj);
+					this.postionObjectsXY(this.XYAXISROOTID, newPos, cellPositionsObj);
 					//console.log(cellPositionsObj);
 					this.clearScene();
-					sceneObject3D = this.fillScene(this.XYAxisRootId, cellPositionsObj);
-					var positionInfo = cellPositionsObj[this.XYAxisRootId];
+					sceneObject3D = this.fillScene(this.XYAXISROOTID, cellPositionsObj);
+					var positionInfo = cellPositionsObj[this.XYAXISROOTID];
 					var ourVec = new THREE.Vector3(- positionInfo.pos.x, 0, 0 );
 					sceneObject3D.position = ourVec;
 					this.addToScene(sceneObject3D);
 
 					var arr = [];
 					var attrPositionsObj = {};
-					when(this.buildHierarchy(this.ZYAxisRootId, attrPositionsObj, arr), lang.hitch(this, function(attrItem){
+					when(this.buildHierarchy(this.ZYAXISROOTID, attrPositionsObj, arr), lang.hitch(this, function(attrItem){
 						var newPos = new THREE.Vector3();
-						this.postionObjectsXY(this.ZYAxisRootId, newPos, attrPositionsObj);
+						this.postionObjectsXY(this.ZYAXISROOTID, newPos, attrPositionsObj);
 						//this.moveAttributesToProperPosition(cellPositionsObj, attrPositionsObj);
-						sceneObject3D = this.fillScene(this.ZYAxisRootId, attrPositionsObj);
+						sceneObject3D = this.fillScene(this.ZYAXISROOTID, attrPositionsObj);
 						var ourVec = new THREE.Vector3(0, this.bodyViewHeight*2, -this.bodyViewWidth);
 						sceneObject3D.rotation.y += Math.PI / 2;;
 						sceneObject3D.position = ourVec;
@@ -52,7 +52,31 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				}));
 			}));
 		},
-		buildHierarchy: function(objectId, cellPositionsObj, parentChildrenArray){
+		buildHierarchy: function(cellId, cellPositionsObj, parentChildrenArray){
+			var self = this;
+			if(cellId in cellPositionsObj) return;//loop protection
+			return when(this.store.get(cellId), function(cell){
+				if(cell.type != 0) return false;// class as opposed to object
+				parentChildrenArray.push(classItem.id);
+				var promisses = [];
+				var children = [];
+				return when(self.store.getManyByView(cellId, self.viewId), function(itemsArr){
+					for(var i=0;i<itemsArr.length;i++){
+						var item = itemsArr[i];
+						promisses.push(this.buildHierarchy(item.id, cellPositionsObj, children));
+					}
+				});
+				var viewYArr = classItem[this.viewId];
+				for(var i=0;i<viewYArr.length;i++){
+					var subObjectId = viewYArr[i];
+					var result = this.buildHierarchy(subObjectId, cellPositionsObj, children);
+					promisses.push(result);				
+				}
+				cellPositionsObj[objectId] = {children: children, name: classItem[this.nameAttrId], associations: classItem['1613']}; 
+				return all(promisses);
+			});
+		},
+		XbuildHierarchy: function(objectId, cellPositionsObj, parentChildrenArray){
 			if(objectId in cellPositionsObj) return;//loop protection
 			return when(this.store.get(objectId), lang.hitch(this, function(classItem){
 				if(classItem.classId != 0) return;// class as opposed to object
