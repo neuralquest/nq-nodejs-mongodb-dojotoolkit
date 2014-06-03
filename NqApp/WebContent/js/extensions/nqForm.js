@@ -21,6 +21,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			var INTEGER_CLASS_ID = 55;
 			var NUMBER_CLASS_ID = 56;
 			var BOOLEAN_CLASS_ID = 57;
+			var CLASSNAME_CLASS_ID = 101;
 			
 			var tableNode = domConstruct.create('table', {style: 'border-spacing:5px;'}, this.pane.containerNode);
 			var self = this;
@@ -86,6 +87,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					case BOOLEAN_CLASS_ID: 
 						dijit = new CheckBox(property, domConstruct.create('input'));
 						break;
+					case CLASSNAME_CLASS_ID:
+						property.type = 'text';
+						dijit = new ValidationTextBox(property, domConstruct.create('input'));
+						break;	
 					default:
 						dijit = new Select({
 						    'store': new Memory({data: property.permittedValues}),
@@ -126,7 +131,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			this.selectedObjIdPreviousLevel = value;
 			
 			var self = this;
-			when(this.store.getItemByView(this.selectedObjIdPreviousLevel, this.selectedObjIdPreviousLevel.split('/')[0]), function(item){
+			when(this.store.getItemByView(this.selectedObjIdPreviousLevel, this.viewId), function(item){
 //			when(this.store.get(value), function(item){
 				for(attrRefId in item){
 					if(attrRefId.isNaN) continue;

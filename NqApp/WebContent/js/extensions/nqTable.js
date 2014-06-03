@@ -169,7 +169,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 						'selectionMode': "single",
 						'loadingMessage': 'Loading data...',
 						'noDataMessage': 'No data.',
-						'query': {parentId: self.selectedObjIdPreviousLevel, joinViewAttributes: self.viewIdsArr},
+						'query': {parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId},
 						'columns': propertiesArr,
 						'cleanAddedRules': true,
 						'className': "dgrid-autoheight"// version dgrid 0.3.14
@@ -201,7 +201,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 						else{
 							var item = self.grid.row(event).data;
 							//var level = self.level;
-							nq.setHashViewId(self.level, item.viewId, self.tabId, item.id.split('/')[1]);	
+							nq.setHashViewId(self.level, item.viewId, self.tabId, item.id);	
 						}
 					});
 					/*self.grid.on("dgrid-refresh-complete", function(event){
@@ -214,15 +214,13 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 				});
 			});
 		},
-		setSelectedObjIdPreviousLevel: function(_value){
-			//remove when we're done with the transformation
-			var value = (typeof _value == 'string' && _value.indexOf('/')>0)?_value.split('/')[1]:_value;
+		setSelectedObjIdPreviousLevel: function(value){
 			//load the data
 			if(this.selectedObjIdPreviousLevel == value) return this;
 			this.selectedObjIdPreviousLevel = value;
 			
 			//does this return a promise?
-			this.grid.set('query',{parentId: value, viewIdsArr: this.viewIdsArr, join:true});
+			this.grid.set('query',{parentId: value, widgetId: this.widgetId, join:true});
 			var promise = this.grid.refresh();
 			
 			return this;//TODO

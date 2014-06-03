@@ -3,13 +3,12 @@ package com.neuralquest.server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -18,10 +17,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.*;
-import org.dom4j.Document;
-import org.dom4j.DocumentFactory;
-import org.dom4j.Element;
 import org.hibernate.Session;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -139,6 +134,7 @@ public class DataServlet extends HttpServlet implements Constants {
 				long type = 0;
 				long destFk = 0;
 				boolean preFetch = false;
+				boolean uniqueTypes = false;
 				for(int i=0; i<queryStringArr.length; i++){
 					String[] queryStringParts = queryStringArr[i].split("=");
 					if("id".equals(queryStringParts[0])){						
@@ -173,6 +169,9 @@ public class DataServlet extends HttpServlet implements Constants {
 					}
 					else if("prefetch".equals(queryStringParts[0])){						
 						preFetch = true;
+					}
+					else if("uniqueTypes".equals(queryStringParts[0])){						
+						uniqueTypes = true;
 					}
 				}
 				if(objectId != 0 && viewId != 0){//used by tree and contents to get array with the root
@@ -212,6 +211,19 @@ public class DataServlet extends HttpServlet implements Constants {
 							tableArray.put(rowObject);
 						}
 					}			
+				}
+				else if(sourceFk != 0 && uniqueTypes){
+					Cell sourceCell = (Cell) session.get(Cell.class, sourceFk);
+					HashSet<Byte> set = new HashSet<Byte>();
+					for(Iterator<Assoc> itr=sourceCell.getSourceAssocs().iterator();itr.hasNext();){
+						Assoc assoc = (Assoc)itr.next();
+						set.add(assoc.getType() );
+					}			
+					for(Iterator<Assoc> itr=sourceCell.getDestAssocs().iterator();itr.hasNext();){
+						Assoc assoc = (Assoc)itr.next();
+						set.add((byte) (assoc.getType()+12));
+					}
+					tableArray = new JSONArray(set);
 				}
 				else if(preFetch){
 					long THEROOT = 1;

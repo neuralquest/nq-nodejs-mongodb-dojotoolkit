@@ -200,6 +200,10 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		*/
 		destroy: function(){
 			cancelAnimation();
+			for ( var i = scene.children.length - 1; i >= 0 ; i -- ) {
+			    var obj = scene.children[ i ];
+			    scene.remove(obj);
+			}
 			this.inherited(arguments);
 		},
 		clearScene: function(){

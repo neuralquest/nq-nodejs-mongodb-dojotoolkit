@@ -136,7 +136,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 
 			var self = this;
 			var viewId = this.viewId;
-			when(this.store.getItemByView(this.selectedObjIdPreviousLevel, this.selectedObjIdPreviousLevel.split('/')[0]), function(item){
+			when(this.store.getItemByView(this.selectedObjIdPreviousLevel, this.viewId), function(item){
 			//when(this.store.get(this.selectedObjIdPreviousLevel), function(item){
 				return when(self.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
 					registry.byId('tab'+self.tabId).resize();

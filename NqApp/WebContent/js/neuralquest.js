@@ -1,97 +1,84 @@
 require([
 'dojo/_base/array', 'dojo/dom-style', 'dojo/_base/fx', 'dojo/ready', 'dojo/topic', "dojo/on", 'dojo/hash', 'dijit/registry', 
-'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct', 
-'dojo/_base/declare', 'dojo/store/Observable', 'dojo/store/Cache', 'dojo/store/JsonRest', 'dojo/store/Memory',
-'dojo/Deferred', 'dojo/when', 'dojo/query', 'dijit/layout/BorderContainer', 
+'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct', 'dojo/_base/declare',
+'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer', 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", 
-'nq/nqStore', 'nq/nqProcessChart', 'nq/nqClassChart', 'nq/nqForm', 'nq/nqTable', 'nq/nqJsonRest', 'nq/nqTree', 'nq/nqObjectStoreModel', 'nq/nqDocument', 'nq/nqCache',
+'nq/nqStore', 'nq/nqProcessChart', 'nq/nqClassChart', 'nq/nqForm', 'nq/nqTable', 'nq/nqTree','nq/nqDocument',
 'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
-		dom, dojo, lang, declare, array, domConstruct,
-		declare, Observable, Cache, JsonRest, Memory, 
-		Deferred, when, query, BorderContainer, 
+		dom, dojo, lang, declare, array, domConstruct, declare,  
+		Deferred, when, all, query, BorderContainer, 
 		TabContainer, ContentPane, AccordionContainer, cookie, 
-		nqStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqJsonRest, nqTree, nqObjectStoreModel, nqDocument, nqCache,
+		nqStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
 		instrumentation, styles) {
 	
-	_nqMemoryStore = Observable(new Memory({}));
-	_nqDataStore = new nqCache(new nqJsonRest({target:"data/"}), _nqMemoryStore);
-	var _transaction = _nqDataStore.transaction();
-	_nqSchemaMemoryStore = new Memory();
-	_nqSchemaStore = Cache(new JsonRest({target:"schema/"}), _nqSchemaMemoryStore);
-	
-	var store = new nqStore();
+	var nqDataStore = new nqStore();
+	var transaction = nqDataStore.transaction();
 
-	/*
-*/
-	//////////////////////////////////////////////////////////////////////////////
-	// Initialize
-	//////////////////////////////////////////////////////////////////////////////
 	ready( function() {
+		// summary:
+		//		Initialize
+		//		Setup listerners, prefetch data which is often used, determin landing page
+		
 		topic.subscribe("/dojo/hashchange", interpritHash);
-		on(registry.byId('cancelButtonId'), 'click', function(event){_transaction.abort();});
-		on(registry.byId('saveButtonId'), 'click', function(event){_transaction.commit();});
+		on(registry.byId('cancelButtonId'), 'click', function(event){transaction.abort();});
+		on(registry.byId('saveButtonId'), 'click', function(event){transaction.commit();});
 		on(registry.byId('helpButtonId'), 'change', function(value){
 			if(value) dojox.html.insertCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
 			else dojox.html.removeCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
 		});
-/*
-		when(store.get(846), function(results){
-			console.log('get',results);					
-		}, errorDialog);
-		
-		when(store.getManyByView(824, 846), function(results){
-			console.log('getManyByView',results);					
-		}, errorDialog);
-	*/	
-		when(store.preFetch(), function(results){
-			fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();
-		
-			//Load the schema in its entirety 
-			var viewId = getState(0).viewId;
-			if(!viewId) viewId = 842;
-			var query = _nqSchemaStore.query({viewId: viewId});
-			when(query, function(objects){
-				if(hash() == "") {
-					var neuralquestState = cookie('neuralquestState');
-					if(neuralquestState) hash(neuralquestState, true);
-					else hash("842.1784.824.846.1866", true);
-				}
-				else interpritHash();
-			}, errorDialog);
+
+		when(nqDataStore.preFetch(), function(results){
+			fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();		
+			if(hash() == "") {
+				var neuralquestState = cookie('neuralquestState');
+				if(neuralquestState) hash(neuralquestState, true);
+				else hash("842.1784.824.846.1866", true);
+			}
+			else interpritHash();
 		}, errorDialog);
 
 	});
-	//////////////////////////////////////////////////////////////////////////////
-	// Interprit the Hash Change
-	//////////////////////////////////////////////////////////////////////////////
 	function interpritHash(hash, lvl){
+		// summary:
+		//		Interprit the hash change. The hash consists of sets of threes: viewId.tabId.selectedObjectId.
+		//		Each set is interpreted consecutively.
+		//		This method is initially called by on hash change and subsequently by ourselves with incrementing level
+		// hash: String
+		//		The current hash
+		// lvl: Number
+		//		The level we are currently processing. Defaults to 0 as is the case when we are called by on hash change topic
+		// returns: Promise
+		//		All of the page elements of the underlaying levels are completed 
+		
+		var ACCORDION_ID = 1777;
+		var WIDGETS_ATTRCLASS = 99;
+		var ACCORDIONORTAB_ATTRCLASS = 91;
+		
 		var level = lvl?lvl:0;
 		var state = getState(level);
 		if(!state.viewId) return true;
-		var PAGE_MODEL_VIEWS_ID = 538;
-		var ACCORTAB_ATTR_ID = 2149;
-		var ACCORDION_ID = 1777;
-		var WIDGETS_VIEW_ID = 2378;
-		var parentViewPane = null;
+		
 		//find the parent pane to display in
+		var parentViewPane = null;
 		if(!state.viewIdPreviousLevel) parentViewPane = registry.byId('placeholder');//no previous level. use placeholder defined in index.html
 		else parentViewPane = registry.byId('slave'+state.viewIdPreviousLevel);//use the slave from the previous level
-		//get the view for this level
-		return when(_nqDataStore.get(PAGE_MODEL_VIEWS_ID+'/'+state.viewId), function(viewObj){
-			//are we createing an accordion container in a border container or a tab container?
+		//get the accordion/tab id that this widget has as an attribute
+		return when(nqDataStore.getOneByAssocTypeAndDestClass(state.viewId, ATTRIBUTE_ASSOC, ACCORDIONORTAB_ATTRCLASS), function(accordionOrTabId){
+			if(!accordionOrTabId) throw new Error('View '+state.viewId+' must have an accordion/tab indicator as an attribute ');
+			//are we creating an accordion container in a border container or a tab container?
 			var viewPanePaneCreated = null;
-			if(viewObj[ACCORTAB_ATTR_ID]==ACCORDION_ID) viewPanePaneCreated = createAccordionInBorderContainer(parentViewPane, viewObj, state.tabId, level);
-			else viewPanePaneCreated = createTabs(parentViewPane, viewObj, state.tabId, level);
-			return when(viewPanePaneCreated, function(selectedTabObj){//returns the selected tab!
+			if(accordionOrTabId==ACCORDION_ID) viewPanePaneCreated = createAccordionInBorderContainer(parentViewPane, state.viewId, state.tabId, level);
+			else viewPanePaneCreated = createTabs(parentViewPane, state.viewId, state.tabId, level);
+			return when(viewPanePaneCreated, function(selectedTabId){//returns the selected tabId
 				//when the viewpane is created, fill the selected tab
 				parentViewPane.resize();//this is a must
 				//start the creation of the widgets as a separate thread (so no return from this when)
-				when(_nqDataStore.getChildren(selectedTabObj, [WIDGETS_VIEW_ID]), function(widgets){
+				when(nqDataStore.getManyByAssocTypeAndDestClass(selectedTabId, ORDERED_ASSOC, WIDGETS_ATTRCLASS), function(widgetsIdsArr){
 					//when we've got all the child widgets that belong to this tab, create them
-					for(var i=0;i<widgets.length;i++){
-						var widgetObj = widgets[i];
-						when(createNqWidget(widgetObj, selectedTabObj, viewObj, level), function(widget){
+					for(var i=0;i<widgetsIdsArr.length;i++){
+						var widgetId = widgetsIdsArr[i];
+						when(createNqWidget(widgetId, selectedTabId, state.viewId, level), function(widget){
 							//when the widget is created tell it which object was selected on the previous level
 							//widget types will responde diferently: fill the form, set the query for the table, recreate the tree, fly to the object in 3D, etc.
 							when(widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel), function(wid){
@@ -99,7 +86,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 							}, errorDialog);
 						}, errorDialog);
 					}
-					return widgets;
+					return widgetsIdsArr;
 				}, errorDialog);
 				//We do not have to wait for the widgets to be completed. Instead we can continue with a recurssive call to interpritHash
 				return when(interpritHash(hash, level+1), function(result){
@@ -108,21 +95,31 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			});
 		}, errorDialog);
 	}	
-	//////////////////////////////////////////////////////////////////////////////
-	// Add an accordion container in a border container
-	//////////////////////////////////////////////////////////////////////////////
-	function createAccordionInBorderContainer(parentContentPane, viewObj, selectedTabId, level){
-		var ACCORTAB_VIEW_ID = 1802;
-		return when(_nqDataStore.getChildren(viewObj, [ACCORTAB_VIEW_ID]), function(tabs){
-			var selectedTabObj = tabs[0];
-			// if the border container already exists we can simply return the tabs
-			if(registry.byId('borderContainer'+viewObj.id.split('/')[1])) {
-				for(var i=0;i<tabs.length;i++){
-					var tt = tabs[i];
-					var ttId = tt.id.split('/')[1];
-					if(ttId == selectedTabId) selectedTabObj=tt; 
-				}
-				return selectedTabObj;
+	function createAccordionInBorderContainer(parentContentPane, viewId, _selectedTabId, level){
+		// summary:
+		//		Add an accordion container in a border container to the parent content pane
+		//		The right side of the border container can be used to display content based on a selected object on the left side.
+		//		If there is only one accordion, then no container is drawn, just a content  pane.
+		//		Will return immediately if its already been created
+		// parentContentPane: ContentPane
+		//		The content pane we will be drawing in
+		// viewId: Number
+		//		
+		// selectedTabId: Number
+		//		The id of the accordion widget that should be selected according to the hash
+		// level: Number
+		//		The level we are curently processing (used to update the hash after something has been clicked)
+		// returns: Promise
+		//		The promise will result in the id of the selected accordion 
+		
+		var ACCORDIONTABS_ATTRCLASS = 90;
+		var PRIMARY_NAMES = 69;
+		
+		return when(nqDataStore.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ACCORDIONTABS_ATTRCLASS), function(tabIdsArr){
+			var selectedTabId = _selectedTabId&&tabIdsArr.indexOf(_selectedTabId)>=0?_selectedTabId:tabIdsArr[0];
+			// if the ContentPane already exists we can simply return the selectedTabId
+			if(registry.byId('viewPane'+viewId)) {
+				return selectedTabId;
 			}
 			// We're filling a slave, clean it first. It may have been used by another view before
 			arrayUtil.forEach(parentContentPane.getChildren(), function(childWidget){
@@ -131,7 +128,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					
 			var design = 'sidebar';//obtain horizontal, vertical, none from viewDef?
 			var borderContainer = new BorderContainer( {
-				'id' : 'borderContainer'+viewObj.id.split('/')[1],
+				'id' : 'borderContainer'+viewId,
 				'region' : 'center',
 				'design' : design,
 				'persist' : true,
@@ -139,7 +136,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				'style' : {width: '100%', height: '100%', overflow: 'hidden', padding: '0px', margin: '0px'}
 			});
 			var leftPane = new ContentPane( {
-				'id' : 'master'+viewObj.id.split('/')[1],
+				'id' : 'master'+viewId,
 				'region' : 'leading',
 				'class' : 'backgroundClass',
 				'splitter' : true,
@@ -147,7 +144,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				'style' : {width: '200px',overflow: 'hidden',padding: '0px', margin: '0px'}
 			});
 			var centerPane = new ContentPane( {
-				'id' : 'slave'+viewObj.id.split('/')[1],
+				'id' : 'slave'+viewId,
 				'region' : 'center',
 				'class' : 'backgroundClass',
 				//'content' : '<p>Loading...</p>',
@@ -157,20 +154,18 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			borderContainer.addChild(leftPane);
 			borderContainer.addChild(centerPane);
 			parentContentPane.containerNode.appendChild(borderContainer.domNode); //appendChild works better than attaching through create
-			//createviewPanePane(leftPane, 0, viewObj.id);
-			//createviewPanePane(centerPane, level+1);
 		
 			var accordianContainer;
-			if(tabs.length==1){// this is really only to have palce to store viewPane+viewObj.id. Is there a better way?
+			if(tabIdsArr.length==1){// this is really only to have palce to store viewPane+viewObj.id. Is there a better way?
 				accordianContainer = new ContentPane( {
-					'id' : 'viewPane'+viewObj.id.split('/')[1],
+					'id' : 'viewPane'+viewId,
 					'region' : 'center',
 					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
 				});
 			}
 			else {
 				accordianContainer = new AccordionContainer( {
-					'id' : 'viewPane'+viewObj.id.split('/')[1],
+					'id' : 'viewPane'+viewId,
 					'region' : 'center',
 					'duration' : 0,//animation screws out layout. Is there a better solution?
 					//'persist' : true,//cookies override our hash tabId
@@ -179,52 +174,68 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				});
 			}
 			leftPane.addChild(accordianContainer);
-			var TAB_TITLE_ATTR = 1803;
-			for(var i=0;i<tabs.length;i++){
-				var tab = tabs[i];
-				var tabId = tab.id.split('/')[1];
-				if(tabId==selectedTabId) selectedTabObj = tab;//use this one for the return value.
-				var tabPane = new ContentPane( {
-					'id' : 'tab'+tabId,
-//					'viewPane': viewObj.id,
-					'title' : tab[TAB_TITLE_ATTR],
-					'selected' : tabId==selectedTabId?true:false,
-					'class' : 'backgroundClass',
-					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
-				});
-				accordianContainer.addChild(tabPane);
-				//when we create a tab we can know if we have to create a border container in it. 
-				/*
-				var childTabsArr = _nqSchemaMemoryStore.query({parentViewId: tab.id, entity: 'tab'});//get the tabs
-				if(childTabsArr.length>0){
-					if(tab.containerType == 'Accordion') createAccordionInBorderContainer(tabPane, tab.id, selectedTabId, level);
-					else createTabs(tabPane, tab.id, selectedTabId, level);
-				}*/
-				accordianContainer.watch("selectedChildWidget", function(name, oval, nval){
-				    //console.log("selected child changed from ", oval.title, " to ", nval.title);
-				    var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
-				    setHashTabId(level, tabId, viewObj.id.split('/')[1]); // this will trigger createNqWidget
-				});
-			}
-			borderContainer.startup();
-			return selectedTabObj;
-		}, errorDialog);
+			var promisses = [];
+			for(var i=0;i<tabIdsArr.length;i++){
+				//get the tab name that this tab has as an attribute
+				var tabId = tabIdsArr[i];
+				promisses.push(when(nqDataStore.getOneByAssocTypeAndDestClass(tabId, ATTRIBUTE_ASSOC, PRIMARY_NAMES), function(cellId){
+					return when(nqDataStore.getCell(cellId), function(cell){ return cell.name;});
+				}));
+			};
+			return when(all(promisses), function(tabNamesArr){
+				for(var i=0;i<tabIdsArr.length;i++){
+					var tabId = tabIdsArr[i];
+					var tabPane = new ContentPane( {
+						'id' : 'tab'+tabId,
+						'title' : tabNamesArr[i],
+						'selected' : tabId==selectedTabId?true:false,
+						'class' : 'backgroundClass',
+						'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
+					});
+					accordianContainer.addChild(tabPane);
+					accordianContainer.watch("selectedChildWidget", function(name, oval, nval){
+					    //console.log("selected child changed from ", oval.title, " to ", nval.title);
+					    var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
+					    setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
+					});
+				};
+				
+				//parentPane.addChild(container);
+				accordianContainer.startup();
+				borderContainer.startup();
+				//if(tabIdsArr.length>1) accordianContainer.resize();
+				
+				return selectedTabId;				
+			});
+
+		});
 	}
-	//////////////////////////////////////////////////////////////////////////////
-	// Add a tab container
-	//////////////////////////////////////////////////////////////////////////////
-	function createTabs(parentPane, viewObj, selectedTabId, level){
-		var ACCORTAB_VIEW_ID = 1802;
-		return when(_nqDataStore.getChildren(viewObj, [ACCORTAB_VIEW_ID]), function(tabs){
-			var selectedTabObj = tabs[0];//use this one for the return value.
-			// if the ContentPane already exists we can simply return the tabs
-			if(registry.byId('viewPane'+viewObj.id.split('/')[1])) {
-				for(var i=0;i<tabs.length;i++){
-					var tt = tabs[i];
-					var ttId = tt.id.split('/')[1];
-					if(ttId == selectedTabId) selectedTabObj=tt; 
-				}
-				return selectedTabObj;
+	function createTabs(parentPane, viewId, _selectedTabId, level){
+		// summary:
+		//		Add a tab container to the parent content pane
+		//		If there is only one tab, then no container is drawn, just a content  pane.
+		//		Will return immediately if its already been created
+		// parentContentPane: ContentPane
+		//		The content pane we will be drawing in
+		// viewId: Number
+		//		
+		// selectedTabId: Number
+		//		The id of the tab widget that should be selected accoording to the hash
+		// level: Number
+		//		The level we are curently processing (used to update the hash after something has been clicked)
+		// returns: Promise
+		//		The promise will result in the id of the selected tab
+		
+		//get the Display Type id that this widget has as an attribute
+		
+		var ACCORDIONTABS_ATTRCLASS = 90;
+		var PRIMARY_NAMES = 69;
+		
+		return when(nqDataStore.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ACCORDIONTABS_ATTRCLASS), function(tabIdsArr){
+			var selectedTabId = _selectedTabId&&tabIdsArr.indexOf(_selectedTabId)>=0?_selectedTabId:tabIdsArr[0];
+			// if the ContentPane already exists we can simply return the selectedTabId
+			if(registry.byId('viewPane'+viewId)) {
+				return selectedTabId;
 			}
 			// We're filling a slave, clean it first. It may have been used by another view before
 			arrayUtil.forEach(parentPane.getChildren(), function(childWidget){
@@ -232,174 +243,165 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			});
 
 			var container;
-			if(tabs.length==1){// this is really only to have palce to store viewPane+viewId. Is there a better way?
+			if(tabIdsArr.length==1){// this is really only to have palce to store viewPane+viewId. Is there a better way?
 				container = new ContentPane( {
-					'id' : 'viewPane'+viewObj.id.split('/')[1],
+					'id' : 'viewPane'+viewId,
 					'region' : 'center'
 				});
 			}
 			else {
 				container = new TabContainer( {
-					'id' : 'viewPane'+viewObj.id.split('/')[1],
+					'id' : 'viewPane'+viewId,
 					//'persist' : true,//cookies override our hash tabId
 					'region' : 'center'
 				});
 			}
-			var TAB_TITLE_ATTR = 1803;
-			for(var i=0;i<tabs.length;i++){
-				var tab = tabs[i];
-				var tabId = tab.id.split('/')[1];
-				if(tabId==selectedTabId) selectedTabObj = tab;//use this one for the return value.
-				var tabPane = new ContentPane( {
-					'id' : 'tab'+tabId,
-	//				'viewPane': viewObj.id,
-					'title' : tab[TAB_TITLE_ATTR],
-					'selected' : tabId==selectedTabId?true:false,
-					'class' : 'backgroundClass',
-					'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
-				});
-				container.addChild(tabPane);
-				container.watch("selectedChildWidget", function(name, oval, nval){
-				    //console.log("selected child changed from ", oval.title, " to ", nval.title);
-				    var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
-				    setHashTabId(level, tabId, viewObj.id.split('/')[1]); // this will trigger createNqWidget
-				});
-				//when we create a tab we can know if we have to create a border container in it. 
-				/*
-				var childTabsArr = _nqSchemaMemoryStore.query({parentViewId: tab.id, entity: 'tab'});//get the tabs
-				if(childTabsArr.length>0){
-					if(tab.displayType = 'Sub Accordion'){
-						createAccordionInBorderContainer(tabPane, tab.id, selectedTabId, level);
-					}
-					else createTabs(tabPane, tab.id, selectedTabId, level);
-				}*/
+			var promisses = [];
+			for(var i=0;i<tabIdsArr.length;i++){
+				//get the tab name that this tab has as an attribute
+				var tabId = tabIdsArr[i];
+				promisses.push(when(nqDataStore.getOneByAssocTypeAndDestClass(tabId, ATTRIBUTE_ASSOC, PRIMARY_NAMES), function(cellId){
+					return when(nqDataStore.getCell(cellId), function(cell){ return cell.name;});
+				}));
 			};
-			parentPane.addChild(container);
-			container.startup();
-			if(tabs.length>1) container.resize();
-			
-			return selectedTabObj;
-		}, errorDialog);
+			return when(all(promisses), function(tabNamesArr){
+				for(var i=0;i<tabIdsArr.length;i++){
+					var tabId = tabIdsArr[i];
+					var tabPane = new ContentPane( {
+						'id' : 'tab'+tabId,
+						'title' : tabNamesArr[i],
+						'selected' : tabId==selectedTabId?true:false,
+						'class' : 'backgroundClass',
+						'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
+					});
+					container.addChild(tabPane);
+					container.watch("selectedChildWidget", function(name, oval, nval){
+					    //console.log("selected child changed from ", oval.title, " to ", nval.title);
+					    var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
+					    setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
+					});
+				};
+				
+				parentPane.addChild(container);
+				container.startup();
+				if(tabIdsArr.length>1) container.resize();
+				
+				return selectedTabId;				
+			});
+		});
 	}	
-	//////////////////////////////////////////////////////////////////////////////
-	// Add the Widget to the Tap Pane and Provide Data For It
-	//////////////////////////////////////////////////////////////////////////////
-	function createNqWidget(widgetObj, tabObj, viewObj, level){
-		var createDeferred = new Deferred();
-//console.log('widgetObh', widgetObj);		
-		var DISPLAYTYPE_ATTR = 745;
-		var ROOT_ATTR = 1804;
+	function createNqWidget(widgetId, tabId, viewId, level){
+		// summary:
+		//		Add a nqWidget to the content pane, depending on DISPLAYTYPE_ATTR
+		//		Will return immediately if its already been created
+		// widgetId: Number
+		//		The id of the widget that the selected tab is requesting 
+		// tabId: Number
+		//		The currently selected tab (used to update the hash after something has been clicked)
+		// viewId: Number
+		//		The id of the view that the selected object is requesting 
+		// level: Number
+		//		The level we are curently processing (used to update the hash after something has been clicked)
+		// returns: Deferred
+		//		The deferred will result in the widget after it has been created, or immediately if it is already there 
+
+		var DISPLAYTYPE_ATTRCLASS = 92;
 		var DOCUMENT_DISPTYPE_ID = 1865;
 		var FORM_DISPTYPE_ID = 1821;
 		var TABLE_DISPTYPE_ID = 1780;
 		var TREE_DISPTYPE_ID = 1779;
 		var PROCESS_MODEL_DISPTYPE_ID = 1924;
 		var CLASS_MODEL_DISPTYPE_ID = 1782;
-
-		var widgetId = widgetObj.id.split('/')[1];
-		var tabId = tabObj.id.split('/')[1];
-		var viewId = viewObj.id.split('/')[1];
+		
+		// if the widget already exists we can simply return widgets
+		var widget = registry.byId('nqWidget'+widgetId);		
+		if(widget) return widget;
 		
 		var state = getState(level);
 		var tabNode = dom.byId('tab'+tabId);
+		var createDeferred = new Deferred();
 
-		// if the widget already exists we can simply return widgets
-		var widget = registry.byId('nqWidget'+widgetId);
-		
-		if(widget) return widget;
-
-		viewsArr = _nqSchemaMemoryStore.query({parentWidgetId: widgetId, entity: 'view'});//get the views that belong to this wdiget	
-		var viewIdsArr = [];
-		for(var i=0;i<viewsArr.length;i++){
-			viewIdsArr.push(viewsArr[i].id);
-		}
-
-		switch(widgetObj[DISPLAYTYPE_ATTR]){
-		case DOCUMENT_DISPTYPE_ID:
-			widget = new nqDocument({
-				id: 'nqWidget'+widgetId,
-				//store: _nqDataStore,
-				store: store,
-				createDeferred: createDeferred, //tell us when your done by returning the widget
-				tabId: tabId // used by resize
-			}, domConstruct.create('div'));
-			tabNode.appendChild(widget.domNode);
-			break;	
-		case FORM_DISPTYPE_ID: 
-			widget = new nqForm({
-				id: 'nqWidget'+widgetId,
-				store: store,
-				createDeferred: createDeferred, //tell us when your done by returning the widget
-				viewId: viewId,
-			}, domConstruct.create('div'));
-			tabNode.appendChild(widget.domNode);
-			break;	
-		case TABLE_DISPTYPE_ID:
-			widget = new nqTable({
-				id: 'nqWidget'+widgetId,
-				store: store,
-				createDeferred: createDeferred, //tell us when your done by returning the widget
-				widgetId: widgetId,
-				//viewIdsArr: viewIdsArr,
-				selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//dgrid needs an initial query
-				viewsArr: viewsArr,//still used by create item
-				level: level, // used by onClick
-				tabId: tabId, // used by onClick
-				query: query
-			}, domConstruct.create('div'));
-			tabNode.appendChild(widget.domNode);
-			break;
-		case TREE_DISPTYPE_ID:
-			widget = new nqTree({
-//				viewIdsArr: viewIdsArr,
-				id: 'nqWidget'+widgetId,
-//				store: _nqDataStore,
-				store: store,
-				createDeferred: createDeferred, //tell us when your done by returning the widget
-				widgetId: widgetId,
-				level: level, // used by onClick
-				tabId: tabId, // used by onClick
-
-				widgetObj: widgetObj,
-				viewObj: viewObj
-//				parentId: widgetObj[ROOT_ATTR]
-			}, domConstruct.create('div'));
-			tabNode.appendChild(widget.domNode);
-			break;	
-		case PROCESS_MODEL_DISPTYPE_ID: 
-			widget = new nqProcessChart({
-				id: 'nqWidget'+widgetId,
-				store: _nqDataStore,
-				createDeferred: createDeferred, //tell us when your done by returning the widget
-				//viewObj: viewObj,
-				tabId: tabId, // used by resize
-				orgUnitRootId: '850/494', // Process Classes
-				orgUnitViewId: '1868',
-				orgUnitNameAttrId: '1926',
-				stateRootId: '2077/443',
-				stateViewId: '2077',
-				stateNameAttrId: '2081'
-				//skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
-			}, domConstruct.create('div'));
-			tabNode.appendChild(widget.domNode);
-			widget.startup();
-			break;
-		case CLASS_MODEL_DISPTYPE_ID: 
-			widget = new nqClassChart({
-				id: 'nqWidget'+widgetId,
-				store: _nqDataStore,
-				createDeferred: createDeferred, //tell us when your done by returning the widget
-				tabId: tabId, // used by resize
-				XYAxisRootId: '844/67', // Process Classes
-				viewId: viewId,
-				nameAttrId: 852,
-				ZYAxisRootId: '844/53', //Attributes
-				skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
-			}, domConstruct.create('div'));
-			tabNode.appendChild(widget.domNode);
-			widget.startup();
-			break;
-		};
+		//get the Display Type id that this widget has as an attribute
+		when(nqDataStore.getOneByAssocTypeAndDestClass(widgetId, ATTRIBUTE_ASSOC, DISPLAYTYPE_ATTRCLASS), function(displayTypeId){
+			switch(displayTypeId){
+			case DOCUMENT_DISPTYPE_ID:
+				widget = new nqDocument({
+					id: 'nqWidget'+widgetId,
+					store: nqDataStore,
+					createDeferred: createDeferred, //tell us when your done by returning the widget
+					widgetId: widgetId, //used to get the name of the widget
+					viewId: viewId,
+					tabId: tabId // used by resize
+				}, domConstruct.create('div'));
+				tabNode.appendChild(widget.domNode);
+				break;	
+			case FORM_DISPTYPE_ID: 
+				widget = new nqForm({
+					id: 'nqWidget'+widgetId,
+					store: nqDataStore,
+					createDeferred: createDeferred, //tell us when your done by returning the widget
+					viewId: viewId,
+				}, domConstruct.create('div'));
+				tabNode.appendChild(widget.domNode);
+				break;	
+			case TABLE_DISPTYPE_ID:
+				widget = new nqTable({
+					id: 'nqWidget'+widgetId,
+					store: nqDataStore,
+					createDeferred: createDeferred, //tell us when your done by returning the widget
+					widgetId: widgetId,
+					selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//dgrid needs an initial query
+//					viewsArr: viewsArr,//still used by create item
+					level: level, // used by onClick
+					tabId: tabId, // used by onClick
+					query: query
+				}, domConstruct.create('div'));
+				tabNode.appendChild(widget.domNode);
+				break;
+			case TREE_DISPTYPE_ID:
+				widget = new nqTree({
+					id: 'nqWidget'+widgetId,
+					store: nqDataStore,
+					createDeferred: createDeferred, //tell us when your done by returning the widget
+					widgetId: widgetId,
+					selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//tree needs an initial query
+					level: level, // used by onClick
+					tabId: tabId, // used by onClick
+				}, domConstruct.create('div'));
+				tabNode.appendChild(widget.domNode);
+				break;	
+			case PROCESS_MODEL_DISPTYPE_ID: 
+				widget = new nqProcessChart({
+					id: 'nqWidget'+widgetId,
+					store: nqDataStore,
+					createDeferred: createDeferred, //tell us when your done by returning the widget
+					//viewObj: viewObj,
+					tabId: tabId, // used by resize
+					//orgUnitRootId: '850/494', // Process Classes
+					//orgUnitViewId: '1868',
+					//orgUnitNameAttrId: '1926',
+					//stateRootId: '2077/443',
+					//stateViewId: '2077',
+					//stateNameAttrId: '2081'
+					//skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
+				}, domConstruct.create('div'));
+				tabNode.appendChild(widget.domNode);
+				widget.startup();
+				break;
+			case CLASS_MODEL_DISPTYPE_ID: 
+				widget = new nqClassChart({
+					id: 'nqWidget'+widgetId,
+					store: nqDataStore,
+					createDeferred: createDeferred, //tell us when your done by returning the widget
+					viewId: viewId,
+					tabId: tabId, // used by resize
+					//skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
+				}, domConstruct.create('div'));
+				tabNode.appendChild(widget.domNode);
+				widget.startup();
+				break;
+			};
+		});
 		return createDeferred.promise;
 	}	
 	//////////////////////////////////////////////////////////////////////////////
@@ -409,11 +411,16 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	function getState(level){
 		var hashArr = hash().split('.');
 		return {
-			viewId: hashArr[level*3+0],
-			tabId: hashArr[level*3+1],
-			selectedObjId: hashArr[level*3+2],
-			selectedObjectIdPreviousLevel: hashArr[level*3+0]+'/'+hashArr[level*3-1],
-			viewIdPreviousLevel: hashArr[level*3-3]
+			//viewId: hashArr[level*3+0],
+			//tabId: hashArr[level*3+1],
+			//selectedObjId: hashArr[level*3+2],
+			//selectedObjectIdPreviousLevel: hashArr[level*3-1],
+			//viewIdPreviousLevel: hashArr[level*3-3]
+			viewId: parseInt(hashArr[level*3+0]),
+			tabId: parseInt(hashArr[level*3+1]),
+			selectedObjId: parseInt(hashArr[level*3+2]),
+			selectedObjectIdPreviousLevel: parseInt(hashArr[level*3-1]),
+			viewIdPreviousLevel: parseInt(hashArr[level*3-3])
 		};
 	}
 	function setHashTabId(level, tabId, viewId){
@@ -423,9 +430,10 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		
 		hashArr[level*3+1] = tabId;
 		
-		var viewsArr = _nqSchemaMemoryStore.query({parentTabId: tabId, entity: 'view'});//get the views		 
-		if(viewsArr.length>0) hashArr[(level+1)*3+0] = viewsArr[0].id;
-		else hashArr = hashArr.slice(0,level*3+2);
+		//var viewsArr = _nqSchemaMemoryStore.query({parentTabId: tabId, entity: 'view'});//get the views		 
+		//if(viewsArr.length>0) hashArr[(level+1)*3+0] = viewsArr[0].id;
+		//else hashArr = hashArr.slice(0,level*3+2);
+		hashArr = hashArr.slice(0,level*3+2);
 
 		//remove anything following this tab in the hash since it is nolonger valid
 		hashArr = hashArr.slice(0,level*3+2);
@@ -467,39 +475,39 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	function errorDialog(err){
 		var dlg = new dijit.Dialog({
 			title: err.message, 
-			extractContent: true,
-			onClick: function(evt){this.hide();},
+			extractContent: true,//important in the case of server response, it'll screw your css. 
+			onClick: function(evt){this.hide();},//click anywhere to close
 			content: err.responseText?err.responseText:err.stack
 		});
 		dlg.show();
-
-		if(!err.responseText)throw err.stack; 
+		if(!err.responseText) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
 	};
-	// Primitive Assoc types (used by the Assoc table)
+	// Primitive Assoc types (as used by the Assoc table)
 	PARENT_ASSOC = 3;			//TO ONE
 	ATTRIBUTE_ASSOC = 4;		//TO ONE
 	MAPSTO_ASSOC = 5;			//TO ONE
-	DEFAULT_ASSOC = 6;		//TO ONE
-	ONETOONE_ASSOC = 7;		//TO ONE
-	ORDERED_ASSOC = 8;		//TO MANY
-	NEXT_ASSOC = 9;			//TO ONE Only used internaly
-	MANYTOMANY_ASSOC = 10;	//TO MANY
+	DEFAULT_ASSOC = 6;			//TO ONE
+	ONETOONE_ASSOC = 7;			//TO ONE
+	ORDERED_ASSOC = 8;			//TO MANY
+	NEXT_ASSOC = 9;				//TO ONE Only used internaly
+	MANYTOMANY_ASSOC = 10;		//TO MANY
 	ONETOMANY_ASSOC = 11;		//TO MANY
 	OWNS_ASSOC = 12;			//TO MANY
 	// Pseudo Assoc tppes (reverse of the real assocs)
 	SUBCLASSES_PASSOC = 15;		//TO MANY
 	ATTRIBUTE_OF_PASSOC = 16;	//TO MANY
 	MAPPED_TO_BY_PASSOC = 17;	//TO MANY
-	DEFAULT_OF_PASSOC = 18;	//TO MANY
-	ONETOONE_REVERSE_PASSOC = 19;	//TO ONE
-	ORDERED_PARENT_PASSOC = 20;//TO ONE
-	//PREVIOUS_PASSOC = 21;	//TO ONE Not implemented
-	MANYTOMANY_REVERSE_PASSOC = 22;	//TO MANY
-	MANYTOONE_PASSOC = 23;	//TO ONE
+	DEFAULT_OF_PASSOC = 18;		//TO MANY
+	ONETOONE_REVERSE_PASSOC = 19;//TO ONE
+	ORDERED_PARENT_PASSOC = 20;	//TO ONE
+	PREVIOUS_PASSOC = 21;		//TO ONE
+	MANYTOMANY_REVERSE_PASSOC = 22;//TO MANY
+	MANYTOONE_PASSOC = 23;		//TO ONE
 	OWNED_BY_PASSOC = 24;		//TO ONE
 	//Special
-	INSTANTIATIONS_PASSOC = 27;	//TO MANY
-	THE_USER_PASSOC = 28;					//TO MANY
-	ASSOCS_PASSOC = 31; 			//TO MANY		
+//	INSTANTIATIONS_PASSOC = 27;	//TO MANY
+//	THE_USER_PASSOC = 28;		//TO MANY
+	BYASSOCTPE_PASSOC = 30; 		//TO MANY		
+	ASSOCS_PASSOC = 31; 		//TO MANY		
 
 });

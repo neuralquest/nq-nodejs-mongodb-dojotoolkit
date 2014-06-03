@@ -1,8 +1,10 @@
-define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dojo/store/util/QueryResults", "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request'],
-function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, request ){
+define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dojo/store/util/QueryResults", "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array"],
+function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, request, registry, array ){
 
 // module:
 //		js/nqStore
+	var dirtyCells = [];
+	var dirtyAssocs = [];
 	var queryCacheForward = [];
 	var queryCacheBackward = [];
 	var cellMasterStore = new JsonRest({target:"data/cell/"});
@@ -31,7 +33,7 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 				return results;
 			}
 		}
-		if(query.destFk && query.type){
+		else if(query.destFk && query.type){
 			if(queryCacheBackward[query.destFk]&&queryCacheBackward[query.destFk][query.type]) {
 				return queryCacheBackward[query.destFk][query.type];//return the cached query results
 			}
@@ -48,28 +50,25 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 				return results;
 			}
 		}
-		return [];
-		var assocResults = assocMemmoryStore.query(query, directives);
-		if(assocResults.length>0) return assocResults;
-		//console.log(query, assocResults);
-		var results = assocMasterStore.query(query, directives);
-		//console.log('rest', query);
-		results.forEach(function(object){
-			assocMemmoryStore.put(object);
-		});
-		return results;
+		else return JsonRest.prototype.query.call(this, query, directives);
+		//return [];
 	};
 
 	return declare("nqStore", [], {
 
 		
-		get: function(id){
+		get: function(id){//get rid of
+			//if(!id) debugger;
+			return cellStore.get(id);
+		},
+		getCell: function(id){
 			// summary:
 			//		Retrieves an object by its identity
 			// id: Number
 			//		The identity to use to lookup the object
 			// returns: Object
 			//		The object in the store that matches the given id.
+			//if(!id) debugger;
 			return cellStore.get(id);
 		},
 		getIdentity: function(object){
@@ -80,6 +79,103 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			// returns: String|Number
 			return object.id;
 		},
+		getAssoc: function(id){
+			// summary:
+			//		Retrieves an object by its identity
+			// id: Number
+			//		The identity to use to lookup the object
+			// returns: Object
+			//		The object in the store that matches the given id.
+			return assocStore.get(id);
+		},
+		putCell: function(object, directives){
+			// summary:
+			//		Stores an object
+			// object: Object
+			//		The object to store.
+			// directives: dojo/store/api/Store.PutDirectives?
+			//		Additional directives for storing objects.
+			// returns: Number|String
+
+			this.enableTransactionButtons();
+			
+			if(array.indexOf(dirtyCells, object.id)>=0) dirtyCells.push(object.id);
+			cellMemmoryStore.put(object, directives);
+			return object.id;
+		},
+		addCell: function(object, directives){
+			// summary:
+			//		Creates an object, throws an error if the object already exists
+			// object: Object
+			//		The object to store.
+			// directives: dojo/store/api/Store.PutDirectives?
+			//		Additional directives for creating objects.
+			// returns: Number|String
+
+			this.enableTransactionButtons();
+			
+			object.id = "cid:"+Math.floor((Math.random()*1000000)+1);
+			dirtyCells.push(object.id);
+			cellMemmoryStore.add(object, directives);
+			return object.id;
+		},
+		removeCell: function(id){
+			// summary:
+			//		Deletes an object by its identity
+			// id: Number
+			//		The identity to use to delete the object
+
+			this.enableTransactionButtons();
+			
+			var i = array.indexOf(dirtyCells, object.id);
+			if(i>=0) dirtyCells.splice(i,0);
+			else dirtyCells.push(object.id);
+			cellMemmoryStore.remove(id);
+		},
+		putAssoc: function(object, directives){
+			// summary:
+			//		Stores an object
+			// object: Object
+			//		The object to store.
+			// directives: dojo/store/api/Store.PutDirectives?
+			//		Additional directives for storing objects.
+			// returns: Number|String
+
+			this.enableTransactionButtons();
+			
+			if(array.indexOf(dirtyAssocs, object.id)>=0) dirtyAssocs.push(object.id);
+			assocMemmoryStore.put(object, directives);
+			return object.id;
+		},
+		addAssoc: function(object, directives){
+			// summary:
+			//		Creates an object, throws an error if the object already exists
+			// object: Object
+			//		The object to store.
+			// directives: dojo/store/api/Store.PutDirectives?
+			//		Additional directives for creating objects.
+			// returns: Number|String
+
+			this.enableTransactionButtons();
+			
+			object.id = "cid:"+Math.floor((Math.random()*1000000)+1);
+			dirtyAssocs.push(object.id);
+			assocMemmoryStore.add(object, directives);
+			return object.id;
+		},
+		removeAssoc: function(id){
+			// summary:
+			//		Deletes an object by its identity
+			// id: Number
+			//		The identity to use to delete the object
+
+			this.enableTransactionButtons();
+			
+			var i = array.indexOf(dirtyAssocs, object.id);
+			if(i>=0) dirtyAssocs.splice(i,0);
+			else dirtyAssocs.push(object.id);
+			assocMemmoryStore.remove(id);
+		},		
 		put: function(object, directives){
 			// summary:
 			//		Stores an object
@@ -88,30 +184,29 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			// directives: dojo/store/api/Store.PutDirectives?
 			//		Additional directives for storing objects.
 			// returns: Number|String
-		},
-		add: function(object, directives){
-			// summary:
-			//		Creates an object, throws an error if the object already exists
-			// object: Object
-			//		The object to store.
-			// directives: dojo/store/api/Store.PutDirectives?
-			//		Additional directives for creating objects.
-			// returns: Number|String
-		},
-		remove: function(id){
-			// summary:
-			//		Deletes an object by its identity
-			// id: Number
-			//		The identity to use to delete the object
-			delete this.index[id];
-			var data = this.data,
-				idProperty = this.idProperty;
-			for(var i = 0, l = data.length; i < l; i++){
-				if(data[i][idProperty] == id){
-					data.splice(i, 1);
-					return;
+
+			var ASSOCS_CLASS_TYPE = 94;
+
+			console.log('put', object, directives);
+			debugger;
+			var self = this;
+			var viewId = object.viewId;
+			var objectId = object.id;
+			var parentId = directives.parent.id;
+			var beforeId = directives.before?directives.before.id:undefined;
+			//get the assocication type that this view has as an attribute
+			when(this.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE), function(assocType){
+				if(assocType==ORDERED_ASSOC){
+					//remove object from the linkedlist
+					
+					if(beforeId)
+					//get the current assoc
 				}
-			}
+				when(assocStore.query({sourceFk: parentId, type: assocType, destFk: objectId}), function(assocArr){
+					console.log(assocArr);
+					
+				});
+			});
 		},
 		query: function(query, options){
 			// summary:
@@ -132,26 +227,17 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			//	|	store.query({ prime: true }).forEach(function(object){
 			//	|		// handle each object
 			//	|	});
-			if(query.parentId && query.viewIdsArr && query.join){
-				var self = this;
-				var resultUntilNow = {};
-				var resultsArr = [];
-				var promise = this.getManyByView(query.parentId, query.viewIdsArr[0]);
-				/*var promise = when(_nqDataStore.get(query.parentId), function(parent){
-					return when(self.join(parent, query.viewIdsArr, 0, resultUntilNow, resultsArr), function(res){
-						return resultsArr;
-					});
-
-				});*/
+			if(query.parentId && query.widgetId && query.join){
+				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
 				return QueryResults(promise);
 			}
-			else if(query.cellId && query.viewId ){
+			else if(query.cellId && query.viewId ){//used by tree to get the first item
 				return when(this.getItemByView(query.cellId, query.viewId), function(item){
 					return QueryResults([item]);
 				});
-				
-				//var promise = this.getItemByView(query.cellId, query.viewIdsArr[0]);
-				//return QueryResults([promise]);
+			}
+			else if(query.sourceFk || query.destFk){
+				return assocStore.query(query, options);
 			}
 			//else return JsonRest.prototype.query.call(this, query, options);
 			return [];
@@ -164,8 +250,49 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			//		as "auto-commit" style actions.
 			// returns: dojo/store/api/Store.Transaction
 			//		This represents the new current transaction.
+	    	return {
+		    	commit: lang.hitch(this, function(){
+					registry.byId('cancelButtonId').set('disabled',true);
+					registry.byId('saveButtonId').set('disabled',true);					
+					
+					var cellOperations = [];
+					for(var j=0;j<dirtyCells.length;j++){
+						var cellId = dirtyCells[j];
+						cellOperations.push(cellMemmoryStore.get(cellId));
+					}
+					var dataOperations = {cellOperations:cellOperations};
+					var assocOperations = [];
+					for(var j=0;j<dirtyAssocs.length;j++){
+						var assocId = dirtyAssocs[j];
+						assocOperations.push(assocMemmoryStore.get(assocId));
+					}
+					dataOperations.assocOperations = assocOperations;
+					request.post(this.target, {
+						// send all the operations in the body
+						headers: {'Content-Type': 'application/json; charset=UTF-8'},
+						data: dojo.toJson(dataOperations)//JSON.stringify(dataOperations)
+					}).then( 
+						function(data){
+							console.log(data);//TODO: Replace IDs
+							dirtyCells = [];
+							dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
+			    		},
+			    		function(error){
+					    	//TODO evict from the cache then refresh the page data
+							dirtyCells = [];
+							nq.errorDialog(error);
+			    		}
+			    	);		    	
+				}),
+			    abort: function(){
+			    	window.location.reload(true);
+			    	//TODO evict from the cache then refresh the page data
+					dirtyCells = [];
+					nq.errorDialog(error);
+		    	}
+	    	};
 		},
-		getChildren: function(parent, parentWidgetOrViewId){
+		getChildren: function(parent){
 			// summary:
 			//		Retrieves the children of an object.
 			// parent: Object
@@ -174,8 +301,7 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			//		Additional options to apply to the retrieval of the children.
 			// returns: dojo/store/api/Store.QueryResults
 			//		A result set of the children of the parent object.
-			//return when(this.getManyByParentWidgetOrView(parent.id, parentWidgetOrViewId));
-			return when(this.getManyByParentWidgetOrView(parent.id, parentWidgetOrViewId[0]));
+			return when(this.getManyByParentWidgetOrViewUnion(parent.id, parent.viewId));
 		},
 		getMetadata: function(object){
 			// summary:
@@ -186,7 +312,7 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			// returns: Object
 			//		An object containing metadata.
 		},
-		getManyByParentWidgetOrView: function(_sourceId, _parentWidgetOrViewId){
+		getManyByParentWidgetOrViewUnion: function(sourceId, parentWidgetOrViewId){
 			// summary:
 			//		Returns an array of items that can be consumed by widgets. 
 			//		Each Widget or View can have multiple sub-views. 
@@ -199,12 +325,8 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			// returns: Array 
 			//		An array of prommises. Each promise will result in an item.
 			
-			//remove when we're done with the transformation
-			var sourceId = (typeof _sourceId == 'string' && _sourceId.indexOf('/')>0)?_sourceId.split('/')[1]:_sourceId;
-			var parentWidgetOrViewId = (typeof _parentWidgetOrViewId == 'string' && _parentWidgetOrViewId.indexOf('/')>0)?_parentWidgetOrViewId.split('/')[1]:_parentWidgetOrViewId;
-
-			var MANYTOMANY_ASSOC = 10;	//TO MANY
 			var VIEW_ID = 74;
+			
 			var self = this;
 			return when(this.getManyByAssocTypeAndDestClass(parentWidgetOrViewId, MANYTOMANY_ASSOC, VIEW_ID), function(subViewsArr){
 				var promisses = [];
@@ -221,23 +343,68 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 				});
 			});
 		},
-		getManyByView: function(_sourceId, _viewId){
+		getManyByParentWidgetJoin: function(sourceId, parentWidgetId){
 			// summary:
 			//		Returns an array of items that can be consumed by widgets. 
-			//		Each item will have an id, a classId, a viewId and name vlaue pairs for the attribute references of the view.
+			//		Each Widget can have multiple joined views. 
+			//		This method can be thought of as returning a join of getManyByView for each of the sub-views
+			//		This is used by the Table which can have many views joined to represent a record.
 			// sourceId: Number
 			//		The identifier of the parent cell
-			// viewId: Number
-			//		The identifier of the view that will tell us which attributes to retreive
+			// parentWidgetId: Number
+			//		The identifier of the widget that will tell us which attributes to retreive
 			// returns: Array 
 			//		An array of prommises. Each promise will result in an item.
 			
-			//remove when we're done with the transformation
-			var sourceId = (typeof _sourceId == 'string' && _sourceId.indexOf('/')>0)?_sourceId.split('/')[1]:_sourceId;
-			var viewId = (typeof _viewId == 'string' && _viewId.indexOf('/')>0)?_viewId.split('/')[1]:_viewId;
+			var VIEW_ID = 74;
 			
+			var self = this;
+			return when(this.getManyByAssocTypeAndDestClass(parentWidgetId, MANYTOMANY_ASSOC, VIEW_ID), function(subViewsArr){
+				if(subViewsArr.length<1) return [];
+				var subViewId = subViewsArr[0];//assume there is only one
+				//if(subViewId==2297) debugger;
+				return when(self.getManyByView(sourceId, subViewId), function(itemsArr){
+					//console.log('itemsArr', itemsArr);
+					var promisses = [];
+					for(var i=0;i<itemsArr.length;i++){
+						item = itemsArr[i];
+						promisses.push(self.getManyByParentWidgetJoin(item.id, item.viewId));
+					}
+					return when(all(promisses), function(arrayOfItemsArr){
+						//console.dir(ArrayOfArrays);
+						var resultArr = [];
+						for(var i=0;i<itemsArr.length;i++){
+							var ourItem = itemsArr[i];
+							if(arrayOfItemsArr[i].length==0) resultArr.push(ourItem);
+							else {
+								for(var j=0;j<arrayOfItemsArr[i].length;j++){
+									var lowerItem = arrayOfItemsArr[i][j];
+									resultArr.push(lang.mixin(lang.clone(ourItem), lowerItem));
+								}
+							}
+						}
+						//console.dir(resultArr);
+						return resultArr;
+					});
+				});
+			});
+		},
+		getManyByView: function(sourceId, viewId){
+			// summary:
+			//		Returns an array of items that can be consumed by widgets. 
+			//		Each item will have an id, a classId (used for icons), a viewId(used for labels and popup menues) and 
+			//		name value pairs for the attribute references of the view.
+			//		In addition the items contain {objId...: cellId} for each of the attribute reference wich provides the id of the value cell 
+			// sourceId: Number
+			//		The identifier of the parent cell
+			// viewId: Number
+			//		The identifier of the view that will tell us which attributes to retreive and by which association type
+			// returns: Array 
+			//		An array of prommises. Each promise will result in an item.
+
 			var ASSOCS_CLASS_TYPE = 94;
 			var ATTRREF_CLASS_TYPE = 63;
+			
 			var self = this;
 			var attrPromises = [];
 			//get the assocication type that this view has as an attribute
@@ -249,19 +416,26 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			return when(all(attrPromises), function(arr){
 				if(!arr[0]) throw new Error('View '+viewId+' must have an association type as an attribute ');
 				var assocType = arr[0];
-				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
-				var destClassId = arr[1][0].destFk;
 				var attrRefArr = arr[2];
-				//get the objects that result from this source, view
-				return when(self.getManyByAssocTypeAndDestClass(sourceId, assocType, destClassId), function(objArr){
-					//for each related object 
-					var itemsDonePromises = [];
-					for(var i=0;i<objArr.length;i++){
-						var objId = objArr[i];
-						itemsDonePromises.push(self.createItem(objId, attrRefArr, viewId));
-					}
-					return all(itemsDonePromises);
-				});
+				//////////////Exception for the Association assocType as used by the Class Model//////////////////////
+				if(assocType == ASSOCS_PASSOC) return self.getAssocItems(sourceId, attrRefArr, viewId);
+				//////////////Exception for the By Association Type assocType as used by the Class Model//////////////////////
+				else if(assocType == BYASSOCTPE_PASSOC) return self.getCellItems(sourceId, attrRefArr, viewId);
+				else{
+					if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
+					//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
+					var destClassId = arr[1][0].destFk;
+					//get the objects that result from this source, view
+					return when(self.getManyByAssocTypeAndDestClass(sourceId, assocType, destClassId), function(objArr){
+						//for each related object 
+						var itemsDonePromises = [];
+						for(var i=0;i<objArr.length;i++){
+							var objId = objArr[i];
+							itemsDonePromises.push(self.createItem(objId, attrRefArr, viewId));
+						}
+						return all(itemsDonePromises);
+					});
+				}
 			});
 		},		
 		createItem: function(objId, attrRefArr, viewId){
@@ -270,6 +444,9 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 				if(classIdAssocArr.length>1) throw new Error(objId+' has more than oneparent.');
 				var parentId = classIdAssocArr.length==0?0:classIdAssocArr[0].destFk;
 				var valuePromises = [];
+				//viewId is used for things like identifing labels and menus in trees, also getChildren as requested by trees
+				//classId is used to identify icons in trees
+				//TODO hasChildren
 				var item = {id: objId, viewId: viewId, classId:parentId};
 				for(var j=0;j<attrRefArr.length;j++){
 					var attrRefId = attrRefArr[j];
@@ -279,12 +456,12 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 				
 			});
 		},
-		addValueToItem: function(item, objId, attrRefId){
-			var PROCESSCLASSES_CLASS = 67;
-			var PRIMARYNAME_CLASS = 69;
+		addValueToItem: function(item, objId, attrRefId){			
 			var PERTMITTEDVALUE_CLASS = 58;
 			var ASSOCS_CLASS_TYPE = 94;
-			var CELLNAME_ATTR_CLASS = 2057;
+			var CELLNAME_ATTR_CLASS = 101;
+			var CELLTYPE_ATTR_CLASS = 102;
+			
 			var self = this;
 			var attrPromises = [];
 			//get the assocication type that this attribute reference has as an attribute
@@ -297,40 +474,9 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 				if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
 				var destClassId = arr[1][0].destFk;
 				/////// Exception for the cell name attribute, as used by the class model ///////////////////
-				//The cell name attribute does not have value objects, instead add the cell name to the item
-				if(destClassId == CELLNAME_ATTR_CLASS){
-					return when(cellStore.get(objId), function(valueObj){
-						if(valueObj.type==0){//is a class
-							item['classId'] = 0;//always show class icon (disregard the one we found earlier)
-							item[attrRefId] = valueObj.name;//add the cell name
-							item['cellId'+attrRefId] = objId;
-							return objId;						
-						}
-						else { //is an object
-							//find out if the object is a process class
-							return when(self.isA(objId, PROCESSCLASSES_CLASS), function(trueFalse){
-								if(trueFalse) {
-									//get the primary name of the object
-									return when(self.getOneByAssocTypeAndDestClass(objId, ATTRIBUTE_ASSOC, PRIMARYNAME_CLASS), function(valueObjId){
-										if(!valueObjId) return null; 
-										else return when(cellStore.get(valueObjId), function(valueObj){
-											//if(!valueObj) return null;
-											item[attrRefId] = valueObj?valueObj.name:null;//add the value to the item
-											item['cellId'+attrRefId] = valueObjId;
-											return valueObjId;
-										});
-									});
-								}
-								else{
-									item[attrRefId] = valueObj.name;//add the cell name
-									item['cellId'+attrRefId] = objId;
-									return objId;						
-								}
-							});
-						}
-					});
-				}
-				/////// End of exception ////////////////////////////////
+				if(destClassId == CELLNAME_ATTR_CLASS) return self.getClassModelCellName(item, objId, attrRefId);
+				/////// Exception for the cell type attribute, as used by the class model ///////////////////
+				else if(destClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
 				//get the value for this object, attribute reference
 				else return when(self.getOneByAssocTypeAndDestClass(objId, assocType, destClassId), function(valueObjId){
 					if(!valueObjId) return null; 
@@ -353,19 +499,87 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 					else {
 						item[attrRefId] = valueObjId;//add the identifier to the item
 						//item['assocId'+attrRefId] = attrPromises[1].id;
-
 					}
 					return valueObjId;
 				});
 			});
 		},
+		getClassModelCellName: function(item, objId, attrRefId){
+			var PROCESSCLASSES_CLASS = 67;
+			var PRIMARYNAME_CLASS = 69;
+			
+			var self = this;
+			return when(cellStore.get(objId), function(valueObj){
+				if(valueObj.type==0){//is a class
+					item['classId'] = 0;//always show class icon (disregard the one we found earlier)
+					item[attrRefId] = valueObj.name;//add the cell name
+					item['cellId'+attrRefId] = objId;
+					return objId;						
+				}
+				else { //is an object
+					//find out if the object is a process class
+					return when(self.isA(objId, PROCESSCLASSES_CLASS), function(trueFalse){
+						if(trueFalse) {
+							//get the primary name of the object
+							return when(self.getOneByAssocTypeAndDestClass(objId, ATTRIBUTE_ASSOC, PRIMARYNAME_CLASS), function(valueObjId){
+								if(!valueObjId) return null; 
+								else return when(cellStore.get(valueObjId), function(valueObj){
+									//if(!valueObj) return null;
+									item[attrRefId] = valueObj?valueObj.name:null;//add the value to the item
+									item['cellId'+attrRefId] = valueObjId;
+									return valueObjId;
+								});
+							});
+						}
+						else{
+							item[attrRefId] = valueObj.name;//add the cell name
+							item['cellId'+attrRefId] = objId;
+							return objId;						
+						}
+					});
+				}
+			});
+		},
+		getAssocItems: function(sourceId, attrRefArr, viewId){
+			return when(assocStore.query({sourceFk: sourceId, uniqueTypes:true}), function(typesArr){
+				var promises = [];
+				for(var j=0;j<typesArr.length;j++){
+					var type = typesArr[j];
+					promises.push(cellStore.get(type));//get the corresponding cell so we can use the name.
+				}
+				return when(all(promises), function(assocCellsArr){
+					items= [];
+					for(var j=0;j<typesArr.length;j++){
+						var type = typesArr[j];
+						var item = {id: sourceId+'/'+type, sourceId:sourceId,  viewId: viewId, classId: type};
+						item[attrRefArr[0]] = assocCellsArr[j].name;
+						items.push(item);
+					}
+					return items;
+				});				
+			});
+		},
+		getCellItems: function(assocId, attrRefArr, viewId){
+			var self = this;
+			var sourceId = assocId.split('/')[0];
+			var assocType = assocId.split('/')[1];
+			return when(this.getManyByAssocType(sourceId, assocType, null, false), function(cellIdsArr){
+				var promises = [];
+				for(var j=0;j<cellIdsArr.length;j++){
+					var objId = cellIdsArr[j];
+					promises.push(self.createItem(objId, attrRefArr, viewId));
+				}
+				return all(promises);
+			});
+		},
 		getManyByAssocTypeAndDestClass: function(sourceId, assocType, destClassId){
 			// summary:
-			//		Given a source cell, return all the cells, by associations of type assocType and that are a destClass.
-			//		Used for navigating the network where we have a source object and we're interested in related objects 
+			//		Given a source cellId, return all the cellIds, by associations of type assocType and destClass.
+			//		Used for navigating the network where we have a source object and we're interested in related objects
 			//		by a particular association type and of class type 'destination class'.
 			//		Used for things like one to many relationships and getAttribute of...
 			//		Will autoresolve ordered associations (which are comprised of a linked list) 
+			//		Takes pseudo-association types into account by substacting 12 from the type and doing a reverse assoc query.
 			// sourceId: Number
 			//		The identifier of the parent cell
 			// assocType: Number
@@ -373,8 +587,8 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			// destClassId: Number
 			//		The identifier of the destination class
 			// returns: Array 
-			//		An array of prommises. Each promise will result an id of a valid object.
-			var ORDERED_ASSOC = 8;		//TO MANY
+			//		An array of prommises. Each promise will result an id of a cell that meets the citeria.
+
 			var self = this;
 			if(assocType==ORDERED_ASSOC){
 				return when(assocStore.query({sourceFk: sourceId, type: assocType}), function(assocs){
@@ -436,10 +650,12 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 		},
 		getManyByAssocType: function(sourceId, assocType, classOrObjectType, recursive){
 			// summary:
-			//		Used to navigate the network.
-			//		Returns an array of ids of cells that are a class/object via a particular association type. 
-			//		Can be used to find all the instances of a particular class, for instance permitted values or,
-			//		get the class mapped to by a view or attribute reference 
+			//		Used to navigate the network via particular association type, where we're interested in either in classes or objects.
+			//		Can do so recusivly following the data graph via the same association type.
+			//		Returns an array of ids of cells that meet the citeria. 
+			//		Can be used to find all the instances of a particular class, to populate permitted values or,
+			//		get all the attribute references in a set of joined views so that we can display them as colum headers in a table.
+			//		Takes pseudo-association types into account by substacting 12 from the type and doing a reverse assoc query.
 			// sourceId: Number
 			//		The identifier of the starting point
 			// assocType: Number
@@ -472,11 +688,12 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 					if(loopProtectionArr[destFk]) continue;
 					loopProtectionArr[destFk] = true;
 					promisses.push(when(self.get(destFk), function(destCell){
-						if(destCell.type==classOrObjectType) {
+						if(!classOrObjectType) resultArr.push(destCell.id);
+						else if(classOrObjectType == destCell.type) {
 								resultArr.push(destCell.id);
 								//loopProtectionArr[childId] = true;
 						}
-						if(recursive) return self.getManyByAssocTypeRecursive(destFk, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
+						if(recursive) return self.getManyByAssocTypeRecursive(destCell.id, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
 						else return destCell;
 					}));
 				}
@@ -494,7 +711,8 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 					if(loopProtectionArr[sourceFk]) continue;
 					loopProtectionArr[sourceFk] = true;
 					promisses.push(when(self.get(sourceFk), function(sourceCell){
-						if(sourceCell.type==classOrObjectType) {
+						if(!classOrObjectType) resultArr.push(sourceCell.id);
+						if(classOrObjectType==sourceCell.type) {
 								resultArr.push(sourceCell.id);
 								//loopProtectionArr[childId] = true;
 						}
@@ -505,7 +723,7 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 				return all(promisses);
 			});
 		},
-		getItemByView: function(_objId, _viewId){
+		getItemByView: function(objId, viewId){
 			// summary:
 			//		Returns an item that can be consumed by widgets. 
 			//		The item will have an id, a classId, a viewId and name vlaue pairs for the attribute references of the view.
@@ -516,14 +734,9 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			// returns: Number 
 			//		A prommises. The promise will result in an item.
 			
-			//remove when we're done with the transformation
-			var objId = (typeof _objId == 'string' && _objId.indexOf('/')>0)?_objId.split('/')[1]:_objId;
-			var viewId = (typeof _viewId == 'string' && _viewId.indexOf('/')>0)?_viewId.split('/')[1]:_viewId;
-
-			var ORDERED_ASSOC = 8;		//TO MANY
 			var ATTRREF_CLASS_TYPE = 63;
-			var self = this;
 
+			var self = this;
 			return when(self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefArr){
 				return when(self.createItem(objId, attrRefArr, viewId, null));
 			});
@@ -539,8 +752,8 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			//		The association type of the association
 			// destClassId: Number
 			//		The identifier of the destination class
-			// returns: Number 
-			//		A prommises. The promise will result an id of a valid object or undefined if it is not found.
+			// returns: Promise 
+			//		The promise will result an id of a valid object or undefined if it is not found.
 			return when(this.getManyByAssocTypeAndDestClass(source, assocType, destClass), function(objects){
 				if(objects.length>1) throw new Error('getOneByAssocTypeAndDestClass returns more than one object');
 				return objects[0];
@@ -554,9 +767,9 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			// assocType: Number
 			//		The association type that we're following down the data graph
 			// classOrObjectType: Number
-			//		Zero or One. Are we looking for a class or an object
-			// returns: Number 
-			//		A prommises. The promise will result an id of a valid object or undefined if it is not found.
+			//		Cell type: zero or one. Are we looking for a class or an object
+			// returns: Promise 
+			//		The promise will result an id of a valid object or undefined if it is not found.
 			return when(this.getManyByAssocType(source, assocType, classOrObjectType, false, false), function(objects){
 				if(objects.length>1) throw new Error('getOneByAssocType returns more than one object');
 				return objects[0];
@@ -568,7 +781,6 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 		},*/
 		isA: function(objectId, destClassId){
 //			if(objectId==556) debugger;
-			var PARENT_ASSOC = 3;
 			if(objectId == destClassId) return true;//found it
 			var self = this;
 			return when(assocStore.query({sourceFk: objectId, type: PARENT_ASSOC}), function(assocs){
@@ -579,7 +791,6 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			});
 		},
 		addNextToAssocsArr: function(sourceId, destClassId, assocsArr){
-			var NEXT_ASSOC = 9;			//TO ONE Only used internaly
 			var self = this;
 			return when(assocStore.query({sourceFk: sourceId, type: NEXT_ASSOC}), function(assocs){
 				if(assocs.length==0) return true;
@@ -588,47 +799,7 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 				return self.addNextToAssocsArr(assocs[0].destFk, destClassId, assocsArr);
 			});
 		},
-		// =======================================================================
-		// Write interface, for DnD
 
-		newItem: function(/* dijit/tree/dndSource.__Item */ args, /*Item*/ parent, /*int?*/ insertIndex, /*Item*/ before){
-			// summary:
-			//		Creates a new item.   See `dojo/data/api/Write` for details on args.
-			//		Used in drag & drop when item from external source dropped onto tree.
-
-			return this.store.put(args, {
-				parent: parent,
-				before: before
-			});
-		},
-
-		pasteItem: function(/*Item*/ childItem, /*Item*/ oldParentItem, /*Item*/ newParentItem,
-					/*Boolean*/ bCopy, /*int?*/ insertIndex, /*Item*/ before){
-			// summary:
-			//		Move or copy an item from one parent item to another.
-			//		Used in drag & drop
-
-			if(!bCopy){
-				// In order for DnD moves to work correctly, childItem needs to be orphaned from oldParentItem
-				// before being adopted by newParentItem.   That way, the TreeNode is moved rather than
-				// an additional TreeNode being created, and the old TreeNode subsequently being deleted.
-				// The latter loses information such as selection and opened/closed children TreeNodes.
-				// Unfortunately simply calling this.store.put() will send notifications in a random order, based
-				// on when the TreeNodes in question originally appeared, and not based on the drag-from
-				// TreeNode vs. the drop-onto TreeNode.
-
-				var oldParentChildren = [].concat(this.childrenCache[this.getIdentity(oldParentItem)]), // concat to make copy
-					index = array.indexOf(oldParentChildren, childItem);
-				oldParentChildren.splice(index, 1);
-				this.onChildrenChange(oldParentItem, oldParentChildren);
-			}
-
-			return this.store.put(childItem, {
-				overwrite: true,
-				parent: newParentItem,
-				before: before
-			});
-		},
 
 		// =======================================================================
 		preFetch: function(){
@@ -654,6 +825,10 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 				if(data.queryCacheBackward) queryCacheBackward = data.queryCacheBackward;
 				return true;
 	    	});		    	
+		}, 
+		enableTransactionButtons: function(){
+			registry.byId('cancelButtonId').set('disabled',false);
+			registry.byId('saveButtonId').set('disabled',false);		
 		}
 
 

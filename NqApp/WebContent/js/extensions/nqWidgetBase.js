@@ -41,6 +41,20 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			},  domConstruct.create('div'));
 			this.domNode.appendChild(this.pane.domNode);
 		},
+		/*postCreate: function(){
+			//only do this if we're displaying in a tab 
+			this.inherited(arguments);
+			var PRIMARY_NAMES = 69;
+			var self = this;
+			when(this.store.getOneByAssocTypeAndDestClass(this.widgetId, ATTRIBUTE_ASSOC, PRIMARY_NAMES), function(nameCellId){
+				if(nameCellId) when(self.store.getCell(nameCellId), function(nameCell){
+					if(nameCell && nameCell.name!=''){
+						domConstruct.create('h1', {innerHTML: nameCell.name}, self.pane.domNode);
+						//this.pane.domNode.appendChild(this.pane.domNode);
+					}
+				});
+			});
+		},*/
 		resize: function(changeSize){
 			this.inherited(arguments);
 			if(!changeSize) return;
@@ -124,6 +138,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
 		makeProperiesObjects: function(attrRefId, propertiesArr, nameValuePairs){
 //			var PARENT_ASSOC = 3;
+			var CLASSNAME_CLASS_ID = 101;
 			var CLASS_TYPE = 0;
 			var BUILDASSOCTYPE_ATTR_ID = 2085;
 			var NAME_ATTR_ID = 544;
@@ -154,7 +169,9 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			//get the label that this attribute reference has as an attribute
 			attrPromises[0] = this.store.get(labelId);
 			//get the parent of the attribute class that this attribute reference maps to
-			attrPromises[1] = this.store.getOneByAssocType(destClassId, PARENT_ASSOC, CLASS_TYPE, true, false);
+			////////////////////Exception for the cell name as used by the class model///////////////////
+			if(destClassId == CLASSNAME_CLASS_ID) attrPromises[1] = destClassId;
+			else attrPromises[1] = this.store.getOneByAssocType(destClassId, PARENT_ASSOC, CLASS_TYPE, true, false);
 			//get the helptext that this attribute reference has as an attribute
 			if(helptextId) attrPromises[2] = this.store.get(helptextId);
 			return when(all(attrPromises), function(propertiesArr){

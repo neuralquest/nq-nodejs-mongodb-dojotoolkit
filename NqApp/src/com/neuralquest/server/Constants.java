@@ -53,8 +53,8 @@ public interface Constants {
 	static final long INTEGER_ID = 55;
 	static final long NUMBER_ID = 56;
 	static final long RTF_ID = 65;
-	static final long CELL_NAME_ID = 2057;
-	static final long CELL_ASSOCIATION_ID = 2058;
+	static final long CELL_NAME_ID = 101;
+	static final long CELL_ASSOCIATION_ID = 102;
 	
 	//attribute properties
 	static final long DEFAULTBOOL_ID = 83;
