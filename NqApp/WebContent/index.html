@@ -40,10 +40,11 @@
 				]
 		    };
 		</script>		
-		<!-- load dojo, must come after dojoConfig   -->
-		<script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/dojo/1.9.3/dojo/dojo.js"></script> 
-		<!-- use local library for debugging purposes 
-		<script type='text/javascript' src="/js/dojo-release-1.9.1-src/dojo/dojo.js"></script> -->
+		<!-- load dojo, must come after dojoConfig   
+		<script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/dojo/1.9.3/dojo/dojo.js"></script> -->
+		<!-- use local library for debugging purposes -->
+		<script type='text/javascript' src="/js/dojo-release-1.10.0-rc1-src/dojo/dojo.js"></script> 
+		<!-- <script type='text/javascript' src="/js/dojo-release-1.9.1-src/dojo/dojo.js"></script> -->
 		<!-- neuralquest magic -->
 		<script type="text/javascript" src="js/neuralquest.js"></script>
 		<!-- Google Analytics -->
@@ -60,7 +61,9 @@
 		<div  id="fullPage" data-dojo-id="fullPage" data-dojo-type="dijit.layout.BorderContainer" data-dojo-props="design:'headline', gutters:'false'" persist="true">	
 			<div class="noOverFlow" style="padding: 0px;" id="placeholder" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center'" class="backgroundClass" >	</div>
 			<div data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'bottom'" class="backgroundClass">
-				<button data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){fullPage.resize();}">resize</button>
+				<button id="logonButtonId" data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'helpIcon'" >Logon</button>
+				<button data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){fullPage.resize();}">Resize</button>
+				<button data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){nq.test();}">Test</button>
 				<div style="float: right;">
 					<button id="saveButtonId" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true, iconClass:'saveIcon'">Save</button>
 					<button id="cancelButtonId" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true, iconClass:'cancelIcon'">Cancel</button>
