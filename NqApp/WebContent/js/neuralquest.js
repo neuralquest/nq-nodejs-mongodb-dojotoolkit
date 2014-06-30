@@ -1,19 +1,22 @@
 require([
 'dojo/_base/array', 'dojo/dom-style', 'dojo/_base/fx', 'dojo/ready', 'dojo/topic', "dojo/on", 'dojo/hash', 'dijit/registry', 
 'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct', 'dojo/_base/declare',
-'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer', 
-'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", 
-'nq/nqStore', 'nq/nqProcessChart', 'nq/nqClassChart', 'nq/nqForm', 'nq/nqTable', 'nq/nqTree','nq/nqDocument',
+'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer', "dojo/store/Observable", 
+'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
+'nq/nqStore', 'nq/nqTransStore', 'nq/nqProcessChart', 'nq/nqClassChart', 'nq/nqForm', 'nq/nqTable', 'nq/nqTree','nq/nqDocument',
 'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct, declare,  
-		Deferred, when, all, query, BorderContainer, 
-		TabContainer, ContentPane, AccordionContainer, cookie, 
-		nqStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
+		Deferred, when, all, query, BorderContainer, Observable,
+		TabContainer, ContentPane, AccordionContainer, cookie, request,
+		nqStore, nqTransStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
 		instrumentation, styles) {
 	
-	var nqDataStore = new nqStore();
-	var transaction = nqDataStore.transaction();
+	//var nqDataStore = new nqTransStore();
+	var nqDataStore = Observable(new nqTransStore());
+	//var nqDataStore = Observable(new nqStore());
+	//var transaction = nqDataStore.transaction();
+		var self = this;
 
 	ready( function() {
 		// summary:
@@ -21,8 +24,13 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		//		Setup listerners, prefetch data which is often used, determin landing page
 		
 		topic.subscribe("/dojo/hashchange", interpritHash);
-		on(registry.byId('cancelButtonId'), 'click', function(event){transaction.abort();});
-		on(registry.byId('saveButtonId'), 'click', function(event){transaction.commit();});
+		on(registry.byId('logonButtonId'), 'change', function(value){
+				if(value) request.post('j_security_check').then(function(data){
+					console.log(this, data);
+		    	}, errorDialog);
+		});
+		on(registry.byId('cancelButtonId'), 'click', function(event){nqDataStore.abort();});
+		on(registry.byId('saveButtonId'), 'click', function(event){nqDataStore.commit();});
 		on(registry.byId('helpButtonId'), 'change', function(value){
 			if(value) dojox.html.insertCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
 			else dojox.html.removeCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
@@ -39,7 +47,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		}, errorDialog);
 
 	});
-	function interpritHash(hash, lvl){
+	function interpritHash(hash, level){
 		// summary:
 		//		Interprit the hash change. The hash consists of sets of threes: viewId.tabId.selectedObjectId.
 		//		Each set is interpreted consecutively.
@@ -55,7 +63,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var WIDGETS_ATTRCLASS = 99;
 		var ACCORDIONORTAB_ATTRCLASS = 91;
 		
-		var level = lvl?lvl:0;
+		level = level||0;
+		//var level = lvl?lvl:0;
 		var state = getState(level);
 		if(!state.viewId) return true;
 		
@@ -482,6 +491,99 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dlg.show();
 		if(!err.responseText) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
 	};
+	
+	
+//    var transaction = transactionalCellStore.transaction();
+//    transactionalCellStore.put(someUpdatedProduct);
+ //   ... other operations ...
+//    transaction.commit();	
+	
+	lang.setObject("nq.test", test);//make the function globally accessable
+	function test(){
+		nqDataTransStore.test();
+
+		
+		/*
+		var self = this;
+		var transaction = nqDataStore.trans();
+		nqDataStore.addTransactionalCellStore({name:'OneName', type:0});
+		nqDataStore.addTransactionalCellStore({name:'TwoName', type:0});
+		var updateObjectId = nqDataStore.addTransactionalCellStore({name:'ThreeName', type:0});
+		var removeObject = nqDataStore.addTransactionalCellStore({name:'FourName', type:0});
+		//var obj = nqDataStore.getTransactionalCellStore(updateObjectId);
+		//obj.name = 'NewThreeName';
+		//nqDataStore.putTransactionalCellStore(obj);
+		transaction.commit();	
+		
+		 when(updateObject, function(obj){
+			obj.name = 'NewThreeName';
+			nqDataStore.putTransactionalCellStore(obj);
+			transaction.commit();	
+			
+		});
+		
+		//var result1 = nqDataStore.getChildren({id: 1016, viewId: 846});
+		var result1 = nqDataStore.query({parentId: 1016, viewId: 846});
+		result1.observe(function(obj, removedFrom, insertedInto){
+			console.log("observe result1 The Identifying The...1016", ": ", obj, removedFrom, insertedInto);
+		});
+
+		//var result2 = nqDataStore.getChildren({id: 2453, viewId: 846});
+		var result2 = nqDataStore.query({parentId: 2453, viewId: 846});
+		result2.observe(function(obj, removedFrom, insertedInto){
+			console.log("observe result2 The Bain...2453", ": ", obj, removedFrom, insertedInto);
+		});
+		var result3 = nqDataStore.query({sourceFk: 1016, type:8});
+		result3.observe(function(obj, removedFrom, insertedInto){
+			console.log("observe on result3...1016", ": ", obj, removedFrom, insertedInto);
+		});
+		var result4 = nqDataStore.query({sourceFk: 2453, type:8});
+		result4.observe(function(obj, removedFrom, insertedInto){
+			console.log("observe on result4...2453", ": ", obj, removedFrom, insertedInto);
+		});
+
+		when(nqDataStore.getAssoc(4597), function(assoc){
+			console.log('assoc before update',assoc);
+			assoc.sourceFk = 2453;
+			assoc.type = ORDERED_ASSOC;
+			nqDataStore.put(assoc);
+			console.log('RESULTS');
+			when(result1, function(children){
+				console.log('result1 Identifying The..');
+				console.log(children);
+			});
+			when(result2, function(children){
+				console.log('result2 The Bain...');
+				console.log(children);
+			});
+			when(result3, function(children){
+				console.log('result3 Identifying The..');
+				console.log(children);
+			});
+			when(result4, function(children){
+				console.log('result4 The Bain...');
+				console.log(children);
+			});
+			console.log('GETCHILDREN');
+			when(nqDataStore.getChildren({id: 1016, viewId: 846}), function(children){
+				console.log('children of Identifying The..');
+				console.log(children);
+			});
+			when(nqDataStore.getChildren({id: 2453, viewId: 846}), function(children){
+				console.log('children of The Bain...');
+				console.log(children);
+			});
+		});
+		/*;
+			when(nqDataStore.getAssoc(4597), function(assoc1){
+				console.log('after update',assoc1);
+
+			});
+		when(nqDataStore.query({sourceFk: 2453, type:8}), function(assocsArr){
+			console.dir(assocsArr);
+		});
+		*/
+	};
 	// Primitive Assoc types (as used by the Assoc table)
 	PARENT_ASSOC = 3;			//TO ONE
 	ATTRIBUTE_ASSOC = 4;		//TO ONE
@@ -510,4 +612,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	BYASSOCTPE_PASSOC = 30; 		//TO MANY		
 	ASSOCS_PASSOC = 31; 		//TO MANY		
 
+	
+	
+	
+	
 });

@@ -128,16 +128,17 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		},
 		setSelectedObjIdPreviousLevel: function(value){
 			//load the data
-			if(this.selectedObjIdPreviousLevel == value) return this;
-			this.selectedObjIdPreviousLevel = value;
-			
+			if(value){
+				if(this.selectedObjIdPreviousLevel == value) return this;
+				this.selectedObjIdPreviousLevel = value;
+			}
 			this.closeEditors();
 			domConstruct.empty(this.pane.domNode);
 
 			var self = this;
 			var viewId = this.viewId;
 			when(this.store.getItemByView(this.selectedObjIdPreviousLevel, this.viewId), function(item){
-			//when(this.store.get(this.selectedObjIdPreviousLevel), function(item){
+			//when(this.store.getCell(this.selectedObjIdPreviousLevel), function(item){
 				return when(self.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
 					registry.byId('tab'+self.tabId).resize();
 //					self.pane.resize();
@@ -168,52 +169,54 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 						self.siblingButton.set('checked', false);
 						self.editModeButton.set('checked', true);
 						var addObj = {
-							'id': '',//cid will be added by our restStore exstension, we need a dummy id
 							'viewId': item.viewId, 
 							'classId': item.classId
 						};
-						addObj[self.HEADER_ATTRREF] = '[header]';
-						addObj[self.PARAGRAPH_ATTRREF] = '<p>[paragraph]</p>';
-						var newItem = self.store.add(addObj);
-						
-						var parentItem = self.store.get(parentId);
-						var pos = parentItem[viewId].indexOf(item.id);
-						parentItem[viewId].splice(pos+1, 0, newItem.id);
-						_nqDataStore.put(parentItem);
-						
-						self.set('parentId');// redraw the page TODO should be using observe
-						var newDiv = query('span[objectId="'+newItem.id+'"]')[0];
-						self.replaceHeaderWithEditor(newDiv);
+						//addObj[self.HEADER_ATTRREF] = '[header]';
+						//addObj[self.PARAGRAPH_ATTRREF] = '<p>[paragraph]</p>';
+						var objectId = domAttr.get(evt.currentTarget,'objectId');
+						when(self.store.query({sourceFk:objectId, type:NEXT_ASSOC}), function(assocArr) {
+							if(assocArr.length>1) throw new Error('One assoc expected');
+							var parentId = domAttr.get(evt.currentTarget,'parentId');
+							var directives = {parent:{id:parentId}};
+							if(assocArr.length==1) {
+								nextObjId = assocArr[0].destFk;
+								directives.before = {id:nextObjId};
+							}
+							when(self.store.add(addObj, directives), function(newItem){
+								when(self.setSelectedObjIdPreviousLevel(), function(done){
+									var newDiv = query('span[objectid="'+newItem.id+'"]')[0];
+									self.replaceHeaderWithEditor(newDiv);
+								});
+							});
+						});
 					}
 					else if(self.childButton.get('checked')){
 						self.childButton.set('checked', false);
 						self.editModeButton.set('checked', true);
 						var addObj = {
-							'id': '',//cid will be added by our restStore exstension, we need a dummy id
 							'viewId': item.viewId, 
 							'classId': item.classId
 						};
-						addObj[self.HEADER_ATTRREF] = '[new header]';
-						addObj[self.PARAGRAPH_ATTRREF] = '<p>new paragraph</p>';
-						var newItem = self.store.add(addObj);
-						if(!item[viewId]) item[viewId] = [];
-						item[viewId].push(newItem.id);
-						_nqDataStore.put(item);
-						
-						self.set('parentId');// redraw the page
-						var newDiv = query('span[objectId="'+newItem.id+'"]')[0];
-						self.replaceHeaderWithEditor(newDiv);
+						var objectId = domAttr.get(evt.currentTarget,'objectId');
+						var directives = {parent:{id:objectId}};
+						when(self.store.add(addObj, directives), function(newItem){
+							when(self.setSelectedObjIdPreviousLevel(), function(done){
+								var newDiv = query('span[objectid="'+newItem.id+'"]')[0];
+								self.replaceHeaderWithEditor(newDiv);
+							});
+						});
 					}
 					else if(self.deleteButton.get('checked')){
 						if(!item[viewId] || item[viewId].length == 0){
 							self.deleteButton.set('checked', false);
 							self.store.remove(item.id);
 							
-							var parentItem = self.store.get(parentId);
+							var parentItem = self.store.getCell(parentId);
 							var pos = parentItem[viewId].indexOf(item.id);
 							parentItem[viewId].splice(pos, 1);
 							_nqDataStore.put(parentItem);
-							self.set('parentId');// redraw the page
+							self.set('parentid');// redraw the page
 						}
 					}
 					else if(self.editModeButton.get('checked')) {
@@ -317,14 +320,14 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					paragraphNrArr[headerLevel-1] = i+1;
 					self.generateNextLevelContents(childItem, viewId, headerLevel+1, paragraphNrArr, item.id, previousParagrphHasRightFloat);
 					paragraphNrArr.splice(headerLevel,100);//remove old shit
-					previousParagrphHasRightFloat = childItem[self.PARAGRAPH_ATTRREF].indexOf('floatright')==-1?false:true;
+//					previousParagrphHasRightFloat = childItem[self.PARAGRAPH_ATTRREF].indexOf('floatright')==-1?false:true;
 				}
 			}, nq.errorDialog);
 		},
 		replaceHeaderWithEditor: function(replaceDiv){
 			var self = this;
 			var cellId = domAttr.get(replaceDiv,'cellId');
-			var cell = this.store.get(cellId);
+			var cell = this.store.getCell(cellId);
 			var textDijit = new ValidationTextBox({
 				cellId: cellId,
 			    'type': 'text',
@@ -334,7 +337,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			    'style':{width:'90%','background': 'rgba(250, 250, 121, 0.28)', 'border-style': 'none'},//rgba(0,0,255,0.04)
 				'placeHolder': 'Paragraph Header',
 				'onChange': function(evt){
-					when(self.store.get(cellId), function(item){
+					when(self.store.getCell(cellId), function(item){
 						item.name = textDijit.get('value');
 						self.store.put(item);
 					});
@@ -346,7 +349,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		replaceParagraphWithEditor: function(replaceDiv){
 			var self = this;
 			var cellId = domAttr.get(replaceDiv,'cellId');
-			var cell = this.store.get(cellId);
+			var cell = this.store.getCell(cellId);
 			// Create toolbar and place it at the top of the page
 			var toolbar = new Toolbar();
 			this.editorToolbarDivNode.appendChild(toolbar.domNode);
@@ -360,7 +363,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				'toolbar': toolbar,
 				focusOnLoad: true,
 				'onChange': function(evt){
-					when(self.store.get(cellId), function(item){
+					when(self.store.getCell(cellId), function(item){
 						item.name = editorDijit.get('value');
 						self.store.put(item);
 				});}
@@ -386,7 +389,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					objectId: tb.objectId,
 					onclick: function(evt){
 						if(self.editModeButton.get('checked')) {
-							self.closeEditors();
+//							self.closeEditors();
 							self.replaceHeaderWithEditor(evt.currentTarget);
 						}
 					}
@@ -400,11 +403,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					objectId: editor.objectId,
 					onclick: function(evt){
 						if(self.editModeButton.get('checked')) {
-							self.closeEditors();
+//							self.closeEditors();
 							self.replaceParagraphWithEditor(evt.currentTarget);
 						}
 					}
 				}, editor.domNode, 'replace');
+				editor.close(false, false);
 				editor.destroy();
 			});
 		},

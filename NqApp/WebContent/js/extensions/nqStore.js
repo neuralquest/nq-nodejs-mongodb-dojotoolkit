@@ -1,8 +1,9 @@
-define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dojo/store/util/QueryResults", "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array"],
-function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, request, registry, array ){
+define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dojo/store/util/QueryResults", "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array", "dojo/store/util/SimpleQueryEngine"],
+function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, request, registry, array, SimpleQueryEngine ){
 
 // module:
 //		js/nqStore
+	
 	var dirtyCells = [];
 	var dirtyAssocs = [];
 	var queryCacheForward = [];
@@ -14,38 +15,48 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 	var assocMemmoryStore = new Memory({});
 	var assocStore = new Cache(assocMasterStore, assocMemmoryStore);
 	assocStore.query = function(query, directives){
+		return assocMemmoryStore.query(query, directives);
+	};
+	/*
+	assocStore.query = function(query, directives){
 		//have we seen this query before?
 		if(query.sourceFk && query.type){
-			//if(query.sourceFk==754 && query.type==4) debugger;
+//			if(query.sourceFk==2453 && query.type==8) debugger;
 			if(queryCacheForward[query.sourceFk]&&queryCacheForward[query.sourceFk][query.type]) {
-				return queryCacheForward[query.sourceFk][query.type];//return the cached query results
+				//return queryCacheForward[query.sourceFk][query.type];//return the cached query results
+				return assocMemmoryStore.query(query, directives);
 			}
 			else{
 				var results = assocMasterStore.query(query, directives);
-				if(!queryCacheForward[query.sourceFk]){
-					queryCacheForward[query.sourceFk] = [];
-				}
-				queryCacheForward[query.sourceFk][query.type] = results;//store the query results
 				//console.log('rest', query);
 				results.forEach(function(object){
 					assocMemmoryStore.put(object);
+				});
+				when(results, function(done) {
+					if(!queryCacheForward[query.sourceFk]){
+						queryCacheForward[query.sourceFk] = [];
+					}
+					queryCacheForward[query.sourceFk][query.type] = results;//store the query results
 				});
 				return results;
 			}
 		}
 		else if(query.destFk && query.type){
 			if(queryCacheBackward[query.destFk]&&queryCacheBackward[query.destFk][query.type]) {
-				return queryCacheBackward[query.destFk][query.type];//return the cached query results
+				//return queryCacheBackward[query.destFk][query.type];//return the cached query results
+				return assocMemmoryStore.query(query, directives);
 			}
 			else {
 				var results = assocMasterStore.query(query, directives);
-				if(!queryCacheBackward[query.destFk]){
-					queryCacheBackward[query.destFk] = [];
-				}
-				queryCacheBackward[query.destFk][query.type] = results;//store the query results
 				//console.log('rest', query);
 				results.forEach(function(object){
 					assocMemmoryStore.put(object);
+				});
+				when(results, function(done) {
+					if(!queryCacheBackward[query.destFk]){
+						queryCacheBackward[query.destFk] = [];
+					}
+					queryCacheBackward[query.destFk][query.type] = results;//store the query results
 				});
 				return results;
 			}
@@ -53,8 +64,11 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 		else return JsonRest.prototype.query.call(this, query, directives);
 		//return [];
 	};
-
+*/
 	return declare("nqStore", [], {
+
+		queryEngine: SimpleQueryEngine,
+
 
 		
 		get: function(id){//get rid of
@@ -144,6 +158,7 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			this.enableTransactionButtons();
 			
 			if(array.indexOf(dirtyAssocs, object.id)>=0) dirtyAssocs.push(object.id);
+			console.log('putAssoc', object);
 			assocMemmoryStore.put(object, directives);
 			return object.id;
 		},
@@ -176,6 +191,7 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			else dirtyAssocs.push(object.id);
 			assocMemmoryStore.remove(id);
 		},		
+	
 		put: function(object, directives){
 			// summary:
 			//		Stores an object
@@ -185,29 +201,122 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			//		Additional directives for storing objects.
 			// returns: Number|String
 
-			var ASSOCS_CLASS_TYPE = 94;
+			if(object.sourceFk || object.destFk){
+				return this.putAssoc(object, directives);
+			}
+			else{
+				var ASSOCS_CLASS_TYPE = 94;
+				var ATTRREF_CLASS_TYPE = 63;
 
-			console.log('put', object, directives);
-			debugger;
-			var self = this;
-			var viewId = object.viewId;
-			var objectId = object.id;
-			var parentId = directives.parent.id;
-			var beforeId = directives.before?directives.before.id:undefined;
-			//get the assocication type that this view has as an attribute
-			when(this.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE), function(assocType){
-				if(assocType==ORDERED_ASSOC){
-					//remove object from the linkedlist
-					
-					if(beforeId)
-					//get the current assoc
-				}
-				when(assocStore.query({sourceFk: parentId, type: assocType, destFk: objectId}), function(assocArr){
-					console.log(assocArr);
-					
-				});
-			});
+				console.log('put', object, directives);
+
+				var objectId = this.putCell(object);//update or create the object
+
+				var self = this;
+				var viewId = object.viewId;
+				//var objectId = object.id;
+				var oldParentId = directives.oldParentItem?directives.oldParentItem.id:undefined;
+				var newParentId = directives.parent?directives.parent.id:undefined;
+				//var newParentId = directives.parent.id;
+				var beforeId = directives.before?directives.before.id:undefined;
+				var attrPromises = [];
+				//get the assocication type that this view has as an attribute
+				attrPromises[0] = self.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
+				//get the class that this view maps to
+				attrPromises[1] = assocStore.query({sourceFk: viewId, type: MAPSTO_ASSOC});
+				when(all(attrPromises), function(arr){
+					if(!arr[0]) throw new Error('View '+viewId+' must have an association type as an attribute ');
+					var assocType = arr[0];
+					if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
+					//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
+					var destClassId = arr[1][0].destFk;
+					if(assocType==ORDERED_ASSOC){
+						if(oldParentId){//no oldParent means we're creating a new cell with a new association
+							//get the objects that result from this source, view
+							when(self.getManyByAssocTypeAndDestClass(oldParentId, ORDERED_ASSOC, destClassId), function(childIdsArr){
+								var ourAssocSourceFk = 0;
+								var ourAssoctype = 0;
+								var idx = childIdsArr.indexOf(objectId);
+								if(idx==0){//if our object is the first one
+									ourAssocSourceFk = oldParentId;
+									ourAssoctype = ORDERED_ASSOC;
+									if(childIdsArr.length>1){//there is another one (at least)
+										when(assocStore.query({sourceFk: objectId, type: NEXT_ASSOC, destFk: childIdsArr[1]}), function(assocArr){
+											if(assocArr.length!=1) throw new Error('Expected to find one association');
+											var assoc = assocArr[0];
+											assoc.sourceFk = oldParentId;
+											assoc.type = ORDERED_ASSOC;
+											self.put(assoc);
+										});					
+									}
+								}
+								else{
+									ourAssocSourceFk = childIdsArr[idx-1];
+									ourAssoctype = NEXT_ASSOC;
+									if(idx < childIdsArr.length-1){//ours is not the last one
+										when(assocStore.query({sourceFk: objectId, type: NEXT_ASSOC, destFk: childIdsArr[idx+1]}), function(assocArr){
+											if(assocArr.length!=1) throw new Error('Expected to find one association');
+											var assoc = assocArr[0];
+											assoc.sourceFk = childIdsArr[idx-1];
+											self.put(assoc);
+										});					
+									}
+								}
+								when(assocStore.query({sourceFk: ourAssocSourceFk, type: ourAssoctype, destFk: objectId}), function(assocArr){
+									if(assocArr.length!=1) throw new Error('Expected to find one association');
+									var ourAssoc = assocArr[0];
+									self.putNewAssoc(ourAssoc, newParentId, destClassId, beforeId);				
+								});					
+							});							
+						}
+						else{
+							if(newParentId) self.putNewAssoc({sourceFk: newParentId, type: ORDERED_ASSOC, destFk: objectId}, newParentId, destClassId, beforeId);	
+						}
+					}
+					else{
+						if(oldParentId == newParentId) return;
+						//TODO new assoc?
+						when(assocStore.query({sourceFk: oldParentId, type: assocType, destFk: objectId}), function(assocArr){
+							if(assocArr.length!=1) throw new Error('Expected to find one association');
+							var assoc = assocArr[0];
+							assoc.sourceFk = newParentId;
+							self.put(assoc);
+						});					
+					}
+				});		
+				return objectId;
+			}
 		},
+		putNewAssoc: function(ourAssoc, parentId, destClassId, beforeId){
+			var self = this;
+			//get the objects that result from this source, view
+			when(self.getManyByAssocTypeAndDestClass(parentId, ORDERED_ASSOC, destClassId), function(childIdsArr){
+				if(beforeId){
+					var idx = childIdsArr.indexOf(beforeId);
+					when(self.assocStore.query({sourceFk: childIdsArr[idx-1], type: NEXT_ASSOC, destFk: beforeId}), function(assocArr){
+						if(assocArr.length!=1) throw new Error('Expected to find one association');
+						var assoc = assocArr[0];
+						assoc.sourceFk = objectId;
+						self.put(assoc);
+					});					
+					ourAssoc.sourceFk = childIdsArr[idx-1];
+					self.put(ourAssoc);											
+				}
+				else{
+					if(childIdsArr.length==0){//ours will be the only one
+						ourAssoc.sourceFk = parentId;
+						ourAssoc.type = ORDERED_ASSOC;
+//						if(newParentId==2453)debugger;
+						self.put(ourAssoc);											
+					}
+					else{//ours will be the last one
+						ourAssoc.sourceFk = childIdsArr[childIdsArr.length-1];
+						ourAssoc.type = NEXT_ASSOC;
+						self.put(ourAssoc);											
+					}
+				}
+			});	
+		},		
 		query: function(query, options){
 			// summary:
 			//		Queries the store for objects. This does not alter the store, but returns a
@@ -235,6 +344,15 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 				return when(this.getItemByView(query.cellId, query.viewId), function(item){
 					return QueryResults([item]);
 				});
+			}
+			else if(query.parentId && query.viewId ){//used by getChildren
+//				if(query.parentId==2453) debugger;
+				//return QueryResults(this.getManyByParentWidgetOrViewUnion(query.parentId, query.viewId));
+				//return when(this.getManyByParentWidgetOrViewUnion(query.parentId, query.viewId), function(items){
+				//	return QueryResults(items);
+				//});
+				var results = this.getManyByParentWidgetOrViewUnion(query.parentId, query.viewId);
+				return QueryResults(results);
 			}
 			else if(query.sourceFk || query.destFk){
 				return assocStore.query(query, options);
@@ -301,7 +419,9 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 			//		Additional options to apply to the retrieval of the children.
 			// returns: dojo/store/api/Store.QueryResults
 			//		A result set of the children of the parent object.
-			return when(this.getManyByParentWidgetOrViewUnion(parent.id, parent.viewId));
+			//return when(this.getManyByParentWidgetOrViewUnion(parent.id, parent.viewId));
+			//return QueryResults(this.getManyByParentWidgetOrViewUnion(parent.id, parent.viewId));
+			return this.query({parentId: parent.id, viewId: parent.viewId });
 		},
 		getMetadata: function(object){
 			// summary:
@@ -688,7 +808,7 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 					if(loopProtectionArr[destFk]) continue;
 					loopProtectionArr[destFk] = true;
 					promisses.push(when(self.get(destFk), function(destCell){
-						if(!classOrObjectType) resultArr.push(destCell.id);
+						if(classOrObjectType!=0 && classOrObjectType!=1 ) resultArr.push(destCell.id);
 						else if(classOrObjectType == destCell.type) {
 								resultArr.push(destCell.id);
 								//loopProtectionArr[childId] = true;
@@ -711,8 +831,8 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 					if(loopProtectionArr[sourceFk]) continue;
 					loopProtectionArr[sourceFk] = true;
 					promisses.push(when(self.get(sourceFk), function(sourceCell){
-						if(!classOrObjectType) resultArr.push(sourceCell.id);
-						if(classOrObjectType==sourceCell.type) {
+						if(classOrObjectType!=0 && classOrObjectType!=1 ) resultArr.push(sourceCell.id);
+						else if(classOrObjectType==sourceCell.type) {
 								resultArr.push(sourceCell.id);
 								//loopProtectionArr[childId] = true;
 						}
@@ -804,7 +924,7 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 		// =======================================================================
 		preFetch: function(){
 			var self = this;
-			return true;//disable prefetch
+//			return true;//disable prefetch
 			return request('data/prefetch', {
 				headers: {'Content-Type': 'application/json; charset=UTF-8'},
 				handleAs: 'json',
@@ -812,7 +932,7 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 				console.dir(data);
 				if(data.cell) cellMemmoryStore.setData(data.cell);
 				if(data.assoc) assocMemmoryStore.setData(data.assoc);
-				if(data.queryCacheForward) {
+				/*if(data.queryCacheForward) {
 					for(var i=0;i<data.queryCacheForward.length;i++){
 						var query = data.queryCacheForward[i]
 						var results = assocMemmoryStore.query(query);
@@ -823,6 +943,7 @@ function(declare, lang, when, all, QueryResults, JsonRest, Memory, Cache, reques
 					}
 				}
 				if(data.queryCacheBackward) queryCacheBackward = data.queryCacheBackward;
+				*/
 				return true;
 	    	});		    	
 		}, 

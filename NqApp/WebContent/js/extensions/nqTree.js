@@ -1,7 +1,8 @@
-define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", "dijit/registry",/* 'nq/nqObjectStoreModel',*/"dijit/tree/ObjectStoreModel", "dojo/hash","dojo/when", "dojo/promise/all",  
-        'dojo/dom-construct', 'dijit/tree/dndSource', 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dojo/query!css2'],
-	function(declare, nqWidgetBase, Tree, registry, ObjectStoreModel, hash, when, all,
-			domConstruct, dndSource, Menu, MenuItem, PopupMenuItem){
+define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang', "dijit/registry",/* 'nq/nqObjectStoreModel',*/"dijit/tree/ObjectStoreModel", "dojo/hash","dojo/when", "dojo/promise/all",  
+        'dojo/dom-construct', 'dijit/tree/dndSource', 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', "dojo/_base/array", 
+        'dojo/query!css2'],
+	function(declare, nqWidgetBase, Tree, lang, registry, ObjectStoreModel, hash, when, all,
+			domConstruct, dndSource, Menu, MenuItem, PopupMenuItem, array){
 
 	return declare("nqTreeWidget", [nqWidgetBase], {
 		allowedClassesObj: {},//Check Item Acceptance needs this
@@ -42,10 +43,7 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", "dijit/registry",
 			//TODO expand tree
 			if(this.selectedObjIdThisLevel == value) return this;
 			this.selectedObjIdThisLevel = value;
-			//if(value == 824) this.tree.set('path', [810,2016,2020,824]);
-			//this.tree.set('path', [810,2016,2020,824]);
-			//this.tree.set('selectedItem', value);
-			//this.tree._selectNode(value);
+			if(value == 824) this.tree.set('path', ['810', '2016', '2020', '824']);
 		},
 
 		getTheParentAttr: function(){
@@ -89,6 +87,63 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", "dijit/registry",
 				store : this.store,
 				query : {cellId: this.selectedObjIdPreviousLevel, viewId: this.viewIdsArr[0]}
 			});
+			this.treeModel.getChildren = function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
+				// summary:
+				//		Calls onComplete() with array of child items of given parent item.
+				// parentItem:
+				//		Item from the dojo/store
+
+				var id = this.store.getIdentity(parentItem);
+//if(id==2453)debugger;
+				if(this.childrenCache[id]){
+					when(this.childrenCache[id], onComplete, onError);
+					return;
+				}
+
+				var res = this.childrenCache[id] = this.store.getChildren(parentItem);
+
+				// User callback
+				when(res, onComplete, onError);
+
+				// Setup listener in case children list changes, or the item(s) in the children list are
+				// updated in some way.
+				if(res.observe){
+					res.observe(lang.hitch(this, function(obj, removedFrom, insertedInto){
+						if(id==2453)debugger;
+						console.log("observe on children of ", id, ": ", obj, removedFrom, insertedInto);
+
+						// If removedFrom == insertedInto, this call indicates that the item has changed.
+						// Even if removedFrom != insertedInto, the item may have changed.
+						this.onChange(obj);
+
+						if(removedFrom != insertedInto){
+							// Indicates an item was added, removed, or re-parented.  The children[] array (returned from
+							// res.then(...)) has already been updated (like a live collection), so just use it.
+							when(res, lang.hitch(this, "onChildrenChange", parentItem));
+							//when(res, function(children) {
+							//	console.log("onChildrenChange", parentItem, children);
+								//lang.hitch(this, "onChildrenChange", parentItem, children);
+							//});
+						}
+					}), true);	// true means to notify on item changes
+				}
+			},
+
+			this.treeModel.pasteItem = function(/*Item*/ childItem, /*Item*/ oldParentItem, /*Item*/ newParentItem,
+					/*Boolean*/ bCopy, /*int?*/ insertIndex, /*Item*/ before){
+				if(!bCopy){
+					var oldParentChildren = [].concat(this.childrenCache[this.getIdentity(oldParentItem)]), // concat to make copy
+						index = array.indexOf(oldParentChildren, childItem);
+					oldParentChildren.splice(index, 1);
+					this.onChildrenChange(oldParentItem, oldParentChildren);
+				}
+				return this.store.put(childItem, {
+					overwrite: true,
+					parent: newParentItem,
+					before: before,
+					oldParentItem: oldParentItem//this is our extension
+				});
+			};
 			this.tree = new Tree({
 				id: 'tree'+this.widgetId,
 				store: this.store,
@@ -115,7 +170,7 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", "dijit/registry",
 				checkItemAcceptance: function(target, source, position){
 					return true;
 					var targetItem = dijit.getEnclosingWidget(target).item;
-					var subClassArr = self.allowedClassesObj[targetItem.viewId];
+					var subClassIdArr = self.allowedClassesObj[targetItem.viewId];
 					var sourceItemClassId = source.current.item.classId;
 					//console.log('sourceItemClassId', sourceItemClassId);
 					for(var i = 0;i<subClassArr.length;i++){
@@ -166,48 +221,58 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", "dijit/registry",
 			var CELNAME_ATTR = 852;
 			
 			var self = this;
-			when(self.store.getManyByAssocType(this.widgetObjId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewObjArr){
-				//console.log('getManyByAssocType', viewObjArr);					
-				for(var i=0;i<viewObjArr.length;i++){
-					viewObj = viewObjArr[i];
-					var parentMenu = new Menu({targetNodeIds: [self.tree.domNode], selector: ".css"+viewObj});					
-					var destClassId = viewObj[ASSOCS_ATTR_ID][MAPSTO_ASSOC][0];
+			when(self.store.getManyByAssocType(this.widgetId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewIdArr){
+				//console.log('getManyByAssocType', viewIdArr);					
+				for(var i=0;i<viewIdArr.length;i++){
+					viewId = viewIdArr[i];
+					var parentMenu = new Menu({targetNodeIds: [self.tree.domNode], selector: ".css"+viewId});
+					var attrPromises = [];
 					//get the assocication type that this view has as an attribute
-					when(self.store.getOneByAssocTypeAndDestClass(viewObj, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE), function(assocTypeObj){
+					attrPromises[0] = self.store.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
+					//get the class that this view maps to
+					attrPromises[1] = self.store.query({sourceFk: viewId, type: MAPSTO_ASSOC});
+					return when(all(attrPromises), function(arr){
+						if(!arr[0]) throw new Error('View '+viewId+' must have an association type as an attribute ');
+						var assocType = arr[0];
+						if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
+						//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
+						var destClassId = arr[1][0].destFk;
 						//get the subclasses as seen from the destClass
 						when(self.store.getManyByAssocType(destClassId, SUBCLASSES_PASSOC, CLASS_TYPE, true), function(subClassArr){
-							self.allowedClassesObj[viewObj] = subClassArr;//Check Item Acceptance needs this
+							self.allowedClassesObj[viewId] = subClassArr;//Check Item Acceptance needs this
 							var classMenu = new Menu({parentMenu: parentMenu});
 							for(var j=0;j<subClassArr.length;j++){
-								var subClass = subClassArr[j];
+								var subClassId = subClassArr[j];
 								//console.log(subClass);
 
 								var tree = this.tree;
 								var menuItem = new MenuItem({
-									label: "A New <b>"+subClass[CELNAME_ATTR]+"</b> Object",
-									iconClass: "icon"+subClass.id,
-									subClass: subClass,
-									viewObj: viewObj
+									label: "A New <b>"+subClassId+"</b> Object",
+									iconClass: "icon"+subClassId,
+									subClassId: subClassId,
+									viewId: viewId
 								});
 								menuItem.on("click", function(evt){
-									console.log('menu item on', this.subClass);
-									var viewId = this.viewObj.id.split('/')[1];
-									var classId = this.subClass.id.split('/')[1];
+									console.log('menu item on', this.subClassId);
+									var viewId = this.viewId;
+									var classId = this.subClassId;
 									var addObj = {
-										'id': '',//cid will be added by our restStore exstension, we need a dummy id
-										'viewId': viewId, 
-										'classId': classId
-									};
-	//								addObj[viewDefToCreate.label] = '[new '+subClass+']';;
-									var newItem = self.store.add(addObj);
-									
+											'type': 1,
+											'viewId': this.viewId, 
+											'classId': this.subClassId
+										};
 									var selectedItem = self.tree.get("selectedItem");
-									if(!selectedItem[viewId]) selectedItem[viewId] = [];
-									selectedItem[viewId].push(newItem.id);
-									_nqDataStore.put(selectedItem);
+									var directives = {parent:{id: selectedItem.id}};
+	//								addObj[viewDefToCreate.label] = '[new '+subClassId+']';;
+									var newItem = self.store.add(addObj, directives);
+									
+									//var selectedItem = self.tree.get("selectedItem");
+									//if(!selectedItem[viewId]) selectedItem[viewId] = [];
+									//selectedItem[viewId].push(newItem.id);
+									//_nqDataStore.put(selectedItem);
 
 									//TODO this should be done automaticly some where
-									var x = self.tree.model.getChildren(selectedItem, viewsArr);//we need this to create an observer on the newly created item
+									//var x = self.tree.model.getChildren(selectedItem, viewsArr);//we need this to create an observer on the newly created item
 									
 									var selectedNodes = self.tree.getNodesByItem(selectedItem);
 									if(!selectedNodes[0].isExpanded){
@@ -219,8 +284,8 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", "dijit/registry",
 							}
 							classMenu.startup();
 							parentMenu.addChild(new PopupMenuItem({
-								label:"Add <span style='color:blue'>"+viewObj+"</span> Relationship To",
-								iconClass:"icon"+destClassId,
+								label:"Add <span style='color:blue'>"+assocType+"</span> Relationship To",
+								iconClass:"icon"+assocType,
 								popup: classMenu
 							}));
 						}, nq.errorDialog);

@@ -3,12 +3,15 @@ package com.neuralquest.server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -17,6 +20,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
 import org.hibernate.Session;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,13 +41,13 @@ public class DataServlet extends HttpServlet implements Constants {
 			Cell userObj = getUserObj(req, session);			
 			
 			if(req.getQueryString()==null) {
+				// No query has been sent, so this is a request for a single object  
+				// Example: /cell/846
 				String[] reqUri = req.getPathInfo().split("/");
 				String tableName = reqUri[reqUri.length-2];
 				String prefetch = reqUri[reqUri.length-1];
 				JSONObject rowObject = new JSONObject();
-				// No query has been sent, so this is a request for a single object  
-				// Example: /viewId/objId
-				if(prefetch.equals("prefetch")){
+				/*if(prefetch.equals("prefetch")){
 					long THEROOT = 1;
 					long PAGES = 62;
 					long DOCUMENTS = 78;
@@ -85,80 +90,46 @@ public class DataServlet extends HttpServlet implements Constants {
 					rowObject.put("assoc", assocArray);
 					rowObject.put("queryCacheForward", queryCacheForwardArray);
 					rowObject.put("queryCacheBackward", queryCacheBackwardArray);
+				}*/
+				if(prefetch.equals("prefetch")){
+					JSONArray cellArray = new JSONArray();
+					JSONArray assocArray = new JSONArray();
+					List<Cell> cells = session.createQuery("from Cell").list();
+					for(Iterator<Cell> itr1=cells.iterator();itr1.hasNext();){
+						Cell cellObj = itr1.next();
+						cellArray.put(cellToJson(cellObj));
+					}
+					List<Assoc> assocs = session.createQuery("from Assoc").list();
+					for(Iterator<Assoc> itr2=assocs.iterator();itr2.hasNext();){
+						Assoc assoc = itr2.next();
+						assocArray.put(assocToJson(assoc));
+					}
+					rowObject.put("cell", cellArray);
+					rowObject.put("assoc", assocArray);
 				}
 				else if(tableName.equals("cell")){
-					String cellIdStr = reqUri[reqUri.length-1];
-					long cellId = Long.parseLong(cellIdStr);
+					long cellId = Long.parseLong(reqUri[reqUri.length-1]);
 					Cell cellObj = (Cell) session.get(Cell.class, new Long(cellId));
-					rowObject.put("id", cellObj.getId());
-					rowObject.put("type", cellObj.getType());
-					String cellName = cellObj.getName();
-					rowObject.put("name", cellName!=null?cellName:null);
+					rowObject = cellToJson(cellObj);
 				}
 				else if(tableName.equals("assoc")){
 					long assocId = Long.parseLong(reqUri[reqUri.length-1]);
 					Assoc assoc = (Assoc)session.get(Assoc.class, assocId);
-					rowObject.put("id", assoc.getId());
-					rowObject.put("sourceFk", assoc.getSourceFk().getId());
-					rowObject.put("type", assoc.getType());
-					rowObject.put("destFk", assoc.getDestFk().getId());
-				}
-				else{
-					long viewObjId = Long.parseLong(tableName);
-					if(viewObjId==ASSOCS_VIEW_ID){//make an exception for the association view
-						rowObject = assocsViewAssoc(viewObjId, reqUri[reqUri.length-1], session);
-					}
-					else {
-						long selObjId = Long.parseLong(reqUri[reqUri.length-1]);
-						if(selObjId > 0 && viewObjId > 0) {
-							Cell viewObj = (Cell) session.get(Cell.class, new Long(viewObjId));
-							Cell selObj = (Cell) session.get(Cell.class, new Long(selObjId));
-							rowObject = getRowData(selObj, viewObj, session, userObj);
-						}
-					}
+					rowObject = assocToJson(assoc);
 				}
 				resp.getWriter().print(rowObject.toString(4));
 			}
 			else{
 				// We've recieved a query so we must return an array	
-				// Example: /?id=468&parentId=viewId/objectId
-				//String[] reqUri = req.getPathInfo().split("/");
-				//String tableName = reqUri[reqUri.length-1];
+				// Example: /?sourceFk=468&type=8
 				JSONArray tableArray = new JSONArray();
 				String[] queryStringArr = URLDecoder.decode(req.getQueryString(), "UTF-8").split("&");
-				long objectId = 0;
-				long viewId = 0;
-				long parentObjectId = 0;
-				long parentViewId = 0;
 				long sourceFk = 0;
 				long type = 0;
 				long destFk = 0;
-				boolean preFetch = false;
-				boolean uniqueTypes = false;
 				for(int i=0; i<queryStringArr.length; i++){
 					String[] queryStringParts = queryStringArr[i].split("=");
-					if("id".equals(queryStringParts[0])){						
-						//viewId = Long.parseLong(reqUri[reqUri.length-2]);
-						//objectId = Long.parseLong(reqUri[reqUri.length-1]);
-						String[] ids = queryStringParts[1].split("/");
-						viewId = Long.parseLong(ids[0]);
-						objectId = Long.parseLong(ids[1]);
-
-					}
-					else if("viewId".equals(queryStringParts[0])){						
-						viewId = Long.parseLong(queryStringParts[1]);
-					}
-					else if("parentId".equals(queryStringParts[0])){						
-						//parentViewId = Long.parseLong(reqUri[reqUri.length-2]);
-						//parentObjectId = Long.parseLong(reqUri[reqUri.length-1]);
-						String[] ids = queryStringParts[1].split("/");
-						parentViewId = Long.parseLong(ids[0]);
-						parentObjectId = Long.parseLong(ids[1]);
-					}
-					else if("parentViewId".equals(queryStringParts[0])){						
-						//parentViewId = Long.parseLong(queryStringParts[1]);
-					}
-					else if("sourceFk".equals(queryStringParts[0])){						
+					if("sourceFk".equals(queryStringParts[0])){						
 						sourceFk = Long.parseLong(queryStringParts[1]);
 					}
 					else if("type".equals(queryStringParts[0])){						
@@ -167,32 +138,26 @@ public class DataServlet extends HttpServlet implements Constants {
 					else if("destFk".equals(queryStringParts[0])){						
 						destFk = Long.parseLong(queryStringParts[1]);
 					}
-					else if("prefetch".equals(queryStringParts[0])){						
-						preFetch = true;
-					}
-					else if("uniqueTypes".equals(queryStringParts[0])){						
-						uniqueTypes = true;
-					}
 				}
-				if(objectId != 0 && viewId != 0){//used by tree and contents to get array with the root
-					Cell requestedObj = (Cell) session.get(Cell.class, new Long(objectId));
-					Cell viewObj = (Cell) session.get(Cell.class, new Long(viewId));
-					JSONObject rowObject = getRowData(requestedObj, viewObj, session, userObj);
-					tableArray.put(rowObject);				
+				if(sourceFk != 0 && type != 0 && destFk != 0 ){
+					Cell sourceCell = (Cell) session.get(Cell.class, sourceFk);
+					for(Iterator<Assoc> itr=sourceCell.getSourceAssocs().iterator();itr.hasNext();){
+						Assoc assoc = (Assoc)itr.next();
+						byte assocType = assoc.getType();
+						long assocDestId = assoc.getDestFk().getId();
+						if(assocType == type && assocDestId == destFk){
+							tableArray.put(assocToJson(assoc));
+						}
+					}			
 				}
 				else if(sourceFk != 0 && type != 0){
 					Cell sourceCell = (Cell) session.get(Cell.class, sourceFk);
 					for(Iterator<Assoc> itr=sourceCell.getSourceAssocs().iterator();itr.hasNext();){
 						Assoc assoc = (Assoc)itr.next();
-						long assocType = assoc.getType();
+						byte assocType = assoc.getType();
 						//System.out.println("type:\t"+type+" assocType:\t"+assocType);
 						if(assocType == type){
-							JSONObject rowObject = new JSONObject();
-							rowObject.put("id", assoc.getId());
-							rowObject.put("sourceFk", sourceFk);
-							rowObject.put("type", type);
-							rowObject.put("destFk", assoc.getDestFk().getId());
-							tableArray.put(rowObject);
+							tableArray.put(assocToJson(assoc));
 						}
 					}			
 				}
@@ -200,67 +165,13 @@ public class DataServlet extends HttpServlet implements Constants {
 					Cell destCell = (Cell) session.get(Cell.class, destFk);
 					for(Iterator<Assoc> itr=destCell.getDestAssocs().iterator();itr.hasNext();){
 						Assoc assoc = (Assoc)itr.next();
-						long assocType = assoc.getType();
+						byte assocType = assoc.getType();
 						//System.out.println("type:\t"+type+" assocType:\t"+assocType);
 						if(assocType == type){
-							JSONObject rowObject = new JSONObject();
-							rowObject.put("id", assoc.getId());
-							rowObject.put("sourceFk", assoc.getSourceFk().getId());
-							rowObject.put("type", type);
-							rowObject.put("destFk", destFk);
-							tableArray.put(rowObject);
+							tableArray.put(assocToJson(assoc));
 						}
 					}			
 				}
-				else if(sourceFk != 0 && uniqueTypes){
-					Cell sourceCell = (Cell) session.get(Cell.class, sourceFk);
-					HashSet<Byte> set = new HashSet<Byte>();
-					for(Iterator<Assoc> itr=sourceCell.getSourceAssocs().iterator();itr.hasNext();){
-						Assoc assoc = (Assoc)itr.next();
-						set.add(assoc.getType() );
-					}			
-					for(Iterator<Assoc> itr=sourceCell.getDestAssocs().iterator();itr.hasNext();){
-						Assoc assoc = (Assoc)itr.next();
-						set.add((byte) (assoc.getType()+12));
-					}
-					tableArray = new JSONArray(set);
-				}
-				else if(preFetch){
-					long THEROOT = 1;
-					long PAGES = 62;
-					long DOCUMENTS = 78;
-					Cell rootCell = (Cell) session.get(Cell.class, THEROOT);
-					LinkedList<Cell> cellList = rootCell.getLsitOfAllSubClasses();
-					Cell pageModelCell = (Cell) session.get(Cell.class, PAGES);
-					LinkedList<Cell> pagemodelList = pageModelCell.getListOfInstances();
-					Cell documentCell = (Cell) session.get(Cell.class, DOCUMENTS);
-					LinkedList<Cell> documentList = documentCell.getListOfInstances();
-					cellList.addAll(pagemodelList);
-					cellList.addAll(documentList);
-					for(Iterator<Cell> itr0=cellList.iterator();itr0.hasNext();){
-						Cell cellObj = itr0.next();
-						JSONObject cellObject = new JSONObject();
-						cellObject.put("id", cellObj.getId());
-						cellObject.put("type", cellObj.getType());
-						String cellName = cellObj.getName();
-						cellObject.put("name", cellName!=null?cellName:null);
-						JSONObject cellWrapper = new JSONObject();
-						cellWrapper.put("cell", cellObject);
-						tableArray.put(cellWrapper);
-						for(Iterator<Assoc> itr=cellObj.getSourceAssocs().iterator();itr.hasNext();){
-							Assoc assoc = (Assoc)itr.next();
-							JSONObject assocObject = new JSONObject();
-							assocObject.put("id", assoc.getId());
-							assocObject.put("sourceFk", assoc.getSourceFk().getId());
-							assocObject.put("type", assoc.getType());
-							assocObject.put("destFk", assoc.getDestFk().getId());
-							JSONObject assocWrapper = new JSONObject();
-							assocWrapper.put("assoc", assocObject);
-							tableArray.put(assocWrapper);
-						}			
-					}
-				}
-				 
 				resp.getWriter().print(tableArray.toString(4));
 			}
 			// see http://www.sitepen.com/blog/2009/01/26/new-in-jsonreststore-13-dates-deleting-conflict-handling-and-more/
@@ -275,9 +186,7 @@ public class DataServlet extends HttpServlet implements Constants {
 			throw new ServletException(e); // or display error message
 		}
 	}
-
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		//new row
 		resp.setCharacterEncoding("UTF-8");
 		resp.setContentType("application/json; charset=UTF-8");
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -288,61 +197,106 @@ public class DataServlet extends HttpServlet implements Constants {
 			BufferedReader reader = req.getReader();
 			String line = reader.readLine();
 			JSONArray postArray = new JSONArray(line);
-			Map<String, Cell> idMap = new HashMap<String, Cell>();
+			Map<String, Cell> idCellMap = new HashMap<String, Cell>();
+			Map<String, Assoc> idAssocMap = new HashMap<String, Assoc>();
 
-			//It's important to process teh actions in the right order in case of multiple additions
 			for(int i = 0; i < postArray.length(); i++){
 				JSONObject actionObj = postArray.getJSONObject(i);
-				String action = actionObj.optString("action", "");
-				String idString = actionObj.optString("data", "");
-//				Cell selectedObj = getOrMakeBasedOnCid(dataObj.getString("id"), session, idMap);
-				if(action.equals("delete")){
-					deleteObj(idString, session);
+				String method = actionObj.getString("method");
+				String table = actionObj.getString("table");
+				JSONObject data = actionObj.getJSONObject("target");
+				String idString = data.getString("id");
+				if(table.equals("cell")){
+					if(method.equals("add") || method.equals("put")){
+						long attrRefId = data.optInt("attrRefId", 0);
+						String name = data.optString("name", null);
+						isValueAllowed(name, attrRefId, session);;
+						Cell theCell = getOrMakeCellBasedOnCid(idString, session, idCellMap);
+						byte type = (byte)data.getInt("type");
+						theCell.setType(type);
+						theCell.setName(name);
+						session.save(theCell);
+					}
+					else if(method.equals("remove")){
+						Cell theCell = getOrMakeCellBasedOnCid(idString, session, idCellMap);
+						//session.delete(theCell);
+						deleteCell(theCell, session);
+					}
+				}
+				if(table.equals("assoc")){
+					if(method.equals("add") || method.equals("put")){
+						Cell sourceFkCell = getOrMakeCellBasedOnCid(data.getString("sourceFk"), session, idCellMap);
+						byte type = (byte)data.getInt("type");
+						Cell destFkCell = getOrMakeCellBasedOnCid(data.getString("destFk"), session, idCellMap);
+						if(idString.contains("cid")){
+							Assoc assoc = idAssocMap.get(idString);//do we know this cell already, was it created in the same conversation?
+							if(assoc==null){//apparently not, perhapse there will be a post lateron. Make the cell here.
+								assoc = makeAssoc(sourceFkCell, type, destFkCell, session);
+								idAssocMap.put(idString, assoc);
+							}
+							else updateAssoc(assoc, sourceFkCell, type, destFkCell, session);
+						}
+						else{
+							long id = Long.parseLong(idString);
+							Assoc assoc = (Assoc)session.load(Assoc.class, id);
+							updateAssoc(assoc, sourceFkCell, type, destFkCell, session);
+						}
+					}
+					else if(method.equals("remove")){
+						Assoc theAssoc = null;
+						if(idString.contains("cid")) theAssoc = idAssocMap.get(idString);//do we know this cell already, was it created in the same conversation?
+						else theAssoc = (Assoc) session.load(Assoc.class, Long.parseLong(idString));
+						deleteAssoc(theAssoc, session);;
+					}
 				}
 			}
 			for(int i = 0; i < postArray.length(); i++){
 				JSONObject actionObj = postArray.getJSONObject(i);
-				String action = actionObj.optString("action", "");
-				if(action.equals("put")){
-					JSONObject dataObj = actionObj.optJSONObject("data");
-					Cell selectedObj = getOrMakeBasedOnCid(dataObj.getString("id"), session, idMap);
-					//give the new obj a parent
-					long classId = Long.parseLong(dataObj.getString("classId"));
-					Cell parentClass = (Cell) session.load(Cell.class, new Long(classId));
-					makeAssoc(selectedObj, PARENT_ASSOC, parentClass, session);
-					updateRowData(dataObj, session, idMap);
+				String method = actionObj.getString("method");
+				String table = actionObj.getString("table");
+				JSONObject data = actionObj.getJSONObject("target");
+				String idString = data.getString("id");
+				if(table.equals("assoc") && method.equals("add") || method.equals("put")){
+					Assoc assoc = null;
+					if(idString.contains("cid")) assoc = idAssocMap.get(idString);//do we know this cell already, was it created in the same conversation?
+					else assoc = (Assoc)session.load(Assoc.class, Long.parseLong(idString));
+					isAssocAllowed(assoc);
 				}
 			}
-			for(int i = 0; i < postArray.length(); i++){
-				JSONObject actionObj = postArray.getJSONObject(i);
-				String action = actionObj.optString("action", "");
-				if(action.equals("post")){
-					JSONObject dataObj = actionObj.optJSONObject("data");
-					updateRowData(dataObj, session, idMap);
-				}
-			}
-			
 			JSONArray newIdsArr = new JSONArray();
-			Iterator keyValuePairs1 = idMap.entrySet().iterator();
-			for (int i = 0; i < idMap.size(); i++)
+			Iterator<Entry<String, Cell>> keyValuePairs1 = idCellMap.entrySet().iterator();
+			for (int i = 0; i < idCellMap.size(); i++)
 			{
-				Map.Entry entry = (Entry) keyValuePairs1.next();
-				String cid = (String) entry.getKey();
-				Cell newCell =  (Cell)entry.getValue();
-				//long id = Long.parseLong(cid.split("/")[1]);
+				Map.Entry<String, Cell> entry = keyValuePairs1.next();
+				String cid = entry.getKey();
+				Cell cell =  entry.getValue();
 
 				JSONObject pairsObj = new JSONObject();
 				pairsObj.put("cid", cid);
-				pairsObj.put("id", newCell.getId());
+				pairsObj.put("table", "cell");
+				pairsObj.put("data", cellToJson(cell));
 				newIdsArr.put(pairsObj);
 			}
-			if(idMap.size()>0) {
+			Iterator<Entry<String, Assoc>> keyValuePairs2 = idAssocMap.entrySet().iterator();
+			for (int i = 0; i < idAssocMap.size(); i++)
+			{
+				Map.Entry<String, Assoc> entry = keyValuePairs2.next();
+				String cid = entry.getKey();
+				Assoc assoc = entry.getValue();
+
+				JSONObject pairsObj = new JSONObject();
+				pairsObj.put("cid", cid);
+				pairsObj.put("table", "assoc");
+				pairsObj.put("data", assocToJson(assoc));
+				newIdsArr.put(pairsObj);
+			}
+			if(newIdsArr.length()>0) {
 				resp.setStatus(201);//only send if we changed an id?
 				resp.getWriter().print(newIdsArr.toString(4));
 			}
-			idMap.clear();
+			idCellMap.clear();
 
-			//if(1==1) throw new RuntimeException("Silly wabbit");
+			if(1==1) throw new RuntimeException("Silly wabbit");
 
 			session.getTransaction().commit();
 		}
@@ -350,6 +304,373 @@ public class DataServlet extends HttpServlet implements Constants {
 			session.getTransaction().rollback();
 			throw new ServletException(e.getMessage()); // or display error message
 		}		
+	}
+
+	/**
+	 * Simply returns if everything is well.
+	 * Otherwise throws runtime exception
+	 * @param assoc
+	 */
+	private void isAssocAllowed(Assoc assoc){
+		Cell sourceCell =assoc.getSourceFk();
+		byte type = assoc.getType();
+		Cell destCell = assoc.getDestFk();
+		
+		if(type < PARENT_ASSOC || type >= SUBCLASSES_PASSOC) throw new RuntimeException("Association type is invalid");
+
+		// the association must be unique
+		for(Iterator<Assoc> itr2=sourceCell.getSourceAssocs().iterator();itr2.hasNext();){
+			Assoc pAssoc = itr2.next();
+			Cell dest = pAssoc.getDestFk();
+			if(type==pAssoc.getType() && destCell.getId()==dest.getId()) throw new RuntimeException("Class associations must be unique");
+		}
+
+		if(sourceCell.getType()==CLASS || destCell.getType()==CLASS){
+			if(type == NEXT_ASSOC) throw new RuntimeException("NEXT not allowed as Class to Class association");
+			return;
+		}
+		else if(sourceCell.getType()==OBJECT || destCell.getType()==OBJECT){
+			if(type==NEXT_ASSOC) throw new RuntimeException("Cannot test NEXT_ASSOC");
+//			if(type==PARENT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || ){
+				
+//			}
+			LinkedList<Cell> sourceCellParentsList = sourceCell.getListOfSuperClasses();
+			LinkedList<Cell> destCellParentsList = destCell.getListOfSuperClasses();
+			for(Iterator<Cell> itr1=sourceCellParentsList.iterator();itr1.hasNext();){
+				Cell sourceCellParent = itr1.next();
+				for(Iterator<Assoc> itr2=sourceCellParent.getSourceAssocs().iterator();itr2.hasNext();){
+					Assoc pAssoc = itr2.next();
+					Cell dest = pAssoc.getDestFk();
+					if(type==pAssoc.getType() && destCellParentsList.contains(dest)) return; //association allowed
+				}
+			}
+			System.out.println("ERROR:\tObject to Object association not allowed");
+			System.out.println("source:\t"+sourceCell.getIdName(50));
+			System.out.println("assoc type:\t"+type);
+			System.out.println("dest:\t"+destCell.getIdName(50));
+			throw new RuntimeException("Object to Object association not allowed");
+		}
+		else if(sourceCell.getType()==CLASS || destCell.getType()==OBJECT){
+			// the type must be DEFAULT_ASSOC
+			if(type != DEFAULT_ASSOC) throw new RuntimeException("Only DEFAULT is allowed as Class to Object association");
+			return;
+		}
+		else if(sourceCell.getType()==OBJECT || destCell.getType()==CLASS){
+			// the type must be MAPSTO_ASSOC or parent
+			if(type != PARENT_ASSOC && type != DEFAULT_ASSOC) throw new RuntimeException("Only PARENT and DEFAULT are allowed as Object to Class association");
+			return;
+		}
+	}
+	/**
+	 * Simply returns if everything is well.
+	 * Otherwise throws runtime exception
+	 * @param valueStr
+	 * @param attrRefId
+	 * @param session
+	 * @throws DocumentException
+	 * @throws ParseException
+	 */
+	private void isValueAllowed(String valueStr, long attrRefId, Session session) throws DocumentException, ParseException{
+		if(valueStr==null && attrRefId== 0) return;
+		if(valueStr!=null && attrRefId== 0) throw new RuntimeException("Must have an attribute reference to update value");
+		Cell attrRefObj = (Cell)session.load(Cell.class, attrRefId);
+
+		//find the assoc type of the attrRef 
+		Cell attrRefMTClass = attrRefObj.getCellByAssocType(MAPSTO_ASSOC);
+		if(attrRefMTClass==null) throw new RuntimeException("Attribute reference does not have a 'maps to'");
+
+		//updateable?
+		Cell attrAccess = attrRefObj.getAttributeObjByDestClass(ATTRIBUTE_ACCESS_ID);
+		boolean readonly = attrAccess!=null&&attrAccess.getId()==MODIFY_ID?false:true;
+		boolean optional = attrAccess!=null&&attrAccess.getId()==MANDATORY_ID?false:true;
+		if(readonly) throw new RuntimeException("Update not allowed:\t"+valueStr);
+		if(!optional && valueStr==null||valueStr.length() == 0) throw new RuntimeException("Mandatory value missing");
+		
+		if(attrRefMTClass.isA(BOOLEAN_ID)){// boolean, Do this first, boolean is also a permitted value
+			Boolean.parseBoolean(valueStr);
+		}
+		else if(attrRefMTClass.isA(PERMITTED_VALUES_ID)){
+			 throw new RuntimeException("Not allowed to update permitted value:\t"+valueStr);
+		}
+		else if(attrRefMTClass.isA(DATE_ID)) {//date
+		    // will throw ParseException or IllegalArgumentException
+			DateFormat dateFormat = DateFormat.getDateInstance (DateFormat.SHORT); // YYYY-MM-DD
+		    dateFormat.parse(valueStr);
+		}
+		else if(attrRefMTClass.isA(CURRENCY_ID)){
+			// will throw NumberFormatException
+			java.math.BigDecimal value = new java.math.BigDecimal(valueStr);
+			//if(value.compareTo(maximumNumber)>0) throw new RuntimeException("Value to big:\t"+valueStr);
+			//if(value<minimumNumber) throw new RuntimeException("Value to small:\t"+valueStr);
+		}
+		else if(attrRefMTClass.isA(NUMBER_ID)){// float
+			// will throw NumberFormatException
+			float minimumNumber = Float.MIN_VALUE;
+			float maximumNumber = Float.MAX_VALUE;
+			double value = Double.parseDouble(valueStr);
+			if(value>maximumNumber) throw new RuntimeException("Value to big:\t"+valueStr);
+			if(value<minimumNumber) throw new RuntimeException("Value to small:\t"+valueStr);
+		}
+		else if(attrRefMTClass.isA(INTEGER_ID)){// integer
+			// will throw NumberFormatException
+			long value = Long.parseLong(valueStr);
+			long minimumInt = Integer.MIN_VALUE;
+			long maximumInt = Integer.MAX_VALUE;
+			if(value>maximumInt) throw new RuntimeException("Value to big:\t"+valueStr);
+			if(value<minimumInt) throw new RuntimeException("Value to small:\t"+valueStr);
+		}
+		else if(attrRefMTClass.isA(RTF_ID)){// rtf
+			// will throw DocumentException
+			int minLength = 0;
+			int maxLength = 65535;			
+			if(valueStr.length()>0)DocumentHelper.parseText("<div>"+valueStr+"</div>");
+			if(valueStr.length()>maxLength) throw new RuntimeException("Value to long:\t"+valueStr);
+			if(valueStr.length()<minLength) throw new RuntimeException("Value to short:\t"+valueStr);
+		}
+		else if (attrRefMTClass.isA(STRING_ID)){//string
+			int minLength = 0;
+			int maxLength = 65535;			
+			if(valueStr.length()>maxLength) throw new RuntimeException("Value to long:\t"+valueStr);
+			if(valueStr.length()<minLength) throw new RuntimeException("Value to short:\t"+valueStr);
+		}
+		else throw new RuntimeException("Unknown attribute type");
+	}	
+	private Assoc makeAssoc(Cell sourceFk, byte type, Cell destFk, Session session){
+		Assoc pAssoc = new Assoc();
+		pAssoc.setSourceFk(sourceFk);
+		pAssoc.setType(type);
+		pAssoc.setDestFk(destFk);
+		session.save(pAssoc);
+		sourceFk.addTosourceAssocs(pAssoc);
+		destFk.addTodestAssocs(pAssoc);
+		session.save(sourceFk);
+		session.save(destFk);
+		return pAssoc;
+	}
+	private void updateAssoc(Assoc pAssoc, Cell sourceFk, byte type, Cell destFk, Session session){
+		Cell currentSourceFk = pAssoc.getSourceFk();
+		if(currentSourceFk != sourceFk){
+			currentSourceFk.getSourceAssocs().remove(pAssoc);
+			session.save(currentSourceFk);
+			sourceFk.addTosourceAssocs(pAssoc);
+			session.save(sourceFk);
+		}
+		Cell currentDestFk = pAssoc.getDestFk();
+		if(currentDestFk != destFk){
+			currentDestFk.getDestAssocs().remove(pAssoc);
+			session.save(currentDestFk);
+			destFk.addTodestAssocs(pAssoc);
+			session.save(destFk);
+		}
+		pAssoc.setSourceFk(sourceFk);
+		pAssoc.setType(type);
+		pAssoc.setDestFk(destFk);
+		session.save(pAssoc);
+	}
+	private void deleteAssoc(Assoc pAssoc, Session session){
+		Cell currentSourceFk = pAssoc.getSourceFk();
+		currentSourceFk.getSourceAssocs().remove(pAssoc);
+		session.save(currentSourceFk);
+		Cell currentDestFk = pAssoc.getDestFk();
+		currentDestFk.getDestAssocs().remove(pAssoc);
+		session.save(currentDestFk);
+		session.delete(pAssoc);
+	}
+	private void destroySourceAssoc(Cell sourceCell, byte type, Cell destCell, Session session){
+		//type and destCell may be 0/null
+		for(Iterator<Assoc> itr1=sourceCell.getSourceAssocs().iterator();itr1.hasNext();){
+			Assoc pAssoc = itr1.next();
+			Cell dest = pAssoc.getDestFk();
+			if((type==0||type==pAssoc.getType()) && (destCell==null||dest.equals(destCell))){
+				itr1.remove();
+				sourceCell.getSourceAssocs().remove(pAssoc);
+				dest.getDestAssocs().remove(pAssoc);
+				session.save(dest);
+				session.delete(pAssoc);
+			}				
+		}
+		session.save(sourceCell);
+	}
+	private void destroyDestAssoc(Cell destCell, byte type, Cell sourceCell, Session session){
+		//type and sourcetCell may be 0/null
+		for(Iterator<Assoc> itr1=destCell.getDestAssocs().iterator();itr1.hasNext();){
+			Assoc pAssoc = itr1.next();
+			Cell source = pAssoc.getSourceFk();
+			if((type==0||type==pAssoc.getType()) && (sourceCell==null||source.equals(sourceCell))){
+				itr1.remove();
+				destCell.getDestAssocs().remove(pAssoc);
+				source.getSourceAssocs().remove(pAssoc);
+				session.save(source);
+				session.delete(pAssoc);
+			}				
+		}
+		session.save(destCell);
+	}
+	/**
+	 * deleteCascade
+	 * This is used to replace all-delete-orphan option in the hbm.
+	 * We need this because we don't allways want to automaticly delete associations.
+	 */
+	private void deleteCell(Cell delCell, Session session) {
+		destroySourceAssoc(delCell, (byte)0, null, session);
+		destroyDestAssoc(delCell, (byte)0, null, session);
+		session.delete(delCell);
+	}
+	private Cell getOrMakeCellBasedOnCid(String cid, Session session, Map<String, Cell> idCellMap){
+		if(cid.contains("cid")){
+			Cell newCell = idCellMap.get(cid);//do we know this cell already, was it created in the same conversation?
+			if(newCell==null){//apparently not, perhapse there will be a post lateron. Make the cell here.
+				newCell = new Cell();
+				newCell.setName(null);
+				newCell.setType((byte) 1);
+				newCell.setSourceAssocs(new java.util.TreeSet<Assoc>());//assoce sets must not be null, else searcches lateron will fail
+				newCell.setDestAssocs(new java.util.TreeSet<Assoc>());//assoce sets must not be null, else searcches lateron will fail
+				session.save(newCell);//we must save otherwise we get null pointer exception
+				idCellMap.put(cid, newCell);
+			}
+			return newCell;
+		}
+		long id = Long.parseLong(cid);
+		return (Cell) session.load(Cell.class, id);
+	}
+	private JSONObject cellToJson(Cell cell){
+		JSONObject cellObject = new JSONObject();
+		cellObject.put("id", cell.getId());
+		cellObject.put("type", cell.getType());
+		String cellName = cell.getName();
+		cellObject.put("name", cellName!=null?cellName:null);
+		return cellObject;
+	}
+	private JSONObject assocToJson(Assoc assoc){
+		JSONObject assocObject = new JSONObject();
+		assocObject.put("id", assoc.getId());
+		assocObject.put("sourceFk", assoc.getSourceFk().getId());
+		assocObject.put("type", assoc.getType());
+		assocObject.put("destFk", assoc.getDestFk().getId());
+		return assocObject;
+	}
+	private Cell getUserObj(HttpServletRequest req, Session session){
+		//String remoteUser = req.getUserPrincipal().getName();
+		String remoteUser = "cjong";
+		Cell personsClass = (Cell) session.load(Cell.class, new Long(PERSONS_ID));
+		LinkedList<Cell> userList = personsClass.getListOfInstances();
+		for(Iterator<Cell> itr0=userList.iterator();itr0.hasNext();){
+			Cell user = itr0.next();
+			Cell useIdObj = user.getAttributeObjByDestClass(USERID_ID);
+			if(useIdObj==null) continue;
+			if(useIdObj.getName().equalsIgnoreCase(remoteUser)) return user;
+		}
+		return null;
+	}
+	//experimental
+	/*
+	private void assocsViewChildren(JSONArray assocArray, Cell selectedObj, Cell viewObj, Session session) throws Exception {
+		Cell permittedValuesParent = (Cell) session.load(Cell.class, new Long(ASSOCIATION_TYPES_ID));
+		LinkedList<Cell> permittedValuesList = permittedValuesParent.getListOfInstances();				
+		for(Iterator<Cell> itr1=permittedValuesList.iterator();itr1.hasNext();){
+			Cell permittedValue = (itr1.next());
+			long assocType = permittedValue.getId();
+			//if(assocType==CHILDREN_PASSOC) continue;//we are doing other than children
+			//if(assocType==PARENT_ASSOC) continue;//causes loop in the tree//doesn;t help
+			//if(permittedValue.getId()!=ATTRIBUTE_ASSOC) continue;//we are doing other than children
+			LinkedList<Cell> thisAssocsList = selectedObj.getListOfRelatedObjectsByAssocTypeAndDestClass(assocType, null);
+			if(thisAssocsList.size()>0){
+				assocArray.put(viewObj.getId()+"/"+selectedObj.getId()+"."+assocType);
+			}
+		}
+	}
+	private JSONObject cellAssociations(Cell selectedObj, Cell viewObj, Session session) throws Exception {
+		JSONObject assocObj = new JSONObject();
+		Cell permittedValuesParent = (Cell) session.load(Cell.class, new Long(ASSOCIATION_TYPES_ID));
+		LinkedList<Cell> permittedValuesList = permittedValuesParent.getListOfInstances();				
+		for(Iterator<Cell> itr1=permittedValuesList.iterator();itr1.hasNext();){
+			Cell permittedValue = (itr1.next());
+			long assocType = permittedValue.getId();
+			//if(assocType==CHILDREN_PASSOC) continue;//we are doing other than children
+			//if(assocType==PARENT_ASSOC) continue;//causes loop in the tree//doesn;t help
+			LinkedList<Cell> thisAssocsList = selectedObj.getListOfRelatedObjectsByAssocTypeAndDestClass(assocType, null);
+			if(thisAssocsList.isEmpty()) continue;
+			JSONArray destArray = new JSONArray();
+			for(Iterator<Cell> itr2=thisAssocsList.iterator();itr2.hasNext();){
+				Cell destObj = itr2.next();
+				destArray.put(viewObj.getId()+"/"+destObj.getId());
+			}
+			assocObj.put(String.valueOf(assocType), destArray);
+		}
+		return assocObj;
+	}
+	private JSONObject assocsViewAssoc(long viewIdString, String assocIdString, Session session) throws Exception {
+		String[] asssocIds = assocIdString.split("\\.");
+		long assocType = Long.parseLong(asssocIds[1]);
+		long sourceObjId = Long.parseLong(asssocIds[0]);
+		Cell assocObj = (Cell) session.load(Cell.class, new Long(assocType));
+		Cell sourceObj = (Cell) session.load(Cell.class, new Long(sourceObjId));
+		JSONObject rowObj = new JSONObject();
+		rowObj.put("id", viewIdString+"/"+assocIdString);
+		rowObj.put("1936", (assocType>9?assocType:"0"+assocType)+" "+assocObj.getName());
+		//rowObj.put("1936", assocType+" "+assocObj.getName());
+		rowObj.put("classId", assocType);
+		rowObj.put("view name", "associations");
+		rowObj.put("viewId", viewIdString);
+		JSONArray childrenArray = new JSONArray();
+		LinkedList<Cell> destObjList = sourceObj.getListOfRelatedObjectsByAssocTypeAndDestClass(assocType, null);
+		for(Iterator<Cell> itr2=destObjList.iterator();itr2.hasNext();){
+			Cell destObj = itr2.next();
+			childrenArray.put(ASSOCS_CLASS_VIEW_ID+"/"+destObj.getId());
+		}
+		rowObj.put(String.valueOf(ASSOCS_CLASS_VIEW_ID), childrenArray);
+		return rowObj;
+	}*/
+/*
+	private void addLabel(JSONObject obj, Cell viewObj, Cell childselectedObj, Session session){
+		//find the labels
+		boolean found = false;
+		LinkedList<Cell> attrRefList = viewObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ATTRIBUTE_REFS_ID);
+		for(Iterator<Cell> itr1=attrRefList.iterator();itr1.hasNext();){
+			Cell attrRefObj = (itr1.next());
+			Cell pointsToCell = attrRefObj.getCellByAssocType(MAPSTO_ASSOC);
+			if(pointsToCell!=null&&pointsToCell.isA(PRIMARY_NAME_ID)) {
+				Cell nameCell = childselectedObj.getAttributeObjByDestClass(PRIMARY_NAME_ID);
+				String cellName = nameCell==null?"":nameCell.getName(50);
+				obj.put(String.valueOf(attrRefObj.getId()),cellName);
+				//childrenArray.put(labelObj);
+				//labelStr += "if(label=='nf') label = store"+childViewObjId+".getValue(item, '"+attrRefObj.getId()+"', 'nf');\n";
+				//found = true;
+				//break;
+			}
+		}
+		if(!found){
+			for(Iterator<Cell> itr1=attrRefList.iterator();itr1.hasNext();){
+				Cell attrRefObj = (itr1.next());
+				//Cell pointsToCell = attrRefObj.getCellByRelType(POINTS_TO_CLASS_ID);
+				//if(attrRefObj.isA(CELL_NAME_ID));
+					//..labelStr += "if(label=='nf') label = store"+childViewObjId+".getValue(item, '"+attrRefObj.getId()+"', 'nf');\n";
+					//break;
+			
+			}
+		}
+	}
+	
+	public boolean isInteger( String input )  
+	{  
+	   try  
+	   {  
+	      Integer.parseInt( input );  
+	      return true;  
+	   }  
+	   catch( Exception e)  
+	   {  
+	      return false;  
+	   }  
+	}
+
+	private String listToString(LinkedList<Cell> list){
+		String retString = "";
+		for(Iterator<Cell> itr1=list.iterator();itr1.hasNext();){
+			Cell cell = itr1.next();
+			retString += ", "+cell.getIdName(50);
+		}
+		return retString;
 	}
 
 	// ********************************************************************************
@@ -393,7 +714,7 @@ public class DataServlet extends HttpServlet implements Constants {
 						long assocCellId = assocCell==null?0:assocCell.getId();
 						long attrRefMTAssoc = attrRefMTAssocCell==null?0:attrRefMTAssocCell.getId();
 						rowObject.put(fieldName, viewObj.getId()+"."+assocCellId+"."+attrRefMTAssoc);
-					}*/
+					}* /
 					if(attrRefMTClass.isA(TO_MANY_ASSOC_TYPES_ID)){// Do this first, these are also a permitted value
 						Cell assocCell = selectedObj.getAttributeObjByDestClass(TO_MANY_ASSOC_TYPES_ID);
 						Cell attrRefMTAssocCell = selectedObj.getCellByAssocType(MAPSTO_ASSOC);
@@ -458,7 +779,7 @@ public class DataServlet extends HttpServlet implements Constants {
 					}			
 					rowObject.put(String.valueOf(tabChildViewObj.getId()), tabChildrenArray);
 				}
-			}*/
+			}* /
 		}
 		
 		return rowObject;
@@ -487,16 +808,16 @@ public class DataServlet extends HttpServlet implements Constants {
 	// ********************************************************************************
 	// Update Row (use by PUT and POST)
 	// ********************************************************************************
-	private void updateRowData(JSONObject dataJsonObj, Session session, Map<String, Cell> idMap) throws Exception {
+	private void updateRowData(JSONObject dataJsonObj, Session session, Map<String, Cell> idCellMap) throws Exception {
 		/*System.out.println("viewObj:\t"+viewObj.getIdName(50));
 		System.out.println("selectedObj:\t"+selectedObj.getIdName(50));*/
 		/*JSONObject temp = getRowData(selectedObj,  viewObj, 0, session);
 		System.out.println("current row data:\t"+temp.toString(4));
-		System.out.println("new row data:\t"+dataJsonObj.toString(4));*/
+		System.out.println("new row data:\t"+dataJsonObj.toString(4));* /
 		
 		//long objId = Long.parseLong(dataJsonObj.getString("id"));
 		//Cell selectedObj = (Cell) session.load(Cell.class, new Long(objId));
-		Cell selectedObj = getOrMakeBasedOnCid(dataJsonObj.getString("id"), session, idMap);
+		Cell selectedObj = getOrMakeCellBasedOnCid(dataJsonObj.getString("id"), session, idCellMap);
 		long viewId = Long.parseLong(dataJsonObj.getString("viewId"));
 		Cell viewObj = (Cell) session.load(Cell.class, new Long(viewId));
 		
@@ -538,7 +859,7 @@ public class DataServlet extends HttpServlet implements Constants {
 						long attrRefMTAssoc = attrRefMTAssocCell==null?0:attrRefMTAssocCell.getId();
 						String currentValue = assocCellId+"."+attrRefMTAssoc;
 						if(currentValue.equals(newValueStr)) continue; // same, no update
-					}*/
+					}* /
 					if(attrRefMTClass.isA(TO_MANY_ASSOC_TYPES_ID)){// Do this first, these are also a permitted value
 						Cell assocCell = selectedObj.getAttributeObjByDestClass(TO_MANY_ASSOC_TYPES_ID);
 						Cell attrRefMTAssocCell = selectedObj.getCellByAssocType(MAPSTO_ASSOC);
@@ -630,7 +951,7 @@ public class DataServlet extends HttpServlet implements Constants {
 					long childrenArrViewId = Long.parseLong(ids[0]);
 					//long childrenArrObjectId = Long.parseLong(ids[1]);
 					if(childViewObj.getId() == childrenArrViewId){
-						newChildrenList.add((Cell) getOrMakeBasedOnCid(cid, session, idMap));//session.load(Cell.class, new Long(childrenArrObjectId)));
+						newChildrenList.add((Cell) getOrMakeCellBasedOnCid(cid, session, idCellMap));//session.load(Cell.class, new Long(childrenArrObjectId)));
 					}
 				}
 			}
@@ -816,227 +1137,5 @@ public class DataServlet extends HttpServlet implements Constants {
 			}
 		}
 	}
-	private void isAssocAllowed(Cell sourceCell, byte type, Cell destCell){
-		if(type==NEXT_ASSOC) throw new RuntimeException("Cennot test NEXT_ASSOC");
-		LinkedList<Cell> sourceCellParentsList = sourceCell.getListOfSuperClasses();
-		LinkedList<Cell> destCellParentsList = destCell.getListOfSuperClasses();
-		for(Iterator<Cell> itr1=sourceCellParentsList.iterator();itr1.hasNext();){
-			Cell sourceCellParent = itr1.next();
-			for(Iterator<Assoc> itr2=sourceCellParent.getSourceAssocs().iterator();itr2.hasNext();){
-				Assoc pAssoc = itr2.next();
-				Cell dest = pAssoc.getDestFk();
-				if(type==pAssoc.getType() && destCellParentsList.contains(dest)) return; //association allowed
-			}
-		}
-		System.out.println("ERROR:\tAssociation not allowed");
-		System.out.println("source:\t"+sourceCell.getIdName(50));
-		System.out.println("assoc tpe:\t"+type);
-		System.out.println("dest:\t"+destCell.getIdName(50));
-		System.out.println("source parents:\t"+listToString(sourceCellParentsList));
-		System.out.println("dest parents:\t"+listToString(destCellParentsList));
-		throw new RuntimeException("Association not allowed");
-	}
-	private void makeAssoc(Cell sourceFk, byte type, Cell destFk, Session session){
-		Assoc pAssoc = new Assoc();
-		pAssoc.setSourceFk(sourceFk);
-		pAssoc.setType(type);
-		pAssoc.setDestFk(destFk);
-		session.save(pAssoc);
-		sourceFk.addTosourceAssocs(pAssoc);
-		destFk.addTodestAssocs(pAssoc);
-		session.save(sourceFk);
-		session.save(destFk);
-	}
-	private void destroyAssoc(Cell sourceObj, long assocType, Cell destObj, Session session){
-		if(assocType>=PARENT_ASSOC && assocType<=OWNS_ASSOC){
-			destroySourceAssoc(sourceObj, (byte)assocType, destObj, session);
-		}
-		else if(assocType==ORDERED_PARENT_PASSOC) throw new RuntimeException("Cannot destroy ordered parent");
-		else if(assocType>=SUBCLASSES_PASSOC && assocType<=OWNED_BY_PASSOC){
-			byte primitiveAssocType = (byte)(assocType - 12);// Big NoNo: here we do math with identifires
-			destroyDestAssoc(destObj, primitiveAssocType, sourceObj, session);// destroy the invers relation
-		}
-	}
-
-	private void destroySourceAssoc(Cell sourceCell, byte type, Cell destCell, Session session){
-		//type and destCell may be 0/null
-		for(Iterator<Assoc> itr1=sourceCell.getSourceAssocs().iterator();itr1.hasNext();){
-			Assoc pAssoc = itr1.next();
-			Cell dest = pAssoc.getDestFk();
-			if((type==0||type==pAssoc.getType()) && (destCell==null||dest.equals(destCell))){
-				itr1.remove();
-				sourceCell.getSourceAssocs().remove(pAssoc);
-				dest.getDestAssocs().remove(pAssoc);
-				session.save(dest);
-				session.delete(pAssoc);
-			}				
-		}
-		session.save(sourceCell);
-	}
-	private void destroyDestAssoc(Cell destCell, byte type, Cell sourceCell, Session session){
-		//type and sourcetCell may be 0/null
-		for(Iterator<Assoc> itr1=destCell.getDestAssocs().iterator();itr1.hasNext();){
-			Assoc pAssoc = itr1.next();
-			Cell source = pAssoc.getSourceFk();
-			if((type==0||type==pAssoc.getType()) && (sourceCell==null||source.equals(sourceCell))){
-				itr1.remove();
-				destCell.getDestAssocs().remove(pAssoc);
-				source.getSourceAssocs().remove(pAssoc);
-				session.save(source);
-				session.delete(pAssoc);
-			}				
-		}
-		session.save(destCell);
-	}
-	/**
-	 * deleteCascade
-	 * This is used to replace all-delete-orphan option in the hbm.
-	 * We need this because we don't allways want to automaticly delete associations.
-	 */
-	private void deleteCell(Cell delCell, Session session) {
-		destroySourceAssoc(delCell, (byte)0, null, session);
-		destroyDestAssoc(delCell, (byte)0, null, session);
-		session.delete(delCell);
-	}
-	private Cell makeCell(String name, Session session) {
-		Cell cell = new Cell();
-		cell.setName(name);
-		cell.setType((byte) 1);// might be overwritten by the update row, if this is a classmodel
-		cell.setSourceAssocs(new java.util.TreeSet<Assoc>());//assoce sets must not be null, else searcches lateron will fail
-		cell.setDestAssocs(new java.util.TreeSet<Assoc>());//assoce sets must not be null, else searcches lateron will fail
-		session.save(cell);//we must save otherwise we get null pointer exception
-		return cell;
-	}
-	private Cell getOrMakeBasedOnCid(String cid, Session session, Map<String, Cell> idMap){
-		if(cid.contains("cid:")){
-			Cell newCell = idMap.get(cid);//do we know this cell already, was it created in the same conversation?
-			if(newCell==null){//apparently not, perhapse there will be a post lateron. Make the cell here.
-				newCell = makeCell(null, session);
-				idMap.put(cid, newCell);
-			}
-			return newCell;
-		}
-		long id = Long.parseLong(cid.split("/")[1]);
-		return (Cell) session.load(Cell.class, id);
-	}
-	//experimental
-	private void assocsViewChildren(JSONArray assocArray, Cell selectedObj, Cell viewObj, Session session) throws Exception {
-		Cell permittedValuesParent = (Cell) session.load(Cell.class, new Long(ASSOCIATION_TYPES_ID));
-		LinkedList<Cell> permittedValuesList = permittedValuesParent.getListOfInstances();				
-		for(Iterator<Cell> itr1=permittedValuesList.iterator();itr1.hasNext();){
-			Cell permittedValue = (itr1.next());
-			long assocType = permittedValue.getId();
-			//if(assocType==CHILDREN_PASSOC) continue;//we are doing other than children
-			//if(assocType==PARENT_ASSOC) continue;//causes loop in the tree//doesn;t help
-			//if(permittedValue.getId()!=ATTRIBUTE_ASSOC) continue;//we are doing other than children
-			LinkedList<Cell> thisAssocsList = selectedObj.getListOfRelatedObjectsByAssocTypeAndDestClass(assocType, null);
-			if(thisAssocsList.size()>0){
-				assocArray.put(viewObj.getId()+"/"+selectedObj.getId()+"."+assocType);
-			}
-		}
-	}
-	private JSONObject cellAssociations(Cell selectedObj, Cell viewObj, Session session) throws Exception {
-		JSONObject assocObj = new JSONObject();
-		Cell permittedValuesParent = (Cell) session.load(Cell.class, new Long(ASSOCIATION_TYPES_ID));
-		LinkedList<Cell> permittedValuesList = permittedValuesParent.getListOfInstances();				
-		for(Iterator<Cell> itr1=permittedValuesList.iterator();itr1.hasNext();){
-			Cell permittedValue = (itr1.next());
-			long assocType = permittedValue.getId();
-			//if(assocType==CHILDREN_PASSOC) continue;//we are doing other than children
-			//if(assocType==PARENT_ASSOC) continue;//causes loop in the tree//doesn;t help
-			LinkedList<Cell> thisAssocsList = selectedObj.getListOfRelatedObjectsByAssocTypeAndDestClass(assocType, null);
-			if(thisAssocsList.isEmpty()) continue;
-			JSONArray destArray = new JSONArray();
-			for(Iterator<Cell> itr2=thisAssocsList.iterator();itr2.hasNext();){
-				Cell destObj = itr2.next();
-				destArray.put(viewObj.getId()+"/"+destObj.getId());
-			}
-			assocObj.put(String.valueOf(assocType), destArray);
-		}
-		return assocObj;
-	}
-	private JSONObject assocsViewAssoc(long viewIdString, String assocIdString, Session session) throws Exception {
-		String[] asssocIds = assocIdString.split("\\.");
-		long assocType = Long.parseLong(asssocIds[1]);
-		long sourceObjId = Long.parseLong(asssocIds[0]);
-		Cell assocObj = (Cell) session.load(Cell.class, new Long(assocType));
-		Cell sourceObj = (Cell) session.load(Cell.class, new Long(sourceObjId));
-		JSONObject rowObj = new JSONObject();
-		rowObj.put("id", viewIdString+"/"+assocIdString);
-		rowObj.put("1936", (assocType>9?assocType:"0"+assocType)+" "+assocObj.getName());
-		//rowObj.put("1936", assocType+" "+assocObj.getName());
-		rowObj.put("classId", assocType);
-		rowObj.put("view name", "associations");
-		rowObj.put("viewId", viewIdString);
-		JSONArray childrenArray = new JSONArray();
-		LinkedList<Cell> destObjList = sourceObj.getListOfRelatedObjectsByAssocTypeAndDestClass(assocType, null);
-		for(Iterator<Cell> itr2=destObjList.iterator();itr2.hasNext();){
-			Cell destObj = itr2.next();
-			childrenArray.put(ASSOCS_CLASS_VIEW_ID+"/"+destObj.getId());
-		}
-		rowObj.put(String.valueOf(ASSOCS_CLASS_VIEW_ID), childrenArray);
-		return rowObj;
-	}
-	private Cell getUserObj(HttpServletRequest req, Session session){
-		//String remoteUser = req.getUserPrincipal().getName();
-		String remoteUser = "cjong";
-		Cell personsClass = (Cell) session.load(Cell.class, new Long(PERSONS_ID));
-		LinkedList<Cell> userList = personsClass.getListOfInstances();
-		for(Iterator<Cell> itr0=userList.iterator();itr0.hasNext();){
-			Cell user = itr0.next();
-			Cell useIdObj = user.getAttributeObjByDestClass(USERID_ID);
-			if(useIdObj==null) continue;
-			if(useIdObj.getName().equalsIgnoreCase(remoteUser)) return user;
-		}
-		return null;
-	}
-	private void addLabel(JSONObject obj, Cell viewObj, Cell childselectedObj, Session session){
-		//find the labels
-		boolean found = false;
-		LinkedList<Cell> attrRefList = viewObj.getListOfRelatedObjectsByAssocTypeAndDestClassId(ORDERED_ASSOC, ATTRIBUTE_REFS_ID);
-		for(Iterator<Cell> itr1=attrRefList.iterator();itr1.hasNext();){
-			Cell attrRefObj = (itr1.next());
-			Cell pointsToCell = attrRefObj.getCellByAssocType(MAPSTO_ASSOC);
-			if(pointsToCell!=null&&pointsToCell.isA(PRIMARY_NAME_ID)) {
-				Cell nameCell = childselectedObj.getAttributeObjByDestClass(PRIMARY_NAME_ID);
-				String cellName = nameCell==null?"":nameCell.getName(50);
-				obj.put(String.valueOf(attrRefObj.getId()),cellName);
-				//childrenArray.put(labelObj);
-				//labelStr += "if(label=='nf') label = store"+childViewObjId+".getValue(item, '"+attrRefObj.getId()+"', 'nf');\n";
-				//found = true;
-				//break;
-			}
-		}
-		if(!found){
-			for(Iterator<Cell> itr1=attrRefList.iterator();itr1.hasNext();){
-				Cell attrRefObj = (itr1.next());
-				//Cell pointsToCell = attrRefObj.getCellByRelType(POINTS_TO_CLASS_ID);
-				//if(attrRefObj.isA(CELL_NAME_ID));
-					//..labelStr += "if(label=='nf') label = store"+childViewObjId+".getValue(item, '"+attrRefObj.getId()+"', 'nf');\n";
-					//break;
-			
-			}
-		}
-	}
-	public boolean isInteger( String input )  
-	{  
-	   try  
-	   {  
-	      Integer.parseInt( input );  
-	      return true;  
-	   }  
-	   catch( Exception e)  
-	   {  
-	      return false;  
-	   }  
-	}
-
-	private String listToString(LinkedList<Cell> list){
-		String retString = "";
-		for(Iterator<Cell> itr1=list.iterator();itr1.hasNext();){
-			Cell cell = itr1.next();
-			retString += ", "+cell.getIdName(50);
-		}
-		return retString;
-	}
+	*/
 }

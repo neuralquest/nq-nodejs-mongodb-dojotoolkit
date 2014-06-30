@@ -69,12 +69,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.pane.resize();
 			//return this.startupDeferred;
 		},
-		getAttrRefProperties: function(_viewId){
-			//remove when we're done with the transformation
-			var viewId = (typeof _viewId == 'string' && _viewId.indexOf('/')>0)?_viewId.split('/')[1]:_viewId;
-
+		getAttrRefProperties: function(viewId){
 			//console.log('viewId', viewId);
-			var ORDERED_ASSOC = 8;		//TO MANY
 			var ATTRREF_CLASS_TYPE = 63;
 			var self = this;			
 			if(viewId==2378) debugger;
@@ -91,13 +87,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		makeProperties: function(attrRefId){
 			var CLASS_TYPE = 0;
 			var PERTMITTEDVALUE_CLASS = 58;
-			var ATTRIBUTE_ASSOC = 4;		//TO ONE
 			var TOONEASSOCS_TYPE = 81;
-			var MAPSTO_ASSOC = 5;			//TO ONE
 			var PRIMARY_NAMES = 69;
 			var ATTRIBUTE_ACCESS = 59;
 			var DESCRIPTION = 77;
-			var SUBCLASSES_PASSOC = 15;		//TO MANY
 			
 			var self = this;
 			var attrPromises = [];
@@ -225,43 +218,6 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			});
 		},		
 
-/*
-		destroy: function(){
-			arrayUtil.forEach(this.pane.getChildren(), function(widget){
-				//if(widget.destroyRecursive) widget.destroyRecursive();
-			});
-			this.inherited(arguments);
-		}
-		replaceContentsWithEditor: function(fillDiv, editorType, objectId){
-			if(editorType == 'string'){
-				var self = this;
-				var value = domAttr.get(fillDiv, 'innerHTML');
-				var textDijit = new ValidationTextBox({
-					objectId: objectId,
-				    'type': 'text',
-				    'trim': true,
-				    'value': value,
-				    //'style':{ 'width':'90%', 'background': 'rgba(0,0,255,0.04)', 'border-style': 'none'},
-				    'style':{width:'90%','background': 'rgba(250, 250, 121, 0.28)', 'border-style': 'none'},//rgba(0,0,255,0.04)
-					'placeHolder': 'Paragraph Header',
-					'onChange': function(evt){
-						when(self.store.get(objectId), function(item){
-							item[self.headerAttrId] = textDijit.get('value');
-							self.store.put(item);
-						});
-				    }
-				}, domConstruct.create('input'));
-				domConstruct.place(textDijit.domNode, fillDiv);
-				textDijit.focus();			
-			}
-		},
-		formatGridDate: function(theDate, rowIndex) {
-			var rowdata = this.grid.getItem(rowIndex);
-			var theDate = new Date(parseInt(rowdata.datefieldname));
-			theDateString = dojo.date.locale.format(theDate, {selector: 'date', datePattern: 'MM/dd/yyyy' });
-			return theDateString;
-		},
-*/
 		extraPlugins:[
      		'|',
      		'foreColor','hiliteColor',
