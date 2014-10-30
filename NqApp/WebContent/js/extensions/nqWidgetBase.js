@@ -160,7 +160,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
 			var attrPromises = [];
 			//get the label that this attribute reference has as an attribute
-			attrPromises[0] = this.store.get(labelId);
+			attrPromises[0] = this.store.getCell(labelId);
 			//get the parent of the attribute class that this attribute reference maps to
 			////////////////////Exception for the cell name as used by the class model///////////////////
 			if(destClassId == CLASSNAME_CLASS_ID) attrPromises[1] = destClassId;

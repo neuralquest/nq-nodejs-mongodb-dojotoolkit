@@ -3,7 +3,7 @@ require([
 'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct', 'dojo/_base/declare',
 'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer', "dojo/store/Observable", 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
-'nq/nqStore', 'nq/nqTransStore', 'nq/nqProcessChart', 'nq/nqClassChart', 'nq/nqForm', 'nq/nqTable', 'nq/nqTree','nq/nqDocument',
+'nq/YnqStore', 'nq/nqTransStore', 'nq/nqProcessChart', 'nq/nqClassChart', 'nq/nqForm', 'nq/nqTable', 'nq/nqTree','nq/nqDocument',
 'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct, declare,  
@@ -23,7 +23,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		//		Initialize
 		//		Setup listerners, prefetch data which is often used, determin landing page
 		
-		topic.subscribe("/dojo/hashchange", interpritHash);
+		topic.subscribe("/dojo/hashchange", interpretHash);
 		on(registry.byId('logonButtonId'), 'change', function(value){
 				if(value) request.post('j_security_check').then(function(data){
 					console.log(this, data);
@@ -43,13 +43,13 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				if(neuralquestState) hash(neuralquestState, true);
 				else hash("842.1784.824.846.1866", true);
 			}
-			else interpritHash();
+			else interpretHash();
 		}, errorDialog);
 
 	});
-	function interpritHash(hash, level){
+	function interpretHash(hash, level){
 		// summary:
-		//		Interprit the hash change. The hash consists of sets of threes: viewId.tabId.selectedObjectId.
+		//		Interpret the hash change. The hash consists of sets of threes: viewId.tabId.selectedObjectId.
 		//		Each set is interpreted consecutively.
 		//		This method is initially called by on hash change and subsequently by ourselves with incrementing level
 		// hash: String
@@ -97,8 +97,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					}
 					return widgetsIdsArr;
 				}, errorDialog);
-				//We do not have to wait for the widgets to be completed. Instead we can continue with a recurssive call to interpritHash
-				return when(interpritHash(hash, level+1), function(result){
+				//We do not have to wait for the widgets to be completed. Instead we can continue with a recurssive call to interpretHash
+				return when(interpretHash(hash, level+1), function(result){
 					return result;
 				});
 			});

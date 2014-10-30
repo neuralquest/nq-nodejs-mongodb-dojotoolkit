@@ -41,7 +41,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 		        label: 'Add Row',
 				iconClass: 'addIcon',
 		        onClick: function(evt){
-		        	var viewDefToCreate = self.viewsArr[0];//TODO what about more than one 
+		        	var viewDefToCreate = self.viewIdsArr[0];//TODO what about more than one 
 					var classToCreate = viewDefToCreate.mapsToClasses[0];
 					var viewId = self.viewsArr[0].id;
 //					console.log(classToCreate.className);

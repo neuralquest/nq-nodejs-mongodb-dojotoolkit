@@ -230,7 +230,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					   self.siblingButton.get('checked') ||
 					   self.childButton.get('checked') ||
 					   self.deleteButton.get('checked')){
-					domStyle.set(headerSpan, 'border', '1px solid gray');// "backgroundColor", "rgba(250, 250, 121, 0.28)"
+					domStyle.set(headerSpan, 'outline', '1px solid gray');// "backgroundColor", "rgba(250, 250, 121, 0.28)"
 				}
 			});
 			on(headerSpan, mouse.leave, function(evt){
@@ -238,7 +238,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					   self.siblingButton.get('checked') ||
 					   self.childButton.get('checked') ||
 					   self.deleteButton.get('checked')){
-					domStyle.set(headerSpan, 'border', '1px none gray');
+					domStyle.set(headerSpan, 'outline', '1px none gray');
 				}
 			});
 			
@@ -300,12 +300,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 
 			on(paragraphNode, mouse.enter, function(evt){
 				if(self.editModeButton.get('checked')) {
-					domStyle.set(paragraphNode, 'border', '1px solid gray');
+					domStyle.set(paragraphNode, 'outline', '1px solid gray');
 				}
 			});
 			on(paragraphNode, mouse.leave, function(evt){
 				if(self.editModeButton.get('checked')) {
-					domStyle.set(paragraphNode, 'border', '1px none gray');
+					domStyle.set(paragraphNode, 'outline', '1px none gray');
 				}
 			});
 

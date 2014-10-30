@@ -87,12 +87,12 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang'
 				store : this.store,
 				query : {cellId: this.selectedObjIdPreviousLevel, viewId: this.viewIdsArr[0]}
 			});
-			this.treeModel.getChildren = function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
+//			this.treeModel.getChildren = function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
 				// summary:
 				//		Calls onComplete() with array of child items of given parent item.
 				// parentItem:
 				//		Item from the dojo/store
-
+/*
 				var id = this.store.getIdentity(parentItem);
 //if(id==2453)debugger;
 				if(this.childrenCache[id]){
@@ -128,10 +128,10 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang'
 					}), true);	// true means to notify on item changes
 				}
 			},
-
-			this.treeModel.pasteItem = function(/*Item*/ childItem, /*Item*/ oldParentItem, /*Item*/ newParentItem,
-					/*Boolean*/ bCopy, /*int?*/ insertIndex, /*Item*/ before){
-				if(!bCopy){
+*/
+//			this.treeModel.pasteItem = function(/*Item*/ childItem, /*Item*/ oldParentItem, /*Item*/ newParentItem,
+//					/*Boolean*/ bCopy, /*int?*/ insertIndex, /*Item*/ before){
+/*				if(!bCopy){
 					var oldParentChildren = [].concat(this.childrenCache[this.getIdentity(oldParentItem)]), // concat to make copy
 						index = array.indexOf(oldParentChildren, childItem);
 					oldParentChildren.splice(index, 1);
@@ -143,7 +143,7 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang'
 					before: before,
 					oldParentItem: oldParentItem//this is our extension
 				});
-			};
+			};*/
 			this.tree = new Tree({
 				id: 'tree'+this.widgetId,
 				store: this.store,

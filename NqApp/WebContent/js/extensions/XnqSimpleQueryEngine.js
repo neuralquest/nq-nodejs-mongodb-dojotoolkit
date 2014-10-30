@@ -4,6 +4,35 @@ define(["dojo/_base/array" /*=====, "../api/Store" =====*/], function(arrayUtil 
 //		dojo/store/util/SimpleQueryEngine
 
 return function(query, options){
+	var queryObject = query;
+	query = function(object){
+		for(var key in queryObject){
+			var required = queryObject[key];
+			if(required && required.test){
+				// an object can provide a test method, which makes it work with regex
+				if(!required.test(object[key], object)){
+					return false;
+				}
+			}else if(required != object[key]){
+				return false;
+			}
+		}
+		return true;
+	}
+	var filteringFunction = function(object){
+		var i=0;
+		//  do something here based on the passed query object
+	};
+	 
+	var execute = function(array){
+		var results = arrayUtil.filter(array, filteringFunction);
+		var i=0;
+		//  do anything else needed, like sorting and pagination
+		return results;
+	}
+	execute.matches = query;
+	return execute;
+	/*
 	// summary:
 	//		Simple query engine that matches using filter functions, named filter
 	//		functions or objects by name-value on a query object hash
@@ -125,6 +154,7 @@ return function(query, options){
 	}
 	execute.matches = query;
 	return execute;
+	*/
 };
 
 });
