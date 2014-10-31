@@ -1,45 +1,9 @@
-define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dojo/store/util/QueryResults", 'dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array", "nq/XnqSimpleQueryEngine"/*"dojo/store/util/SimpleQueryEngine"*/],
-function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest, Memory, Cache, request, registry, array, SimpleQueryEngine ){
+define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dojo/store/util/QueryResults", 'dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array"],
+function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest, Memory, Cache, request, registry, array ){
 
 // module:
 //		js/nqTransStore
-	/*var dbConfig = {
-	    version: 1,
-	    stores: {
-	        cell: {
-	            id: {preference: 10},
-	            name: {indexed: false},
-	            type: {indexed: false}
-	        },
-	        assoc: {
-	            id: {indexed: false},
-	            sourceFk: {preference: 10},
-	            type: {indexed: false},
-	            destFk: {preference: 10}
-	        },
-	        'transaction-log': {
-		        id: {preference: 1},
-		        method: {preference: 1},
-		        objectId: {preference: 10},
-		        options: {preference: 1},
-		        previous: {preference: 1},
-		        storeId: {indexed: false},
-		        target: {indexed: false}
-	        }
-	    }
-	};*/
-    /*var transactionLogStore = new LocalDB({
-        dbConfig: dbConfig,
-        storeName: 'transaction-log'
-    });*/
-     /*var localCellStore = new LocalDB({
-        dbConfig: dbConfig,
-        storeName: 'cell'
-    });*/
-    /*var localAssocStore = new LocalDB({
-        dbConfig: dbConfig,
-        storeName: 'assoc'
-    });*/   
+ 
 	var transactionLogStore = new Memory();
     var masterCellStore = new JsonRest({
         target: '/data/cell',
@@ -71,7 +35,6 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
     assocStore.transaction();//trun autocommit off
 
 	return declare("nqTransStore", [], {
-//		queryEngine: SimpleQueryEngine,
 		
 		getCell: function(id){
 			return cellStore.get(id);
@@ -121,11 +84,9 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 		put: function(object, directives){
 			this.enableTransactionButtons();
 			
-			//console.log('put', object, directives);
-			var res = cellStore.put(object);//update the object
+			this.updateItem(object);			
 			if(directives) this.processDirectives(object, directives);
-			//TODO update attrRefValues
-			return res;//TODO return item
+			return object;
 		},
 		makeItem: function(sourceId, attrRefId){
 			var CLASS_TYPE = 0;
@@ -163,7 +124,32 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				}	
 			});	
 		},
-
+		updateItem: function(item){
+			for(key in item){
+				if(!isNaN(key)){
+					console.log('cellId'+key);
+					var cellId = item['cellId'+key];
+					var assocId = item['assocId'+key];
+					if(cellId) {
+						when(cellStore.get(cellId), function(cell){
+							if(cell.name != item[key]){
+								cell.name = item[key];
+								cellStore.put(cell);
+							}
+						});
+					}
+					else if(assocId) {
+						when(assocStore.get(assocId), function(assoc){
+							if(assoc.destFk != item[key]){
+								assoc.destFk = item[key];
+								assocStore.put(assoc);
+							}
+						});
+					}
+					else debugger; //new assoc
+				}
+			}		
+		},
 		processDirectives: function(object, directives){
 			var ASSOCS_CLASS_TYPE = 94;
 
@@ -190,56 +176,95 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						// The leading Assoc will remain attached to the Object that's being moved
 						// First make sure the old parent/preceding object is attached to the object that comes after the moving object
 						// get the ordered children as seen from the old parent
-						when(self.getManyByAssocTypeAndDestClass(oldParentId, ORDERED_ASSOC, destClassId), function(childIdsArr){
-							var leadingAssocSourceFk = 0;
-							var leadingAssoctype = 0;
-							var idx = childIdsArr.indexOf(movingObjectId);
-							if(idx==0){//the obejct we're moving is the first of the old parent children
-								leadingAssocSourceFk = oldParentId;
-								leadingAssoctype = ORDERED_ASSOC;
-								if(childIdsArr.length>1){//there is at least one other object following the moving object, find it's assoc  
-									when(assocStore.query({sourceFk: movingObjectId, type: NEXT_ASSOC, destFk: childIdsArr[1]}), function(assocArr){
-										// update it so that it has the old parent as source
-										if(assocArr.length!=1) throw new Error('Expected to find one association');
-										var assoc = assocArr[0];
-										assoc.sourceFk = oldParentId;
-										assoc.type = ORDERED_ASSOC;
-										assocStore.put(assoc);
-										//Next make sure the new parent/preceding object is attached to the moving object
-										self.updateFollowingAssoc(leadingAssocSourceFk, leadingAssoctype, newParentId, destClassId, beforeId, movingObjectId);
-									});					
-								}
-								//Next make sure the new parent/preceding object is attached to the moving object
-								else self.updateFollowingAssoc(leadingAssocSourceFk, leadingAssoctype, newParentId, destClassId, beforeId, movingObjectId);
+						when(self.getManyByAssocTypeAndDestClass(oldParentId, ORDERED_ASSOC, destClassId), function(oldParentChildren){
+							// get the ordered children as seen from the new parent (could be the same)
+							when(self.getManyByAssocTypeAndDestClass(newParentId, ORDERED_ASSOC, destClassId), function(newParentChildren){
+								var leadingAssocSourceFk = 0;
+								var leadingAssoctype = 0;
+								var idx = oldParentChildren.indexOf(movingObjectId);
+								if(idx==0){//the obejct we're moving is the first of the old parent children
+									leadingAssocSourceFk = oldParentId;
+									leadingAssoctype = ORDERED_ASSOC;
+									if(oldParentChildren.length>1){//there is at least one other object following the moving object, find it's assoc  
+										when(assocStore.query({sourceFk: movingObjectId, type: NEXT_ASSOC, destFk: oldParentChildren[1]}), function(assocArr){
+											// update it so that it has the old parent as source
+											if(assocArr.length!=1) throw new Error('Expected to find one association');
+											var assoc = assocArr[0];
+											assoc.sourceFk = oldParentId;
+											assoc.type = ORDERED_ASSOC;
+											assocStore.put(assoc);
+										});					
+									}
 
-							}
-							else{//the obejct we're moving is NOT the first of the old parent children
-								leadingAssocSourceFk = childIdsArr[idx-1];
-								leadingAssoctype = NEXT_ASSOC;
-								if(idx < childIdsArr.length-1){//there is at least one other object following the moving object, find it's assoc  
-									when(assocStore.query({sourceFk: movingObjectId, type: NEXT_ASSOC, destFk: childIdsArr[idx+1]}), function(assocArr){
-										//update it so that it has the previous object as source
+								}
+								else{//the obejct we're moving is NOT the first of the old parent children
+									leadingAssocSourceFk = oldParentChildren[idx-1];
+									leadingAssoctype = NEXT_ASSOC;
+									if(idx < oldParentChildren.length-1){//there is at least one other object following the moving object, find it's assoc  
+										when(assocStore.query({sourceFk: movingObjectId, type: NEXT_ASSOC, destFk: oldParentChildren[idx+1]}), function(assocArr){
+											//update it so that it has the previous object as source
+											if(assocArr.length!=1) throw new Error('Expected to find one association');
+											var assoc = assocArr[0];
+											assoc.sourceFk = oldParentChildren[idx-1];
+											assocStore.put(assoc);
+										});					
+									}
+								}
+
+								//Next make sure the new parent/following object is attached to the moving object
+								var newParentFollowingAssocSourceFk = 0;
+								var newParentFollowingAssoctype = 0;
+								if(beforeId){
+									var idx = newParentChildren.indexOf(beforeId);
+									if(idx==0){//the to be following object is the first one of the new parent children
+										newParentFollowingAssocSourceFk = newParentId;
+										newParentFollowingAssoctype = ORDERED_ASSOC;
+									}
+									else{//the to be following object is NOT the first one of the new parent children
+										newParentFollowingAssocSourceFk = newParentChildren[idx-1];
+										newParentFollowingAssoctype = NEXT_ASSOC;
+									}
+									//get the following assoc and update it so that it has the moving object as source
+									when(assocStore.query({sourceFk: newParentFollowingAssocSourceFk, type: newParentFollowingAssoctype, destFk: beforeId}), function(assocArr){
 										if(assocArr.length!=1) throw new Error('Expected to find one association');
-										var assoc = assocArr[0];
-										assoc.sourceFk = childIdsArr[idx-1];
-										assocStore.put(assoc);
-										//Next make sure the new parent/preceding object is attached to the moving object
-										self.updateFollowingAssoc(leadingAssocSourceFk, leadingAssoctype, newParentId, destClassId, beforeId, movingObjectId);
+										var newParentFollowingAssoc = assocArr[0];
+										newParentFollowingAssoc.sourceFk = movingObjectId;
+										newParentFollowingAssoc.type = NEXT_ASSOC;
+										assocStore.put(newParentFollowingAssoc);
 									});					
 								}
-								//Next make sure the new parent/preceding object is attached to the moving object
-								else self.updateFollowingAssoc(leadingAssocSourceFk, leadingAssoctype, newParentId, destClassId, beforeId, movingObjectId);
-							}
-							//when(assocStore.query({sourceFk: leadingAssocSourceFk, type: leadingAssoctype, destFk: movingObjectId}), function(assocArr){
-							//	if(assocArr.length!=1) throw new Error('Expected to find one association');
-							//	var leadingAssoc = assocArr[0];
-							//	self.updateFollowingAssoc(leadingAssocSourceFk, leadingAssoctype, newParentId, destClassId, beforeId, movingObjectId);				
-							//});					
+								else{// No before: add it to the last one or the parent if the new parent has no children
+									if(newParentChildren.length==0){//ours will be the only one
+										newParentFollowingAssocSourceFk = newParentId;
+										newParentFollowingAssoctype = ORDERED_ASSOC;
+									}
+									else{//ours will be the last one
+										newParentFollowingAssocSourceFk = newParentChildren[newParentChildren.length-1];
+										newParentFollowingAssoctype = NEXT_ASSOC;
+									}
+								}
+								//Fianlly attach the new parent/preceding object to the moving object
+								when(assocStore.query({sourceFk: leadingAssocSourceFk, type: leadingAssoctype, destFk: movingObjectId}), function(assocArr){
+									if(assocArr.length!=1) throw new Error('Expected to find one association');
+									var leadingAssoc = assocArr[0];
+									leadingAssoc.sourceFk = newParentFollowingAssocSourceFk;
+									leadingAssoc.type = newParentFollowingAssoctype;
+									assocStore.put(leadingAssoc);										
+								});					
+							});
 						});							
 					}
 					else{//no oldParent means we're creating a new cell with a new association
 						if(newParentId) {
-							self.updateFollowingAssoc(null, newParentId, destClassId, beforeId, movingObjectId);	
+							// get the ordered children as seen from the new parent
+							when(self.getManyByAssocTypeAndDestClass(newParentId, ORDERED_ASSOC, destClassId), function(newParentChildren){
+								if(newParentChildren.length>0){
+									assocStore.addAssoc({sourceFk: newParentChildren[newParentChildren.length-1], type: NEXT_ASSOC, destFk: movingObjectId});
+								}
+								else{
+									assocStore.addAssoc({sourceFk: newParentId, type: ORDERED_ASSOC, destFk: movingObjectId});									
+								}
+							});
 						}
 					}
 				}
@@ -254,57 +279,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					});					
 				}
 			});		
-		},
-		updateFollowingAssoc: function(leadingAssocSourceFk, leadingAssoctype, newParentId, destClassId, beforeId, movingObjectId){
-			var self = this;
-			//get the objects that result from this source, view
-			when(self.getManyByAssocTypeAndDestClass(newParentId, ORDERED_ASSOC, destClassId), function(childIdsArr){
-				var followingAssocSourceFk = 0;
-				var followingAssoctype = 0;
-				if(beforeId){
-					var idx = childIdsArr.indexOf(beforeId);
-					if(idx==0){//the to be following object is the first one of the new parent children
-						followingAssocSourceFk = newParentId;
-						followingAssoctype = ORDERED_ASSOC;
-					}
-					else{//the to be following object is NOT the first one of the new parent children
-						followingAssocSourceFk = childIdsArr[idx-1];
-						followingAssoctype = NEXT_ASSOC;
-					}
-					//get the following assoc and update it so that it has the moving object as source
-					when(assocStore.query({sourceFk: followingAssocSourceFk, type: followingAssoctype, destFk: beforeId}), function(assocArr){
-						if(assocArr.length!=1) throw new Error('Expected to find one association');
-						var followingAssoc = assocArr[0];
-						followingAssoc.sourceFk = movingObjectId;
-						followingAssoc.type = NEXT_ASSOC;
-						assocStore.put(followingAssoc);
-					});					
-				}
-				else{// No before: add it to the last one or the parent if the new parent has no children
-					if(childIdsArr.length==0){//ours will be the only one
-						followingAssocSourceFk = newParentId;
-						followingAssoctype = ORDERED_ASSOC;
-					}
-					else{//ours will be the last one
-						followingAssocSourceFk = childIdsArr[childIdsArr.length-1];
-						followingAssoctype = NEXT_ASSOC;
-					}
-				}
-				when(assocStore.query({sourceFk: leadingAssocSourceFk, type: leadingAssoctype, destFk: movingObjectId}), function(assocArr){
-					if(assocArr.length!=1) throw new Error('Expected to find one association');
-					var leadingAssoc = assocArr[0];
-					leadingAssoc.sourceFk = followingAssocSourceFk;
-					leadingAssoc.type = followingAssoctype;
-					assocStore.put(leadingAssoc);										
-				});					
-				//if(leadingAssoc){//update the leading assoc so that it has new parent or previous as source
-				//	leadingAssoc.sourceFk = followingAssocSourceFk;
-				//	leadingAssoc.type = followingAssoctype;
-				//	assocStore.put(leadingAssoc);										
-				//}
-				//else self.addAssoc({sourceFk: followingAssocSourceFk, type: followingAssoctype, destFk: movingObjectId});
-			});	
-		},
+		},		
 		remove: function(id){			
 			this.enableTransactionButtons();
 			debugger;
@@ -551,17 +526,17 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						var itemsDonePromises = [];
 						for(var i=0;i<objArr.length;i++){
 							var objId = objArr[i];
-							itemsDonePromises.push(self.createItem(objId, attrRefArr, viewId));
+							itemsDonePromises.push(self.getItem(objId, attrRefArr, viewId));
 						}
 						return all(itemsDonePromises);
 					});
 				}
 			});
 		},		
-		createItem: function(objId, attrRefArr, viewId){
+		getItem: function(objId, attrRefArr, viewId){
 			var self = this;
 			return when(assocStore.query({sourceFk: objId, type: PARENT_ASSOC}), function(classIdAssocArr){
-				if(classIdAssocArr.length>1) throw new Error(objId+' has more than oneparent.');
+				if(classIdAssocArr.length>1) throw new Error(objId+' has more than one parent.');
 				var parentId = classIdAssocArr.length==0?0:classIdAssocArr[0].destFk;
 				var valuePromises = [];
 				//viewId is used for things like identifing labels and menus in trees, also getChildren as requested by trees
@@ -605,7 +580,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						return when(self.isA(destClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
 							if(trueFalse) {
 								item[attrRefId] = valueObjId;//add the identifier to the item
-								//item['assocId'+attrRefId] = attrPromises[1].id;
+								item['assocId'+attrRefId] = attrPromises[1].id;
 								return valueObjId;
 							}
 							else return when(cellStore.get(valueObjId), function(valueObj){
@@ -687,7 +662,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				var promises = [];
 				for(var j=0;j<cellIdsArr.length;j++){
 					var objId = cellIdsArr[j];
-					promises.push(self.createItem(objId, attrRefArr, viewId));
+					promises.push(self.getItem(objId, attrRefArr, viewId));
 				}
 				return all(promises);
 			});
@@ -858,7 +833,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 
 			var self = this;
 			return when(self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefArr){
-				return when(self.createItem(objId, attrRefArr, viewId, null));
+				return when(self.getItem(objId, attrRefArr, viewId, null));
 			});
 			
 		},

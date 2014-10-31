@@ -337,10 +337,16 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			    'style':{width:'90%','background': 'rgba(250, 250, 121, 0.28)', 'border-style': 'none'},//rgba(0,0,255,0.04)
 				'placeHolder': 'Paragraph Header',
 				'onChange': function(evt){
-					when(self.store.getCell(cellId), function(item){
-						item.name = textDijit.get('value');
-						self.store.put(item);
-					});
+					var updateItem = {};
+					var cellValueKey = self.HEADER_ATTRREF;
+					var cellIdKey = 'cellId'+self.HEADER_ATTRREF;
+					updateItem[cellValueKey] = textDijit.get('value');
+					updateItem[cellIdKey] = cellId;
+					self.store.put(updateItem);
+					//when(self.store.getCell(cellId), function(item){
+					//	item.name = textDijit.get('value');
+					//	self.store.put(item);
+					//});
 			    }
 			}, domConstruct.create('input'));
 			domConstruct.place(textDijit.domNode, replaceDiv, "replace");
