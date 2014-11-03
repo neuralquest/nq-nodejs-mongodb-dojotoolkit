@@ -18,6 +18,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 
 //		editMode: false,
 		normalToolbar: null,
+		// Map from id of each parent node to array of its children, or to Promise for that array of children.
+		childrenCache: {},
+
 
 		postCreate: function(){
 			this.inherited(arguments);
@@ -132,7 +135,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				if(this.selectedObjIdPreviousLevel == value) return this;
 				this.selectedObjIdPreviousLevel = value;
 			}
-			this.closeEditors();
+			//this.closeEditors();
 			domConstruct.empty(this.pane.domNode);
 
 			var self = this;
@@ -156,92 +159,82 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			
 			//Header
 			var paragraphNrStr = paragraphNrArr.length==0?'':paragraphNrArr.join('.');
-			var headerNode = domConstruct.create('h'+headerLevel, {style: {'clear': previousParagrphHasRightFloat?'both':'none'}}, this.pane.containerNode);
+			var headerNode = domConstruct.create(
+					'h'+headerLevel, 
+					{style: {'clear': previousParagrphHasRightFloat?'both':'none'}}, 
+					this.pane.containerNode
+				);
 			if(headerLevel>1) domConstruct.create('span', { innerHTML: paragraphNrStr, style: { 'margin-right':'30px'}}, headerNode);
-			var headerSpan = domConstruct.create('span', { 
-				innerHTML: item[this.HEADER_ATTRREF],
-				cellId: item['cellId'+this.HEADER_ATTRREF],
-				objectId: item.id,
-				parentId: parentId,
-				onclick: function(evt){
-					self.closeEditors();
-					if(self.siblingButton.get('checked')){
-						self.siblingButton.set('checked', false);
-						self.editModeButton.set('checked', true);
-						var addObj = {
-							'viewId': item.viewId, 
-							'classId': item.classId
-						};
-						//addObj[self.HEADER_ATTRREF] = '[header]';
-						//addObj[self.PARAGRAPH_ATTRREF] = '<p>[paragraph]</p>';
-						var objectId = domAttr.get(evt.currentTarget,'objectId');
-						when(self.store.query({sourceFk:objectId, type:NEXT_ASSOC}), function(assocArr) {
-							if(assocArr.length>1) throw new Error('One assoc expected');
-							var parentId = domAttr.get(evt.currentTarget,'parentId');
-							var directives = {parent:{id:parentId}};
-							if(assocArr.length==1) {
-								nextObjId = assocArr[0].destFk;
-								directives.before = {id:nextObjId};
-							}
-							when(self.store.add(addObj, directives), function(newItem){
-								when(self.setSelectedObjIdPreviousLevel(), function(done){
-									var newDiv = query('span[objectid="'+newItem.id+'"]')[0];
-									self.replaceHeaderWithEditor(newDiv);
-								});
-							});
-						});
-					}
-					else if(self.childButton.get('checked')){
-						self.childButton.set('checked', false);
-						self.editModeButton.set('checked', true);
-						var addObj = {
-							'viewId': item.viewId, 
-							'classId': item.classId
-						};
-						var objectId = domAttr.get(evt.currentTarget,'objectId');
-						var directives = {parent:{id:objectId}};
-						when(self.store.add(addObj, directives), function(newItem){
-							when(self.setSelectedObjIdPreviousLevel(), function(done){
-								var newDiv = query('span[objectid="'+newItem.id+'"]')[0];
-								self.replaceHeaderWithEditor(newDiv);
-							});
-						});
-					}
-					else if(self.deleteButton.get('checked')){
-						if(!item[viewId] || item[viewId].length == 0){
-							self.deleteButton.set('checked', false);
-							self.store.remove(item.id);
-							
-							var parentItem = self.store.getCell(parentId);
-							var pos = parentItem[viewId].indexOf(item.id);
-							parentItem[viewId].splice(pos, 1);
-							_nqDataStore.put(parentItem);
-							self.set('parentid');// redraw the page
-						}
-					}
-					else if(self.editModeButton.get('checked')) {
-						 self.replaceHeaderWithEditor(evt.currentTarget);
-					}
-				}
-			}, headerNode);
-			
-			on(headerSpan, mouse.enter, function(evt){
+			var textDijit = new ValidationTextBox({
+				item: item,
+			    'type': 'text',
+			    'trim': true,
+			    'value': item[self.HEADER_ATTRREF],
+			    //'style':{width:'90%','background': 'rgba(250, 250, 121, 0.28)', 'border-style': 'none'},//rgba(0,0,255,0.04)
+			    'style':{width:'90%'},
+				'placeHolder': 'Paragraph Header',
+				'onChange': function(evt){
+					item[self.HEADER_ATTRREF] = textDijit.get('value');
+					self.store.put(item);
+			    }
+			}, domConstruct.create('span'));
+			headerNode.appendChild(textDijit.domNode);
+
+			on(headerNode, mouse.enter, function(evt){
 				if(self.editModeButton.get('checked') ||
 					   self.siblingButton.get('checked') ||
 					   self.childButton.get('checked') ||
 					   self.deleteButton.get('checked')){
-					domStyle.set(headerSpan, 'outline', '1px solid gray');// "backgroundColor", "rgba(250, 250, 121, 0.28)"
+					domStyle.set(headerNode, 'outline', '1px solid gray');// "backgroundColor", "rgba(250, 250, 121, 0.28)"
 				}
 			});
-			on(headerSpan, mouse.leave, function(evt){
+			on(headerNode, mouse.leave, function(evt){
 				if(self.editModeButton.get('checked') ||
 					   self.siblingButton.get('checked') ||
 					   self.childButton.get('checked') ||
 					   self.deleteButton.get('checked')){
-					domStyle.set(headerSpan, 'outline', '1px none gray');
+					domStyle.set(headerNode, 'outline', '1px none gray');
 				}
 			});
-			
+			on(headerNode, 'click', function(evt){
+//				self.closeEditors();
+				if(self.siblingButton.get('checked')){
+					self.siblingButton.set('checked', false);
+					self.editModeButton.set('checked', true);
+					var addObj = {
+						'viewId': item.viewId, 
+						'classId': item.classId
+					};
+					var directives = {parent:item.id};
+					self.store.add(addObj, directives);
+				}
+				else if(self.childButton.get('checked')){
+					self.childButton.set('checked', false);
+					self.editModeButton.set('checked', true);
+					var addObj = {
+						'viewId': item.viewId, 
+						'classId': item.classId
+					};
+					var directives = {parent:{id:item.id}};
+					self.store.add(addObj, directives);
+				}
+				else if(self.deleteButton.get('checked')){
+					if(!item[viewId] || item[viewId].length == 0){
+						self.deleteButton.set('checked', false);
+						self.store.remove(item.id);
+					}
+				}
+				else if(self.editModeButton.get('checked')) {
+					 //self.replaceHeaderWithEditor(evt.currentTarget);
+					//var objectId = domAttr.get(evt.currentTarget,'objectId');
+
+					//evt.currentTarget.set('readonly', false);
+					// Just oprn all of them
+					registry.byClass("dijit.form.ValidationTextBox",self.pane.containerNode).forEach(function(tb){
+						tb.set('readonly', false);
+					});
+				}
+			});
 			//Illustration
 			if(item.id=="846/1213"){
 				var widgetDomNode = domConstruct.create('div', {
@@ -278,24 +271,18 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				objectId: item.id,
 				onclick: function(evt){
 					if(self.editModeButton.get('checked')) {
-						self.closeEditors();
-						self.replaceParagraphWithEditor(evt.currentTarget);
+						//self.closeEditors();
+						//self.replaceParagraphWithEditor(evt.currentTarget);
 					}
 				}
 			}, this.pane.containerNode);
 
-			
 			//Paragraph
 			var paragraphNode = domConstruct.create('div', {
 				innerHTML: item[this.PARAGRAPH_ATTRREF], 
 				cellId: item['cellId'+this.PARAGRAPH_ATTRREF], 
 				objectId: item.id,
-				onclick: function(evt){
-					if(self.editModeButton.get('checked')) {
-						self.closeEditors();
-						self.replaceParagraphWithEditor(evt.currentTarget);
-					}
-				}
+				viewId: item.viewId,
 			}, this.pane.containerNode);
 
 			on(paragraphNode, mouse.enter, function(evt){
@@ -308,12 +295,21 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					domStyle.set(paragraphNode, 'outline', '1px none gray');
 				}
 			});
+			on(paragraphNode, 'click', function(evt){
+				if(self.editModeButton.get('checked')) {
+//					self.closeEditors();
+					self.replaceParagraphWithEditor(evt.currentTarget, item);
+				}
+			});
+			
 
 			if(item.classId==80) return; //folder
 			
 			//Get the sub- headers/paragraphs
-			return when(this.store.getManyByView(item.id, viewId), function(children){
+			//return when(this.store.getManyByView(item.id, viewId), function(children){
 			//return when(this.store.getChildren(item, [846]), function(children){
+			var res = this.store.getChildren(item);
+			when(res, function(children){
 				var previousParagrphHasRightFloat = false;
 				for(var i=0;i<children.length;i++){
 					var childItem = children[i];
@@ -323,45 +319,20 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 //					previousParagrphHasRightFloat = childItem[self.PARAGRAPH_ATTRREF].indexOf('floatright')==-1?false:true;
 				}
 			}, nq.errorDialog);
+			res.observe(
+				function(obj, removedFrom, insertedInto){
+					//console.log("observe on children of ", item, ": ", obj, removedFrom, insertedInto);
+					if(obj.id == item.id) self.setSelectedObjIdPreviousLevel();
+				}, true);	// true means to notify on item changes
 		},
-		replaceHeaderWithEditor: function(replaceDiv){
+		replaceParagraphWithEditor: function(replaceDiv, item){
 			var self = this;
-			var cellId = domAttr.get(replaceDiv,'cellId');
-			var cell = this.store.getCell(cellId);
-			var textDijit = new ValidationTextBox({
-				cellId: cellId,
-			    'type': 'text',
-			    'trim': true,
-			    'value': cell.name,
-			    //'style':{ 'width':'90%', 'background': 'rgba(0,0,255,0.04)', 'border-style': 'none'},
-			    'style':{width:'90%','background': 'rgba(250, 250, 121, 0.28)', 'border-style': 'none'},//rgba(0,0,255,0.04)
-				'placeHolder': 'Paragraph Header',
-				'onChange': function(evt){
-					var updateItem = {};
-					var cellValueKey = self.HEADER_ATTRREF;
-					var cellIdKey = 'cellId'+self.HEADER_ATTRREF;
-					updateItem[cellValueKey] = textDijit.get('value');
-					updateItem[cellIdKey] = cellId;
-					self.store.put(updateItem);
-					//when(self.store.getCell(cellId), function(item){
-					//	item.name = textDijit.get('value');
-					//	self.store.put(item);
-					//});
-			    }
-			}, domConstruct.create('input'));
-			domConstruct.place(textDijit.domNode, replaceDiv, "replace");
-			textDijit.focus();			
-		},
-		replaceParagraphWithEditor: function(replaceDiv){
-			var self = this;
-			var cellId = domAttr.get(replaceDiv,'cellId');
-			var cell = this.store.getCell(cellId);
 			// Create toolbar and place it at the top of the page
 			var toolbar = new Toolbar();
 			this.editorToolbarDivNode.appendChild(toolbar.domNode);
 			//Paragraph
 			var editorDijit = new Editor({
-				cellId: cellId,
+				//disabled: true,
 				'height': '', //auto grow
 			    'minHeight': '30px',
 			    'extraPlugins': this.extraPlugins,
@@ -369,10 +340,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				'toolbar': toolbar,
 				focusOnLoad: true,
 				'onChange': function(evt){
-					when(self.store.getCell(cellId), function(item){
-						item.name = editorDijit.get('value');
-						self.store.put(item);
-				});}
+					item[self.PARAGRAPH_ATTRREF] = editorDijit.get('value');
+					self.store.put(item);
+				}
 			}, domConstruct.create('div'));
 			editorDijit.addStyleSheet('css/editor.css');
 			editorDijit.on("NormalizedDisplayChanged", function(){
@@ -382,51 +352,42 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				}
 				editorDijit.resize({h: height});
 			});
-			editorDijit.set('value', cell.name);
+			editorDijit.set('value', item[self.PARAGRAPH_ATTRREF]);
 			domConstruct.place(editorDijit.domNode, replaceDiv, "replace");
 			editorDijit.startup();			
+
+			editorDijit.on(mouse.enter, function(evt){
+			//on(editorDijit.domNode, mouse.enter, function(evt){
+				if(self.editModeButton.get('checked')) {
+					domStyle.set(editorDijit.domNode, 'outline', '1px solid gray');
+				}
+			});
+			on(editorDijit.domNode, mouse.leave, function(evt){
+				if(self.editModeButton.get('checked')) {
+					domStyle.set(editorDijit.domNode, 'outline', '1px none gray');
+				}
+			});
+			on(editorDijit.domNode, 'click', function(evt){
+				if(self.editModeButton.get('checked')) {
+//					self.closeEditors();
+//					self.replaceParagraphWithEditor(evt.currentTarget, item);
+					editorDijit.open();
+					domStyle.set(editorDijit.toolbar.containerNode, "display", "");
+				}
+			});
 		},
+
 		closeEditors: function(){
 			var self = this;
 			registry.byClass("dijit.form.ValidationTextBox",this.pane.containerNode).forEach(function(tb){
-				domConstruct.create('span', { 
-					innerHTML: tb.get('value'),
-					cellId: tb.cellId,
-					objectId: tb.objectId,
-					onclick: function(evt){
-						if(self.editModeButton.get('checked')) {
-//							self.closeEditors();
-							self.replaceHeaderWithEditor(evt.currentTarget);
-						}
-					}
-				}, tb.domNode, 'replace');
-				tb.destroy();
+				tb.set('readonly', true);
 			});
 			registry.byClass("dijit.Editor",this.pane.containerNode).forEach(function(editor){
-				domConstruct.create('div', {
-					innerHTML: editor.get('value'), 
-					cellId: editor.cellId,
-					objectId: editor.objectId,
-					onclick: function(evt){
-						if(self.editModeButton.get('checked')) {
-//							self.closeEditors();
-							self.replaceParagraphWithEditor(evt.currentTarget);
-						}
-					}
-				}, editor.domNode, 'replace');
-				editor.close(false, false);
-				editor.destroy();
+				//editor.set('disabled', true);
+				//self.replaceEditorWithParagraph(editor);
+				editor.close();
+				domStyle.set(editor.toolbar.containerNode, "display", "none");
 			});
-		},
-		addWidget: function(widgetDomNode){
-			widget = new nqClassChart({
-				store : this.store,
-				XYAxisRootId: '844/78' // Process Classes
-			}, domConstruct.create('div'));
-			widgetDomNode.appendChild(widget.domNode);
-			widget.startup().then(function(res){
-				//widget.setParentId(state.ParentIdPreviousLevel);
-			});
-		}
+		}	
 	});
 });

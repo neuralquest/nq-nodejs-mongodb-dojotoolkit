@@ -52,8 +52,8 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 		},
 
 		//get item
-		get: function(id){
-			debugger;
+		get: function(id, viewId){
+			//debugger;
 			return this.getItemByView(id, viewId);
 		},
 		add: function(object, directives){
@@ -127,7 +127,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 		updateItem: function(item){
 			for(key in item){
 				if(!isNaN(key)){
-					console.log('cellId'+key);
+					//console.log('cellId'+key);
 					var cellId = item['cellId'+key];
 					var assocId = item['assocId'+key];
 					if(cellId) {
@@ -259,10 +259,10 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 							// get the ordered children as seen from the new parent
 							when(self.getManyByAssocTypeAndDestClass(newParentId, ORDERED_ASSOC, destClassId), function(newParentChildren){
 								if(newParentChildren.length>0){
-									assocStore.addAssoc({sourceFk: newParentChildren[newParentChildren.length-1], type: NEXT_ASSOC, destFk: movingObjectId});
+									assocStore.add({sourceFk: newParentChildren[newParentChildren.length-1], type: NEXT_ASSOC, destFk: movingObjectId});
 								}
 								else{
-									assocStore.addAssoc({sourceFk: newParentId, type: ORDERED_ASSOC, destFk: movingObjectId});									
+									assocStore.add({sourceFk: newParentId, type: ORDERED_ASSOC, destFk: movingObjectId});									
 								}
 							});
 						}
@@ -636,22 +636,33 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			});
 		},
 		getAssocItems: function(sourceId, attrRefArr, viewId){
-			return when(assocStore.query({sourceFk: sourceId, uniqueTypes:true}), function(typesArr){
-				var promises = [];
-				for(var j=0;j<typesArr.length;j++){
-					var type = typesArr[j];
-					promises.push(cellStore.get(type));//get the corresponding cell so we can use the name.
+			var uniqueTypes = {};
+			return when(assocStore.query({sourceFk: sourceId}), function(sourceTypesArr){
+				for(var i=0;i<sourceTypesArr.length;i++){
+					var type = sourceTypesArr[i].type;
+					if(type == 3) continue;
+					uniqueTypes[type] = true;
 				}
-				return when(all(promises), function(assocCellsArr){
-					items= [];
-					for(var j=0;j<typesArr.length;j++){
-						var type = typesArr[j];
-						var item = {id: sourceId+'/'+type, sourceId:sourceId,  viewId: viewId, classId: type};
-						item[attrRefArr[0]] = assocCellsArr[j].name;
-						items.push(item);
+				return when(assocStore.query({destFk: sourceId}), function(destypesArr){
+					for(var i=0;i<destypesArr.length;i++){					
+						var type = (destypesArr[i].type)+12;
+						uniqueTypes[type] = true;
 					}
-					return items;
-				});				
+					var promises = [];
+					for(key in uniqueTypes){
+						promises.push(cellStore.get(key));//get the corresponding cell so we can use the name.
+					}
+					return when(all(promises), function(assocCellsArr){
+						items= [];
+						for(var j=0;j<assocCellsArr.length;j++){
+							var type = assocCellsArr[j].id;
+							var item = {id: sourceId+'/'+type, sourceId:sourceId,  viewId: viewId, classId: type};
+							item[attrRefArr[0]] = assocCellsArr[j].name;
+							items.push(item);
+						}
+						return items;
+					});				
+				});
 			});
 		},
 		getCellItems: function(assocId, attrRefArr, viewId){
@@ -954,7 +965,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				headers: {'Content-Type': 'application/json; charset=UTF-8'},
 				handleAs: 'json',
 			}).then(function(data){
-				console.dir(data);
+				//console.dir(data);
 				if(localCellStore.setData) localCellStore.setData(data.cell);
 				else{
 					array.forEach(data.cell, function(item, index){

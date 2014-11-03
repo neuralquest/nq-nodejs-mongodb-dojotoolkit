@@ -187,7 +187,7 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang'
 				},
 				onLoad: function(){
 					fullPage.resize();//need this for lazy loaded trees, some how the first tree lags behind
-					console.dir(self.createDeferred.resolve(self));
+					//console.dir(self.createDeferred.resolve(self));
 					self.createDeferred.resolve(self);//ready to be loaded with data/
 //					self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
 				},

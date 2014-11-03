@@ -296,9 +296,11 @@ public class ConsistancyServlet extends HttpServlet  implements Constants {
 		objList.add(view);
 		//bodyEl.addElement("h3").addText("View: "+view.getIdName(50));
 		bodyEl.addElement("h3").addAttribute("style", "color:BlueViolet;").addText("View: "+view.getIdName(50));
+		Cell accTabTypeObj = view.getAttributeObjByDestClass(91); //var ACCORDIONORTAB_ATTRCLASS = 91
 		Cell viewMTClass = view.getCellByAssocType(MAPSTO_ASSOC);
 		Cell assocTypeObj = view.getAttributeObjByDestClass(ASSOCIATION_TYPES_ID);
 		Element listEl = bodyEl.addElement("ul").addText("");
+		listEl.addElement("li").addText("accoordion or tab: "+(accTabTypeObj==null?"null":accTabTypeObj.getIdName(50)));
 		listEl.addElement("li").addText("assoc from previous: "+(assocTypeObj==null?"null":assocTypeObj.getIdName(50)));
 		listEl.addElement("li").addText("maps to: "+ (viewMTClass==null?"null":viewMTClass.getIdName(50)));
 		Element listEl1 = listEl.addElement("ol").addText("");
@@ -329,11 +331,11 @@ public class ConsistancyServlet extends HttpServlet  implements Constants {
 			Cell childAccTabs = itr1.next();
 			//listEl.addElement("h3").addText("AccTab: "+childAccTabs.getIdName(50));
 			listEl.addElement("h4").addAttribute("style", "color:blue;").addText("AccTab: "+childAccTabs.getIdName(50));
-			Cell dispTypeObj = childAccTabs.getAttributeObjByDestClass(DISPLAY_TYPE_ID);
-			Cell tabMTObj = childAccTabs.getCellByAssocType(MAPSTO_ASSOC);
-			Element listEl3 = listEl.addElement("ul").addText("");
-			listEl3.addElement("li").addText("display type: "+(dispTypeObj==null?"null":dispTypeObj.getIdName(50)));
-			listEl3.addElement("li").addText("fk: "+(tabMTObj==null?"null":tabMTObj.getIdName(50)));
+			//Cell dispTypeObj = childAccTabs.getAttributeObjByDestClass(DISPLAY_TYPE_ID);
+			//Cell tabMTObj = childAccTabs.getCellByAssocType(MAPSTO_ASSOC);
+			Element listEl3 = listEl.addElement("ol").addText("");
+			//listEl3.addElement("li").addText("display type: "+(dispTypeObj==null?"null":dispTypeObj.getIdName(50)));
+			//listEl3.addElement("li").addText("fk: "+(tabMTObj==null?"null":tabMTObj.getIdName(50)));
 			
 			reportWidgets(listEl3, childAccTabs, objList);
 			reportTabs(listEl3, childAccTabs, objList);
