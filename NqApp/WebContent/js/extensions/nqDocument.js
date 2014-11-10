@@ -135,12 +135,28 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				if(this.selectedObjIdPreviousLevel == value) return this;
 				this.selectedObjIdPreviousLevel = value;
 			}
-			//this.closeEditors();
-			domConstruct.empty(this.pane.domNode);
+			this.pane.destroyDescendants(false);
 
+			
+			//dojo.forEach(registry.findWidgets(this.pane.domNode), function(w) {
+				//console.log(w);
+			    //w.destroy();
+			//});
+			/*
+			//clear the contents pane
+			registry.byClass("dijit.form.ValidationTextBox",this.pane.containerNode).forEach(function(tb){
+				tb.destroy();
+			});
+			registry.byClass("dijit.Editor",this.pane.containerNode).forEach(function(editor){
+				//editor.toolbar.destroy();
+				editor.destroy();
+				//editor.destroyRecursive();
+			});
+			domConstruct.empty(this.pane.domNode);
+*/
 			var self = this;
 			var viewId = this.viewId;
-			when(this.store.getItemByView(this.selectedObjIdPreviousLevel, this.viewId), function(item){
+			when(this.store.get(this.selectedObjIdPreviousLevel, this.viewId), function(item){//TODO change to query and listen for chages
 			//when(this.store.getCell(this.selectedObjIdPreviousLevel), function(item){
 				return when(self.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
 					registry.byId('tab'+self.tabId).resize();
@@ -180,23 +196,23 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			}, domConstruct.create('span'));
 			headerNode.appendChild(textDijit.domNode);
 
-			on(headerNode, mouse.enter, function(evt){
+			this.own(on(headerNode, mouse.enter, function(evt){
 				if(self.editModeButton.get('checked') ||
 					   self.siblingButton.get('checked') ||
 					   self.childButton.get('checked') ||
 					   self.deleteButton.get('checked')){
 					domStyle.set(headerNode, 'outline', '1px solid gray');// "backgroundColor", "rgba(250, 250, 121, 0.28)"
 				}
-			});
-			on(headerNode, mouse.leave, function(evt){
+			}));
+			this.own(on(headerNode, mouse.leave, function(evt){
 				if(self.editModeButton.get('checked') ||
 					   self.siblingButton.get('checked') ||
 					   self.childButton.get('checked') ||
 					   self.deleteButton.get('checked')){
 					domStyle.set(headerNode, 'outline', '1px none gray');
 				}
-			});
-			on(headerNode, 'click', function(evt){
+			}));
+			this.own(on(headerNode, 'click', function(evt){
 //				self.closeEditors();
 				if(self.siblingButton.get('checked')){
 					self.siblingButton.set('checked', false);
@@ -225,16 +241,16 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					}
 				}
 				else if(self.editModeButton.get('checked')) {
-					 //self.replaceHeaderWithEditor(evt.currentTarget);
-					//var objectId = domAttr.get(evt.currentTarget,'objectId');
-
-					//evt.currentTarget.set('readonly', false);
+					self.closeEditors();
 					// Just oprn all of them
 					registry.byClass("dijit.form.ValidationTextBox",self.pane.containerNode).forEach(function(tb){
 						tb.set('readonly', false);
 					});
 				}
-			});
+			}));
+			this.own(textDijit);
+
+			
 			//Illustration
 			if(item.id=="846/1213"){
 				var widgetDomNode = domConstruct.create('div', {
@@ -285,30 +301,29 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				viewId: item.viewId,
 			}, this.pane.containerNode);
 
-			on(paragraphNode, mouse.enter, function(evt){
+			this.own(on(paragraphNode, mouse.enter, function(evt){
 				if(self.editModeButton.get('checked')) {
 					domStyle.set(paragraphNode, 'outline', '1px solid gray');
 				}
-			});
-			on(paragraphNode, mouse.leave, function(evt){
+			}));
+			this.own(on(paragraphNode, mouse.leave, function(evt){
 				if(self.editModeButton.get('checked')) {
 					domStyle.set(paragraphNode, 'outline', '1px none gray');
 				}
-			});
-			on(paragraphNode, 'click', function(evt){
+			}));
+			this.own(on(paragraphNode, 'click', function(evt){
 				if(self.editModeButton.get('checked')) {
-//					self.closeEditors();
+					self.closeEditors();
 					self.replaceParagraphWithEditor(evt.currentTarget, item);
 				}
-			});
+			}));
 			
 
 			if(item.classId==80) return; //folder
 			
 			//Get the sub- headers/paragraphs
-			//return when(this.store.getManyByView(item.id, viewId), function(children){
-			//return when(this.store.getChildren(item, [846]), function(children){
 			var res = this.store.getChildren(item);
+			if(res) this.own(res);
 			when(res, function(children){
 				var previousParagrphHasRightFloat = false;
 				for(var i=0;i<children.length;i++){
@@ -335,9 +350,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				//disabled: true,
 				'height': '', //auto grow
 			    'minHeight': '30px',
-			    'extraPlugins': this.extraPlugins,
+//			    'extraPlugins': this.extraPlugins,
 //			    'value': storedRtf,
-				'toolbar': toolbar,
+//				'toolbar': toolbar,
 				focusOnLoad: true,
 				'onChange': function(evt){
 					item[self.PARAGRAPH_ATTRREF] = editorDijit.get('value');
@@ -354,40 +369,38 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			});
 			editorDijit.set('value', item[self.PARAGRAPH_ATTRREF]);
 			domConstruct.place(editorDijit.domNode, replaceDiv, "replace");
-			editorDijit.startup();			
+//			editorDijit.startup();			
 
-			editorDijit.on(mouse.enter, function(evt){
-			//on(editorDijit.domNode, mouse.enter, function(evt){
+			editorDijit.on('mouseenter', function(evt){
 				if(self.editModeButton.get('checked')) {
 					domStyle.set(editorDijit.domNode, 'outline', '1px solid gray');
 				}
 			});
-			on(editorDijit.domNode, mouse.leave, function(evt){
+			editorDijit.on('mouseleave', function(evt){
 				if(self.editModeButton.get('checked')) {
 					domStyle.set(editorDijit.domNode, 'outline', '1px none gray');
 				}
 			});
-			on(editorDijit.domNode, 'click', function(evt){
+			editorDijit.on('click', function(evt){
 				if(self.editModeButton.get('checked')) {
-//					self.closeEditors();
-//					self.replaceParagraphWithEditor(evt.currentTarget, item);
+					self.closeEditors();
 					editorDijit.open();
 					domStyle.set(editorDijit.toolbar.containerNode, "display", "");
 				}
 			});
+			this.own(editorDijit);
+			editorDijit.startup();			
+			
 		},
-
 		closeEditors: function(){
 			var self = this;
 			registry.byClass("dijit.form.ValidationTextBox",this.pane.containerNode).forEach(function(tb){
 				tb.set('readonly', true);
 			});
 			registry.byClass("dijit.Editor",this.pane.containerNode).forEach(function(editor){
-				//editor.set('disabled', true);
-				//self.replaceEditorWithParagraph(editor);
 				editor.close();
 				domStyle.set(editor.toolbar.containerNode, "display", "none");
 			});
-		}	
+		},
 	});
 });

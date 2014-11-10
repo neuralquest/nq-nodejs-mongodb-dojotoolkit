@@ -23,6 +23,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			var BOOLEAN_CLASS_ID = 57;
 			var CLASSNAME_CLASS_ID = 101;
 			
+			var item = null;
 			var tableNode = domConstruct.create('table', {style: 'border-spacing:5px;'}, this.pane.containerNode);
 			var self = this;
 			when(this.getAttrRefProperties(this.viewId), function(propertiesArr){
@@ -38,7 +39,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					var tdDom = domConstruct.create("td", {style: "padding: 3px; background: rgba(249, 249, 182, 0.5);"}, row);
 					var dijit = null;
 					switch(property.attrClassType){
-					case PERMITTEDVAULE_CLASS_ID: 
+					case PERMITTEDVAULE_CLASS_ID: //defect not being called
 						dijit = new Select({
 						    'store': new Memory({data: property.permittedValues}),
 							'name': property.field,
@@ -49,7 +50,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 							'queryOptions': { ignoreCase: true }//doesnt work
 						}, domConstruct.create('div'));
 						break;	
-					case RTF_CLASS_ID: 
+					case RTF_CLASS_ID:
+						/**/
 						var toolbar = new Toolbar();
 						self.editorToolbarDivNode.appendChild(toolbar.domNode);
 						//initially show the toolbar div
@@ -58,6 +60,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 						property.height = '';//auto grow
 						property.extraPlugins = self.extraPlugins;
 						property.toolbar = toolbar;
+						//self.own(toolbar);
 						//property.styleSheet = 'css/editor.css';
 						property.value = '<p></p>';
 						dijit = new Editor(property, domConstruct.create('div'));
@@ -68,8 +71,9 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 								height = dijit.editNode.scrollHeight;
 							}
 							dijit.resize({h: height});
-						});	
-
+						});
+						//dijit.destroy = function(){console.log('destroyed editor')};
+							
 						break;	
 					case DATE_CLASS_ID:
 						dijit = new DateTextBox(property, domConstruct.create('input'));
@@ -103,17 +107,14 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 						}, domConstruct.create('div'));
 					};
 					if(dijit){
+						self.own(dijit);
 						tdDom.appendChild(dijit.domNode);
-						
-						dijit.on('change', function(value){
-							var cellId = self.cellId;
-							var _value = value;
-							when(self.store.get(cellId), function(item){
-								item.name = _value;
-								self.store.put(item);
-							});
-						});
-						dijit.startup();
+						dijit.attributeReferenceId = property.name;
+						self.pane.own(dijit.on('change', function(value){
+							self.item[this.attributeReferenceId] = value;
+							self.store.put(self.item);
+						}));
+						//dijit.startup();will be call after add child and then from widget base
 					}
 					//else html.set(tdDom, 'unknown attribute type: '+property.attrClassType); 
 					
@@ -131,17 +132,28 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			this.selectedObjIdPreviousLevel = value;
 			
 			var self = this;
-			when(this.store.getItemByView(this.selectedObjIdPreviousLevel, this.viewId), function(item){
-//			when(this.store.get(value), function(item){
-				for(attrRefId in item){
-					if(attrRefId.isNaN) continue;
-					var attrQuery = "[name='"+attrRefId+"']";
-					query(attrQuery).forEach(function(input){
-						var wid = registry.getEnclosingWidget(input);
-						wid.set('value',item[attrRefId], false);// do not fire change
-						wid['cellId'] = item['cellId'+attrRefId];
-					});
-			     }
+
+			var q = {}
+			var res = this.store.query({cellId:this.selectedObjIdPreviousLevel, viewId:this.viewId});
+			if(res.then) this.own(res);	// in case app calls destroy() before query completes
+			when(res, function(items){
+				if(items.length==1){
+					self.item = items[0];
+					for(attrRefId in self.item){
+						if(attrRefId.isNaN) continue;
+						var attrQuery = "[name='"+attrRefId+"']";
+						query(attrQuery).forEach(function(input){
+							var wid = registry.getEnclosingWidget(input);
+							wid.set('value',self.item[attrRefId], false);// do not fire change
+						});
+				     }
+				}
+				/*
+				res.observe(
+						function(obj, removedFrom, insertedInto){
+							//console.log("observe on children of ", item, ": ", obj, removedFrom, insertedInto);
+						}, true);	// true means to notify on item changes
+				*/
 				self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
 			});
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;

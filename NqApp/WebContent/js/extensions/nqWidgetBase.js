@@ -1,8 +1,8 @@
 define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry",
-        'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", "dojo/promise/all", "dojo/when",
+        'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", "dojo/promise/all", "dojo/when", 'dijit/registry',
         'dijit/Toolbar', 'dijit/form/Select', 'dijit/form/DateTextBox',  'dijit/form/NumberTextBox', 'dijit/form/CheckBox', 'dijit/Editor', 'dijit/form/CurrencyTextBox', 'dijit/form/ValidationTextBox', ],
 	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, 
-			arrayUtil, domAttr, Deferred, all, when,
+			arrayUtil, domAttr, Deferred, all, when, registry,
 			Toolbar, Select, DateTextBox, NumberTextBox, CheckBox, Editor, CurrencyTextBox, ValidationTextBox){
 	return declare("nqWidgetBase", [_WidgetBase], {
 		readOnly: false,
@@ -40,6 +40,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				'style' : { 'overflow': 'auto', 'padding': '10px', 'margin': '0px', width: '100%', height: '100%', background:'transparent'}
 			},  domConstruct.create('div'));
 			this.domNode.appendChild(this.pane.domNode);
+			this.own(this.pane);
 		},
 		/*postCreate: function(){
 			//only do this if we're displaying in a tab 
@@ -63,17 +64,17 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.pane.resize(changeSize);
 		},
 		startup: function(){
-			arrayUtil.forEach(this.pane.getChildren(), function(widget){
-				if(widget.startup) widget.startup();
+			//console.log('startup CALLED', this.id);
+			dojo.forEach(registry.findWidgets(this.domNode), function(widget) {
+				widget.startup();
 			});
 			this.pane.resize();
-			//return this.startupDeferred;
 		},
 		getAttrRefProperties: function(viewId){
 			//console.log('viewId', viewId);
 			var ATTRREF_CLASS_TYPE = 63;
 			var self = this;			
-			if(viewId==2378) debugger;
+			//if(viewId==2378) debugger;
 			return when(this.store.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefs){
 				//console.log('attrRefs', attrRefs);
 				var promisses = [];
@@ -151,6 +152,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
 			var MODIFY_VALUE_ID = 289;
 			var MANDATORY_VALUE_ID = 290;
+			var PERMITTEDVAULE_CLASS_ID = 58;
 
 			var labelId = propertiesArr[0];
 			var assocType = propertiesArr[1];
@@ -165,17 +167,19 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			////////////////////Exception for the cell name as used by the class model///////////////////
 			if(destClassId == CLASSNAME_CLASS_ID) attrPromises[1] = destClassId;
 			else attrPromises[1] = this.store.getOneByAssocType(destClassId, PARENT_ASSOC, CLASS_TYPE, true, false);
+			attrPromises[2] = this.store.isA(destClassId, PERMITTEDVAULE_CLASS_ID)
 			//get the helptext that this attribute reference has as an attribute
-			if(helptextId) attrPromises[2] = this.store.get(helptextId);
+			if(helptextId) attrPromises[3] = this.store.get(helptextId);
 			return when(all(attrPromises), function(propertiesArr){
 				var label = propertiesArr[0].name;
 				var attrClassType = propertiesArr[1];
-				var helptext = propertiesArr[2]?propertiesArr[2].name:'undefined';
+				var permittedValue = propertiesArr[2];
+				var helptext = propertiesArr[3]?propertiesArr[3].name:'undefined';
 				var property = {
 						field: attrRefId.toString(), // for dgrid
 						name: attrRefId.toString(), //for input
 						assocType: assocType,
-						attrClassType: attrClassType,
+						attrClassType: permittedValue?PERMITTEDVAULE_CLASS_ID:attrClassType,
 						label: label,
 						helpText: helptext,
 						required: access==MANDATORY_VALUE_ID?true:false,
@@ -212,7 +216,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				var pairsArrPromisses = [];
 				for(var j=0;j<permittedObjIdsArr.length;j++){
 					var objId = permittedObjIdsArr[j];
-					pairsArrPromisses.push(self.store.get(objId));
+					pairsArrPromisses.push(self.store.getCell(objId));
 				}
 				return all(pairsArrPromisses);
 			});

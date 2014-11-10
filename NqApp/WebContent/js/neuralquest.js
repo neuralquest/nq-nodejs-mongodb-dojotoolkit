@@ -247,9 +247,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				return selectedTabId;
 			}
 			// We're filling a slave, clean it first. It may have been used by another view before
-			arrayUtil.forEach(parentPane.getChildren(), function(childWidget){
-				if(childWidget.destroyRecursive) childWidget.destroyRecursive();
-			});
+			if(parentPane) parentPane.destroyDescendants(false);
 
 			var container;
 			if(tabIdsArr.length==1){// this is really only to have palce to store viewPane+viewId. Is there a better way?
@@ -325,6 +323,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		// if the widget already exists we can simply return widgets
 		var widget = registry.byId('nqWidget'+widgetId);		
 		if(widget) return widget;
+		var tab = registry.byId('tab'+tabId);		
 		
 		var state = getState(level);
 		var tabNode = dom.byId('tab'+tabId);
@@ -342,7 +341,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					viewId: viewId,
 					tabId: tabId // used by resize
 				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
+				tab.addChild(widget);
 				break;	
 			case FORM_DISPTYPE_ID: 
 				widget = new nqForm({
@@ -351,7 +350,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					createDeferred: createDeferred, //tell us when your done by returning the widget
 					viewId: viewId,
 				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
+				//tabNode.appendChild(widget.domNode);
+				tab.addChild(widget);
 				break;	
 			case TABLE_DISPTYPE_ID:
 				widget = new nqTable({
@@ -365,7 +365,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					tabId: tabId, // used by onClick
 					query: query
 				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
+				tab.addChild(widget);
 				break;
 			case TREE_DISPTYPE_ID:
 				widget = new nqTree({
@@ -377,7 +377,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					level: level, // used by onClick
 					tabId: tabId, // used by onClick
 				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
+				tab.addChild(widget);
 				break;	
 			case PROCESS_MODEL_DISPTYPE_ID: 
 				widget = new nqProcessChart({
@@ -394,8 +394,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					//stateNameAttrId: '2081'
 					//skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
 				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
-				widget.startup();
+				tab.addChild(widget);
+				//widget.startup();
 				break;
 			case CLASS_MODEL_DISPTYPE_ID: 
 				widget = new nqClassChart({
@@ -406,8 +406,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					tabId: tabId, // used by resize
 					//skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
 				}, domConstruct.create('div'));
-				tabNode.appendChild(widget.domNode);
-				widget.startup();
+				tab.addChild(widget);
+				//widget.startup();
 				break;
 			};
 		});
@@ -420,11 +420,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	function getState(level){
 		var hashArr = hash().split('.');
 		return {
-			//viewId: hashArr[level*3+0],
-			//tabId: hashArr[level*3+1],
-			//selectedObjId: hashArr[level*3+2],
-			//selectedObjectIdPreviousLevel: hashArr[level*3-1],
-			//viewIdPreviousLevel: hashArr[level*3-3]
 			viewId: parseInt(hashArr[level*3+0]),
 			tabId: parseInt(hashArr[level*3+1]),
 			selectedObjId: parseInt(hashArr[level*3+2]),

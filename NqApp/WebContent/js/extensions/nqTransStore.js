@@ -37,6 +37,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 	return declare("nqTransStore", [], {
 		
 		getCell: function(id){
+			//still used by nqWidgetbase to develop permitted values
 			return cellStore.get(id);
 		},
 		getIdentity: function(object){
@@ -51,16 +52,59 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			return  assocStore.add(object, directives);
 		},
 
-		//get item
-		get: function(id, viewId){
-			//debugger;
-			return this.getItemByView(id, viewId);
+		XgetItem: function(objId, viewId){
+			// summary:
+			//		Returns an item that can be consumed by widgets. 
+			//		The item will have an id, a classId, a viewId and name vlaue pairs for the attribute references of the view.
+			// sourceId: Number
+			//		The identifier of the cell
+			// viewId: Number
+			//		The identifier of the view that will tell us which attributes to retreive
+			// returns: Number 
+			//		A prommises. The promise will result in an item.
+			
+			var ATTRREF_CLASS_TYPE = 63;
+
+			var self = this;
+			//viewId is used for things like identifing labels and menus in trees, also getChildren as requested by trees
+			var item = {id: objId, viewId: viewId};
+			
+			var attrPromises = [];
+			attrPromises[0] = self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
+			attrPromises[1] = assocStore.query({sourceFk: objId, type: PARENT_ASSOC});
+			return when(all(attrPromises), function(arr){
+				var attrRefArr = arr[0];
+				if(arr[1].length!=1) throw new Error('Object must have one parent');
+				var parentId = arr[1][0].destFk;
+				//classId is used to identify icons in trees
+				item.classId = parentId;
+				var valuePromises = [];
+				//TODO hasChildren
+				for(var j=0;j<attrRefArr.length;j++){
+					var attrRefId = attrRefArr[j];
+					valuePromises.push(self.getAttributeValue(item, objId, attrRefId));
+				}
+				return when(all(valuePromises), function(valueObjArr){return item;});
+			});
+			
+			
+
+		},
+		get: function(objId, viewId){			
+			var ATTRREF_CLASS_TYPE = 63;
+
+			var self = this;
+			return when(self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefArr){
+				return when(self.getItem(objId, attrRefArr, viewId, null));
+			});			
 		},
 		add: function(object, directives){
 			var ATTRREF_CLASS_TYPE = 63;
+			
 			this.enableTransactionButtons();
 			
-			var self = this;			
+			var self = this;
+			if(!object.type) object.type = 1;			
 			var obj = this.addCell(object);//create the object
 			var classId = object.classId;
 			this.addAssoc({sourceFk: obj.id, type: PARENT_ASSOC, destFk: classId});
@@ -73,7 +117,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				var promisses = [];
 				for(var i=0;i<attrRefs.length;i++){
 					var attrRefId = attrRefs[i];
-					promisses.push(self.makeItem(obj.id, attrRefId));
+					promisses.push(self.addItemAttribute(obj.id, attrRefId));
 				};
 				return when(all(promisses), function(arr) {
 					return item;
@@ -88,7 +132,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			if(directives) this.processDirectives(object, directives);
 			return object;
 		},
-		makeItem: function(sourceId, attrRefId){
+		addItemAttribute: function(sourceId, attrRefId){
 			var CLASS_TYPE = 0;
 			var PERTMITTEDVALUE_CLASS = 58;
 			var TOONEASSOCS_TYPE = 81;
@@ -125,28 +169,45 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			});	
 		},
 		updateItem: function(item){
-			for(key in item){
-				if(!isNaN(key)){
-					//console.log('cellId'+key);
-					var cellId = item['cellId'+key];
-					var assocId = item['assocId'+key];
-					if(cellId) {
-						when(cellStore.get(cellId), function(cell){
-							if(cell.name != item[key]){
-								cell.name = item[key];
-								cellStore.put(cell);
+			for(attributeReference in item){
+				if(!isNaN(attributeReference)){
+					//console.log('cellId'+attributeReference);
+					var value  = item[attributeReference];
+					if(item['cellId'+attributeReference]) {
+						var cellId = item['cellId'+attributeReference];
+						if(cellId==null){
+							//cretae a new cell and its associations
+						}
+						else{
+							if(value==null){
+								//delete the cell and its associations
 							}
-						});
-					}
-					else if(assocId) {
-						when(assocStore.get(assocId), function(assoc){
-							if(assoc.destFk != item[key]){
-								assoc.destFk = item[key];
-								assocStore.put(assoc);
+							else{
+								//update the cell value
+								when(cellStore.get(cellId), function(cell){
+									if(cell.name != value){
+										cell.name = value;
+										cellStore.put(cell);
+									}
+								});
 							}
-						});
+						}
 					}
-					else debugger; //new assoc
+					else if(item['assocId'+attributeReference]){
+						var assocId = item['assocId'+attributeReference];
+						if(assocId==null){
+							
+						}
+						else{
+							when(assocStore.get(assocId), function(assoc){
+								if(assoc.destFk != value){
+									assoc.destFk = value;
+									assocStore.put(assoc);
+								}
+							});
+						}
+					}
+					else throw new Error("Don't know what to update");
 				}
 			}		
 		},
@@ -286,12 +347,12 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 		},		
 
 		query: function(query, options){
-			if(query.newParentId && query.widgetId && query.join){
+			if(query.parentId && query.widgetId && query.join){
 				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
 				return QueryResults(promise);
 			}
 			else if(query.cellId && query.viewId ){//used by tree to get the first item
-				return when(this.getItemByView(query.cellId, query.viewId), function(item){
+				return when(this.get(query.cellId, query.viewId), function(item){
 					return QueryResults([item]);
 				});
 			}
@@ -545,13 +606,13 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				var item = {id: objId, viewId: viewId, classId:parentId};
 				for(var j=0;j<attrRefArr.length;j++){
 					var attrRefId = attrRefArr[j];
-					valuePromises.push(self.addValueToItem(item, objId, attrRefId));
+					valuePromises.push(self.getAttributeValue(item, objId, attrRefId));
 				}
 				return when(all(valuePromises), function(valueObjArr){return item;});
 				
 			});
 		},
-		addValueToItem: function(item, objId, attrRefId){			
+		getAttributeValue: function(item, objId, attrRefId){			
 			var PERTMITTEDVALUE_CLASS = 58;
 			var ASSOCS_CLASS_TYPE = 94;
 			var CELLNAME_ATTR_CLASS = 101;
@@ -574,28 +635,55 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				else if(destClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
 				//get the value for this object, attribute reference
 				else return when(self.getOneByAssocTypeAndDestClass(objId, assocType, destClassId), function(valueObjId){
-					if(!valueObjId) return null; 
 					if(assocType == ATTRIBUTE_ASSOC){
+						//if(attrRefId == 760) debugger;
 						//find out if the attribute class is a permitted value
 						return when(self.isA(destClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
 							if(trueFalse) {
-								item[attrRefId] = valueObjId;//add the identifier to the item
-								item['assocId'+attrRefId] = attrPromises[1].id;
-								return valueObjId;
+								if(valueObjId){
+									return when(assocStore.query({sourceFk: objId, type: assocType, destFk: valueObjId}), function(assocArr){
+										item[attrRefId] = valueObjId;//add the identifier to the item
+										item['assocId'+attrRefId] = assocArr[0]?assocArr[0].id:null;
+										return valueObjId;									
+									});								
+								}
+								else{
+									item[attrRefId] = null;
+									item['assocId'+attrRefId] = null;
+									return null;																		
+								}
 							}
-							else return when(cellStore.get(valueObjId), function(valueObj){
-								//if(!valueObj) return null;
-								item[attrRefId] = valueObj?valueObj.name:null;//add the value to the item
-								item['cellId'+attrRefId] = valueObjId;
-								return valueObjId;
-							});
+							else {
+								if(valueObjId){
+									return when(cellStore.get(valueObjId), function(valueObj){
+										//if(!valueObj) return null;
+										item[attrRefId] = valueObj?valueObj.name:null;//add the value to the item
+										item['cellId'+attrRefId] = valueObjId;
+										return valueObjId;
+									});
+								}
+								else{
+									item[attrRefId] = null;
+									item['cellId'+attrRefId] = null;
+									return null;																		
+								}
+							}
 						});
 					}
 					else {
-						item[attrRefId] = valueObjId;//add the identifier to the item
-						//item['assocId'+attrRefId] = attrPromises[1].id;
+						if(valueObjId){
+							return when(assocStore.query({sourceFk: objId, type: assocType, destFk: valueObjId}), function(assocArr){
+								item[attrRefId] = valueObjId;//add the identifier to the item
+								item['assocId'+attrRefId] = assocArr[0]?assocArr[0].id:null;
+								return valueObjId;									
+							});								
+						}
+						else{
+							item[attrRefId] = null;
+							item['assocId'+attrRefId] = null;
+							return null;																		
+						}
 					}
-					return valueObjId;
 				});
 			});
 		},
@@ -828,25 +916,6 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				}
 				return all(promisses);
 			});
-		},
-		getItemByView: function(objId, viewId){
-			// summary:
-			//		Returns an item that can be consumed by widgets. 
-			//		The item will have an id, a classId, a viewId and name vlaue pairs for the attribute references of the view.
-			// sourceId: Number
-			//		The identifier of the cell
-			// viewId: Number
-			//		The identifier of the view that will tell us which attributes to retreive
-			// returns: Number 
-			//		A prommises. The promise will result in an item.
-			
-			var ATTRREF_CLASS_TYPE = 63;
-
-			var self = this;
-			return when(self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefArr){
-				return when(self.getItem(objId, attrRefArr, viewId, null));
-			});
-			
 		},
 		getOneByAssocTypeAndDestClass: function(source, assocType, destClass){
 			// summary:
