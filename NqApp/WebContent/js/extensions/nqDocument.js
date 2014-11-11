@@ -221,7 +221,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 						'viewId': item.viewId, 
 						'classId': item.classId
 					};
-					var directives = {parent:item.id};
+					var directives = {parent:{id:item.id}};
 					self.store.add(addObj, directives);
 				}
 				else if(self.childButton.get('checked')){

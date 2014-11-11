@@ -41,26 +41,21 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 		        label: 'Add Row',
 				iconClass: 'addIcon',
 		        onClick: function(evt){
-		        	var viewDefToCreate = self.viewIdsArr[0];//TODO what about more than one 
-					var classToCreate = viewDefToCreate.mapsToClasses[0];
-					var viewId = self.viewsArr[0].id;
-//					console.log(classToCreate.className);
-					//add the child
-					var addObj = {
-						'id': '',//cid will be added by our restStore exstension, we need a dummy id
-						'viewId': viewId, 
-						'classId': classToCreate.id
-					};
-					//TODO add default values
-					//addObj[self.viewDef.label] = '[new '+classToCreate.className+']';
-					var newItem = self.store.add(addObj);
-					//update the parent
-					var parentItem = self.store.get(self.query.parentId);
-					if(!parentItem[viewId]) parentItem[viewId] = [];
-					parentItem[viewId].unshift(newItem.id);
-					self.store.put(parentItem);
-					self.grid.refresh();
-					self.grid.select(newItem);
+					//get the class that this view maps to
+					when(self.store.getOneByAssocType(item.viewId, MAPSTO_ASSOC, 0), function(classId){
+						if(!classId) throw new Error('View '+item.viewId+' must map to one class ');
+						var addObj = {
+							viewId: self.viewIdsArr[0], //TODO what about more than one
+							calssId: classId
+						};
+						var directives = {
+								parent:{id:self.selectedObjIdPreviousLevel}
+						};
+						var newItem = self.store.add(addObj, directives);
+						self.grid.refresh();//we should be getting refresh from observe
+						self.grid.select(newItem);
+					});
+
 		        },
 				style : {'margin-left':'5px'} 
 			});

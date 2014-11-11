@@ -37,7 +37,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 	return declare("nqTransStore", [], {
 		
 		getCell: function(id){
-			//still used by nqWidgetbase to develop permitted values
+			//still used by nqWidgetbase to develope permitted values
 			return cellStore.get(id);
 		},
 		getIdentity: function(object){
@@ -52,26 +52,26 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			return  assocStore.add(object, directives);
 		},
 
-		XgetItem: function(objId, viewId){
+		Xget: function(itemId, viewId){
 			// summary:
 			//		Returns an item that can be consumed by widgets. 
 			//		The item will have an id, a classId, a viewId and name vlaue pairs for the attribute references of the view.
-			// sourceId: Number
-			//		The identifier of the cell
+			// itemId: Number
+			//		The identifier of the item
 			// viewId: Number
 			//		The identifier of the view that will tell us which attributes to retreive
-			// returns: Number 
+			// returns: object 
 			//		A prommises. The promise will result in an item.
 			
 			var ATTRREF_CLASS_TYPE = 63;
 
 			var self = this;
 			//viewId is used for things like identifing labels and menus in trees, also getChildren as requested by trees
-			var item = {id: objId, viewId: viewId};
+			var item = {id: itemId, viewId: viewId};
 			
 			var attrPromises = [];
 			attrPromises[0] = self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
-			attrPromises[1] = assocStore.query({sourceFk: objId, type: PARENT_ASSOC});
+			attrPromises[1] = assocStore.query({sourceFk: itemId, type: PARENT_ASSOC});
 			return when(all(attrPromises), function(arr){
 				var attrRefArr = arr[0];
 				if(arr[1].length!=1) throw new Error('Object must have one parent');
@@ -82,7 +82,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				//TODO hasChildren
 				for(var j=0;j<attrRefArr.length;j++){
 					var attrRefId = attrRefArr[j];
-					valuePromises.push(self.getAttributeValue(item, objId, attrRefId));
+					valuePromises.push(self.getAttributeValue(item, itemId, attrRefId));
 				}
 				return when(all(valuePromises), function(valueObjArr){return item;});
 			});
@@ -90,30 +90,45 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			
 
 		},
-		get: function(objId, viewId){			
+		get: function(itemId, viewId){			
 			var ATTRREF_CLASS_TYPE = 63;
 
 			var self = this;
 			return when(self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefArr){
-				return when(self.getItem(objId, attrRefArr, viewId, null));
+				return when(self.getItem(itemId, attrRefArr, viewId, null));
 			});			
 		},
-		add: function(object, directives){
+		add: function(item, directives){
+			// summary:
+			//		Create an Item with default values. 
+			// item: object
+			//		An item with atleast a viewId and a classId
+			//		The classId points the class type of the newly created object. 
+			//		Note that this can be a subclass if the view maps to class, so we cant use that to determine the class type of the object.
+			//		The viewId is used to determine the attribute references
+			// directives: object
+			//		Must contain a parent object with atleast an id
+			// returns: Array 
+			//		The new Item with a client id
+			//
+			
 			var ATTRREF_CLASS_TYPE = 63;
 			
 			this.enableTransactionButtons();
 			
 			var self = this;
-			if(!object.type) object.type = 1;			
-			var obj = this.addCell(object);//create the object
-			var classId = object.classId;
-			this.addAssoc({sourceFk: obj.id, type: PARENT_ASSOC, destFk: classId});
-			if(directives) this.processDirectives(obj, directives);
+			var obj = this.addCell({type:1});//create the item object
+			//attach it to the parent class
+			this.addAssoc({sourceFk: obj.id, type: PARENT_ASSOC, destFk: item.classId});
+
+			item.id = obj.id;
+
+			//establish the foreign key relationship
+			if(directives) this.processDirectives(item, directives);
 
 			//if(viewId==2378) debugger;
-			return when(this.getManyByAssocTypeAndDestClass(object.viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefs){
+			return when(this.getManyByAssocTypeAndDestClass(item.viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefs){
 				//console.log('attrRefs', attrRefs);
-				var item = {id: obj.id, viewId: obj.viewId, classId:obj.classId};
 				var promisses = [];
 				for(var i=0;i<attrRefs.length;i++){
 					var attrRefId = attrRefs[i];
@@ -121,16 +136,55 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				};
 				return when(all(promisses), function(arr) {
 					return item;
-				});//TODO return item
+				});
 			});
-			//return obj;
 		},
-		put: function(object, directives){
+		put: function(item, directives){
 			this.enableTransactionButtons();
 			
-			this.updateItem(object);			
-			if(directives) this.processDirectives(object, directives);
-			return object;
+			for(attributeReference in item){
+				if(isNaN(attributeReference)) continue;
+				//console.log('cellId'+attributeReference);
+				var value  = item[attributeReference];
+				if(item['cellId'+attributeReference]) {
+					var cellId = item['cellId'+attributeReference];
+					if(cellId==null){
+						//cretae a new cell and its associations
+					}
+					else{
+						if(value==null){
+							//delete the cell and its associations
+						}
+						else{
+							//update the cell value
+							when(cellStore.get(cellId), function(cell){
+								if(cell.name != value){
+									cell.name = value;
+									cellStore.put(cell);
+								}
+							});
+						}
+					}
+				}
+				else if(item['assocId'+attributeReference]){
+					var assocId = item['assocId'+attributeReference];
+					if(assocId==null){
+						
+					}
+					else{
+						when(assocStore.get(assocId), function(assoc){
+							if(assoc.destFk != value){
+								assoc.destFk = value;
+								assocStore.put(assoc);
+							}
+						});
+					}
+				}
+				else throw new Error("Don't know what to update");
+			}		
+					
+			if(directives) this.processDirectives(item, directives);
+			return item;
 		},
 		addItemAttribute: function(sourceId, attrRefId){
 			var CLASS_TYPE = 0;
@@ -167,49 +221,6 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					return false;
 				}	
 			});	
-		},
-		updateItem: function(item){
-			for(attributeReference in item){
-				if(!isNaN(attributeReference)){
-					//console.log('cellId'+attributeReference);
-					var value  = item[attributeReference];
-					if(item['cellId'+attributeReference]) {
-						var cellId = item['cellId'+attributeReference];
-						if(cellId==null){
-							//cretae a new cell and its associations
-						}
-						else{
-							if(value==null){
-								//delete the cell and its associations
-							}
-							else{
-								//update the cell value
-								when(cellStore.get(cellId), function(cell){
-									if(cell.name != value){
-										cell.name = value;
-										cellStore.put(cell);
-									}
-								});
-							}
-						}
-					}
-					else if(item['assocId'+attributeReference]){
-						var assocId = item['assocId'+attributeReference];
-						if(assocId==null){
-							
-						}
-						else{
-							when(assocStore.get(assocId), function(assoc){
-								if(assoc.destFk != value){
-									assoc.destFk = value;
-									assocStore.put(assoc);
-								}
-							});
-						}
-					}
-					else throw new Error("Don't know what to update");
-				}
-			}		
 		},
 		processDirectives: function(object, directives){
 			var ASSOCS_CLASS_TYPE = 94;
