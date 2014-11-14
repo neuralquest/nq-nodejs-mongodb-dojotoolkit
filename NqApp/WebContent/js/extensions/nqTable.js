@@ -46,14 +46,16 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 						if(!classId) throw new Error('View '+item.viewId+' must map to one class ');
 						var addObj = {
 							viewId: self.viewIdsArr[0], //TODO what about more than one
-							calssId: classId
+							classId: classId
 						};
 						var directives = {
 								parent:{id:self.selectedObjIdPreviousLevel}
 						};
 						var newItem = self.store.add(addObj, directives);
-						self.grid.refresh();//we should be getting refresh from observe
-						self.grid.select(newItem);
+						when(newItem, function(item){
+							self.grid.refresh();//we should be getting refresh from observe
+							self.grid.select(item);
+						});
 					});
 
 		        },
@@ -107,7 +109,6 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 									'queryOptions': { ignoreCase: true }//doesnt work
 									//value: 749
 							};
-							//property.editor = Select;
 							columns.push(editor(property, Select));
 							break;	
 						case RTF_CLASS_ID: 
@@ -121,11 +122,11 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 									'extraPlugins': self.extraPlugins,
 									'maxHeight': -1
 							};					
-							property.editor = Editor;
 							property.renderCell = function(object, value, node, options) {
 								html.set(node, value);
 							}
 							//editor.editor(toolbar);
+							columns.push(editor(property, Editor));
 							break;	
 						case DATE_CLASS_ID:
 							property.renderCell = function(object, value, node, options) {
@@ -142,24 +143,19 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 								return value.toISOString();
 							};
 							property.autoSave = true;
-							//property.editor = DateTextBox;
 							columns.push(editor(property, DateTextBox));
 							break;	
 						case STRING_CLASS_ID:
 							columns.push(editor(property, 'text'));
-							//property.editor = 'text';
 							break;	
 						case INTEGER_CLASS_ID: 
 							columns.push(editor(property, 'number'));
-							//property.editor = 'number';
 							break;	
 						case NUMBER_CLASS_ID: 
 							columns.push(editor(property, 'number'));
-							//property.editor = 'number';
 							break;	
 						case BOOLEAN_CLASS_ID: 
 							columns.push(editor(property, 'checkbox'));
-							//property.editor = 'checkbox';
 							break;
 						default:
 							var selectStore = new Memory({data: property.permittedValues});
@@ -177,7 +173,6 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 									'queryOptions': { ignoreCase: true }//doesnt work
 									//value: 749
 							};
-							//property.editor = Select;
 							columns.push(editor(property, Select));
 						};
 					}
@@ -193,7 +188,8 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 						'query': {parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true},
 						'columns': columns,
 						'cleanAddedRules': true,
-						'className': "dgrid-autoheight"// version dgrid 0.3.14
+						'className': "dgrid-autoheight",// version dgrid 0.3.14
+						'getBeforePut':false// temporary fix for the fact that a get without a viewId ruins the item sent to the put 
 					}, domConstruct.create('div'));
 //							for(var key in gridStyle){
 //								this.grid.styleColumn(key, gridStyle[key]);

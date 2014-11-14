@@ -131,7 +131,13 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		},
 
 		makeProperiesObjects: function(attrRefId, propertiesArr, nameValuePairs){
-//			var PARENT_ASSOC = 3;
+			var PERMITTEDVAULE_CLASS_ID = 58;
+			var RTF_CLASS_ID = 65;
+			var DATE_CLASS_ID = 52;
+			var STRING_CLASS_ID = 54;
+			var INTEGER_CLASS_ID = 55;
+			var NUMBER_CLASS_ID = 56;
+			var BOOLEAN_CLASS_ID = 57;
 			var CLASSNAME_CLASS_ID = 101;
 			var CLASS_TYPE = 0;
 			var BUILDASSOCTYPE_ATTR_ID = 2085;
@@ -170,21 +176,87 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			attrPromises[2] = this.store.isA(destClassId, PERMITTEDVAULE_CLASS_ID)
 			//get the helptext that this attribute reference has as an attribute
 			if(helptextId) attrPromises[3] = this.store.get(helptextId);
-			return when(all(attrPromises), function(propertiesArr){
-				var label = propertiesArr[0].name;
-				var attrClassType = propertiesArr[1];
-				var permittedValue = propertiesArr[2];
-				var helptext = propertiesArr[3]?propertiesArr[3].name:'undefined';
+			return when(all(attrPromises), function(propsArr){
+				var label = propsArr[0].name;
+				var permittedValue = propsArr[2];
+				var helptext = propsArr[3]?propsArr[3].name:'<a href="#842.1787.846.538.1857.873.537">Edit Helptext</a>';
+				var getValue = null;
+				var attrClassType = permittedValue?PERMITTEDVAULE_CLASS_ID:propsArr[1];
+				switch(attrClassType){
+				case PERMITTEDVAULE_CLASS_ID:
+					getValue = function(item) {
+						var value = item[property.name];
+						if(!value) return nameValuePairs[0]?nameValuePairs[0].id:null;
+						return value;
+					};
+					break;	
+				case RTF_CLASS_ID:
+					getValue = function(item) {
+						var value = item[property.name];
+						if(!value) return '<p>[New '+label+']</p>';
+						return value;
+					};
+					break;	
+				case DATE_CLASS_ID:
+					property.get = function(item) {
+						var value = item[property.name];
+						if(!value) return toISOString(new Date());
+						return value;
+					};
+					break;	
+				case STRING_CLASS_ID:
+					getValue = function(item) {
+						var value = item[property.name];
+						if(!value) return '[New '+label+']';
+						return value;
+					};
+				break;	
+				case INTEGER_CLASS_ID: 
+					getValue = function(item) {
+						var value = item[property.name];
+						if(!value) return 0;
+						return value;
+					};
+					break;	
+				case NUMBER_CLASS_ID: 
+					getValue = function(item) {
+						var value = item[property.name];
+						if(!value) return 0;
+						return value;
+					};
+					break;	
+				case BOOLEAN_CLASS_ID: 
+					getValue = function(item) {
+						var value = item[property.name];
+						if(!value) return false;
+						return value;
+					};
+					break;
+				case CLASSNAME_CLASS_ID:
+					getValue = function(item) {
+						var value = item[property.name];
+						if(!value) return '<p>[New '+label+']</p>';
+						return value;
+					};
+				break;	
+				default:
+					getValue = function(item) {
+						var value = item[property.name];
+						if(!value) return nameValuePairs[0]?nameValuePairs[0].id:null;
+						return value;
+					};
+				};
 				var property = {
 						field: attrRefId.toString(), // for dgrid
 						name: attrRefId.toString(), //for input
 						assocType: assocType,
-						attrClassType: permittedValue?PERMITTEDVAULE_CLASS_ID:attrClassType,
+						attrClassType: attrClassType,
 						label: label,
 						helpText: helptext,
 						required: access==MANDATORY_VALUE_ID?true:false,
 						editable: access==MODIFY_VALUE_ID||MANDATORY_VALUE_ID?true:false,
 						trim: true,
+						get: getValue,
 						//placeholder: attrRef[PLACEHOLDER_ATTR_ID],
 						//'default': attrRef[DEFAULT_ATTR_ID],
 						//width: attrRef[WIDTH_ATTR_ID]+'em',

@@ -52,7 +52,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			return  assocStore.add(object, directives);
 		},
 
-		Xget: function(itemId, viewId){
+		get: function(itemId, viewId){
 			// summary:
 			//		Returns an item that can be consumed by widgets. 
 			//		The item will have an id, a classId, a viewId and name vlaue pairs for the attribute references of the view.
@@ -67,9 +67,10 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 
 			var self = this;
 			//viewId is used for things like identifing labels and menus in trees, also getChildren as requested by trees
-			var item = {id: itemId, viewId: viewId};
+			var item = {id: itemId, viewId: viewId, attrRefProps:{}};
 			
 			var attrPromises = [];
+			//get the attribute references that belong to this view
 			attrPromises[0] = self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
 			attrPromises[1] = assocStore.query({sourceFk: itemId, type: PARENT_ASSOC});
 			return when(all(attrPromises), function(arr){
@@ -86,17 +87,6 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				}
 				return when(all(valuePromises), function(valueObjArr){return item;});
 			});
-			
-			
-
-		},
-		get: function(itemId, viewId){			
-			var ATTRREF_CLASS_TYPE = 63;
-
-			var self = this;
-			return when(self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefArr){
-				return when(self.getItem(itemId, attrRefArr, viewId, null));
-			});			
 		},
 		add: function(item, directives){
 			// summary:
@@ -111,31 +101,22 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			// returns: Array 
 			//		The new Item with a client id
 			//
-			
-			var ATTRREF_CLASS_TYPE = 63;
-			
 			this.enableTransactionButtons();
 			
 			var self = this;
 			var obj = this.addCell({type:1});//create the item object
-			//attach it to the parent class
-			this.addAssoc({sourceFk: obj.id, type: PARENT_ASSOC, destFk: item.classId});
-
 			item.id = obj.id;
-
-			//establish the foreign key relationship
-			if(directives) this.processDirectives(item, directives);
-
-			//if(viewId==2378) debugger;
-			return when(this.getManyByAssocTypeAndDestClass(item.viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefs){
-				//console.log('attrRefs', attrRefs);
-				var promisses = [];
-				for(var i=0;i<attrRefs.length;i++){
-					var attrRefId = attrRefs[i];
-					promisses.push(self.addItemAttribute(obj.id, attrRefId));
-				};
-				return when(all(promisses), function(arr) {
-					return item;
+			
+			//attach it to its parent class
+			return when(this.addAssoc({sourceFk: obj.id, type: PARENT_ASSOC, destFk: item.classId}), function(assoc){
+				return when(self.get(item.id, item.viewId), function(item){
+					//establish the foreign key relationship
+					if(directives){
+						return when(self.processDirectives(item, directives), function(result){
+							return item;
+						});
+					}
+					else return item;
 				});
 			});
 		},
@@ -143,13 +124,19 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			this.enableTransactionButtons();
 			
 			for(attributeReference in item){
-				if(isNaN(attributeReference)) continue;
-				//console.log('cellId'+attributeReference);
+				if(isNaN(attributeReference, item)) continue;
+				console.log('UPDATE ATTRREF', attributeReference, item[attributeReference], item.attrRefProps[attributeReference]);
 				var value  = item[attributeReference];
-				if(item['cellId'+attributeReference]) {
-					var cellId = item['cellId'+attributeReference];
+				var attrRefType = item.attrRefProps[attributeReference].type;
+				var assocType = item.attrRefProps[attributeReference].assocType;
+				if(attrRefType  == 'cell') {
+					var cellId = item.attrRefProps[attributeReference].id;
 					if(cellId==null){
 						//cretae a new cell and its associations
+						var attrClass = item.attrRefProps[attributeReference].attrClass;
+						var newCell = cellStore.put({type:1, name:value});
+						assocStore.put({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:attrClass});
+						assocStore.put({sourceFk:item.id, type:assocType, destFk:newCell.id});
 					}
 					else{
 						if(value==null){
@@ -166,10 +153,10 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						}
 					}
 				}
-				else if(item['assocId'+attributeReference]){
-					var assocId = item['assocId'+attributeReference];
+				else if(attrRefType  == 'assoc'){
+					var assocId = item.attrRefProps[attributeReference].id;
 					if(assocId==null){
-						
+						assocStore.put({sourceFk:item.id, type:assocType, destFk:value});
 					}
 					else{
 						when(assocStore.get(assocId), function(assoc){
@@ -185,42 +172,6 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					
 			if(directives) this.processDirectives(item, directives);
 			return item;
-		},
-		addItemAttribute: function(sourceId, attrRefId){
-			var CLASS_TYPE = 0;
-			var PERTMITTEDVALUE_CLASS = 58;
-			var TOONEASSOCS_TYPE = 81;
-			
-			var self = this;
-			var attrPromises = [];
-			//get the assocication type that this attribute reference has as an attribute
-			attrPromises[0] = this.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, TOONEASSOCS_TYPE);
-			//get the attribute class that this attribute reference maps to
-			//attrPromises[1] = this.store.getOneByAssocTypeAndDestClass(attrRefId, MAPSTO_ASSOC, ATTRIBUTE);
-			attrPromises[1] = this.getOneByAssocType(attrRefId, MAPSTO_ASSOC, CLASS_TYPE, false);
-			return when(all(attrPromises), function(propertiesArr){
-				if(!propertiesArr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
-				var assocType = propertiesArr[0];
-				if(!propertiesArr[1]) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
-				var destClassId = propertiesArr[1];
-				var defaultValue = null;
-				if(assocType == ATTRIBUTE_ASSOC){
-					//find out if the attribute class is a permitted value
-					return when(self.isA(destClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
-						if(trueFalse) {
-						}
-						else {
-							var valueObj = self.addCell({type:1, attrRefId:attrRefId});//, name: '[new]' 
-							self.addAssoc({sourceFk: valueObj.id, type: PARENT_ASSOC, destFk: destClassId});
-							self.addAssoc({sourceFk: sourceId, type: ATTRIBUTE_ASSOC, destFk: valueObj.id});
-						}
-						return trueFalse;
-					});					
-				}
-				else {
-					return false;
-				}	
-			});	
 		},
 		processDirectives: function(object, directives){
 			var ASSOCS_CLASS_TYPE = 94;
@@ -352,14 +303,50 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				}
 			});		
 		},		
-		remove: function(id){			
+		remove: function(id, viewId){			
 			this.enableTransactionButtons();
-			debugger;
+
+			var self = this;
+			return when(this.get(id, viewId), function(item){
+				var itemId = item.id;
+				for(attributeReference in item){
+					if(isNaN(attributeReference, item)) continue;
+					console.log('DELETE ATTRREF', attributeReference, item[attributeReference], item.attrRefProps[attributeReference]);
+					var value  = item[attributeReference];
+					var attrRefType = item.attrRefProps[attributeReference].type;
+					var destClassId = item.attrRefProps[attributeReference].destClassId;
+					if(attrRefType  == 'cell') {
+						var cellId = item.attrRefProps[attributeReference].id;
+						var assocType = item.attrRefProps[attributeReference].assocType;
+						if(cellId!=null){
+							var toAssocs = assocStore.query({sourceFk: itemId, type: assocType, destFk: cellId});
+							if(toAssocs.length==1) assocStore.remove(toAssocs[0]);
+							else throw new Error("Don't know how to delete the attribute assoc");
+							var parentAssocs = assocStore.query({sourceFk: cellId, type: PARENT_ASSOC, destFk: destClassId});
+							if(parentAssocs.length==1) assocStore.remove(parentAssocs[0]);
+							else throw new Error("Don't know how to delete the parent assoc");
+							cellStore.remove(cellId);
+						}
+					}
+					else if(attrRefType  == 'assoc'){
+						var assocId = item.attrRefProps[attributeReference].id;
+						if(assocId!=null) assocStore.remove(assocId);
+					}
+					else throw new Error("Don't know what to delete");
+				}		
+			});
+			var itemParentAssocs = assocStore.query({sourceFk: item.id, type: PARENT_ASSOC, destFk: item.classId});
+			if(itemParentAssocs.length==1) assocStore.remove(itemParentAssocs[0]);
+			else throw new Error("Don't know how to delete the item parent assoc");
+			cellStore.remove(item.id);
 		},		
 
 		query: function(query, options){
 			if(query.parentId && query.widgetId && query.join){
 				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
+				when(promise, function(res){
+					console.log(res);
+				});
 				return QueryResults(promise);
 			}
 			else if(query.cellId && query.viewId ){//used by tree to get the first item
@@ -378,6 +365,9 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			}
 			//else return JsonRest.prototype.query.call(this, query, options);
 			return [];
+		},
+		getChildren: function(parent){
+			return this.query({parentId: parent.id, viewId: parent.viewId });
 		},
 
 		commit: function(){
@@ -474,11 +464,6 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				transactionLogStore.remove(action.id);
 			});
     	},
-		getChildren: function(parent){
-			return this.query({parentId: parent.id, viewId: parent.viewId });
-			//return this.getManyByParentWidgetOrViewUnion(parent.id, parent.viewId);
-			// QueryResults(this.getManyByParentWidgetOrViewUnion(parent.id, parent.viewId));
-		},
 		getManyByParentWidgetOrViewUnion: function(sourceId, parentWidgetOrViewId){
 			// summary:
 			//		Returns an array of items that can be consumed by widgets. 
@@ -528,7 +513,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			var self = this;
 			return when(this.getManyByAssocTypeAndDestClass(parentWidgetId, MANYTOMANY_ASSOC, VIEW_ID), function(subViewsArr){
 				if(subViewsArr.length<1) return [];
-				var subViewId = subViewsArr[0];//assume there is only one
+				var subViewId = subViewsArr[0];//assume there is only one TODO can we merge this with union?
 				//if(subViewId==2297) debugger;
 				return when(self.getManyByView(sourceId, subViewId), function(itemsArr){
 					//console.log('itemsArr', itemsArr);
@@ -546,6 +531,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 							else {
 								for(var j=0;j<arrayOfItemsArr[i].length;j++){
 									var lowerItem = arrayOfItemsArr[i][j];
+									var attrRefProps = lang.mixin(lang.clone(ourItem.attrRefProps), lowerItem.attrRefProps);
 									resultArr.push(lang.mixin(lang.clone(ourItem), lowerItem));
 								}
 							}
@@ -598,14 +584,15 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						var itemsDonePromises = [];
 						for(var i=0;i<objArr.length;i++){
 							var objId = objArr[i];
-							itemsDonePromises.push(self.getItem(objId, attrRefArr, viewId));
+							itemsDonePromises.push(self.get(objId, viewId));
+							//itemsDonePromises.push(self.getItem(objId, attrRefArr, viewId));
 						}
 						return all(itemsDonePromises);
 					});
 				}
 			});
 		},		
-		getItem: function(objId, attrRefArr, viewId){
+		/*getItem: function(objId, attrRefArr, viewId){
 			var self = this;
 			return when(assocStore.query({sourceFk: objId, type: PARENT_ASSOC}), function(classIdAssocArr){
 				if(classIdAssocArr.length>1) throw new Error(objId+' has more than one parent.');
@@ -614,7 +601,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				//viewId is used for things like identifing labels and menus in trees, also getChildren as requested by trees
 				//classId is used to identify icons in trees
 				//TODO hasChildren
-				var item = {id: objId, viewId: viewId, classId:parentId};
+				var item = {id: objId, viewId: viewId, classId:parentId, attrRefProps:{}};
 				for(var j=0;j<attrRefArr.length;j++){
 					var attrRefId = attrRefArr[j];
 					valuePromises.push(self.getAttributeValue(item, objId, attrRefId));
@@ -622,7 +609,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				return when(all(valuePromises), function(valueObjArr){return item;});
 				
 			});
-		},
+		},*/
 		getAttributeValue: function(item, objId, attrRefId){			
 			var PERTMITTEDVALUE_CLASS = 58;
 			var ASSOCS_CLASS_TYPE = 94;
@@ -654,28 +641,33 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 								if(valueObjId){
 									return when(assocStore.query({sourceFk: objId, type: assocType, destFk: valueObjId}), function(assocArr){
 										item[attrRefId] = valueObjId;//add the identifier to the item
-										item['assocId'+attrRefId] = assocArr[0]?assocArr[0].id:null;
+										var props = {type:'assoc', id:assocArr[0]?assocArr[0].id:null, assocType:assocType}; 
+										item.attrRefProps[attrRefId] = props;
 										return valueObjId;									
 									});								
 								}
 								else{
-									item[attrRefId] = null;
-									item['assocId'+attrRefId] = null;
+									//TODO get the default
+									item[attrRefId] = null;//add the identifier to the item
+									var props = {type:'assoc', id:null, assocType:assocType}; 
+									item.attrRefProps[attrRefId] = props;
 									return null;																		
 								}
 							}
 							else {
 								if(valueObjId){
 									return when(cellStore.get(valueObjId), function(valueObj){
-										//if(!valueObj) return null;
 										item[attrRefId] = valueObj?valueObj.name:null;//add the value to the item
-										item['cellId'+attrRefId] = valueObjId;
+										var props = {type:'cell', id:valueObjId, assocType:assocType, attrClass:destClassId}; 
+										item.attrRefProps[attrRefId] = props;
 										return valueObjId;
 									});
 								}
 								else{
+									//TODO get the default
 									item[attrRefId] = null;
-									item['cellId'+attrRefId] = null;
+									var props = {type:'cell', id:valueObjId, assocType:assocType, attrClass:destClassId}; 
+									item.attrRefProps[attrRefId] = props;
 									return null;																		
 								}
 							}
@@ -685,13 +677,16 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						if(valueObjId){
 							return when(assocStore.query({sourceFk: objId, type: assocType, destFk: valueObjId}), function(assocArr){
 								item[attrRefId] = valueObjId;//add the identifier to the item
-								item['assocId'+attrRefId] = assocArr[0]?assocArr[0].id:null;
+								var props = {type:'assoc', id:assocArr[0]?assocArr[0].id:null, assocType:assocType}; 
+								item.attrRefProps[attrRefId] = props;
 								return valueObjId;									
 							});								
 						}
 						else{
-							item[attrRefId] = null;
-							item['assocId'+attrRefId] = null;
+							//TODO get the default
+							item[attrRefId] = null;//add the identifier to the item
+							var props = {type:'assoc', id:null, assocType:assocType}; 
+							item.attrRefProps[attrRefId] = props;
 							return null;																		
 						}
 					}
@@ -755,7 +750,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						items= [];
 						for(var j=0;j<assocCellsArr.length;j++){
 							var type = assocCellsArr[j].id;
-							var item = {id: sourceId+'/'+type, sourceId:sourceId,  viewId: viewId, classId: type};
+							var item = {id: sourceId+'/'+type, sourceId:sourceId,  viewId: viewId, classId: type, attrRefProps:{}};
 							item[attrRefArr[0]] = assocCellsArr[j].name;
 							items.push(item);
 						}
@@ -772,7 +767,8 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				var promises = [];
 				for(var j=0;j<cellIdsArr.length;j++){
 					var objId = cellIdsArr[j];
-					promises.push(self.getItem(objId, attrRefArr, viewId));
+					promises.push(self.get(objId, viewId));
+					//promises.push(self.getItem(objId, attrRefArr, viewId));
 				}
 				return all(promises);
 			});
