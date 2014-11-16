@@ -60,119 +60,169 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			//		The identifier of the item
 			// viewId: Number
 			//		The identifier of the view that will tell us which attributes to retreive
+			//		viewId is used for things like identifing labels and menus in trees, also getChildren as requested by trees
 			// returns: object 
-			//		A prommises. The promise will result in an item.
-			
+			//		A prommises. The promise will result in an item.			
 			var ATTRREF_CLASS_TYPE = 63;
 
 			var self = this;
-			//viewId is used for things like identifing labels and menus in trees, also getChildren as requested by trees
-			var item = {id: itemId, viewId: viewId, attrRefProps:{}};
+			var item = {id: itemId, viewId: viewId, hasChildren:false};
 			
 			var attrPromises = [];
 			//get the attribute references that belong to this view
 			attrPromises[0] = self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
-			attrPromises[1] = assocStore.query({sourceFk: itemId, type: PARENT_ASSOC});
+			//get the class that this view maps to
+			attrPromises[1] = assocStore.query({sourceFk: viewId, type: MAPSTO_ASSOC});
+			//get the class type of this item
+			attrPromises[2] = assocStore.query({sourceFk: itemId, type: PARENT_ASSOC});
 			return when(all(attrPromises), function(arr){
 				var attrRefArr = arr[0];
-				if(arr[1].length!=1) throw new Error('Object must have one parent');
-				var parentId = arr[1][0].destFk;
-				//classId is used to identify icons in trees
-				item.classId = parentId;
+				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
+				var destClassId = arr[1][0].destFk;
+				if(arr[2].length==1) item.classId = arr[2][0].destFk;//classId is used to identify icons in trees
+				else item.classId = 0; // the root has no parent
+				
 				var valuePromises = [];
 				//TODO hasChildren
+				//get the items that result from this source, view
+				//return when(self.getManyByAssocTypeAndDestClass(sourceId, assocType, destClassId), function(objArr){
+				//});
 				for(var j=0;j<attrRefArr.length;j++){
 					var attrRefId = attrRefArr[j];
 					valuePromises.push(self.getAttributeValue(item, itemId, attrRefId));
 				}
 				return when(all(valuePromises), function(valueObjArr){return item;});
-			});
+			}, nq.errorDialog);
 		},
 		add: function(item, directives){
 			// summary:
 			//		Create an Item with default values. 
 			// item: object
-			//		An item with atleast a viewId and a classId
-			//		The classId points the class type of the newly created object. 
-			//		Note that this can be a subclass if the view maps to class, so we cant use that to determine the class type of the object.
+			//		An item with atleast a viewId and optionally a classId
+			//		The classId points the class type of the newly created item, will default to the class the view maps to.
 			//		The viewId is used to determine the attribute references
 			// directives: object
 			//		Must contain a parent object with atleast an id
 			// returns: Array 
 			//		The new Item with a client id
 			//
-			this.enableTransactionButtons();
+			var ATTRREF_CLASS_TYPE = 63;
 			
+			this.enableTransactionButtons();			
 			var self = this;
+			
 			var obj = this.addCell({type:1});//create the item object
 			item.id = obj.id;
-			
-			//attach it to its parent class
-			return when(this.addAssoc({sourceFk: obj.id, type: PARENT_ASSOC, destFk: item.classId}), function(assoc){
-				return when(self.get(item.id, item.viewId), function(item){
-					//establish the foreign key relationship
-					if(directives){
-						return when(self.processDirectives(item, directives), function(result){
-							return item;
-						});
-					}
-					else return item;
-				});
-			});
-		},
+
+			var attrPromises = [];
+			//get the attribute references that belong to this view
+			attrPromises[0] = self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
+			//get the class that this view maps to
+			attrPromises[1] = assocStore.query({sourceFk: viewId, type: MAPSTO_ASSOC});
+			//get the class type of this item
+			attrPromises[2] = assocStore.query({sourceFk: item.id, type: PARENT_ASSOC});
+			// add the new item to the new parent in directives
+			attrPromises[3] = self.processDirectives(item, directives);
+			return when(all(attrPromises), function(arr){
+				var attrRefArr = arr[0];
+				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
+				var destClassId = arr[1][0].destFk;
+				
+				if(!item.classId){
+					if(arr[2].length!=1) throw new Error('Object must have one parent');
+					item.classId = arr[2][0].destFk;//classId is used to identify icons in trees
+				}
+				self.addAssoc({sourceFk: obj.id, type: PARENT_ASSOC, destFk: item.classId});
+
+				var valuePromises = [];
+				for(var j=0;j<attrRefArr.length;j++){
+					var attrRefId = attrRefArr[j];
+					valuePromises.push(self.addAttributeValue(item, attrRefId));
+				}
+				return when(all(valuePromises), function(valueObjArr){return item;});
+			}, nq.errorDialog);			
+		},		
 		put: function(item, directives){
-			this.enableTransactionButtons();
+			var PERTMITTEDVALUE_CLASS = 58;
+			var ASSOCS_CLASS_TYPE = 94;
+			var CELLNAME_ATTR_CLASS = 101;
+			var CELLTYPE_ATTR_CLASS = 102;
 			
-			for(attributeReference in item){
-				if(isNaN(attributeReference, item)) continue;
-				console.log('UPDATE ATTRREF', attributeReference, item[attributeReference], item.attrRefProps[attributeReference]);
-				var value  = item[attributeReference];
-				var attrRefType = item.attrRefProps[attributeReference].type;
-				var assocType = item.attrRefProps[attributeReference].assocType;
-				if(attrRefType  == 'cell') {
-					var cellId = item.attrRefProps[attributeReference].id;
-					if(cellId==null){
-						//cretae a new cell and its associations
-						var attrClass = item.attrRefProps[attributeReference].attrClass;
-						var newCell = cellStore.put({type:1, name:value});
-						assocStore.put({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:attrClass});
-						assocStore.put({sourceFk:item.id, type:assocType, destFk:newCell.id});
-					}
-					else{
-						if(value==null){
-							//delete the cell and its associations
-						}
-						else{
-							//update the cell value
-							when(cellStore.get(cellId), function(cell){
-								if(cell.name != value){
-									cell.name = value;
-									cellStore.put(cell);
-								}
-							});
-						}
-					}
-				}
-				else if(attrRefType  == 'assoc'){
-					var assocId = item.attrRefProps[attributeReference].id;
-					if(assocId==null){
-						assocStore.put({sourceFk:item.id, type:assocType, destFk:value});
-					}
-					else{
-						when(assocStore.get(assocId), function(assoc){
-							if(assoc.destFk != value){
-								assoc.destFk = value;
-								assocStore.put(assoc);
+			this.enableTransactionButtons();
+			var self = this;
+			
+			for(attrRefId in item){
+				if(isNaN(attrRefId, item)) continue;
+				console.log('UPDATE ATTRREF', attrRefId, item[attrRefId]);
+				var attrPromises = [];
+				//get the assocication type that this attribute reference has as an attribute
+				attrPromises[0] = this.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
+				//get the attribute class that this attribute reference maps to
+				attrPromises[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
+				when(all(attrPromises), function(arr){
+					if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
+					var assocType = arr[0];
+					if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
+					var destClassId = arr[1][0].destFk;
+					/////// Exception for the cell type attribute, as used by the class model ///////////////////
+					if(destClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
+					//get the value for this object, attribute reference
+					when(self.getOneByAssocTypeAndDestClass(item.id, assocType, destClassId), function(valueObjId){
+						//find out if the attribute class is a permitted value
+						when(self.isA(destClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
+							if(trueFalse || assocType != ATTRIBUTE_ASSOC) {
+								//TODO we have to take reverse assoc into account
+								when(assocStore.query({sourceFk:item.id, type:assocType, destFk:valueObjId}), function(assocsArr){
+									if(assocsArr.length>1) throw new Error('More than one permitted value found: '+assocsArr);
+									if(assocsArr.length==1) {
+										if(item[attrRefId]==null){
+											assocStore.remove(assocsArr[0].id);
+										}
+										else{
+											var assoc = assocsArr[0];
+											//TODO can we update assoc directly without the put? I wonder. It would bypass the transaction store.
+											//I think we're already doing it by accident
+											if(assoc.destFk != item[attrRefId]) {
+												assoc.destFk = item[attrRefId];
+												assocStore.put(assoc);
+											}
+										}
+									}
+									else{
+										if(item[attrRefId]!=null){
+											var assoc = {sourceFk:item.id, type:assocType, destFk:item[attrRefId]};
+											assocStore.put(assoc);
+										}
+									}
+								}, nq.errorDialog);
 							}
-						});
-					}
-				}
-				else throw new Error("Don't know what to update");
-			}		
+							else {
+								if(valueObjId) {
+									var cell = cellStore.get(valueObjId);
+									//TODO can we update assoc directly without the put? I wonder. It would bypass the transaction store.
+									//I think we're already doing it by accident
+									if(cell.name != item[attrRefId]){
+										cell.name = item[attrRefId];
+										cellStore.put(cell);
+									}
+								}
+								else{
+									//cretae a new cell and its associations
+									var newCell = cellStore.put({type:1, name:item[attrRefId]});
+									assocStore.put({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:destClassId});
+									assocStore.put({sourceFk:item.id, type:assocType, destFk:newCell.id});
+								}
+							}
+						});						
+					}, nq.errorDialog);
+
+				}, nq.errorDialog);
+			};
 					
 			if(directives) this.processDirectives(item, directives);
 			return item;
-		},
+		},		
+
 		processDirectives: function(object, directives){
 			var ASSOCS_CLASS_TYPE = 94;
 
@@ -303,42 +353,70 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				}
 			});		
 		},		
-		remove: function(id, viewId){			
-			this.enableTransactionButtons();
+		remove: function(itemId, viewId){			
+			var PERTMITTEDVALUE_CLASS = 58;
+			var ASSOCS_CLASS_TYPE = 94;
+			var CELLNAME_ATTR_CLASS = 101;
+			var CELLTYPE_ATTR_CLASS = 102;
 
+			this.enableTransactionButtons();
 			var self = this;
-			return when(this.get(id, viewId), function(item){
-				var itemId = item.id;
-				for(attributeReference in item){
-					if(isNaN(attributeReference, item)) continue;
-					console.log('DELETE ATTRREF', attributeReference, item[attributeReference], item.attrRefProps[attributeReference]);
-					var value  = item[attributeReference];
-					var attrRefType = item.attrRefProps[attributeReference].type;
-					var destClassId = item.attrRefProps[attributeReference].destClassId;
-					if(attrRefType  == 'cell') {
-						var cellId = item.attrRefProps[attributeReference].id;
-						var assocType = item.attrRefProps[attributeReference].assocType;
-						if(cellId!=null){
-							var toAssocs = assocStore.query({sourceFk: itemId, type: assocType, destFk: cellId});
-							if(toAssocs.length==1) assocStore.remove(toAssocs[0]);
-							else throw new Error("Don't know how to delete the attribute assoc");
-							var parentAssocs = assocStore.query({sourceFk: cellId, type: PARENT_ASSOC, destFk: destClassId});
-							if(parentAssocs.length==1) assocStore.remove(parentAssocs[0]);
-							else throw new Error("Don't know how to delete the parent assoc");
-							cellStore.remove(cellId);
-						}
-					}
-					else if(attrRefType  == 'assoc'){
-						var assocId = item.attrRefProps[attributeReference].id;
-						if(assocId!=null) assocStore.remove(assocId);
-					}
-					else throw new Error("Don't know what to delete");
+			
+			when(this.get(itemId, viewId), function(item){
+				for(attrRefId in item){
+					if(isNaN(attrRefId, item)) continue;
+					console.log('DELETE ATTRREF', attrRefId, item[attrRefId]);
+					var attrPromises = [];
+					//get the assocication type that this attribute reference has as an attribute
+					attrPromises[0] = self.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
+					//get the attribute class that this attribute reference maps to
+					attrPromises[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
+					when(all(attrPromises), function(arr){
+						if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
+						var assocType = arr[0];
+						if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
+						var destClassId = arr[1][0].destFk;
+						/////// Exception for the cell type attribute, as used by the class model ///////////////////
+						if(destClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
+						//find out if the attribute class is a permitted value
+						when(self.isA(destClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
+							if(trueFalse || assocType != ATTRIBUTE_ASSOC) {
+								//TODO we have to take reverse assoc into account
+								when(assocStore.query({sourceFk:item.id, type:assocType, destFk:item[attrRefId]}), function(assocsArr){
+									if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
+								});
+							}
+							else {
+								//get the value for this object, attribute reference
+								when(self.getOneByAssocTypeAndDestClass(item.id, assocType, destClassId), function(valueObjId){
+									if(valueObjId) {
+										cellStore.remove(valueObjId);
+										when(assocStore.query({sourceFk:valueObjId, type:PARENT_ASSOC, destFk:destClassId}), function(assocsArr){
+											if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
+										}, nq.errorDialog);
+										when(assocStore.query({sourceFk:item.id, type:assocType, destFk:valueObjId}), function(assocsArr){
+											if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
+										}, nq.errorDialog);
+									}
+								}, nq.errorDialog);
+							}
+						}, nq.errorDialog);
+					}, nq.errorDialog);
 				}		
-			});
-			var itemParentAssocs = assocStore.query({sourceFk: item.id, type: PARENT_ASSOC, destFk: item.classId});
-			if(itemParentAssocs.length==1) assocStore.remove(itemParentAssocs[0]);
-			else throw new Error("Don't know how to delete the item parent assoc");
-			cellStore.remove(item.id);
+			}, nq.errorDialog);
+			//TODO fix linked lists		
+			when(assocStore.query({sourceFk:itemId}), function(assocsArr){
+				for(var i = 0;i<assocsArr.length;i++){
+					assocStore.remove(assocsArr[0].id);
+				}
+			}, nq.errorDialog);
+			when(assocStore.query({destFk:itemId}), function(assocsArr){
+				for(var i = 0;i<assocsArr.length;i++){
+					assocStore.remove(assocsArr[0].id);
+				}
+			}, nq.errorDialog);
+					
+			cellStore.remove(itemId);
 		},		
 
 		query: function(query, options){
@@ -370,100 +448,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			return this.query({parentId: parent.id, viewId: parent.viewId });
 		},
 
-		commit: function(){
-			registry.byId('cancelButtonId').set('disabled',true);
-			registry.byId('saveButtonId').set('disabled',true);					
-			// commit everything in the transaction log
-//			autoCommit = true;
-			// query for everything in the log
-			var operations = transactionLogStore.query({}).map(function(action){
-				return {method:action.method, table: action.storeId, target: action.target};
-			});
-			console.log(operations);
-			return request.post('data/', {
-					// send all the operations in the body
-					headers: {'Content-Type': 'application/json; charset=UTF-8'},
-					data: dojo.toJson(operations)//JSON.stringify(dataOperations)
-			}).then(function(data){
-					console.log(data);
-					//TODO: Replace IDs
-					data.map(function(action){
-						//var options = action.options || {};
-						var cid = action.cid;
-						var store = action.tabel;
-						var target = action.data;
-						var cachingStore;
-						if(store=='cell') cachingStore = localCellStore;
-						else cachingStore = localAssocStore;
-						cachingStore.remove(cid);
-						cachingStore.put(target);
-						if(store=='cell') {
-							localAssocStore.query({sourceFk:cid}).map(function(assoc){
-								assoc.sourceFk = target.id;
-								localAssocStore.put(assoc);
-							});						
-							localAssocStore.query({destFk:cid}).map(function(assoc){
-								assoc.destFk = target.id;
-								localAssocStore.put(assoc);
-							});						
-						}
-	    			});
-					transactionLogStore.query({}).map(function(action){
-						transactionLogStore.remove(action.id);
-					});
-					dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
-	    		},
-	    		function(error){
-			    	//evict from the cache then refresh the page data
-	    			transactionLogStore.query({}).map(function(action){
-						//var options = action.options || {};
-						var method = action.method;
-						var store = action.storeId;
-						var target = action.target;
-						var cachingStore;
-						if(store=='cell') cachingStore = localCellStore;
-						else cachingStore = localAssocStore;
-						// revert, by sending out a notification and updating the caching store
-						if(method === 'add'){
-							cachingStore.remove(action.objectId);
-						}else{
-							cachingStore.put(target);
-						}
-						store.notify && store.notify(method === 'add' ? null : action.previous,
-							method === 'remove' ? undefined : action.objectId);
-	    			});
-					transactionLogStore.query({}).map(function(action){
-						transactionLogStore.remove(action.id);
-					});
-					nq.errorDialog(error);
-	    		}
-	    	);		    	
-//			return result;
-		},
-		abort: function(){
-			registry.byId('cancelButtonId').set('disabled',true);
-			registry.byId('saveButtonId').set('disabled',true);					
-			transactionLogStore.query({}).map(function(action){
-				//var options = action.options || {};
-				var method = action.method;
-				var store = action.storeId;
-				var target = action.target;
-				var cachingStore;
-				if(store=='cell') cachingStore = localCellStore;
-				else cachingStore = localAssocStore;
-				// revert, by sending out a notification and updating the caching store
-				if(method === 'add'){
-					cachingStore.remove(action.objectId);
-				}else{
-					cachingStore.put(target);
-				}
-				store.notify && store.notify(method === 'add' ? null : action.previous,
-					method === 'remove' ? undefined : action.objectId);
-			});
-			transactionLogStore.query({}).map(function(action){
-				transactionLogStore.remove(action.id);
-			});
-    	},
+
 		getManyByParentWidgetOrViewUnion: function(sourceId, parentWidgetOrViewId){
 			// summary:
 			//		Returns an array of items that can be consumed by widgets. 
@@ -531,7 +516,6 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 							else {
 								for(var j=0;j<arrayOfItemsArr[i].length;j++){
 									var lowerItem = arrayOfItemsArr[i][j];
-									var attrRefProps = lang.mixin(lang.clone(ourItem.attrRefProps), lowerItem.attrRefProps);
 									resultArr.push(lang.mixin(lang.clone(ourItem), lowerItem));
 								}
 							}
@@ -574,42 +558,21 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				if(assocType == ASSOCS_PASSOC) return self.getAssocItems(sourceId, attrRefArr, viewId);
 				//////////////Exception for the By Association Type assocType as used by the Class Model//////////////////////
 				else if(assocType == BYASSOCTPE_PASSOC) return self.getCellItems(sourceId, attrRefArr, viewId);
-				else{
-					if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
-					//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
-					var destClassId = arr[1][0].destFk;
-					//get the objects that result from this source, view
-					return when(self.getManyByAssocTypeAndDestClass(sourceId, assocType, destClassId), function(objArr){
-						//for each related object 
-						var itemsDonePromises = [];
-						for(var i=0;i<objArr.length;i++){
-							var objId = objArr[i];
-							itemsDonePromises.push(self.get(objId, viewId));
-							//itemsDonePromises.push(self.getItem(objId, attrRefArr, viewId));
-						}
-						return all(itemsDonePromises);
-					});
-				}
+				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
+				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
+				var destClassId = arr[1][0].destFk;
+				//get the items that result from this source, view
+				return when(self.getManyByAssocTypeAndDestClass(sourceId, assocType, destClassId), function(objArr){
+					//for each related object 
+					var itemsDonePromises = [];
+					for(var i=0;i<objArr.length;i++){
+						var objId = objArr[i];
+						itemsDonePromises.push(self.get(objId, viewId));
+					}
+					return all(itemsDonePromises);
+				});
 			});
 		},		
-		/*getItem: function(objId, attrRefArr, viewId){
-			var self = this;
-			return when(assocStore.query({sourceFk: objId, type: PARENT_ASSOC}), function(classIdAssocArr){
-				if(classIdAssocArr.length>1) throw new Error(objId+' has more than one parent.');
-				var parentId = classIdAssocArr.length==0?0:classIdAssocArr[0].destFk;
-				var valuePromises = [];
-				//viewId is used for things like identifing labels and menus in trees, also getChildren as requested by trees
-				//classId is used to identify icons in trees
-				//TODO hasChildren
-				var item = {id: objId, viewId: viewId, classId:parentId, attrRefProps:{}};
-				for(var j=0;j<attrRefArr.length;j++){
-					var attrRefId = attrRefArr[j];
-					valuePromises.push(self.getAttributeValue(item, objId, attrRefId));
-				}
-				return when(all(valuePromises), function(valueObjArr){return item;});
-				
-			});
-		},*/
 		getAttributeValue: function(item, objId, attrRefId){			
 			var PERTMITTEDVALUE_CLASS = 58;
 			var ASSOCS_CLASS_TYPE = 94;
@@ -641,16 +604,11 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 								if(valueObjId){
 									return when(assocStore.query({sourceFk: objId, type: assocType, destFk: valueObjId}), function(assocArr){
 										item[attrRefId] = valueObjId;//add the identifier to the item
-										var props = {type:'assoc', id:assocArr[0]?assocArr[0].id:null, assocType:assocType}; 
-										item.attrRefProps[attrRefId] = props;
 										return valueObjId;									
 									});								
 								}
 								else{
-									//TODO get the default
 									item[attrRefId] = null;//add the identifier to the item
-									var props = {type:'assoc', id:null, assocType:assocType}; 
-									item.attrRefProps[attrRefId] = props;
 									return null;																		
 								}
 							}
@@ -658,16 +616,11 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 								if(valueObjId){
 									return when(cellStore.get(valueObjId), function(valueObj){
 										item[attrRefId] = valueObj?valueObj.name:null;//add the value to the item
-										var props = {type:'cell', id:valueObjId, assocType:assocType, attrClass:destClassId}; 
-										item.attrRefProps[attrRefId] = props;
 										return valueObjId;
 									});
 								}
 								else{
-									//TODO get the default
 									item[attrRefId] = null;
-									var props = {type:'cell', id:valueObjId, assocType:assocType, attrClass:destClassId}; 
-									item.attrRefProps[attrRefId] = props;
 									return null;																		
 								}
 							}
@@ -677,100 +630,53 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						if(valueObjId){
 							return when(assocStore.query({sourceFk: objId, type: assocType, destFk: valueObjId}), function(assocArr){
 								item[attrRefId] = valueObjId;//add the identifier to the item
-								var props = {type:'assoc', id:assocArr[0]?assocArr[0].id:null, assocType:assocType}; 
-								item.attrRefProps[attrRefId] = props;
 								return valueObjId;									
 							});								
 						}
 						else{
 							//TODO get the default
 							item[attrRefId] = null;//add the identifier to the item
-							var props = {type:'assoc', id:null, assocType:assocType}; 
-							item.attrRefProps[attrRefId] = props;
 							return null;																		
 						}
 					}
 				});
 			});
 		},
-		getClassModelCellName: function(item, objId, attrRefId){
-			var PROCESSCLASSES_CLASS = 67;
-			var PRIMARYNAME_CLASS = 69;
+		addAttributeValue: function(item, attrRefId){			
+			var PERTMITTEDVALUE_CLASS = 58;
+			var ASSOCS_CLASS_TYPE = 94;
+			var CELLNAME_ATTR_CLASS = 101;
+			var CELLTYPE_ATTR_CLASS = 102;
 			
 			var self = this;
-			return when(cellStore.get(objId), function(valueObj){
-				if(valueObj.type==0){//is a class
-					item['classId'] = 0;//always show class icon (disregard the one we found earlier)
-					item[attrRefId] = valueObj.name;//add the cell name
-					item['cellId'+attrRefId] = objId;
-					return objId;						
-				}
-				else { //is an object
-					//find out if the object is a process class
-					return when(self.isA(objId, PROCESSCLASSES_CLASS), function(trueFalse){
-						if(trueFalse) {
-							//get the primary name of the object
-							return when(self.getOneByAssocTypeAndDestClass(objId, ATTRIBUTE_ASSOC, PRIMARYNAME_CLASS), function(valueObjId){
-								if(!valueObjId) return null; 
-								else return when(cellStore.get(valueObjId), function(valueObj){
-									//if(!valueObj) return null;
-									item[attrRefId] = valueObj?valueObj.name:null;//add the value to the item
-									item['cellId'+attrRefId] = valueObjId;
-									return valueObjId;
-								});
-							});
-						}
-						else{
-							item[attrRefId] = valueObj.name;//add the cell name
-							item['cellId'+attrRefId] = objId;
-							return objId;						
-						}
-					});
-				}
-			});
-		},
-		getAssocItems: function(sourceId, attrRefArr, viewId){
-			var uniqueTypes = {};
-			return when(assocStore.query({sourceFk: sourceId}), function(sourceTypesArr){
-				for(var i=0;i<sourceTypesArr.length;i++){
-					var type = sourceTypesArr[i].type;
-					if(type == 3) continue;
-					uniqueTypes[type] = true;
-				}
-				return when(assocStore.query({destFk: sourceId}), function(destypesArr){
-					for(var i=0;i<destypesArr.length;i++){					
-						var type = (destypesArr[i].type)+12;
-						uniqueTypes[type] = true;
+			if(!item[attrRefId]) item[attrRefId] = null;
+			var attrPromises = [];
+			//get the assocication type that this attribute reference has as an attribute
+			attrPromises[0] = self.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
+			//get the attribute class that this attribute reference maps to
+			attrPromises[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
+			return when(all(attrPromises), function(arr){
+				if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
+				var assocType = arr[0];
+				if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
+				var destClassId = arr[1][0].destFk;
+				var defaultValue = null;//TODO
+				
+				if(item[attrRefId]!=null) item[attrRefId] = defaultValue;
+				/////// Exception for the cell type attribute, as used by the class model ///////////////////
+				if(destClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
+				//find out if the attribute class is a permitted value
+				return when(self.isA(destClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
+					if(trueFalse || assocType != ATTRIBUTE_ASSOC) {
+						if(item[attrRefId]!=null) assocStore.put({sourceFk:item.id, type:assocType, destFk:item[attrRefId]});
 					}
-					var promises = [];
-					for(key in uniqueTypes){
-						promises.push(cellStore.get(key));//get the corresponding cell so we can use the name.
+					else {
+						//cretae a new cell and its associations
+						var newCell = cellStore.put({type:1, name:item[attrRefId]});
+						assocStore.put({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:destClassId});
+						assocStore.put({sourceFk:item.id, type:assocType, destFk:newCell.id});
 					}
-					return when(all(promises), function(assocCellsArr){
-						items= [];
-						for(var j=0;j<assocCellsArr.length;j++){
-							var type = assocCellsArr[j].id;
-							var item = {id: sourceId+'/'+type, sourceId:sourceId,  viewId: viewId, classId: type, attrRefProps:{}};
-							item[attrRefArr[0]] = assocCellsArr[j].name;
-							items.push(item);
-						}
-						return items;
-					});				
 				});
-			});
-		},
-		getCellItems: function(assocId, attrRefArr, viewId){
-			var self = this;
-			var sourceId = assocId.split('/')[0];
-			var assocType = assocId.split('/')[1];
-			return when(this.getManyByAssocType(sourceId, assocType, null, false), function(cellIdsArr){
-				var promises = [];
-				for(var j=0;j<cellIdsArr.length;j++){
-					var objId = cellIdsArr[j];
-					promises.push(self.get(objId, viewId));
-					//promises.push(self.getItem(objId, attrRefArr, viewId));
-				}
-				return all(promises);
 			});
 		},
 		getManyByAssocTypeAndDestClass: function(sourceId, assocType, destClassId){
@@ -982,7 +888,182 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				return self.addNextToAssocsArr(assocs[0].destFk, destClassId, assocsArr);
 			});
 		},
-
+		/////// Exception for the class model //////////////////////////////////////////////////
+		getClassModelCellName: function(item, objId, attrRefId){
+			var PROCESSCLASSES_CLASS = 67;
+			var PRIMARYNAME_CLASS = 69;
+			
+			var self = this;
+			return when(cellStore.get(objId), function(valueObj){
+				if(valueObj.type==0){//is a class
+					item['classId'] = 0;//always show class icon (disregard the one we found earlier)
+					item[attrRefId] = valueObj.name;//add the cell name
+					item['cellId'+attrRefId] = objId;
+					return objId;						
+				}
+				else { //is an object
+					//find out if the object is a process class
+					return when(self.isA(objId, PROCESSCLASSES_CLASS), function(trueFalse){
+						if(trueFalse) {
+							//get the primary name of the object
+							return when(self.getOneByAssocTypeAndDestClass(objId, ATTRIBUTE_ASSOC, PRIMARYNAME_CLASS), function(valueObjId){
+								if(!valueObjId) return null; 
+								else return when(cellStore.get(valueObjId), function(valueObj){
+									//if(!valueObj) return null;
+									item[attrRefId] = valueObj?valueObj.name:null;//add the value to the item
+									item['cellId'+attrRefId] = valueObjId;
+									return valueObjId;
+								});
+							});
+						}
+						else{
+							item[attrRefId] = valueObj.name;//add the cell name
+							item['cellId'+attrRefId] = objId;
+							return objId;						
+						}
+					});
+				}
+			});
+		},
+		getAssocItems: function(sourceId, attrRefArr, viewId){
+			var uniqueTypes = {};
+			return when(assocStore.query({sourceFk: sourceId}), function(sourceTypesArr){
+				for(var i=0;i<sourceTypesArr.length;i++){
+					var type = sourceTypesArr[i].type;
+					if(type == 3) continue;
+					uniqueTypes[type] = true;
+				}
+				return when(assocStore.query({destFk: sourceId}), function(destypesArr){
+					for(var i=0;i<destypesArr.length;i++){					
+						var type = (destypesArr[i].type)+12;
+						uniqueTypes[type] = true;
+					}
+					var promises = [];
+					for(key in uniqueTypes){
+						promises.push(cellStore.get(key));//get the corresponding cell so we can use the name.
+					}
+					return when(all(promises), function(assocCellsArr){
+						items= [];
+						for(var j=0;j<assocCellsArr.length;j++){
+							var type = assocCellsArr[j].id;
+							var item = {id: sourceId+'/'+type, sourceId:sourceId,  viewId: viewId, classId: type};
+							item[attrRefArr[0]] = assocCellsArr[j].name;
+							items.push(item);
+						}
+						return items;
+					});				
+				});
+			});
+		},
+		getCellItems: function(assocId, attrRefArr, viewId){
+			var self = this;
+			var sourceId = assocId.split('/')[0];
+			var assocType = assocId.split('/')[1];
+			return when(this.getManyByAssocType(sourceId, assocType, null, false), function(cellIdsArr){
+				var promises = [];
+				for(var j=0;j<cellIdsArr.length;j++){
+					var objId = cellIdsArr[j];
+					promises.push(self.get(objId, viewId));
+					//promises.push(self.getItem(objId, attrRefArr, viewId));
+				}
+				return all(promises);
+			});
+		},
+		/////// END OF Exception for the class model //////////////////////////////////////////////////
+		commit: function(){
+			registry.byId('cancelButtonId').set('disabled',true);
+			registry.byId('saveButtonId').set('disabled',true);					
+			// commit everything in the transaction log
+//			autoCommit = true;
+			// query for everything in the log
+			var operations = transactionLogStore.query({}).map(function(action){
+				return {method:action.method, table: action.storeId, target: action.target};
+			});
+			console.log(operations);
+			return request.post('data/', {
+					// send all the operations in the body
+					headers: {'Content-Type': 'application/json; charset=UTF-8'},
+					data: dojo.toJson(operations)//JSON.stringify(dataOperations)
+			}).then(function(data){
+					console.log(data);
+					//TODO: Replace IDs
+					data.map(function(action){
+						//var options = action.options || {};
+						var cid = action.cid;
+						var store = action.tabel;
+						var target = action.data;
+						var cachingStore;
+						if(store=='cell') cachingStore = localCellStore;
+						else cachingStore = localAssocStore;
+						cachingStore.remove(cid);
+						cachingStore.put(target);
+						if(store=='cell') {
+							localAssocStore.query({sourceFk:cid}).map(function(assoc){
+								assoc.sourceFk = target.id;
+								localAssocStore.put(assoc);
+							});						
+							localAssocStore.query({destFk:cid}).map(function(assoc){
+								assoc.destFk = target.id;
+								localAssocStore.put(assoc);
+							});						
+						}
+	    			});
+					transactionLogStore.query({}).map(function(action){
+						transactionLogStore.remove(action.id);
+					});
+					dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
+	    		},
+	    		function(error){
+			    	//evict from the cache then refresh the page data
+	    			transactionLogStore.query({}).map(function(action){
+						//var options = action.options || {};
+						var method = action.method;
+						var store = action.storeId;
+						var target = action.target;
+						var cachingStore;
+						if(store=='cell') cachingStore = localCellStore;
+						else cachingStore = localAssocStore;
+						// revert, by sending out a notification and updating the caching store
+						if(method === 'add'){
+							cachingStore.remove(action.objectId);
+						}else{
+							cachingStore.put(target);
+						}
+						store.notify && store.notify(method === 'add' ? null : action.previous,
+							method === 'remove' ? undefined : action.objectId);
+	    			});
+					transactionLogStore.query({}).map(function(action){
+						transactionLogStore.remove(action.id);
+					});
+					nq.errorDialog(error);
+	    		}
+	    	);		    	
+//			return result;
+		},
+		abort: function(){
+			registry.byId('cancelButtonId').set('disabled',true);
+			registry.byId('saveButtonId').set('disabled',true);					
+			transactionLogStore.query({}).map(function(action){
+				//var options = action.options || {};
+				var method = action.method;
+				var store = action.storeId;
+				var target = action.target;
+				var cachingStore;
+				if(store=='cell') cachingStore = localCellStore;
+				else cachingStore = localAssocStore;
+				// revert, by sending out a notification and updating the caching store
+				if(method === 'add'){
+					cachingStore.remove(action.objectId);
+				}else{
+					cachingStore.put(target);
+				}
+				store.notify && store.notify(method === 'add' ? null : action.previous,
+					method === 'remove' ? undefined : action.objectId);
+			});
+			transactionLogStore.query({}).map(function(action){
+				transactionLogStore.remove(action.id);
+			});
+    	},
 
 		test: function(){
 			var self = this;
@@ -1039,7 +1120,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 //			return true;//disable prefetch
 			return request('data/prefetch', {
 				headers: {'Content-Type': 'application/json; charset=UTF-8'},
-				handleAs: 'json',
+				handleAs: 'json'
 			}).then(function(data){
 				//console.dir(data);
 				if(localCellStore.setData) localCellStore.setData(data.cell);

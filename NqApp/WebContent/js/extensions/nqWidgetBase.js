@@ -41,6 +41,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			},  domConstruct.create('div'));
 			this.domNode.appendChild(this.pane.domNode);
 			this.own(this.pane);
+
 		},
 		/*postCreate: function(){
 			//only do this if we're displaying in a tab 
@@ -173,16 +174,16 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			////////////////////Exception for the cell name as used by the class model///////////////////
 			if(destClassId == CLASSNAME_CLASS_ID) attrPromises[1] = destClassId;
 			else attrPromises[1] = this.store.getOneByAssocType(destClassId, PARENT_ASSOC, CLASS_TYPE, true, false);
-			attrPromises[2] = this.store.isA(destClassId, PERMITTEDVAULE_CLASS_ID)
+			attrPromises[2] = this.store.isA(destClassId, PERMITTEDVAULE_CLASS_ID);
 			//get the helptext that this attribute reference has as an attribute
-			if(helptextId) attrPromises[3] = this.store.get(helptextId);
+			if(helptextId) attrPromises[3] = this.store.getCell(helptextId);
 			return when(all(attrPromises), function(propsArr){
 				var label = propsArr[0].name;
 				var permittedValue = propsArr[2];
 				var helptext = propsArr[3]?propsArr[3].name:'<a href="#842.1787.846.538.1857.873.537">Edit Helptext</a>';
 				var getValue = null;
 				var attrClassType = permittedValue?PERMITTEDVAULE_CLASS_ID:propsArr[1];
-				switch(attrClassType){
+				/*switch(attrClassType){
 				case PERMITTEDVAULE_CLASS_ID:
 					getValue = function(item) {
 						var value = item[property.name];
@@ -245,7 +246,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 						if(!value) return nameValuePairs[0]?nameValuePairs[0].id:null;
 						return value;
 					};
-				};
+				};*/
 				var property = {
 						field: attrRefId.toString(), // for dgrid
 						name: attrRefId.toString(), //for input
@@ -256,7 +257,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 						required: access==MANDATORY_VALUE_ID?true:false,
 						editable: access==MODIFY_VALUE_ID||MANDATORY_VALUE_ID?true:false,
 						trim: true,
-						get: getValue,
+
+//						get: getValue,
 						//placeholder: attrRef[PLACEHOLDER_ATTR_ID],
 						//'default': attrRef[DEFAULT_ATTR_ID],
 						//width: attrRef[WIDTH_ATTR_ID]+'em',
@@ -278,7 +280,23 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 						editOn: 'click',  // for dgrid
 						autoSave: true // for dgrid
 					};
-					return property;
+				if(attrClassType=='RTF_CLASS_ID'){
+					property.get = function(item){
+						var value = item[property.name];
+						if(!value) return '<p></p>';//editor will crash if it does not have a value
+						return value;
+					}
+					//property.height = '';//auto grow
+
+				}
+				if(attrClassType=='STRING_CLASS_ID'){
+					property.get = function(item){
+						var value = item[property.name];
+						if(!value) return '';//difficult to select
+						return value;
+					}
+				}
+				return property;
 			});	
 		},
 		resolvePermittedValues: function(sourceId, assocType){

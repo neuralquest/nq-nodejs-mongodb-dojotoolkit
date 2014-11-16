@@ -1,4 +1,4 @@
-define(["../_base/kernel", "../_base/lang", "../when", "../_base/array" /*=====, "./api/Store" =====*/
+define(["dojo/_base/kernel", "dojo/_base/lang", "dojo/when", "dojo/_base/array" /*=====, "./api/Store" =====*/
 ], function(kernel, lang, when, array /*=====, Store =====*/){
 
 // module:

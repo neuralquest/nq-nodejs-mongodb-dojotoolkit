@@ -28,8 +28,8 @@ code {border:none; font-size: 100%;}
 .nqGrid .field-rowSelector {width: 5px;}
 /*.nqGrid .dgrid .dgrid-scroller {position: relative;overflow: visible;max-height: 500px;}*/
 .nqGrid .dgrid-cell-padding {padding: 0px;}
-.nqGrid .dgrid-row-odd {background: #F2F5F9;}
-.nqGrid .dgrid-cell {border: none;}
+/*.nqGrid .dgrid-row-odd {background: #F2F5F9;}
+.nqGrid .dgrid-cell {border: none;}*/
 /*.dgrid-selected { background: #999; / * Make selected rows be gray * /}*/
 
 /*make dijits transparent*/

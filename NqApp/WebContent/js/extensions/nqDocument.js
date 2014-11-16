@@ -135,25 +135,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				if(this.selectedObjIdPreviousLevel == value) return this;
 				this.selectedObjIdPreviousLevel = value;
 			}
-			this.pane.destroyDescendants(false);
+			this.pane.destroyDescendants(false);//destroy all the widget but leave the pane intact
 
-			
-			//dojo.forEach(registry.findWidgets(this.pane.domNode), function(w) {
-				//console.log(w);
-			    //w.destroy();
-			//});
-			/*
-			//clear the contents pane
-			registry.byClass("dijit.form.ValidationTextBox",this.pane.containerNode).forEach(function(tb){
-				tb.destroy();
-			});
-			registry.byClass("dijit.Editor",this.pane.containerNode).forEach(function(editor){
-				//editor.toolbar.destroy();
-				editor.destroy();
-				//editor.destroyRecursive();
-			});
-			domConstruct.empty(this.pane.domNode);
-*/
 			var self = this;
 			var viewId = this.viewId;
 			when(this.store.get(this.selectedObjIdPreviousLevel, this.viewId), function(item){//TODO change to query and listen for chages
@@ -252,7 +235,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 
 			
 			//Illustration
-			if(item.id=="846/1213"){
+			if(item.id=="1213"){
 				var widgetDomNode = domConstruct.create('div', {
 					'class': 'floatright',
 					objectId: item.id
@@ -264,7 +247,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			}
 			
 			//IFrame
-			if(item.id=="846/1510"){
+			if(item.id=="1510"){
 				var widgetDomNode = domConstruct.create('div', {
 					style: {width:'300px'},
 					'class': 'floatright',
@@ -294,30 +277,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			}, this.pane.containerNode);
 
 			//Paragraph
-			var paragraphNode = domConstruct.create('div', {
-				innerHTML: item[this.PARAGRAPH_ATTRREF], 
-				cellId: item['cellId'+this.PARAGRAPH_ATTRREF], 
-				objectId: item.id,
-				viewId: item.viewId,
-			}, this.pane.containerNode);
-
-			this.own(on(paragraphNode, mouse.enter, function(evt){
-				if(self.editModeButton.get('checked')) {
-					domStyle.set(paragraphNode, 'outline', '1px solid gray');
-				}
-			}));
-			this.own(on(paragraphNode, mouse.leave, function(evt){
-				if(self.editModeButton.get('checked')) {
-					domStyle.set(paragraphNode, 'outline', '1px none gray');
-				}
-			}));
-			this.own(on(paragraphNode, 'click', function(evt){
-				if(self.editModeButton.get('checked')) {
-					self.closeEditors();
-					self.replaceParagraphWithEditor(evt.currentTarget, item);
-				}
-			}));
-			
+			var paragraphDomNode = domConstruct.create('div', {}, this.pane.containerNode);
+			this.replaceNodeWithParagraph(paragraphDomNode, item);			
 
 			if(item.classId==80) return; //folder
 			
@@ -348,11 +309,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			//Paragraph
 			var editorDijit = new Editor({
 				//disabled: true,
+				item: item,
 				'height': '', //auto grow
 			    'minHeight': '30px',
 //			    'extraPlugins': this.extraPlugins,
 //			    'value': storedRtf,
-//				'toolbar': toolbar,
+				'toolbar': toolbar,
 				focusOnLoad: true,
 				'onChange': function(evt){
 					item[self.PARAGRAPH_ATTRREF] = editorDijit.get('value');
@@ -369,7 +331,6 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			});
 			editorDijit.set('value', item[self.PARAGRAPH_ATTRREF]);
 			domConstruct.place(editorDijit.domNode, replaceDiv, "replace");
-//			editorDijit.startup();			
 
 			editorDijit.on('mouseenter', function(evt){
 				if(self.editModeButton.get('checked')) {
@@ -381,16 +342,39 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					domStyle.set(editorDijit.domNode, 'outline', '1px none gray');
 				}
 			});
-			editorDijit.on('click', function(evt){
+			/*editorDijit.on('click', function(evt){
 				if(self.editModeButton.get('checked')) {
 					self.closeEditors();
 					editorDijit.open();
 					domStyle.set(editorDijit.toolbar.containerNode, "display", "");
 				}
-			});
+			});*/
 			this.own(editorDijit);
 			editorDijit.startup();			
 			
+		},
+		replaceNodeWithParagraph: function(replaceDiv, item){
+			var self = this;
+			var paragraphNode = domConstruct.create('div', {
+				innerHTML: item[this.PARAGRAPH_ATTRREF], 
+			}, replaceDiv, "replace");
+
+			this.own(on(paragraphNode, mouse.enter, function(evt){
+				if(self.editModeButton.get('checked')) {
+					domStyle.set(paragraphNode, 'outline', '1px solid gray');
+				}
+			}));
+			this.own(on(paragraphNode, mouse.leave, function(evt){
+				if(self.editModeButton.get('checked')) {
+					domStyle.set(paragraphNode, 'outline', '1px none gray');
+				}
+			}));
+			this.own(on(paragraphNode, 'click', function(evt){
+				if(self.editModeButton.get('checked')) {
+					self.closeEditors();
+					self.replaceParagraphWithEditor(evt.currentTarget, item);
+				}
+			}));
 		},
 		closeEditors: function(){
 			var self = this;
@@ -398,9 +382,21 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				tb.set('readonly', true);
 			});
 			registry.byClass("dijit.Editor",this.pane.containerNode).forEach(function(editor){
-				editor.close();
-				domStyle.set(editor.toolbar.containerNode, "display", "none");
+				self.replaceNodeWithParagraph(editor.domNode, editor.item);
+				editor.destroy();
 			});
-		},
+
+		},		
+		addWidget: function(widgetDomNode){
+			widget = new nqClassChart({
+				store : this.store,
+				XYAxisRootId: '844/78' // Process Classes
+			}, domConstruct.create('div'));
+			widgetDomNode.appendChild(widget.domNode);
+			widget.startup().then(function(res){
+				//widget.setParentId(state.ParentIdPreviousLevel);
+			});
+		}
+
 	});
 });

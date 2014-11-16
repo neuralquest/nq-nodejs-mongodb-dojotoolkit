@@ -124,7 +124,12 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 							};					
 							property.renderCell = function(object, value, node, options) {
 								html.set(node, value);
-							}
+							};
+							property.get = function(item) {
+								var value = item[property.name];
+								if(!value) return '<p></p>';//editor will crash without a value 
+								return value;
+							};
 							//editor.editor(toolbar);
 							columns.push(editor(property, Editor));
 							break;	
@@ -206,13 +211,8 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 						var item = self.grid.row(event).data;
 						if(self.deleteButton.get('checked')){
 							self.deleteButton.set('checked', false);
-							self.store.remove(item.id);
-							
-							var viewId = self.viewsArr[0].id;
-							var parentItem = self.store.get(self.query.parentId);
-							var pos = parentItem[viewId].indexOf(item.id);
-							parentItem[viewId].splice(pos, 1);
-							_nqDataStore.put(parentItem);
+							self.store.remove(item.id, item.viewId);//what if there is more than one view?
+
 							self.grid.refresh();
 						}
 						else{

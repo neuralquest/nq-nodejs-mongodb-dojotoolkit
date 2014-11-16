@@ -129,21 +129,66 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang'
 				}
 			},
 */
-//			this.treeModel.pasteItem = function(/*Item*/ childItem, /*Item*/ oldParentItem, /*Item*/ newParentItem,
-//					/*Boolean*/ bCopy, /*int?*/ insertIndex, /*Item*/ before){
-/*				if(!bCopy){
-					var oldParentChildren = [].concat(this.childrenCache[this.getIdentity(oldParentItem)]), // concat to make copy
-						index = array.indexOf(oldParentChildren, childItem);
-					oldParentChildren.splice(index, 1);
-					this.onChildrenChange(oldParentItem, oldParentChildren);
+			this.treeModel.getChildren = function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
+				// summary:
+				//		Calls onComplete() with array of child items of given parent item.
+				// parentItem:
+				//		Item from the dojo/store
+
+				// TODO:
+				// For 2.0, change getChildren(), getRoot(), etc. to return a cancelable promise, rather than taking
+				// onComplete() and onError() callbacks.   Also, probably get rid of the caching.
+				//
+				// But be careful if we continue to maintain ObjectStoreModel as a separate class
+				// from Tree, because in that case ObjectStoreModel can be shared by two trees, and destroying one tree
+				// should not interfere with an in-progress getChildren() call from another tree.  Also, need to make
+				// sure that multiple calls to getChildren() for the same parentItem don't trigger duplicate calls
+				// to onChildrenChange() and onChange().
+				//
+				// I think for 2.0 though that ObjectStoreModel should be rolled into Tree itself.
+
+				var id = this.store.getIdentity(parentItem);
+
+				if(this.childrenCache[id]){
+					// If this.childrenCache[id] is defined, then it always has the latest list of children
+					// (like a live collection), so just return it.
+					when(this.childrenCache[id], onComplete, onError);
+					return;
 				}
-				return this.store.put(childItem, {
-					overwrite: true,
-					parent: newParentItem,
-					before: before,
-					oldParentItem: oldParentItem//this is our extension
-				});
-			};*/
+
+				// Query the store.
+				// Cache result so that we can close the query on destroy(), and to avoid setting up multiple observers
+				// when getChildren() is called multiple times for the same parent.
+				// The only problem is that getChildren() on non-Observable stores may return a stale value.
+				var res = this.childrenCache[id] = this.store.getChildren(parentItem);
+				if(res.then){
+					this.own(res);	// in case app calls destroy() before query completes
+				}
+
+				// Setup observer in case children list changes, or the item(s) in the children list are updated.
+				if(res.observe){
+					this.own(res.observe(lang.hitch(this, function(obj, removedFrom, insertedInto){
+						console.log("observe on children of ", parentItem, ": ", obj, removedFrom, insertedInto);
+
+						// If removedFrom == insertedInto, this call indicates that the item has changed.
+						// Even if removedFrom != insertedInto, the item may have changed.
+						this.onChange(obj);
+
+						if(removedFrom != insertedInto){
+							// Indicates an item was added, removed, or re-parented.  The children[] array (returned from
+							// res.then(...)) has already been updated (like a live collection), so just use it.
+							
+		var newResult = this.store.getChildren(parentItem);
+		when(newResult, lang.hitch(this, "onChildrenChange", parentItem));
+
+							//when(res, lang.hitch(this, "onChildrenChange", parentItem));
+						}
+					}), true));	// true means to notify on item changes
+				}
+
+				// User callback
+				when(res, onComplete, onError);
+			},
 			this.tree = new Tree({
 				id: 'tree'+this.widgetId,
 				store: this.store,
@@ -293,15 +338,8 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang'
 							label:"Delete",
 							iconClass:"removeIcon",
 							onClick: function(){
-								//TODO
 								var selectedItem = self.tree.get("selectedItem");
-								self.store.remove(selectedItem.id);
-								
-								var parentItem = self.store.get(this.parentId);
-								var viewId = self.viewDefToCreate.id;
-								index = array.indexOf(parentItem[viewId], selectedItem.id);
-								parentItem[viewId].splice(index, 1);
-								self.store.put(parentItem);
+								self.store.remove(selectedItem.id,selectedItem.viewId);
 							}
 						}));
 						parentMenu.startup();
