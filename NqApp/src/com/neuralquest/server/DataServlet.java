@@ -204,13 +204,13 @@ public class DataServlet extends HttpServlet implements Constants {
 				JSONObject actionObj = postArray.getJSONObject(i);
 				String method = actionObj.getString("method");
 				String table = actionObj.getString("table");
-				JSONObject data = actionObj.getJSONObject("target");
-				String idString = data.getString("id");
 				if(table.equals("cell")){
 					if(method.equals("add") || method.equals("put")){
+						JSONObject data = actionObj.getJSONObject("target");
+						String idString = data.getString("id");
 						long attrRefId = data.optInt("attrRefId", 0);
 						String name = data.optString("name", null);
-						isValueAllowed(name, attrRefId, session);;
+						isValueAllowed(name, attrRefId, session);
 						Cell theCell = getOrMakeCellBasedOnCid(idString, session, idCellMap);
 						byte type = (byte)data.getInt("type");
 						theCell.setType(type);
@@ -218,6 +218,7 @@ public class DataServlet extends HttpServlet implements Constants {
 						session.save(theCell);
 					}
 					else if(method.equals("remove")){
+						String idString = actionObj.getString("target");
 						Cell theCell = getOrMakeCellBasedOnCid(idString, session, idCellMap);
 						//session.delete(theCell);
 						deleteCell(theCell, session);
@@ -225,6 +226,8 @@ public class DataServlet extends HttpServlet implements Constants {
 				}
 				if(table.equals("assoc")){
 					if(method.equals("add") || method.equals("put")){
+						JSONObject data = actionObj.getJSONObject("target");
+						String idString = data.getString("id");
 						Cell sourceFkCell = getOrMakeCellBasedOnCid(data.getString("sourceFk"), session, idCellMap);
 						byte type = (byte)data.getInt("type");
 						Cell destFkCell = getOrMakeCellBasedOnCid(data.getString("destFk"), session, idCellMap);
@@ -243,10 +246,12 @@ public class DataServlet extends HttpServlet implements Constants {
 						}
 					}
 					else if(method.equals("remove")){
+						String idString = actionObj.getString("target");
 						Assoc theAssoc = null;
 						if(idString.contains("cid")) theAssoc = idAssocMap.get(idString);//do we know this cell already, was it created in the same conversation?
-						else theAssoc = (Assoc) session.load(Assoc.class, Long.parseLong(idString));
-						deleteAssoc(theAssoc, session);;
+						//else theAssoc = (Assoc) session.load(Assoc.class, Long.parseLong(idString));
+						else theAssoc = (Assoc) session.get(Assoc.class, Long.parseLong(idString));
+						if(theAssoc!=null) deleteAssoc(theAssoc, session);;
 					}
 				}
 			}
@@ -254,9 +259,9 @@ public class DataServlet extends HttpServlet implements Constants {
 				JSONObject actionObj = postArray.getJSONObject(i);
 				String method = actionObj.getString("method");
 				String table = actionObj.getString("table");
-				JSONObject data = actionObj.getJSONObject("target");
-				String idString = data.getString("id");
-				if(table.equals("assoc") && method.equals("add") || method.equals("put")){
+				if(table.equals("assoc") && (method.equals("add") || method.equals("put"))){
+					JSONObject data = actionObj.getJSONObject("target");
+					String idString = data.getString("id");
 					Assoc assoc = null;
 					if(idString.contains("cid")) assoc = idAssocMap.get(idString);//do we know this cell already, was it created in the same conversation?
 					else assoc = (Assoc)session.load(Assoc.class, Long.parseLong(idString));
@@ -296,7 +301,7 @@ public class DataServlet extends HttpServlet implements Constants {
 			}
 			idCellMap.clear();
 
-			if(1==1) throw new RuntimeException("Silly wabbit");
+			//if(1==1) throw new RuntimeException("Silly wabbit");
 
 			session.getTransaction().commit();
 		}
@@ -321,7 +326,9 @@ public class DataServlet extends HttpServlet implements Constants {
 		// the association must be unique
 		for(Iterator<Assoc> itr2=sourceCell.getSourceAssocs().iterator();itr2.hasNext();){
 			Assoc pAssoc = itr2.next();
+			if(assoc == pAssoc) continue;
 			Cell dest = pAssoc.getDestFk();
+			System.out.println(assoc.getId()+" - "+pAssoc.getId());
 			if(type==pAssoc.getType() && destCell.getId()==dest.getId()) throw new RuntimeException("Class associations must be unique");
 		}
 

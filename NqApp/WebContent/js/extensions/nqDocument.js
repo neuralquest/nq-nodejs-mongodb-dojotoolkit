@@ -16,7 +16,14 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		HEADER_ATTRREF: 873,
 		PARAGRAPH_ATTRREF: 959,
 
-//		editMode: false,
+		HEADER_ATTRREF: 558,
+		PARAGRAPH_ATTRREF: 762,
+		SVG_ATTRREF: 747,
+		IMAGEURL_ATTRREF: 1613,
+		ANNOTATION_ATTRREF: 1734,
+		WIDGET_ATTRREF: 1747,
+
+		//		editMode: false,
 		normalToolbar: null,
 		// Map from id of each parent node to array of its children, or to Promise for that array of children.
 		childrenCache: {},
@@ -342,13 +349,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					domStyle.set(editorDijit.domNode, 'outline', '1px none gray');
 				}
 			});
-			/*editorDijit.on('click', function(evt){
-				if(self.editModeButton.get('checked')) {
-					self.closeEditors();
-					editorDijit.open();
-					domStyle.set(editorDijit.toolbar.containerNode, "display", "");
-				}
-			});*/
+
 			this.own(editorDijit);
 			editorDijit.startup();			
 			

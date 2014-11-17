@@ -579,6 +579,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		});
 		*/
 	};
+	
+	CLASS_TYPE = 0;
+	OBJECT_TYPE = 1;	
 	// Primitive Assoc types (as used by the Assoc table)
 	PARENT_ASSOC = 3;			//TO ONE
 	ATTRIBUTE_ASSOC = 4;		//TO ONE
@@ -602,7 +605,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	MANYTOONE_PASSOC = 23;		//TO ONE
 	OWNED_BY_PASSOC = 24;		//TO ONE
 	//Special
-//	INSTANTIATIONS_PASSOC = 27;	//TO MANY
+	INSTANTIATIONS_PASSOC = 27;	//TO MANY
 //	THE_USER_PASSOC = 28;		//TO MANY
 	BYASSOCTPE_PASSOC = 30; 		//TO MANY		
 	ASSOCS_PASSOC = 31; 		//TO MANY		

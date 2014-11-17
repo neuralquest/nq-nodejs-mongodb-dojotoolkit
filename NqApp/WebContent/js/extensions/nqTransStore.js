@@ -191,26 +191,34 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 									else{
 										if(item[attrRefId]!=null){
 											var assoc = {sourceFk:item.id, type:assocType, destFk:item[attrRefId]};
-											assocStore.put(assoc);
+											self.addAssoc(assoc);
 										}
 									}
 								}, nq.errorDialog);
 							}
 							else {
 								if(valueObjId) {
-									var cell = cellStore.get(valueObjId);
-									//TODO can we update assoc directly without the put? I wonder. It would bypass the transaction store.
-									//I think we're already doing it by accident
-									if(cell.name != item[attrRefId]){
-										cell.name = item[attrRefId];
-										cellStore.put(cell);
+									if(item[attrRefId]!=null){
+										var cell = cellStore.get(valueObjId);
+										//TODO can we update assoc directly without the put? I wonder. It would bypass the transaction store.
+										//I think we're already doing it by accident
+										if(cell.name != item[attrRefId]){
+											cell.name = item[attrRefId];
+											cell.attrRefId = attrRefId;//used to validate on the server
+											cellStore.put(cell);
+										}
+									}
+									else{
+										//delete the cell
 									}
 								}
 								else{
-									//cretae a new cell and its associations
-									var newCell = cellStore.put({type:1, name:item[attrRefId]});
-									assocStore.put({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:destClassId});
-									assocStore.put({sourceFk:item.id, type:assocType, destFk:newCell.id});
+									if(item[attrRefId]!=null){
+										//cretae a new cell and its associations
+										var newCell = self.addCell({type:1, name:item[attrRefId], attrRefId:attrRefId});
+										self.addAssoc({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:destClassId});
+										self.addAssoc({sourceFk:item.id, type:assocType, destFk:newCell.id});
+									}
 								}
 							}
 						});						
@@ -332,10 +340,10 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 							// get the ordered children as seen from the new parent
 							when(self.getManyByAssocTypeAndDestClass(newParentId, ORDERED_ASSOC, destClassId), function(newParentChildren){
 								if(newParentChildren.length>0){
-									assocStore.add({sourceFk: newParentChildren[newParentChildren.length-1], type: NEXT_ASSOC, destFk: movingObjectId});
+									self.addAssoc({sourceFk: newParentChildren[newParentChildren.length-1], type: NEXT_ASSOC, destFk: movingObjectId});
 								}
 								else{
-									assocStore.add({sourceFk: newParentId, type: ORDERED_ASSOC, destFk: movingObjectId});									
+									self.addAssoc({sourceFk: newParentId, type: ORDERED_ASSOC, destFk: movingObjectId});									
 								}
 							});
 						}
@@ -344,12 +352,22 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				else{
 					if(oldParentId == newParentId) return;
 					//TODO new assoc?
-					when(assocStore.query({sourceFk: oldParentId, type: assocType, destFk: movingObjectId}), function(assocArr){
-						if(assocArr.length!=1) throw new Error('Expected to find one association');
-						var assoc = assocArr[0];
-						assoc.sourceFk = newParentId;
-						assocStore.put(assoc);
-					});					
+					if(assocType<SUBCLASSES_PASSOC){
+						when(assocStore.query({sourceFk: oldParentId, type: assocType, destFk: movingObjectId}), function(assocArr){
+							if(assocArr.length!=1) throw new Error('Expected to find one association');
+							var assoc = assocArr[0];
+							assoc.sourceFk = newParentId;
+							assocStore.put(assoc);
+						});					
+					}
+					else {
+						when(assocStore.query({sourceFk:movingObjectId , type: assocType-12, destFk: oldParentId}), function(assocArr){
+							if(assocArr.length!=1) throw new Error('Expected to find one association');
+							var assoc = assocArr[0];
+							assoc.destFk = newParentId;
+							assocStore.put(assoc);
+						});					
+					}
 				}
 			});		
 		},		
@@ -422,9 +440,9 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 		query: function(query, options){
 			if(query.parentId && query.widgetId && query.join){
 				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
-				when(promise, function(res){
+				/*when(promise, function(res){
 					console.log(res);
-				});
+				});*/
 				return QueryResults(promise);
 			}
 			else if(query.cellId && query.viewId ){//used by tree to get the first item
@@ -562,7 +580,10 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
 				var destClassId = arr[1][0].destFk;
 				//get the items that result from this source, view
-				return when(self.getManyByAssocTypeAndDestClass(sourceId, assocType, destClassId), function(objArr){
+				var promise = null;
+				if(assocType==INSTANTIATIONS_PASSOC) promise = self.getManyByAssocType(destClassId, SUBCLASSES_PASSOC, OBJECT_TYPE, true);
+				else promise = self.getManyByAssocTypeAndDestClass(sourceId, assocType, destClassId);
+				return when(promise, function(objArr){
 					//for each related object 
 					var itemsDonePromises = [];
 					for(var i=0;i<objArr.length;i++){
@@ -672,7 +693,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					}
 					else {
 						//cretae a new cell and its associations
-						var newCell = cellStore.put({type:1, name:item[attrRefId]});
+						var newCell = cellStore.put({type:1, name:item[attrRefId], attrRefId:attrRefId});
 						assocStore.put({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:destClassId});
 						assocStore.put({sourceFk:item.id, type:assocType, destFk:newCell.id});
 					}
@@ -985,6 +1006,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					headers: {'Content-Type': 'application/json; charset=UTF-8'},
 					data: dojo.toJson(operations)//JSON.stringify(dataOperations)
 			}).then(function(data){
+					dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
 					console.log(data);
 					//TODO: Replace IDs
 					data.map(function(action){
@@ -1011,11 +1033,11 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					transactionLogStore.query({}).map(function(action){
 						transactionLogStore.remove(action.id);
 					});
-					dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
 	    		},
 	    		function(error){
+	    			nq.errorDialog(error);
 			    	//evict from the cache then refresh the page data
-	    			transactionLogStore.query({}).map(function(action){
+	    			/*transactionLogStore.query({}).map(function(action){
 						//var options = action.options || {};
 						var method = action.method;
 						var store = action.storeId;
@@ -1035,7 +1057,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					transactionLogStore.query({}).map(function(action){
 						transactionLogStore.remove(action.id);
 					});
-					nq.errorDialog(error);
+					nq.errorDialog(error);*/
 	    		}
 	    	);		    	
 //			return result;

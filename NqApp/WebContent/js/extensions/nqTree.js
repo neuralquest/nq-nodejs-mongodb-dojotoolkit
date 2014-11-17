@@ -172,7 +172,7 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang'
 
 						// If removedFrom == insertedInto, this call indicates that the item has changed.
 						// Even if removedFrom != insertedInto, the item may have changed.
-						this.onChange(obj);
+		if(obj)this.onChange(obj);
 
 						if(removedFrom != insertedInto){
 							// Indicates an item was added, removed, or re-parented.  The children[] array (returned from
