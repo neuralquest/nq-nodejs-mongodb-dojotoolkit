@@ -94,43 +94,33 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 						var property = propertiesArr[i];
 						switch(property.attrClassType){
 						case PERMITTEDVAULE_CLASS_ID: 
-							var selectStore = new Memory({data: property.permittedValues});
 							property.renderCell = function(object, value, node, options){
 								var selectedOption = this.editorArgs.store.get(value);
 								if(selectedOption) node.appendChild(document.createTextNode(selectedOption.name));
 								else node.appendChild(document.createTextNode('id: '+value));
 							};
-							property.editorArgs = {
-									'store': selectStore, 
-									'style': "width:99%;",
-									'labelAttr': 'name',
-									'maxHeight': -1, // tells _HasDropDown to fit menu within viewport
-									'fetchProperties': { sort : [ { attribute : "name" }]},
-									'queryOptions': { ignoreCase: true }//doesnt work
-									//value: 749
-							};
 							columns.push(editor(property, Select));
 							break;	
 						case RTF_CLASS_ID: 
-							var toolbar = new Toolbar({
+/*							var toolbar = new Toolbar({
 								//'style': {'display': 'none'}
 							});
-							self.editorToolbarDivNode.appendChild(toolbar.domNode);
-							property.editorArgs = {
+*/							self.editorToolbarDivNode.appendChild(property.editorArgs.toolbar.domNode);
+/*							property.editorArgs = {
 									'toolbar': toolbar, 
 									'addStyleSheet': 'css/editor.css',
 									'extraPlugins': self.extraPlugins,
 									'maxHeight': -1
 							};					
-							property.renderCell = function(object, value, node, options) {
+*/							property.renderCell = function(object, value, node, options) {
 								html.set(node, value);
 							};
-							property.get = function(item) {
+/*							property.get = function(item) {
 								var value = item[property.name];
 								if(!value) return '<p></p>';//editor will crash without a value 
 								return value;
 							};
-							//editor.editor(toolbar);
+*/							//editor.editor(toolbar);
 							columns.push(editor(property, Editor));
 							break;	
 						case DATE_CLASS_ID:
@@ -163,26 +153,11 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 							columns.push(editor(property, 'checkbox'));
 							break;
 						default:
-							var selectStore = new Memory({data: property.permittedValues});
-							property.renderCell = function(object, value, node, options){
-								var selectedOption = this.editorArgs.store.get(value);
-								if(selectedOption) node.appendChild(document.createTextNode(selectedOption.name));
-								else node.appendChild(document.createTextNode('id: '+value));
-							};
-							property.editorArgs = {
-									'store': selectStore, 
-									'style': "width:99%;",
-									'labelAttr': 'name',
-									'maxHeight': -1, // tells _HasDropDown to fit menu within viewport
-									'fetchProperties': { sort : [ { attribute : "name" }]},
-									'queryOptions': { ignoreCase: true }//doesnt work
-									//value: 749
-							};
-							columns.push(editor(property, Select));
+							columns.push(editor(property, 'text'));
 						};
 					}
 
-					console.log('propertiesArr', propertiesArr);
+					//console.log('propertiesArr', propertiesArr);
 					self.grid = new (declare([Grid, Selection, Keyboard, DijitRegistry, Dnd]))({
 						//'id' : 'widget'+state.tabId,
 						'class': '.nqGrid',

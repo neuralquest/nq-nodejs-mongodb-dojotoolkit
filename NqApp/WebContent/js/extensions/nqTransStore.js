@@ -489,12 +489,10 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					var viewId = subViewsArr[j];
 					promisses.push(self.getManyByView(sourceId, viewId));
 				}
-				return when(all(promisses), function(ArrayOfArrays){
-					var resultArr = [];
-					for(var i=0;i<ArrayOfArrays.length;i++){
-						resultArr = resultArr.concat(ArrayOfArrays[i]);
-					}
-					return resultArr;
+				return when(all(promisses), function(arrayOfArrays){
+					//return arrayOfArrays.join(',').split(',');
+					var merged = [];
+					return merged.concat.apply(merged, arrayOfArrays);
 				});
 			});
 		},
@@ -774,6 +772,81 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			return when(this.isA(destFk, destClassId), function(trueFalse){
 				if(trueFalse) resultArr.push(destFk);
 				return trueFalse;
+			});
+		},
+		NgetManyByAssocType: function(sourceId, assocType, classOrObjectType, recursive){
+			// summary:
+			//		Used to navigate the network via particular association type, where we're interested in either in classes or objects.
+			//		Can do so recusivly following the data graph via the same association type.
+			//		Returns an array of ids of cells that meet the citeria. 
+			//		Can be used to find all the instances of a particular class, to populate permitted values or,
+			//		get all the attribute references in a set of joined views so that we can display them as colum headers in a table.
+			//		Takes pseudo-association types into account by substacting 12 from the type and doing a reverse assoc query.
+			// sourceId: Number
+			//		The identifier of the starting point
+			// assocType: Number
+			//		The association type that we're following down the data graph
+			// classOrObjectType: Number
+			//		Zero or One. Are we looking for a class or an object
+			// recursive: Boolean
+			//		Do we stop at the first level or continue indefinitly?
+			// returns: Array 
+			//		An array of prommises. Each promise will result a cell that meets the criteria
+			
+			//console.log('getManyByAssocType', sourceId, assocType, classOrObjectType, recursive);
+			var self = this;
+			var resultArr = [];
+			var loopProtectionArr = [];
+			var promise;
+			if(assocType<15) promise = self.NgetManyByAssocTypeRecursive(sourceId, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
+			else promise = self.NgetManyByAssocTypeRecursiveReverse(sourceId, assocType-12, classOrObjectType, recursive, resultArr, loopProtectionArr);
+			return when((promise), function(arrayOfArrays){
+				//console.log('resultArr', resultArr);
+				return resultArr;
+			});
+		},
+		NgetManyByAssocTypeRecursive: function(sourceId, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr){
+			var self = this;
+			return when(assocStore.query({sourceFk: sourceId, type: assocType}), function(assocsArr){
+				var promisses = [];
+				for(var j=0;j<assocsArr.length;j++){
+					var destFk = assocsArr[j].destFk;
+					if(loopProtectionArr[destFk]) continue;
+					loopProtectionArr[destFk] = true;
+					promisses.push(when(cellStore.get(destFk), function(destCell){
+						if(classOrObjectType!=0 && classOrObjectType!=1 ) resultArr.push(destCell);
+						else if(classOrObjectType == destCell.type) {
+								resultArr.push(destCell);
+								//loopProtectionArr[childId] = true;
+						}
+						if(recursive) return self.NgetManyByAssocTypeRecursive(destCell.id, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
+						else return destCell;
+					}));
+				}
+				return all(promisses);
+			});
+		},
+		NgetManyByAssocTypeRecursiveReverse: function(sourceId, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr){
+			//console.log('getManyByAssocTypeRecursiveReverse', sourceId, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
+			var self = this;
+			return when(assocStore.query({destFk: sourceId, type: assocType}), function(assocsArr){
+				//console.log('assocsArr', assocsArr);
+				var promisses = [];
+				for(var j=0;j<assocsArr.length;j++){
+					var sourceFk = assocsArr[j].sourceFk;
+					if(loopProtectionArr[sourceFk]) continue;
+					loopProtectionArr[sourceFk] = true;
+					promisses.push(when(cellStore.get(sourceFk), function(sourceCell){
+						if(classOrObjectType!=0 && classOrObjectType!=1 ) resultArr.push(sourceCell);
+						else if(classOrObjectType==sourceCell.type) {
+								resultArr.push(sourceCell);
+								//loopProtectionArr[childId] = true;
+						}
+						if(recursive) return self.NgetManyByAssocTypeRecursiveReverse(sourceFk, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
+						else return sourceCell;
+					}));
+				}
+				return all(promisses);
 			});
 		},
 		getManyByAssocType: function(sourceId, assocType, classOrObjectType, recursive){

@@ -40,31 +40,22 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					var dijit = null;
 					switch(property.attrClassType){
 					case PERMITTEDVAULE_CLASS_ID: //defect not being called
-						dijit = new Select({
-						    'store': new Memory({data: property.permittedValues}),
-							'name': property.field,
-							'labelAttr': 'name',
-							'style': "width: "+property.width,
-							'maxHeight': -1, // tells _HasDropDown to fit menu within viewport
-							'fetchProperties': { sort : [ { attribute : "name" }]},
-							'queryOptions': { ignoreCase: true }//doesnt work
-						}, domConstruct.create('div'));
+						dijit = new Select(property.editorArgs, domConstruct.create('div'));
 						break;	
 					case RTF_CLASS_ID:
-						/**/
-						var toolbar = new Toolbar();
-						self.editorToolbarDivNode.appendChild(toolbar.domNode);
+						self.editorToolbarDivNode.appendChild(property.editorArgs.toolbar.domNode);
 						//initially show the toolbar div
-						domStyle.set(self.editorToolbarDivNode, 'display' , '');
+						//domStyle.set(self.editorToolbarDivNode, 'display' , '');
 
-						property.height = '';//auto grow
+						/*property.height = '';//auto grow
 						property.extraPlugins = self.extraPlugins;
 						property.toolbar = toolbar;
 						//self.own(toolbar);
 						//property.styleSheet = 'css/editor.css';
 						property.value = '<p></p>';
-						dijit = new Editor(property, domConstruct.create('div'));
-						dijit.addStyleSheet('css/editor.css');
+						dijit = new Editor(property, domConstruct.create('div'));*/
+						dijit = new Editor(property.editorArgs, domConstruct.create('div'));
+//						dijit.addStyleSheet('css/editor.css');
 						dijit.on("NormalizedDisplayChanged", function(){
 							var height = domGeometry.getMarginSize(dijit.domNode).h;
 							if(has("opera")){
@@ -95,16 +86,6 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 						property.type = 'text';
 						dijit = new ValidationTextBox(property, domConstruct.create('input'));
 						break;	
-					default:
-						dijit = new Select({
-						    'store': new Memory({data: property.permittedValues}),
-							'name': property.field,
-							'labelAttr': 'name',
-							'style': "width: "+property.width,
-							'maxHeight': -1, // tells _HasDropDown to fit menu within viewport
-							'fetchProperties': { sort : [ { attribute : "name" }]},
-							'queryOptions': { ignoreCase: true }//doesnt work
-						}, domConstruct.create('div'));
 					};
 					if(dijit){
 						self.own(dijit);
@@ -116,7 +97,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 						}));
 						//dijit.startup();will be call after add child and then from widget base
 					}
-					//else html.set(tdDom, 'unknown attribute type: '+property.attrClassType); 
+					else html.set(tdDom, 'unknown attribute type: '+property.attrClassType); 
 					
 					//the help text
 					domConstruct.create("td", { innerHTML: (property.helpText), style: "padding: 3px", 'class': 'helpTextInvisable'}, row);
