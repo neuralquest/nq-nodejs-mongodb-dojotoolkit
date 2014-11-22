@@ -275,8 +275,11 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang'
 			}, nq.errorDialog);		
 		},
 		createMenuforView: function(viewId){
-			var OBJECT_TYPE = 1;
-			var ASSOCS_ATTR_ID = 1613;
+			var CLASSMODEL_VIEWID = 844;
+			var CLASSMODEL_ATTRTREFID = 852;
+			var CLASSES_VIEWID = 733;
+			var ASSOCIATIONS_VIEWID = 1934 ;
+			var CLASSES_ATTRTREFID = 756;
 			var SUBCLASSES_PASSOC = 15;
 			var ASSOCS_CLASS_TYPE = 94;
 			var CLASS_TYPE = 0;
@@ -300,75 +303,116 @@ define(["dojo/_base/declare", "nq/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang'
 					self.store.remove(selectedItem.id,selectedItem.viewId);
 				}
 			}));
-			var attrPromises = [];
-			//get the assocication type that this view has as an attribute
-			attrPromises[0] = self.store.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
-			//get the class that this view maps to
-			attrPromises[1] = self.store.query({sourceFk: viewId, type: MAPSTO_ASSOC});
-			when(all(attrPromises), function(arr){
-				var viewId2 = viewId;
-				console.log('viewId', viewId, viewId2);
-				if(!arr[0]) throw new Error('View '+viewId+' must have an association type as an attribute ');
-				var assocType = arr[0];
-				var assocName = self.store.getCell(assocType).name;
-				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
-				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
-				var destClassId = arr[1][0].destFk;
-				//get the subclasses as seen from the destClass
-				when(self.store.NgetManyByAssocType(destClassId, SUBCLASSES_PASSOC, CLASS_TYPE, true), function(subClassArr){
-					subClassArr.push(destClassId);//TODO should getManyByAssocType also return destClassId?
-					self.allowedClassesObj[viewId] = subClassArr;//Check Item Acceptance needs this
-					//var addMenu = new Menu({parentMenu: parentMenu});
-					for(var j=0;j<subClassArr.length;j++){
-						var subClassId = subClassArr[j];
-						//console.log(subClass);
+			if(viewId == CLASSMODEL_VIEWID){
+				var menuItem = new MenuItem({
+					label: "<b>Class</b> by <span style='color:blue'>child</span> association",
+					iconClass: "icon0",
+					viewId: viewId
+				});
+				menuItem.on("click", function(evt){
+					var selectedItem = self.tree.get("selectedItem");
+					//console.log('menu item on', dijit.byNode(this.getParent().currentTarget));
+					var viewId = this.viewId;
+					var item = self.store.add({type: 0, attrRefId: CLASSMODEL_ATTRTREFID, viewId: viewId, classId:CLASS_TYPE, name: 'New Class'}, {parent:{id: selectedItem.id}});
+					var selectedNodes = self.tree.getNodesByItem(selectedItem);
+					if(!selectedNodes[0].isExpanded) self.tree._expandNode(selectedItem);
+					self.tree.set('selectedItem', item.id);
+				});
+				addMenu.addChild(menuItem);	
+				var menuItem = new MenuItem({
+					label: "<b>Oject</b> by <span style='color:blue'>child</span> association",
+					iconClass: "icon1",
+					viewId: viewId
+				});
+				menuItem.on("click", function(evt){
+					var selectedItem = self.tree.get("selectedItem");
+					console.log('menu item on', evt);
+					var viewId = this.viewId;
+					var item = self.store.add({type: 1, attrRefId: CLASSMODEL_ATTRTREFID, viewId: viewId, classId:OBJECT_TYPE }, {parent:{id: selectedItem.id}});
+					var selectedNodes = self.tree.getNodesByItem(selectedItem);
+					if(!selectedNodes[0].isExpanded) self.tree._expandNode(selectedItem);
+					self.tree.set('selectedItem', item.id);
+				});
+				addMenu.addChild(menuItem);	
+			}
+			else if(viewId == CLASSES_VIEWID){
+				
+			}
+			else if(viewId == ASSOCIATIONS_VIEWID){
+				
+			}
+			else{
+				var attrPromises = [];
+				//get the assocication type that this view has as an attribute
+				attrPromises[0] = self.store.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
+				//get the class that this view maps to
+				attrPromises[1] = self.store.query({sourceFk: viewId, type: MAPSTO_ASSOC});
 
-						var tree = this.tree;
-						var menuItem = new MenuItem({
-							label: "<b>"+subClassId.name+"</b> object by <span style='color:blue'>"+assocName+"</span>"+' association',
-							iconClass: "icon"+subClassId.id,
-							subClassId: subClassId,
-							viewId: viewId
-						});
-						menuItem.on("click", function(evt){
-							console.log('menu item on', this.subClassId);
-							var viewId = this.viewId;
-							var classId = this.subClassId;
-							var addObj = {
-									'type': 1,
-									'viewId': this.viewId, 
-									'classId': this.subClassId
-								};
-							var selectedItem = self.tree.get("selectedItem");
-							var directives = {parent:{id: selectedItem.id}};
-//								addObj[viewDefToCreate.label] = '[new '+subClassId+']';;
-							var newItem = self.store.add(addObj, directives);
-							
-							//var selectedItem = self.tree.get("selectedItem");
-							//if(!selectedItem[viewId]) selectedItem[viewId] = [];
-							//selectedItem[viewId].push(newItem.id);
-							//_nqDataStore.put(selectedItem);
+				when(all(attrPromises), function(arr){
+					var viewId2 = viewId;
+					console.log('viewId', viewId, viewId2);
+					if(!arr[0]) throw new Error('View '+viewId+' must have an association type as an attribute ');
+					var assocType = arr[0];
+					var assocName = self.store.getCell(assocType).name;//TODO will fail if it is asysnc
+					if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
+					//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
+					var destClassId = arr[1][0].destFk;
+					//get the subclasses as seen from the destClass
+					when(self.store.getManyCellsByAssocType(destClassId, SUBCLASSES_PASSOC, CLASS_TYPE, true), function(subClassArr){
+						subClassArr.push(destClassId);//TODO should getManyByAssocType also return destClassId?
+						self.allowedClassesObj[viewId] = subClassArr;//Check Item Acceptance needs this
+						//var addMenu = new Menu({parentMenu: parentMenu});
+						for(var j=0;j<subClassArr.length;j++){
+							var subClassId = subClassArr[j];
+							//console.log(subClass);
 
-							//TODO this should be done automaticly some where
-							//var x = self.tree.model.getChildren(selectedItem, viewsArr);//we need this to create an observer on the newly created item
-							
-							var selectedNodes = self.tree.getNodesByItem(selectedItem);
-							if(!selectedNodes[0].isExpanded){
-								self.tree._expandNode(selectedNodes[0]);
-							}
-							self.tree.set('selectedItem', newItem.id);
-						});
-						addMenu.addChild(menuItem);	
-					}
-					addMenu.startup();
-					/*parentMenu.addChild(new PopupMenuItem({
-						label:"To",
-						iconClass:"icon"+assocType,
-						popup: addMenu
-					}));*/
-				}, nq.errorDialog);
-				parentMenu.startup();
-			}, nq.errorDialog);
+							var tree = this.tree;
+							var menuItem = new MenuItem({
+								label: "<b>"+subClassId.name+"</b> object by <span style='color:blue'>"+assocName+"</span>"+' association',
+								iconClass: "icon"+subClassId.id,
+								subClassId: subClassId,
+								viewId: viewId
+							});
+							menuItem.on("click", function(evt){
+								console.log('menu item on', this.subClassId);
+								var viewId = this.viewId;
+								var classId = this.subClassId;
+								var addObj = {
+										'type': 1,
+										'viewId': this.viewId, 
+										'classId': this.subClassId
+									};
+								var selectedItem = self.tree.get("selectedItem");
+								var directives = {parent:{id: selectedItem.id}};
+//									addObj[viewDefToCreate.label] = '[new '+subClassId+']';;
+								var newItem = self.store.add(addObj, directives);
+								
+								//var selectedItem = self.tree.get("selectedItem");
+								//if(!selectedItem[viewId]) selectedItem[viewId] = [];
+								//selectedItem[viewId].push(newItem.id);
+								//_nqDataStore.put(selectedItem);
+
+								//TODO this should be done automaticly some where
+								//var x = self.tree.model.getChildren(selectedItem, viewsArr);//we need this to create an observer on the newly created item
+								
+								var selectedNodes = self.tree.getNodesByItem(selectedItem);
+								if(!selectedNodes[0].isExpanded){
+									self.tree._expandNode(selectedNodes[0]);
+								}
+								self.tree.set('selectedItem', newItem.id);
+							});
+							addMenu.addChild(menuItem);	
+						}
+						addMenu.startup();
+						/*parentMenu.addChild(new PopupMenuItem({
+							label:"To",
+							iconClass:"icon"+assocType,
+							popup: addMenu
+						}));*/
+					}, nq.errorDialog);
+					parentMenu.startup();
+				}, nq.errorDialog);			
+			}
 		}
 	});
 });

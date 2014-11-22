@@ -393,7 +393,13 @@ public class DataServlet extends HttpServlet implements Constants {
 		if(readonly) throw new RuntimeException("Update not allowed:\t"+valueStr);
 		if(!optional && valueStr==null||valueStr.length() == 0) throw new RuntimeException("Mandatory value missing");
 		
-		if(attrRefMTClass.isA(BOOLEAN_ID)){// boolean, Do this first, boolean is also a permitted value
+		if(attrRefMTClass.isA(CELL_NAME_ID)){
+			int minLength = 0;
+			int maxLength = 65535;			
+			if(valueStr.length()>maxLength) throw new RuntimeException("Value to long:\t"+valueStr);
+			if(valueStr.length()<minLength) throw new RuntimeException("Value to short:\t"+valueStr);
+		}
+		else if(attrRefMTClass.isA(BOOLEAN_ID)){// boolean, Do this first, boolean is also a permitted value
 			Boolean.parseBoolean(valueStr);
 		}
 		else if(attrRefMTClass.isA(PERMITTED_VALUES_ID)){

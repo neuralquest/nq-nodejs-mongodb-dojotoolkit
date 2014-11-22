@@ -106,10 +106,23 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			// returns: Array 
 			//		The new Item with a client id
 			//
+			var CLASSMODEL_VIEWID = 844;
+			var CLASSES_VIEWID = 733;
 			var ATTRREF_CLASS_TYPE = 63;
 			
 			this.enableTransactionButtons();			
 			var self = this;
+			var viewId = item.viewId;
+		
+			/////// Exception for the class model views///////////////////
+			if(viewId == CLASSMODEL_VIEWID || viewId == CLASSES_VIEWID){
+				var newCell = this.addCell(item);
+				this.addAssoc({sourceFk: newCell.id, type: PARENT_ASSOC, destFk: directives.parent.id});
+				return this.get(newCell.id, viewId);
+			}
+			
+			
+			
 			
 			var obj = this.addCell({type:1});//create the item object
 			item.id = obj.id;
@@ -163,13 +176,13 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 					var assocType = arr[0];
 					if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
-					var destClassId = arr[1][0].destFk;
+					var attrClassId = arr[1][0].destFk;
 					/////// Exception for the cell type attribute, as used by the class model ///////////////////
-					if(destClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
+					if(attrClassId == CELLNAME_ATTR_CLASS) return self.putClassModelCellName(item, attrRefId);
 					//get the value for this object, attribute reference
-					when(self.getOneByAssocTypeAndDestClass(item.id, assocType, destClassId), function(valueObjId){
+					when(self.getOneByAssocTypeAndDestClass(item.id, assocType, attrClassId), function(valueObjId){
 						//find out if the attribute class is a permitted value
-						when(self.isA(destClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
+						when(self.isA(attrClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
 							if(trueFalse || assocType != ATTRIBUTE_ASSOC) {
 								//TODO we have to take reverse assoc into account
 								when(assocStore.query({sourceFk:item.id, type:assocType, destFk:valueObjId}), function(assocsArr){
@@ -216,7 +229,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 									if(item[attrRefId]!=null){
 										//cretae a new cell and its associations
 										var newCell = self.addCell({type:1, name:item[attrRefId], attrRefId:attrRefId});
-										self.addAssoc({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:destClassId});
+										self.addAssoc({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:attrClassId});
 										self.addAssoc({sourceFk:item.id, type:assocType, destFk:newCell.id});
 									}
 								}
@@ -251,7 +264,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				var assocType = arr[0];
 				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
 				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
-				var destClassId = arr[1][0].destFk;
+				var attrClassId = arr[1][0].destFk;
 				if(assocType==ORDERED_ASSOC){
 					if(oldParentId){
 						// The leading Assoc will remain attached to the Object that's being moved
@@ -395,9 +408,9 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
 						var destClassId = arr[1][0].destFk;
 						/////// Exception for the cell type attribute, as used by the class model ///////////////////
-						if(destClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
+						if(attrClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
 						//find out if the attribute class is a permitted value
-						when(self.isA(destClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
+						when(self.isA(attrClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
 							if(trueFalse || assocType != ATTRIBUTE_ASSOC) {
 								//TODO we have to take reverse assoc into account
 								when(assocStore.query({sourceFk:item.id, type:assocType, destFk:item[attrRefId]}), function(assocsArr){
@@ -406,10 +419,10 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 							}
 							else {
 								//get the value for this object, attribute reference
-								when(self.getOneByAssocTypeAndDestClass(item.id, assocType, destClassId), function(valueObjId){
+								when(self.getOneByAssocTypeAndDestClass(item.id, assocType, attrClassId), function(valueObjId){
 									if(valueObjId) {
 										cellStore.remove(valueObjId);
-										when(assocStore.query({sourceFk:valueObjId, type:PARENT_ASSOC, destFk:destClassId}), function(assocsArr){
+										when(assocStore.query({sourceFk:valueObjId, type:PARENT_ASSOC, destFk:attrClassId}), function(assocsArr){
 											if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
 										}, nq.errorDialog);
 										when(assocStore.query({sourceFk:item.id, type:assocType, destFk:valueObjId}), function(assocsArr){
@@ -571,9 +584,9 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				var assocType = arr[0];
 				var attrRefArr = arr[2];
 				//////////////Exception for the Association assocType as used by the Class Model//////////////////////
-				if(assocType == ASSOCS_PASSOC) return self.getAssocItems(sourceId, attrRefArr, viewId);
+				if(assocType == ASSOCS_PASSOC) return self.getClassModelAssocItems(sourceId, attrRefArr, viewId);
 				//////////////Exception for the By Association Type assocType as used by the Class Model//////////////////////
-				else if(assocType == BYASSOCTPE_PASSOC) return self.getCellItems(sourceId, attrRefArr, viewId);
+				else if(assocType == BYASSOCTPE_PASSOC) return self.getClassModelCelltems(sourceId, attrRefArr, viewId);
 				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
 				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
 				var destClassId = arr[1][0].destFk;
@@ -608,17 +621,17 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 				var assocType = arr[0];
 				if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
-				var destClassId = arr[1][0].destFk;
+				var attrClassId = arr[1][0].destFk;
 				/////// Exception for the cell name attribute, as used by the class model ///////////////////
-				if(destClassId == CELLNAME_ATTR_CLASS) return self.getClassModelCellName(item, objId, attrRefId);
+				if(attrClassId == CELLNAME_ATTR_CLASS) return self.getClassModelCellName(item, objId, attrRefId);
 				/////// Exception for the cell type attribute, as used by the class model ///////////////////
-				else if(destClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
+				else if(attrClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
 				//get the value for this object, attribute reference
-				else return when(self.getOneByAssocTypeAndDestClass(objId, assocType, destClassId), function(valueObjId){
+				else return when(self.getOneByAssocTypeAndDestClass(objId, assocType, attrClassId), function(valueObjId){
 					if(assocType == ATTRIBUTE_ASSOC){
 						//if(attrRefId == 760) debugger;
 						//find out if the attribute class is a permitted value
-						return when(self.isA(destClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
+						return when(self.isA(attrClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
 							if(trueFalse) {
 								if(valueObjId){
 									return when(assocStore.query({sourceFk: objId, type: assocType, destFk: valueObjId}), function(assocArr){
@@ -678,21 +691,21 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 				var assocType = arr[0];
 				if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
-				var destClassId = arr[1][0].destFk;
+				var attrClassId = arr[1][0].destFk;
 				var defaultValue = null;//TODO
 				
 				if(item[attrRefId]!=null) item[attrRefId] = defaultValue;
 				/////// Exception for the cell type attribute, as used by the class model ///////////////////
-				if(destClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
+				if(attrClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
 				//find out if the attribute class is a permitted value
-				return when(self.isA(destClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
+				return when(self.isA(attrClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
 					if(trueFalse || assocType != ATTRIBUTE_ASSOC) {
 						if(item[attrRefId]!=null) assocStore.put({sourceFk:item.id, type:assocType, destFk:item[attrRefId]});
 					}
 					else {
 						//cretae a new cell and its associations
 						var newCell = cellStore.put({type:1, name:item[attrRefId], attrRefId:attrRefId});
-						assocStore.put({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:destClassId});
+						assocStore.put({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:attrClassId});
 						assocStore.put({sourceFk:item.id, type:assocType, destFk:newCell.id});
 					}
 				});
@@ -774,77 +787,12 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				return trueFalse;
 			});
 		},
-		NgetManyByAssocType: function(sourceId, assocType, classOrObjectType, recursive){
-			// summary:
-			//		Used to navigate the network via particular association type, where we're interested in either in classes or objects.
-			//		Can do so recusivly following the data graph via the same association type.
-			//		Returns an array of ids of cells that meet the citeria. 
-			//		Can be used to find all the instances of a particular class, to populate permitted values or,
-			//		get all the attribute references in a set of joined views so that we can display them as colum headers in a table.
-			//		Takes pseudo-association types into account by substacting 12 from the type and doing a reverse assoc query.
-			// sourceId: Number
-			//		The identifier of the starting point
-			// assocType: Number
-			//		The association type that we're following down the data graph
-			// classOrObjectType: Number
-			//		Zero or One. Are we looking for a class or an object
-			// recursive: Boolean
-			//		Do we stop at the first level or continue indefinitly?
-			// returns: Array 
-			//		An array of prommises. Each promise will result a cell that meets the criteria
-			
-			//console.log('getManyByAssocType', sourceId, assocType, classOrObjectType, recursive);
-			var self = this;
-			var resultArr = [];
-			var loopProtectionArr = [];
-			var promise;
-			if(assocType<15) promise = self.NgetManyByAssocTypeRecursive(sourceId, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
-			else promise = self.NgetManyByAssocTypeRecursiveReverse(sourceId, assocType-12, classOrObjectType, recursive, resultArr, loopProtectionArr);
-			return when((promise), function(arrayOfArrays){
-				//console.log('resultArr', resultArr);
-				return resultArr;
-			});
-		},
-		NgetManyByAssocTypeRecursive: function(sourceId, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr){
-			var self = this;
-			return when(assocStore.query({sourceFk: sourceId, type: assocType}), function(assocsArr){
+		getManyCellsByAssocType: function(sourceId, assocType, classOrObjectType, recursive){
+			return when(this.getManyByAssocType(sourceId, assocType, classOrObjectType, recursive), function(cellIdsArr){
 				var promisses = [];
-				for(var j=0;j<assocsArr.length;j++){
-					var destFk = assocsArr[j].destFk;
-					if(loopProtectionArr[destFk]) continue;
-					loopProtectionArr[destFk] = true;
-					promisses.push(when(cellStore.get(destFk), function(destCell){
-						if(classOrObjectType!=0 && classOrObjectType!=1 ) resultArr.push(destCell);
-						else if(classOrObjectType == destCell.type) {
-								resultArr.push(destCell);
-								//loopProtectionArr[childId] = true;
-						}
-						if(recursive) return self.NgetManyByAssocTypeRecursive(destCell.id, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
-						else return destCell;
-					}));
-				}
-				return all(promisses);
-			});
-		},
-		NgetManyByAssocTypeRecursiveReverse: function(sourceId, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr){
-			//console.log('getManyByAssocTypeRecursiveReverse', sourceId, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
-			var self = this;
-			return when(assocStore.query({destFk: sourceId, type: assocType}), function(assocsArr){
-				//console.log('assocsArr', assocsArr);
-				var promisses = [];
-				for(var j=0;j<assocsArr.length;j++){
-					var sourceFk = assocsArr[j].sourceFk;
-					if(loopProtectionArr[sourceFk]) continue;
-					loopProtectionArr[sourceFk] = true;
-					promisses.push(when(cellStore.get(sourceFk), function(sourceCell){
-						if(classOrObjectType!=0 && classOrObjectType!=1 ) resultArr.push(sourceCell);
-						else if(classOrObjectType==sourceCell.type) {
-								resultArr.push(sourceCell);
-								//loopProtectionArr[childId] = true;
-						}
-						if(recursive) return self.NgetManyByAssocTypeRecursiveReverse(sourceFk, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
-						else return sourceCell;
-					}));
+				for(var j=0;j<cellIdsArr.length;j++){
+					var cellId = cellIdsArr[j];
+					promisses.push(cellStore.get(cellId));
 				}
 				return all(promisses);
 			});
@@ -1019,7 +967,48 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				}
 			});
 		},
-		getAssocItems: function(sourceId, attrRefArr, viewId){
+		putClassModelCellName: function(item, attrRefId){
+			var PROCESSCLASSES_CLASS = 67;
+			var PRIMARYNAME_CLASS = 69;
+			
+			var self = this;
+			return when(cellStore.get(item.id), function(valueObj){
+				if(valueObj.type==0){//is a class
+					var cell = cellStore.get(item.id);//TODO can this file in async mode?
+					if(cell.name != item[attrRefId]){
+						cell.name = item[attrRefId];
+						cellStore.put(cell);
+					}
+					return cell;						
+				}
+				else { //is an object
+					//find out if the object is a process class
+					return when(self.isA(objId, PROCESSCLASSES_CLASS), function(trueFalse){//TODO should be asking for attribute class type
+						if(trueFalse) {
+							//get the primary name of the object
+							return when(self.getOneByAssocTypeAndDestClass(objId, ATTRIBUTE_ASSOC, PRIMARYNAME_CLASS), function(valueObjId){
+								if(!valueObjId) return null; 
+								var cell = cellStore.get(valueObjId);//TODO can this file in async mode?
+								if(cell.name != item[attrRefId]){
+									cell.name = item[attrRefId];
+									cellStore.put(cell);
+								}
+								return cell;						
+							});
+						}
+						else{
+							var cell = cellStore.get(item.id);//TODO can this file in async mode?
+							if(cell.name != item[attrRefId]){
+								cell.name = item[attrRefId];
+								cellStore.put(cell);
+							}
+							return cell;						
+						}
+					});
+				}
+			});
+		},
+		getClassModelAssocItems: function(sourceId, attrRefArr, viewId){
 			var uniqueTypes = {};
 			return when(assocStore.query({sourceFk: sourceId}), function(sourceTypesArr){
 				for(var i=0;i<sourceTypesArr.length;i++){
@@ -1049,7 +1038,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				});
 			});
 		},
-		getCellItems: function(assocId, attrRefArr, viewId){
+		getClassModelCelltems: function(assocId, attrRefArr, viewId){
 			var self = this;
 			var sourceId = assocId.split('/')[0];
 			var assocType = assocId.split('/')[1];
@@ -1082,7 +1071,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
 					console.log(data);
 					//TODO: Replace IDs
-					data.map(function(action){
+					/*data.map(function(action){
 						//var options = action.options || {};
 						var cid = action.cid;
 						var store = action.tabel;
@@ -1102,7 +1091,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 								localAssocStore.put(assoc);
 							});						
 						}
-	    			});
+	    			});*/
 					transactionLogStore.query({}).map(function(action){
 						transactionLogStore.remove(action.id);
 					});

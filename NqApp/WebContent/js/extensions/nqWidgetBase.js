@@ -162,8 +162,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 					var getValue = null;
 					var attrClassType = (permittedValue||assocType!=ATTRIBUTE_ASSOC)?PERMITTEDVAULE_CLASS_ID:propsArr[1];
 					var permRes = null;
-					if(permittedValue) permRes = self.store.NgetManyByAssocType(destClassId, SUBCLASSES_PASSOC, OBJECT_TYPE, true);
-					else if(assocType!=ATTRIBUTE_ASSOC) permRes = self.store.NgetManyByAssocType(destClassId, SUBCLASSES_PASSOC, CLASS_TYPE, true);
+					if(permittedValue) permRes = self.store.getManyCellsByAssocType(destClassId, SUBCLASSES_PASSOC, OBJECT_TYPE, true);
+					else if(assocType!=ATTRIBUTE_ASSOC) permRes = self.store.getManyCellsByAssocType(destClassId, SUBCLASSES_PASSOC, CLASS_TYPE, true);
 					else permRes = true;
 					return when(permRes, function(nameValuePairs){
 						var property = {
