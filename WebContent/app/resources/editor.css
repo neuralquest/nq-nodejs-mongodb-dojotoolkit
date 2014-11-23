@@ -1,0 +1,29 @@
+
+/*body {font-size: 80%; border-style: solid; border-width: 1px; border-color: grey; text-align: justify; font-family: sans-serif;}*/
+body {
+	/*font-size: 80%; 
+	background-color: rgba(250, 250, 121, 0.28);*/
+	text-align: justify; 
+	font-family: sans-serif; 
+}
+p, ul, ol {
+	margin-top: 0em; 
+	margin-bottom: 0em; 
+}
+
+/*used for image floats*/
+.floatright { float: right; width: 400px; margin: 0 0 10px 10px; background-color: fff; padding: 3px; border-top: 1px solid #999; border-right: 2px solid #555; border-bottom: 2px solid #555; border-left: 1px solid #999; clear:right }
+div.floatright p {font-size: 90%; }
+div.floatright pre {font-size: 90%; padding:2px}
+
+/*used for todo floats*/
+.todofloatright { float: right; width: 400px; margin: 0 0 10px 10px; background-color: fff; padding: 3px; border-top: 1px solid #999; border-right: 2px solid #555; border-bottom: 2px solid #555; border-left: 1px solid #999; clear:right }
+div.todofloatright p {font-size: 90%; background-color: rgb(252, 252, 181);}
+
+
+/*used for html tables in the document*/
+.nqtable {border-collapse:collapse;}
+.nqtable td, .nqtable th{padding:3px; border-width:1px; border-color:gray; border-style:solid; vertical-align:top;}
+.nqtable th{text-align: center; font-weight: bold; background-color: silver; }
+
+

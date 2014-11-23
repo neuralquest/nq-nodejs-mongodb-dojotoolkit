@@ -1,0 +1,188 @@
+@import '../../dojo/resources/dojo.css';
+<!--for the editor  -->
+@import '../../dojox/plugins/resources/editorPlugins.css';
+@import '../../dijit/themes/claro/claro.css';
+<!--for the grid -->
+@import '../../dgrid/css/dgrid.css';
+<!--
+@import '../../dijit/themes/soria/soria.css';
+<!--for the grid - ->
+@import '../../dgrid/css/skins/soria.css';
+-->		
+
+/* NOTE: for a full screen layout, must set body size equal to the viewport.*/
+html, body, #fullPage, #placholder {width: 100%;height: 100%;overflow: hidden;padding: 0px;margin: 0px;}
+.noOverFlow {width: 100%;height: 100%;overflow: hidden;padding: 0px;margin: 0px;}
+
+/* add padding to each contentpane inside the tab container, and scrollbar if necessary 
+.dojoTabPane {padding : 10px 10px 10px 10px; overflow: auto;}*/
+
+.backgroundClass{background: #FFFFFF url(../img/Neuralquest/testsBodyBg.gif) repeat-x scroll left top;    }
+
+p,ul,ol {text-align: justify; margin-top: 0em; margin-bottom: 0em; font-family: sans-serif;}
+
+h1, h2, h3, h4, h5, h6 {margin-top: 0.5em; margin-bottom: 0em;}
+code {border:none; font-size: 100%;}
+.dojoDndContainerOver {	border: 0px;}
+
+/*needed for auto grow tables? view-source:http://dojofoundation.org/packages/dgrid/js/dgrid/test/autoheight.html*/
+/* styles for autoheight */
+.nqGrid {height: auto;}
+.nqGrid .dgrid-scroller {position: relative;overflow-y: hidden;}
+.has-ie-6 .nqGrid .dgrid-scroller {
+	/* IE6 doesn't react properly to hidden on this page for some reason */
+	overflow-y: visible;
+}
+.nqGrid .dgrid-header-scroll {display: none;}
+.nqGrid .dgrid-header {right: 0;}
+.nqGrid .field-rowSelector {width: 5px;}
+/*.nqGrid .dgrid .dgrid-scroller {position: relative;overflow: visible;max-height: 500px;}*/
+.nqGrid .dgrid-cell-padding {padding: 0px;}
+/*.nqGrid .dgrid-row-odd {background: #F2F5F9;}
+.nqGrid .dgrid-cell {border: none;}*/
+/*.dgrid-selected { background: #999; / * Make selected rows be gray * /}*/
+
+/*make dijits transparent*/
+.soria .dijitTextBox, .soria .dijitSelect, .soria .dijitSelect .dijitButtonContents {border: none; background: transparent;}
+
+
+.helpTextInvisable {color:navy; display:none;}
+
+/*reward*/
+.popUp {border: 2px solid gray;	border-radius: 5px; position: fixed; z-index: 2; opacity: 0;background-color: lime; top: 30%; left: 40%; width: 100px; height: 50px; font-weight: bold; font-size: 16px;}
+
+/*the startup page*/
+.pageOverlay {top: 0;left: 0;position: absolute;height: 100%;width: 100%;z-index: 1001;display: block;}
+#loadingOverlay {background:  #fff url('../img/Neuralquest/loadingAnimation.gif') no-repeat 10px 23px;}
+.loadingMessage {padding: 25px 40px;color: #999;}
+
+/*our icons*/
+.editIcon {background-image: url('../img/Neuralquest/edit.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.annoIcon {background-image: url('../img/Neuralquest/anno.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.rulesIcon {background-image: url('../img/Neuralquest/rules.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.todoIcon {background-image: url('../img/Neuralquest/todo.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.cancelIcon {background-image: url('../img/Neuralquest/cancel.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.saveIcon {background-image: url('../img/Neuralquest/save.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.helpIcon {background-image: url('../img/Neuralquest/help.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.addIcon {background-image: url('../img/Neuralquest/add.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+.removeIcon {background-image: url('../img/Neuralquest/remove.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
+
+/*used for image floats*/
+.floatright { float: right; width: 400px; margin: 0 0 10px 10px; background-color: fff; padding: 3px; border-top: 1px solid #999; border-right: 2px solid #555; border-bottom: 2px solid #555; border-left: 1px solid #999; clear:right }
+div.floatright p {font-size: 90%; }
+div.floatright pre {font-size: 90%; padding:2px;}
+div.floatright img {width: inherit;}
+div.floatright iframe {
+  /* Set the width of the iframe the size you want to transform it FROM */
+  width: 1200px;
+  height: 800px;
+  /* apply the transform */
+  -webkit-transform:scale(0.25);
+  -moz-transform:scale(0.25);
+  -o-transform:scale(0.25);
+  transform:scale(0.25);
+  /* position it, as if it was the original size 
+  position: absolute;
+  left: -400px;
+  top: -200px;*/
+  -moz-transform-origin: top left;
+  -webkit-transform-origin: top left;
+  -o-transform-origin: top left;
+  -ms-transform-origin: top left;
+  transform-origin: top left;
+}
+
+/*used for todo floats*/
+.todofloatright { display:none; float: right; width: 300px; margin: 0 0 10px 10px; background-color: fff; padding: 3px; border-top: 1px solid #999; border-right: 2px solid #555; border-bottom: 2px solid #555; border-left: 1px solid #999; clear:right }
+div.todofloatright p {font-size: 90%; background-color: rgb(252, 252, 181);}
+
+
+/*used for html tables in the document*/
+.nqtable {border-collapse:collapse;}
+.nqtable td, .nqtable th{padding:3px; border-width:1px; border-color:gray; border-style:solid; vertical-align:top;}
+.nqtable th{text-align: center; font-weight: bold; background-color: silver; }
+
+
+
+/* Gennerated by means of nqserver/nqSprites.css */
+/* You can also gennerate a sprite template using nqserver/nqSprites.png */
+.icondefault { background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1264px; width: 16px; height: 16px;} /*  79 - page  */
+.icon0 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px 0px; width: 16px; height: 16px;} /*  0 - class  */
+.icon1 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -16px; width: 16px; height: 16px;} /*  1 - object  */
+.icon3 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -48px; width: 16px; height: 16px;} /*  3 - parent  */
+.icon4 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -64px; width: 16px; height: 16px;} /*  4 - attribute  */
+.icon5 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -80px; width: 16px; height: 16px;} /*  5 - maps to  */
+.icon6 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -96px; width: 16px; height: 16px;} /*  6 - default  */
+.icon7 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -112px; width: 16px; height: 16px;} /*  7 - one to one  */
+.icon8 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -128px; width: 16px; height: 16px;} /*  8 - ordered  */
+.icon9 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -144px; width: 16px; height: 16px;} /*  9 - next  */
+.icon10 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -160px; width: 16px; height: 16px;} /*  10 - many to many  */
+.icon11 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -176px; width: 16px; height: 16px;} /*  11 - one to many  */
+.icon12 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -192px; width: 16px; height: 16px;} /*  12 - owns  */
+.icon15 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -240px; width: 16px; height: 16px;} /*  15 - subclasses  */
+.icon16 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -256px; width: 16px; height: 16px;} /*  16 - attribute of  */
+.icon17 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -272px; width: 16px; height: 16px;} /*  17 - mapped to by  */
+.icon18 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -288px; width: 16px; height: 16px;} /*  18 - default of  */
+.icon19 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -304px; width: 16px; height: 16px;} /*  19 - one to one reverse  */
+.icon20 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -320px; width: 16px; height: 16px;} /*  20 - ordered parent  */
+.icon22 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -352px; width: 16px; height: 16px;} /*  22 - many to many reverse  */
+.icon23 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -368px; width: 16px; height: 16px;} /*  23 - many to one  */
+.icon24 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -384px; width: 16px; height: 16px;} /*  24 - owned by  */
+.icon27 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -432px; width: 16px; height: 16px;} /*  27 - instantiations  */
+.icon28 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -448px; width: 16px; height: 16px;} /*  28 - the user  */
+.icon30 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -480px; width: 16px; height: 16px;} /*  30 - by association type  */
+.icon31 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -496px; width: 16px; height: 16px;} /*  31 - associations  */
+.icon50 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -800px; width: 16px; height: 16px;} /*  50 - Business Classes  */
+.icon51 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -816px; width: 16px; height: 16px;} /*  51 - Pseudonyms  */
+.icon52 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -832px; width: 16px; height: 16px;} /*  52 - Date  */
+.icon53 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -848px; width: 16px; height: 16px;} /*  53 - Attribute  */
+.icon54 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -864px; width: 16px; height: 16px;} /*  54 - String  */
+.icon55 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -880px; width: 16px; height: 16px;} /*  55 - Integer  */
+.icon56 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -896px; width: 16px; height: 16px;} /*  56 - Number  */
+.icon57 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -912px; width: 16px; height: 16px;} /*  57 - Boolean  */
+.icon58 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -928px; width: 16px; height: 16px;} /*  58 - Permitted Value  */
+.icon59 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -944px; width: 16px; height: 16px;} /*  59 - Attribute Access  */
+.icon60 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -960px; width: 16px; height: 16px;} /*  60 - Start Dates  */
+.icon61 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -976px; width: 16px; height: 16px;} /*  61 - URL  */
+.icon62 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -992px; width: 16px; height: 16px;} /*  62 - Pages  */
+.icon63 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1008px; width: 16px; height: 16px;} /*  63 - Attribute References  */
+.icon64 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1024px; width: 16px; height: 16px;} /*  64 - currency  */
+.icon65 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1040px; width: 16px; height: 16px;} /*  65 - RTF  */
+.icon66 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1056px; width: 16px; height: 16px;} /*  66 - States  */
+.icon67 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1072px; width: 16px; height: 16px;} /*  67 - Process Classes  */
+.icon68 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1088px; width: 16px; height: 16px;} /*  68 - User Id  */
+.icon69 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1104px; width: 16px; height: 16px;} /*  69 - Primary Names  */
+.icon70 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1120px; width: 16px; height: 16px;} /*  70 - Organizational Units  */
+.icon71 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1136px; width: 16px; height: 16px;} /*  71 - Parties  */
+.icon72 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1152px; width: 16px; height: 16px;} /*  72 - Execute  */
+.icon73 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1168px; width: 16px; height: 16px;} /*  73 - Incident States  */
+.icon74 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1184px; width: 16px; height: 16px;} /*  74 - Views  */
+.icon75 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1200px; width: 16px; height: 16px;} /*  75 - USD  */
+.icon76 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1216px; width: 16px; height: 16px;} /*  76 - EUR  */
+.icon77 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1232px; width: 16px; height: 16px;} /*  77 - Description  */
+.icon78 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1248px; width: 16px; height: 16px;} /*  78 - Documents  */
+.icon79 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1264px; width: 16px; height: 16px;} /*  79 - Pages  */
+.icon80 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1280px; width: 16px; height: 16px;} /*  80 - Folders  */
+.icon81 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1296px; width: 16px; height: 16px;} /*  81 - To One Associations  */
+.icon82 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1312px; width: 16px; height: 16px;} /*  82 - Field Width  */
+.icon83 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1328px; width: 16px; height: 16px;} /*  83 - Default Boolean  */
+.icon84 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1344px; width: 16px; height: 16px;} /*  84 - Products  */
+.icon85 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1360px; width: 16px; height: 16px;} /*  85 - Service Requests  */
+.icon86 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1376px; width: 16px; height: 16px;} /*  86 - Agreements  */
+.icon87 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1392px; width: 16px; height: 16px;} /*  87 - To Manny Associations  */
+.icon88 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1408px; width: 16px; height: 16px;} /*  88 - Legal Entities  */
+.icon89 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1424px; width: 16px; height: 16px;} /*  89 - Organizations  */
+.icon90 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1440px; width: 16px; height: 16px;} /*  90 - Accordions Tabs  */
+.icon91 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1456px; width: 16px; height: 16px;} /*  91 - Accordion or Tab  */
+.icon92 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1472px; width: 16px; height: 16px;} /*  92 - Display Types  */
+.icon93 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1488px; width: 16px; height: 16px;} /*  93 - Orfans  */
+.icon94 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1504px; width: 16px; height: 16px;} /*  94 - Association Types  */
+.icon95 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1520px; width: 16px; height: 16px;} /*  95 - Service Request History  */
+.icon96 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1536px; width: 16px; height: 16px;} /*  96 - Business Class Histories  */
+.icon97 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1552px; width: 16px; height: 16px;} /*  97 - General Ledger  */
+.icon98 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1568px; width: 16px; height: 16px;} /*  98 - Journal  */
+.icon99 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1584px; width: 16px; height: 16px;} /*  99 - Widgets  */
+.icon100 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1600px; width: 16px; height: 16px;} /*  100 - ParentId  */
+.icon101 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1616px; width: 16px; height: 16px;} /*  101 - Cell Name  */
+.icon102 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1632px; width: 16px; height: 16px;} /*  102 - Cell Type  */
+.icon103 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1648px; width: 16px; height: 16px;} /*  103 - Persons  */

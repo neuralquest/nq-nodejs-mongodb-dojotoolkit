@@ -1,0 +1,17 @@
+{
+	"name": "neuralquest",
+	"version": "0.1",
+	"description": "Neuralquest - Browser based process modeling and execution.",
+	"license": "BSD-3-Clause",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Neuralquest/neuralquest.git"
+	},
+	"devDependencies": {
+		"intern": "2.0.3",
+		"stylus": "0.48.1"
+	},
+	"bugs": "http://neuralquest.org",
+	"keywords": [ "Process Modeling", "Dojo"],
+	"homepage": "http://neuralquest.org"
+}
