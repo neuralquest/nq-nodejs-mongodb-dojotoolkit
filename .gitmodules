@@ -1,0 +1,27 @@
+[submodule "WebContent/tween"]
+	path = WebContent/tween
+	url = https://github.com/sole/tween.js.git
+[submodule "WebContent/threejs"]
+	path = WebContent/threejs
+	url = https://github.com/mrdoob/three.js.git
+[submodule "WebContent/xstyle"]
+	path = WebContent/xstyle
+	url = https://github.com/kriszyp/xstyle.git
+[submodule "WebContent/put-selector"]
+	path = WebContent/put-selector
+	url = https://github.com/kriszyp/put-selector.git
+[submodule "WebContent/util"]
+	path = WebContent/util
+	url = https://github.com/dojo/util.git
+[submodule "WebContent/dgrid"]
+	path = WebContent/dgrid
+	url = https://github.com/SitePen/dgrid.git
+[submodule "WebContent/dstore"]
+	path = WebContent/dstore
+	url = https://github.com/SitePen/dgrid.git
+[submodule "WebContent/dijit"]
+	path = WebContent/dijit
+	url = https://github.com/dojo/dijit.git
+[submodule "WebContent/dojo"]
+	path = WebContent/dojo
+	url = https://github.com/dojo/dojo.git
