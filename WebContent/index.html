@@ -4,16 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 		<title>Neuralquest - Browser based process modeling and execution.</title>
-		<!-- load Threejs scripts -->
-		<!-- <script type='text/javascript' src="js/threejs/build/three.js"></script>
-		<script type='text/javascript' src="js/threejs/examples/js/controls/TrackballControls.js"></script>
-		<script type='text/javascript' src="js/threejs/examples/js/Detector.js"></script>
-		<script type='text/javascript' src="js/threejs/examples/js/libs/stats.min.js"></script>
-		<script type='text/javascript' src='js/threejs/examples/js/libs/tween.min.js'></script>
-		<script type='text/javascript' src="js/threejs/examples/fonts/helvetiker_regular.typeface.js"></script>
-		<script src="js/threejs/examples/fonts/helvetiker_regular.typeface.js"></script>
-		<script src="js/threejs/examples/fonts/helvetiker_bold.typeface.js"></script> -->
-		<link rel="stylesheet" href="app/resources/app.css">	
+		<link rel="stylesheet" href="app/resources/neuralquest.css">	
 		<!-- provide config -->
 		<script>	
 			dojoConfig = {
@@ -35,8 +26,7 @@
 					'dojox',
 					'put-selector',
 					'xstyle',
-					'threejs',
-					'tween' 
+					'threejs'
 				],
 				// Use the smaller, faster "lite" CSS selector engine, which works in all browsers IE8+
 				selectorEngine: 'lite',
@@ -44,7 +34,7 @@
 				// instead of the legacy Dojo resolution method (relative to the parent directory of `baseUrl`)
 				tlmSiblingOfDojo: false,
 				deferredInstrumentation: true,
-				useDeferredInstrumentation: "report-unhandled-rejections",
+	//			useDeferredInstrumentation: "report-unhandled-rejections",
 	//			locale: "en-GB",
 				parseOnLoad: true,
 	            dojoBlankHtmlUrl:'/blank.html'
@@ -75,7 +65,7 @@
 					<button id="saveButtonId" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true, iconClass:'saveIcon'">Save</button>
 					<button id="cancelButtonId" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true, iconClass:'cancelIcon'">Cancel</button>
 					<button id="helpButtonId" data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'helpIcon'" >Help</button>
-					<img src="img/Neuralquest/neuralquest.png" align="middle" width="160px" height="24px">
+					<img src="app/resources/img/Neuralquest/neuralquest.png" align="middle" width="160px" height="24px">
 				</div>
 			</div>
 		</div>
