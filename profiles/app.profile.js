@@ -52,7 +52,8 @@ var profile = {
 		'dojo',
 		'dojox',
 		'put-selector',
-		'xstyle'
+		'xstyle',
+		'threejs'
 	],
 
 	// Strips all calls to console functions within the code. You can also set this to "warn" to strip everything
