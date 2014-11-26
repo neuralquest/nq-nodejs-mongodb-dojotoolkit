@@ -1,17 +1,38 @@
 {
 	"name": "neuralquest",
-	"version": "0.1",
-	"description": "Neuralquest - Browser based process modeling and execution.",
+	"author": "Chris de Jong",
+	"version": "0.1.0",
+	"description": "A Browser based process modeling and execution environment.",
 	"license": "BSD-3-Clause",
-	"repository": {
+    "maintainers": [
+	    {
+	 	   "name": "Chris de Jong",
+	 	   "email": "chris@neuralquest.org"
+	    }
+    ],
+  	"repository": {
 		"type": "git",
 		"url": "https://github.com/Neuralquest/neuralquest.git"
 	},
+	"Dependencies": {
+		"dgrid": "~0.5.0",
+		"dijit": "~1.11.0",
+		"dojo": "~1.11.0",
+		"dojox": "~1.11.0",
+		"dstore": "~1.0.0",
+		"put-selector": "~0.3.0",
+		"xstyle": "~0.2.0"
+	},
 	"devDependencies": {
-		"intern": "2.0.3",
-		"stylus": "0.48.1"
+		"intern": "~2.0.0",
+		"stylus": "~0.48.0"
+		"util": "~1.11.0"
 	},
 	"bugs": "http://neuralquest.org",
-	"keywords": [ "Process Modeling", "Dojo"],
+	"keywords": [ "Process Modeling", "Javascript", "Dojo", "WebGL", "Threejs"],
 	"homepage": "http://neuralquest.org"
+	"icon": "https://raw.githubusercontent.com/Neuralquest/neuralquest/master/WebContent/favicon.ico",
+	"help" : {
+        "web" : "http://neuralquest.org"
+    }
 }
