@@ -1,19 +1,20 @@
 require([
 'dojo/_base/array', 'dojo/dom-style', 'dojo/_base/fx', 'dojo/ready', 'dojo/topic', "dojo/on", 'dojo/hash', 'dijit/registry', 
 'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct', 'dojo/_base/declare',
-'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer', "app/nqObservable", //"dojo/store/Observable", 
+'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',// 'dstore/Trackable', //"app/nqObservable", //"dojo/store/Observable", 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
 'app/nqTransStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument',
 'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct, declare,  
-		Deferred, when, all, query, BorderContainer, Observable,
+		Deferred, when, all, query, BorderContainer,// Trackable,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
 		nqTransStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
 		instrumentation, styles) {
 	
-	//var nqDataStore = new nqTransStore();
-	var nqDataStore = Observable(new nqTransStore());
+	var nqDataStore = new nqTransStore();
+	//var nqDataStore = declare([new nqTransStore(), Trackable]);
+	//var nqDataStore = Observable(new nqTransStore());
 	//var nqDataStore = Observable(new nqStore());
 	//var transaction = nqDataStore.transaction();
 		var self = this;

@@ -1,18 +1,18 @@
 define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-style",'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox', 'dojo/when', "dojo/promise/all", 
          'dijit/Editor', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", "dojo/cookie", "dojo/hash", "dijit/form/ToggleButton",
-         "app/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/date/locale", "dojo/html",
+         "app/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/date/locale", "dojo/html", 'dgrid/extensions/ColumnResizer',
         'dgrid/OnDemandGrid', 'dgrid/Editor', 'dgrid/Selector', 'dgrid/Keyboard', 'dgrid/extensions/DijitRegistry', "dgrid/extensions/DnD",
         "dgrid/Selection", "dijit/form/Button","dojo/_base/array", "dijit/registry",
-        "dojo/date/stamp", 'dojo/promise/instrumentation', 
+        "dojo/date/stamp", //'dGrid/_StoreMixin', 
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, arrayUtil, lang, domStyle, Select, Toolbar, DateTextBox, when, all, 
 			RTFEditor, Memory, domConstruct, on, cookie, hash, ToggleButton,
-			nqWidgetBase, ContentPane, domGeometry, has, locale, html, 
+			nqWidgetBase, ContentPane, domGeometry, has, locale, html, ColumnResizer,
 			Grid, Editor, Selector, Keyboard, DijitRegistry, Dnd,
 			Selection, Button, array, registry,
-			stamp, instrumentation){
+			stamp/*, nqRenderAllMixin*/){
    
 	return declare("nqTable", [nqWidgetBase], {
 		viewIdsArr: [],
@@ -135,15 +135,15 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 					}*/
 
 					//console.log('propertiesArr', propertiesArr);
-					self.grid = new (declare([Grid, Selector, Keyboard, DijitRegistry, Dnd, Editor]))({
-						collection: self.store,
+					self.grid = new (declare([Grid, Selector, Keyboard, DijitRegistry, Dnd, Editor, ColumnResizer]))({
+						//collection: self.store.fetch({parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true}),
 						//'id' : 'widget'+state.tabId,
 						'class': '.nqGrid',
 						//'store': self.store,
 						'selectionMode': "single",
 						'loadingMessage': 'Loading data...',
 						'noDataMessage': 'No data.',
-						'query': {parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true},
+						//'query': {parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true},
 						'columns': columns,
 						'cleanAddedRules': true,
 						'className': "dgrid-autoheight",// version dgrid 0.3.14
@@ -192,8 +192,12 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			this.selectedObjIdPreviousLevel = value;
 			
 			//does this return a promise?
-			this.grid.set('query',{parentId: value, widgetId: this.widgetId, join:true});
-			var promise = this.grid.refresh();
+			//var collection = this.store;
+			var collection = this.store.filter({parentId: value, widgetId: this.widgetId, join:true});
+			var promise = this.grid.set('collection', collection);
+
+//			this.grid.set('query',{parentId: value, widgetId: this.widgetId, join:true});
+			//var promise = this.grid.refresh();
 			
 			return this;//TODO
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;

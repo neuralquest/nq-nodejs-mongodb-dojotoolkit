@@ -1,5 +1,5 @@
-define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dojo/store/util/QueryResults", 'dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array"],
-function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest, Memory, Cache, request, registry, array ){
+define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dstore/QueryResults", 'dstore/Trackable', 'dstore/Store','dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array", 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/Filter'],
+function(declare, lang, when, all, QueryResults, Store, Trackable, transaction, LocalDB, JsonRest, Memory, Cache, request, registry, array, SimpleQuery, QueryMethod, Filter ){
 
 // module:
 //		js/nqTransStore
@@ -34,10 +34,13 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
     cellStore.transaction();//trun autocommit off
     assocStore.transaction();//trun autocommit off
 
-	return declare("nqTransStore", [], {
+	//return declare('nqTransStore',[Store],{
+	return declare([Store, Trackable],{
+	//return declare(Store,{
+		_createSortQuerier: SimpleQuery.prototype._createSortQuerier,
 		
 		getCell: function(id){
-			//still used by nqWidgetbase to develope permitted values
+			//still used by nqWidgetbase to develop permitted values
 			return cellStore.get(id);
 		},
 		getIdentity: function(object){
@@ -448,8 +451,112 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			}, nq.errorDialog);
 					
 			cellStore.remove(itemId);
-		},		
+		},
+		_createSubCollection: function (kwArgs) {
+			var newCollection = lang.delegate(this.constructor.prototype);
 
+			for (var i in this) {
+				if (this._includePropertyInSubCollection(i, newCollection)) {
+					newCollection[i] = this[i];
+				}
+			}
+
+			return declare.safeMixin(newCollection, kwArgs);
+		},
+
+		// queryLog: __QueryLogEntry[]
+		//		The query operations represented by this collection
+		queryLog: [],	// NOTE: It's ok to define this on the prototype because the array instance is never modified
+		_includePropertyInSubCollection: function (name, subCollection) {
+			return !(name in subCollection) || subCollection[name] !== this[name];
+		},
+		_getQuerierFactory: function (type) {
+			var uppercaseType = type[0].toUpperCase() + type.substr(1);
+			return this['_create' + uppercaseType + 'Querier'];
+		},
+		Filter: Filter,
+		filter: new QueryMethod({
+			type: 'filter',
+			normalizeArguments: function (filter) {
+				var Filter = this.Filter;
+				if (filter instanceof Filter) {
+					return [filter];
+				}
+				return [new Filter(filter)];
+			}
+		}),
+		xfilter: function(query, options){
+			if(query.parentId && query.widgetId && query.join){
+				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
+				/*when(promise, function(res){
+					console.log(res);
+				});*/
+				return new QueryResults(promise);
+			}
+			var newCollection = this._createSubCollection({
+				queryLog: this.queryLog.concat(logEntry)
+			});
+		},
+		fetch: function () {
+			var data = this.data;
+			//var data =[];
+			if (!data || data._version !== this.storage.version) {
+				// our data is absent or out-of-date, so we requery from the root
+				// start with the root data
+				//data = this.storage.fullData;
+				var queryLog = this.queryLog;
+				// iterate through the query log, applying each querier
+				for (var i = 0, l = queryLog.length; i < l; i++) {
+					//data = queryLog[i].querier(data);
+					var query = queryLog[i].arguments[0];
+					var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
+					//data = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
+					
+					when(promise, function(res){
+						data = res;
+					});
+					
+				}
+				// store it, with the storage version stamp
+				data._version = this.storage.version;
+				this.data = data;
+			}
+			return new QueryResults(data);
+		},
+		xfetch: function(query, options){
+			return;
+			if(query.parentId && query.widgetId && query.join){
+				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
+				/*when(promise, function(res){
+					console.log(res);
+				});*/
+				return new QueryResults(promise);
+			}
+			else if(query.cellId && query.viewId ){//used by tree to get the first item
+				return when(this.get(query.cellId, query.viewId), function(item){
+					return new QueryResults([item]);
+				});
+			}
+			else if(query.parentId && query.viewId ){//used by getChildren
+				var results = this.getManyByParentWidgetOrViewUnion(query.parentId, query.viewId);
+				return new QueryResults(results);
+				//return QueryResults(this.queryEngine(query, options)(results));
+			}
+			else if(query.sourceFk || query.destFk){
+				//return assocStore.query(query, options);
+				return localAssocStore.query(query, options);
+			}
+			//else return JsonRest.prototype.query.call(this, query, options);
+			return [];
+		},
+		fetchRange: function (kwArgs) {
+			var data = this.fetch(),
+				start = kwArgs.start,
+				end = kwArgs.end;
+			return new QueryResults(data.slice(start, end), {
+				totalLength: data.length
+			});
+		},		
 		query: function(query, options){
 			if(query.parentId && query.widgetId && query.join){
 				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
