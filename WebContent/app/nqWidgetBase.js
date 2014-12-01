@@ -195,7 +195,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 								},
 								//permittedValues: nameValuePairs,
 								//permittedValues:[{ id:0, name:'undefined'}], 
-								editOn: 'click',  // for dgrid
+								editOn: 'dblclick',  // for dgrid
 								autoSave: true // for dgrid
 							};
 

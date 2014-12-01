@@ -1,5 +1,5 @@
-define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dstore/QueryResults", 'dstore/Trackable', 'dstore/Store','dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array", 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/Filter'],
-function(declare, lang, when, all, QueryResults, Store, Trackable, transaction, LocalDB, JsonRest, Memory, Cache, request, registry, array, SimpleQuery, QueryMethod, Filter ){
+define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dstore/QueryResults", /*'dstore/Trackable',*/ 'dstore/Store','dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array", 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/Filter'],
+function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transaction, LocalDB, JsonRest, Memory, Cache, request, registry, array, SimpleQuery, QueryMethod, Filter ){
 
 // module:
 //		js/nqTransStore
@@ -35,7 +35,7 @@ function(declare, lang, when, all, QueryResults, Store, Trackable, transaction, 
     assocStore.transaction();//trun autocommit off
 
 	//return declare('nqTransStore',[Store],{
-	return declare([Store, Trackable],{
+	return declare(Store,{
 	//return declare(Store,{
 		_createSortQuerier: SimpleQuery.prototype._createSortQuerier,
 		

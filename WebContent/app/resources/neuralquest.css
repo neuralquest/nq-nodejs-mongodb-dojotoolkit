@@ -22,21 +22,10 @@ h1, h2, h3, h4, h5, h6 {margin-top: 0.5em; margin-bottom: 0em;}
 code {border:none; font-size: 100%;}
 .dojoDndContainerOver {	border: 0px;}
 
-/*needed for auto grow tables? view-source:http://dojofoundation.org/packages/dgrid/js/dgrid/test/autoheight.html*/
-/* styles for autoheight */
-.nqGrid {height: auto;}
-.nqGrid .dgrid-scroller {position: relative;overflow-y: hidden;}
-.has-ie-6 .nqGrid .dgrid-scroller {
-	/* IE6 doesn't react properly to hidden on this page for some reason */
-	overflow-y: visible;
-}
-.nqGrid .dgrid-header-scroll {display: none;}
-.nqGrid .dgrid-header {right: 0;}
-.nqGrid .field-rowSelector {width: 5px;}
-/*.nqGrid .dgrid .dgrid-scroller {position: relative;overflow: visible;max-height: 500px;}*/
+/*dgrid*/
 .nqGrid .dgrid-cell-padding {padding: 0px;}
-/*.nqGrid .dgrid-row-odd {background: #F2F5F9;}
-.nqGrid .dgrid-cell {border: none;}*/
+/*.nqGrid .dgrid-cell {border: none;}*/
+/*.nqGrid .dgrid-row-odd {background: #F2F5F9;}*/
 /*.dgrid-selected { background: #999; / * Make selected rows be gray * /}*/
 
 /*make dijits transparent*/

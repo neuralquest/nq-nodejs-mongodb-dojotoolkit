@@ -86,7 +86,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 				}
 				return when(all(attrRefPropertiesPromisses), function(arrayOfArrays){
 					var merged = [];
-					merged[0] = { label: ' ', selector: 'checkbox', width:'2em'};
+					//merged[0] = { label: ' ', selector: 'checkbox', width:'2em'};
 					var columns = merged.concat.apply(merged, arrayOfArrays);
 
 					/*for(var i=0;i<propertiesArr.length;i++){
@@ -136,17 +136,13 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 
 					//console.log('propertiesArr', propertiesArr);
 					self.grid = new (declare([Grid, Selector, Keyboard, DijitRegistry, Dnd, Editor, ColumnResizer]))({
-						//collection: self.store.fetch({parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true}),
-						//'id' : 'widget'+state.tabId,
-						'class': '.nqGrid',
-						//'store': self.store,
+						collection: self.store.filter({parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true}),
 						'selectionMode': "single",
 						'loadingMessage': 'Loading data...',
 						'noDataMessage': 'No data.',
-						//'query': {parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true},
 						'columns': columns,
 						'cleanAddedRules': true,
-						'className': "dgrid-autoheight",// version dgrid 0.3.14
+						'className': "dgrid-autoheight",
 						'getBeforePut':false// temporary fix for the fact that a get without a viewId ruins the item sent to the put 
 					}, domConstruct.create('div'));
 //							for(var key in gridStyle){
@@ -179,7 +175,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 								console.log("Row complete:", event);
 							});
 							*/
-					//self.grid.startup();
+					self.grid.startup();
 					self.own(self.normalToolbar);
 					self.own(self.grid);
 					self.createDeferred.resolve(self);//ready to be loaded with data					
