@@ -500,22 +500,37 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 		fetch: function () {
 			var data = this.data;
 			//var data =[];
-			if (!data || data._version !== this.storage.version) {
+			if (!data || data._version !== this.storage.version || 1==1) {
 				// our data is absent or out-of-date, so we requery from the root
 				// start with the root data
 				//data = this.storage.fullData;
 				var queryLog = this.queryLog;
 				// iterate through the query log, applying each querier
 				for (var i = 0, l = queryLog.length; i < l; i++) {
-					//data = queryLog[i].querier(data);
-					var query = queryLog[i].arguments[0];
-					var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
-					//data = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
-					
-					when(promise, function(res){
-						data = res;
-					});
-					
+					if(queryLog[i].type == 'filter'){
+						var query = queryLog[i].arguments[0];
+						if(query.parentId && query.widgetId && query.join){
+							var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
+							when(promise, function(res){
+								data = res;
+							});
+						}
+						else if(query.cellId && query.viewId ){//used by tree to get the first item
+							return when(this.get(query.cellId, query.viewId), function(item){
+								return QueryResults([item]);
+							});
+						}
+						else if(query.parentId && query.viewId ){//used by getChildren
+							var promise = this.getManyByParentWidgetOrViewUnion(query.parentId, query.viewId);
+							when(promise, function(res){
+								data = res;
+							});
+						}
+						else if(query.sourceFk || query.destFk){
+							//return assocStore.query(query, options);
+							return localAssocStore.query(query, options);
+						}
+					}
 				}
 				// store it, with the storage version stamp
 				data._version = this.storage.version;
@@ -583,9 +598,27 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			return [];
 		},
 		getChildren: function(parent){
-			return this.query({parentId: parent.id, viewId: parent.viewId });
+			//return this.query({parentId: parent.id, viewId: parent.viewId });
+			var collection = this.filter({parentId: parent.id, viewId: parent.viewId });
+			return collection;
 		},
+		XgetChildren: function(parent, onComplete){
+			var res = this.fetch({parentId: parent.id, viewId: parent.viewId });
 
+			return onComplete(object.children || []);
+		},
+		mayHaveChildren: function(item){
+			return true;
+			return "children" in item;
+		},
+		getRoot: function(onItem, onError){
+			// there should be only on a single object in (the root of) this collection,
+			// so we just return that
+			this.forEach(onItem);
+		},
+		getLabel: function(object){
+			return object.name;
+		},
 
 		getManyByParentWidgetOrViewUnion: function(sourceId, parentWidgetOrViewId){
 			// summary:

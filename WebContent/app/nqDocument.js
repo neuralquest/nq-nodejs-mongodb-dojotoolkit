@@ -302,11 +302,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 //					previousParagrphHasRightFloat = childItem[self.PARAGRAPH_ATTRREF].indexOf('floatright')==-1?false:true;
 				}
 			}, nq.errorDialog);
-			res.observe(
+			/*res.observe(
 				function(obj, removedFrom, insertedInto){
 					//console.log("observe on children of ", item, ": ", obj, removedFrom, insertedInto);
 					if(obj.id == item.id) self.setSelectedObjIdPreviousLevel();
 				}, true);	// true means to notify on item changes
+				*/
 		},
 		replaceParagraphWithEditor: function(replaceDiv, item){
 			var self = this;

@@ -133,13 +133,14 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 					var collection = self.store.filter({parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true});
 					self.grid = new (declare([Grid, Selector, Keyboard, DijitRegistry, Dnd, Editor, ColumnResizer]))({
 						collection: collection,
-						'selectionMode': "single",
-						'loadingMessage': 'Loading data...',
-						'noDataMessage': 'No data.',
-						'columns': columns,
-						'cleanAddedRules': true,
-						'className': "dgrid-autoheight",
-						'getBeforePut':false// temporary fix for the fact that a get without a viewId ruins the item sent to the put 
+						selectionMode: "single",
+						loadingMessage: 'Loading data...',
+						noDataMessage: 'No data.',
+						columns: columns,
+						cleanAddedRules: true,
+						//className: "dgrid-autoheight",
+						//height: '',//needed for auto grow
+						getBeforePut:false// temporary fix for the fact that a get without a viewId ruins the item sent to the put 
 					}, domConstruct.create('div'));
 //							for(var key in gridStyle){
 //								this.grid.styleColumn(key, gridStyle[key]);
@@ -148,23 +149,6 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 
 					collection.on('remove, add, update', function(event){
 						self.grid.refresh();
-						return;
-						console.dir(event);
-						if(event.previousIndex > -1){
-							// if we have a previous index (the case of remove or update)
-							// we remove that row
-							self.grid.removeRow(event.previousIndex);
-						}
-						if(event.target){
-							// if we have a new object, insert it with the index
-							// (the case of update or add)
-							var collection = self.store.filter({parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true});
-							collection.forEach(function(item){
-								console.dir(item);
-							});
-							var promise = self.grid.set('collection', collection);
-							//self.grid.addRow(event.target);
-						}
 					});					
 					self.grid.on(".dgrid-row:click", function(event){
 						var item = self.grid.row(event).data;
