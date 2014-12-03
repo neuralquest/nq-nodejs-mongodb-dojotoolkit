@@ -79,6 +79,9 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			return when(this.store.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefs){
 				//console.log('attrRefs', attrRefs);
 				var promisses = [];
+				promisses.push({field: 'id', label: 'id', hidden: false});
+				promisses.push({field: 'viewId', label: 'viewId', hidden: false});
+				promisses.push({field: 'classId', label: 'classId', hidden: false});
 				for(var i=0;i<attrRefs.length;i++){
 					var attrRef = attrRefs[i];
 					promisses.push(self.makeProperties(attrRef));
@@ -166,42 +169,28 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 					else permRes = true;
 					return when(permRes, function(nameValuePairs){
 						var property = {
-								field: attrRefId.toString(), // for dgrid
-								name: attrRefId.toString(), //for input
-								assocType: assocType,
-								attrClassType: attrClassType,
-								label: label,
-								helpText: helptext,
-								required: access==MANDATORY_VALUE_ID?true:false,
-								editable: access==MODIFY_VALUE_ID||MANDATORY_VALUE_ID?true:false,
-								trim: true,
-
-//								get: getValue,
-								//placeholder: attrRef[PLACEHOLDER_ATTR_ID],
-								//'default': attrRef[DEFAULT_ATTR_ID],
-								//width: attrRef[WIDTH_ATTR_ID]+'em',
-								width: '30em',
-//									style: {width: '30em'}, causes editor to crash
-								//invalidMessage: attrRef[INVALIDMESSAGE_ATTR_ID],
-								//maxLength: attrRef[MAXLENGTH_ATTR_ID],
-								//minLength: attrRef[MINLENGTH_ATTR_ID],
-								//currency: attrRef[CURRENCY_ATTR_ID],
-								//regRex: attrRef[REGEX_ATTR_ID], //e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
-								constraints: {
-									//minimum: attrRef[MINIMUM_ATTR_ID],
-									//maximum: attrRef[MAXIMUM_ATTR_ID],
-									//places: attrRef[PLACES_ATTR_ID],
-									//fractional: attrRef[FRACTIONAL_ATTR_ID]
-								},
-								//permittedValues: nameValuePairs,
-								//permittedValues:[{ id:0, name:'undefined'}], 
-								editOn: 'dblclick',  // for dgrid
-								autoSave: true // for dgrid
-							};
-
+							field: attrRefId.toString(), // for dgrid
+							name: attrRefId.toString(), //for input
+							assocType: assocType,
+							attrClassType: attrClassType,
+							label: label,
+							helpText: helptext,
+							required: access==MANDATORY_VALUE_ID?true:false,
+							editable: access==MODIFY_VALUE_ID||MANDATORY_VALUE_ID?true:false,
+							trim: true,
+							//default: attrRef[DEFAULT_ATTR_ID],
+							//width: attrRef[WIDTH_ATTR_ID]+'em',
+							//width: '30em',
+							//style: {width: '30em'}, causes editor to crash
+							//invalidMessage: attrRef[INVALIDMESSAGE_ATTR_ID],
+							//currency: attrRef[CURRENCY_ATTR_ID],
+							editOn: 'dblclick',  // for dgrid
+							autoSave: true, // for dgrid
+							sortable: true
+						};
 						switch(attrClassType){
 						case PERMITTEDVAULE_CLASS_ID: 
-							property.editor = 'Select';
+							//property.editor = 'Select';
 							var selectStore = new Memory({data: nameValuePairs});
 							property.editorArgs = {
 									name: property.field,
@@ -215,7 +204,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 							};
 							break;	
 						case RTF_CLASS_ID: 
-							property.editor = 'text';
+							//property.editor = 'RTFEditor';
 							var toolbar = new Toolbar({
 								//'style': {'display': 'none'}
 							});
@@ -223,7 +212,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 									'toolbar': toolbar, 
 									'addStyleSheet': 'css/editor.css',
 									'extraPlugins': self.extraPlugins,
-									'maxHeight': -1
+									//'maxHeight': -1
 							};					
 							property.get = function(item){
 								var value = item[property.name];
@@ -232,16 +221,32 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 							}
 							break;	
 						case DATE_CLASS_ID:
-							property.editor = 'DateTextBox';
+							//property.editor = 'DateTextBox';
 							break;	
 						case STRING_CLASS_ID:
 							property.editor = 'text';
+							property.editorArgs = {
+								//maxLength: attrRef[MAXLENGTH_ATTR_ID],
+								//minLength: attrRef[MINLENGTH_ATTR_ID],
+								//regRex: attrRef[REGEX_ATTR_ID], //e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
+							}
 							break;	
 						case INTEGER_CLASS_ID: 
 							property.editor = 'number';
+							property.editorArgs.constraints = {
+								//minimum: attrRef[MINIMUM_ATTR_ID],
+								//maximum: attrRef[MAXIMUM_ATTR_ID],
+								//places: attrRef[PLACES_ATTR_ID],
+								//fractional: attrRef[FRACTIONAL_ATTR_ID]
+							}
 							break;	
 						case NUMBER_CLASS_ID: 
 							property.editor = 'number';
+							property.editorArgs.constraints = {
+								//minimum: attrRef[MINIMUM_ATTR_ID],
+								//maximum: attrRef[MAXIMUM_ATTR_ID],
+								places: 0
+							}
 							break;	
 						case BOOLEAN_CLASS_ID: 
 							property.editor = 'radio';

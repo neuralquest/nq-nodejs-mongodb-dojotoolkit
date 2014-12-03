@@ -267,7 +267,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				var assocType = arr[0];
 				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
 				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
-				var attrClassId = arr[1][0].destFk;
+				var destClassId = arr[1][0].destFk;
 				if(assocType==ORDERED_ASSOC){
 					if(oldParentId){
 						// The leading Assoc will remain attached to the Object that's being moved

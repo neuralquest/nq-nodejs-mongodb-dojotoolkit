@@ -52,10 +52,10 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 								parent:{id:self.selectedObjIdPreviousLevel}
 						};
 						var newItem = self.store.add(addObj, directives);
-						when(newItem, function(item){
-							self.grid.refresh();//we should be getting refresh from observe
-							self.grid.select(item);
-						});
+						//when(newItem, function(item){
+						//	self.grid.refresh();//we should be getting refresh from observe
+						//	self.grid.select(item);
+						//});
 					});
 
 		        },
@@ -68,13 +68,15 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 		        checked: false,
 		        label: 'Delete Row',
 				iconClass: 'removeIcon',
-				style : {'margin-left':'5px'} 
+				style : {'margin-left':'5px'}, 
+		        onClick: function(evt){
+		        	var item = null;
+					self.store.remove(item.id, item.viewId);//what if there is more than one view?
+				}
 			});
 			this.normalToolbar.addChild(this.deleteButton);
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
 	
-			var MANYTOMANY_ASSOC = 10;	//TO MANY
-			var OBJECT_TYPE = 1;
 			//something wierd just happend. I have to add dojo. to when, else it dont work: object is not a function
 			//recursivily get all of the views that belong to this widget
 			dojo.when(self.store.getManyByAssocType(this.widgetId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewIdsArr){
@@ -89,8 +91,8 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 					//merged[0] = { label: ' ', selector: 'checkbox', width:'2em'};
 					var columns = merged.concat.apply(merged, arrayOfArrays);
 
-					/*for(var i=0;i<propertiesArr.length;i++){
-						var property = propertiesArr[i];
+					for(var i=0;i<columns.length;i++){
+						var property = columns[i];
 						switch(property.attrClassType){
 						case PERMITTEDVAULE_CLASS_ID: 
 							property.renderCell = function(object, value, node, options){
@@ -98,13 +100,14 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 								if(selectedOption) node.appendChild(document.createTextNode(selectedOption.name));
 								else node.appendChild(document.createTextNode('id: '+value));
 							};
+							property.editor = Select;
 							break;	
 						case RTF_CLASS_ID: 
 							self.editorToolbarDivNode.appendChild(property.editorArgs.toolbar.domNode);
 							property.renderCell = function(object, value, node, options) {
 								html.set(node, value);
 							};
-							//Editor.editor(toolbar);
+							property.editor = RTFEditor;
 							break;	
 						case DATE_CLASS_ID:
 							property.renderCell = function(object, value, node, options) {
@@ -120,23 +123,16 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 								if(!value) return;
 								return value.toISOString();
 							};
-							property.autoSave = true;
+							//property.autoSave = true;
+							property.editor = DateTextBox;
 							break;	
-						case STRING_CLASS_ID:
-							break;	
-						case INTEGER_CLASS_ID: 
-							break;	
-						case NUMBER_CLASS_ID: 
-							break;	
-						case BOOLEAN_CLASS_ID: 
-							break;
-						default:
 						};
-					}*/
+					}
 
 					//console.log('propertiesArr', propertiesArr);
+					var collection = self.store.filter({parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true});
 					self.grid = new (declare([Grid, Selector, Keyboard, DijitRegistry, Dnd, Editor, ColumnResizer]))({
-						collection: self.store.filter({parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true}),
+						collection: collection,
 						'selectionMode': "single",
 						'loadingMessage': 'Loading data...',
 						'noDataMessage': 'No data.',
@@ -150,25 +146,35 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 //							}
 					self.pane.containerNode.appendChild(self.grid.domNode);
 
+					collection.on('remove, add, update', function(event){
+						self.grid.refresh();
+						return;
+						console.dir(event);
+						if(event.previousIndex > -1){
+							// if we have a previous index (the case of remove or update)
+							// we remove that row
+							self.grid.removeRow(event.previousIndex);
+						}
+						if(event.target){
+							// if we have a new object, insert it with the index
+							// (the case of update or add)
+							var collection = self.store.filter({parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true});
+							collection.forEach(function(item){
+								console.dir(item);
+							});
+							var promise = self.grid.set('collection', collection);
+							//self.grid.addRow(event.target);
+						}
+					});					
+					self.grid.on(".dgrid-row:click", function(event){
+						var item = self.grid.row(event).data;
+						//var level = self.level;
+						nq.setHashViewId(self.level, item.viewId, self.tabId, item.id);	
+					});
 					self.grid.on("dgrid-error", function(event) {
 						//nq.errorDialog;
 						// Display an error message above the grid when an error occurs.
 		    	    	new dijit.Dialog({title: "Get Error", extractContent: true, content: event.error.message}).show();
-					});
-									
-					self.grid.on(".dgrid-row:click", function(event){
-						var item = self.grid.row(event).data;
-						if(self.deleteButton.get('checked')){
-							self.deleteButton.set('checked', false);
-							self.store.remove(item.id, item.viewId);//what if there is more than one view?
-
-							self.grid.refresh();
-						}
-						else{
-							var item = self.grid.row(event).data;
-							//var level = self.level;
-							nq.setHashViewId(self.level, item.viewId, self.tabId, item.id);	
-						}
 					});
 					/*self.grid.on("dgrid-refresh-complete", function(event){
 //								var row = grid.row(event);
