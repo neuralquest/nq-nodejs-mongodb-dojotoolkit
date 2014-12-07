@@ -1,4 +1,4 @@
-define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dstore/QueryResults", /*'dstore/Trackable',*/ 'dstore/Store','dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array", 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/Filter'],
+define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dstore/QueryResults", 'dstore/Store', /*'dstore/Trackable',*/'dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array", 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/Filter'],
 function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transaction, LocalDB, JsonRest, Memory, Cache, request, registry, array, SimpleQuery, QueryMethod, Filter ){
 
 // module:
@@ -153,7 +153,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				var valuePromises = [];
 				for(var j=0;j<attrRefArr.length;j++){
 					var attrRefId = attrRefArr[j];
-					valuePromises.push(self.addAttributeValue(item, attrRefId));
+//					valuePromises.push(self.addAttributeValue(item, attrRefId));
 				}
 				return when(all(valuePromises), function(valueObjArr){return item;});
 			}, nq.errorDialog);			
@@ -367,22 +367,31 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				}
 				else{
 					if(oldParentId == newParentId) return;
-					//TODO new assoc?
-					if(assocType<SUBCLASSES_PASSOC){
-						when(assocStore.query({sourceFk: oldParentId, type: assocType, destFk: movingObjectId}), function(assocArr){
-							if(assocArr.length!=1) throw new Error('Expected to find one association');
-							var assoc = assocArr[0];
-							assoc.sourceFk = newParentId;
-							assocStore.put(assoc);
-						});					
+					if(oldParentId){
+						if(assocType<SUBCLASSES_PASSOC){
+							when(assocStore.query({sourceFk: oldParentId, type: assocType, destFk: movingObjectId}), function(assocArr){
+								if(assocArr.length!=1) throw new Error('Expected to find one association');
+								var assoc = assocArr[0];
+								assoc.sourceFk = newParentId;
+								assocStore.put(assoc);
+							});					
+						}
+						else {
+							when(assocStore.query({sourceFk:movingObjectId , type: assocType-12, destFk: oldParentId}), function(assocArr){
+								if(assocArr.length!=1) throw new Error('Expected to find one association');
+								var assoc = assocArr[0];
+								assoc.destFk = newParentId;
+								assocStore.put(assoc);
+							});					
+						}
 					}
-					else {
-						when(assocStore.query({sourceFk:movingObjectId , type: assocType-12, destFk: oldParentId}), function(assocArr){
-							if(assocArr.length!=1) throw new Error('Expected to find one association');
-							var assoc = assocArr[0];
-							assoc.destFk = newParentId;
-							assocStore.put(assoc);
-						});					
+					else{//new assoc
+						if(assocType<SUBCLASSES_PASSOC){
+							self.addAssoc({sourceFk: newParentId, type: assocType, destFk: movingObjectId});									
+						}
+						else {
+							self.addAssoc({sourceFk: movingObjectId, type: assocType-12, destFk: newParentId});									
+						}
 					}
 				}
 			});		
@@ -485,18 +494,6 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				return [new Filter(filter)];
 			}
 		}),
-		xfilter: function(query, options){
-			if(query.parentId && query.widgetId && query.join){
-				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
-				/*when(promise, function(res){
-					console.log(res);
-				});*/
-				return new QueryResults(promise);
-			}
-			var newCollection = this._createSubCollection({
-				queryLog: this.queryLog.concat(logEntry)
-			});
-		},
 		fetch: function () {
 			var data = this.data;
 			//var data =[];
@@ -509,15 +506,16 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				for (var i = 0, l = queryLog.length; i < l; i++) {
 					if(queryLog[i].type == 'filter'){
 						var query = queryLog[i].arguments[0];
-						if(query.parentId && query.widgetId && query.join){
+						if(query.parentId && query.widgetId && query.join){//used by nqTable
 							var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
 							when(promise, function(res){
 								data = res;
 							});
 						}
-						else if(query.cellId && query.viewId ){//used by tree to get the first item
-							return when(this.get(query.cellId, query.viewId), function(item){
-								return QueryResults([item]);
+						else if(query.itemId && query.viewId ){//used by tree to get the first item
+							var promise = this.get(query.itemId, query.viewId);
+							when(promise, function(res){
+								data = [res];
 							});
 						}
 						else if(query.parentId && query.viewId ){//used by getChildren
@@ -538,32 +536,6 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			}
 			return new QueryResults(data);
 		},
-		xfetch: function(query, options){
-			return;
-			if(query.parentId && query.widgetId && query.join){
-				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
-				/*when(promise, function(res){
-					console.log(res);
-				});*/
-				return new QueryResults(promise);
-			}
-			else if(query.cellId && query.viewId ){//used by tree to get the first item
-				return when(this.get(query.cellId, query.viewId), function(item){
-					return new QueryResults([item]);
-				});
-			}
-			else if(query.parentId && query.viewId ){//used by getChildren
-				var results = this.getManyByParentWidgetOrViewUnion(query.parentId, query.viewId);
-				return new QueryResults(results);
-				//return QueryResults(this.queryEngine(query, options)(results));
-			}
-			else if(query.sourceFk || query.destFk){
-				//return assocStore.query(query, options);
-				return localAssocStore.query(query, options);
-			}
-			//else return JsonRest.prototype.query.call(this, query, options);
-			return [];
-		},
 		fetchRange: function (kwArgs) {
 			var data = this.fetch(),
 				start = kwArgs.start,
@@ -572,12 +544,9 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				totalLength: data.length
 			});
 		},		
-		query: function(query, options){
+		/*query: function(query, options){
 			if(query.parentId && query.widgetId && query.join){
 				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
-				/*when(promise, function(res){
-					console.log(res);
-				});*/
 				return QueryResults(promise);
 			}
 			else if(query.cellId && query.viewId ){//used by tree to get the first item
@@ -596,28 +565,11 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			}
 			//else return JsonRest.prototype.query.call(this, query, options);
 			return [];
-		},
+		},*/
 		getChildren: function(parent){
 			//return this.query({parentId: parent.id, viewId: parent.viewId });
 			var collection = this.filter({parentId: parent.id, viewId: parent.viewId });
 			return collection;
-		},
-		XgetChildren: function(parent, onComplete){
-			var res = this.fetch({parentId: parent.id, viewId: parent.viewId });
-
-			return onComplete(object.children || []);
-		},
-		mayHaveChildren: function(item){
-			return true;
-			return "children" in item;
-		},
-		getRoot: function(onItem, onError){
-			// there should be only on a single object in (the root of) this collection,
-			// so we just return that
-			this.forEach(onItem);
-		},
-		getLabel: function(object){
-			return object.name;
 		},
 
 		getManyByParentWidgetOrViewUnion: function(sourceId, parentWidgetOrViewId){

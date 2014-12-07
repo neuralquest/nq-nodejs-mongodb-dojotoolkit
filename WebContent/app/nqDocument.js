@@ -146,15 +146,26 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 
 			var self = this;
 			var viewId = this.viewId;
-			when(this.store.get(this.selectedObjIdPreviousLevel, this.viewId), function(item){//TODO change to query and listen for chages
-			//when(this.store.getCell(this.selectedObjIdPreviousLevel), function(item){
-				return when(self.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
-					registry.byId('tab'+self.tabId).resize();
-//					self.pane.resize();
-					self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
-					return item;
-				});
-			}, nq.errorDialog);
+			var query = {itemId:this.selectedObjIdPreviousLevel, viewId:this.viewId};
+			var collection = this.store.filter(query);
+			collection.on('remove, add', function(event){
+				var parent = event.parent;
+				var collection = self.childrenCache[parent.id];
+				var children = collection.fetch();
+				self.onChildrenChange(parent, children);
+			});	
+			collection.on('update', function(event){
+				var obj = event.target;
+				self.onChange(obj);
+			});	
+			var children = collection.fetch();
+			var item = children[0];
+			var promise = when(self.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
+				registry.byId('tab'+self.tabId).resize();
+//				self.pane.resize();
+				self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
+				return item;
+			});
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
 		//Create an ordinary HTML page recursivly by obtaining data from the server
@@ -290,9 +301,20 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			if(item.classId==80) return; //folder
 			
 			//Get the sub- headers/paragraphs
-			var res = this.store.getChildren(item);
-			if(res) this.own(res);
-			when(res, function(children){
+			var collection = this.store.getChildren(item);
+			// Setup observer in case children list changes, or the item(s) in the children list are updated.
+			collection.on('remove, add', function(event){
+				var parent = event.parent;
+				var collection = self.childrenCache[parent.id];
+				var children = collection.fetch();
+				self.onChildrenChange(parent, children);
+			});	
+			collection.on('update', function(event){
+				var obj = event.target;
+				self.onChange(obj);
+			});	
+			var children = collection.fetch();
+			children.forEach(function(childItem){
 				var previousParagrphHasRightFloat = false;
 				for(var i=0;i<children.length;i++){
 					var childItem = children[i];
@@ -300,14 +322,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					self.generateNextLevelContents(childItem, viewId, headerLevel+1, paragraphNrArr, item.id, previousParagrphHasRightFloat);
 					paragraphNrArr.splice(headerLevel,100);//remove old shit
 //					previousParagrphHasRightFloat = childItem[self.PARAGRAPH_ATTRREF].indexOf('floatright')==-1?false:true;
-				}
-			}, nq.errorDialog);
-			/*res.observe(
-				function(obj, removedFrom, insertedInto){
-					//console.log("observe on children of ", item, ": ", obj, removedFrom, insertedInto);
-					if(obj.id == item.id) self.setSelectedObjIdPreviousLevel();
-				}, true);	// true means to notify on item changes
-				*/
+				}				
+			});
 		},
 		replaceParagraphWithEditor: function(replaceDiv, item){
 			var self = this;

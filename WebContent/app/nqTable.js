@@ -41,21 +41,18 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 		        label: 'Add Row',
 				iconClass: 'addIcon',
 		        onClick: function(evt){
+					var viewId = self.viewIdsArr[0]; //TODO what about more than one
 					//get the class that this view maps to
-					when(self.store.getOneByAssocType(item.viewId, MAPSTO_ASSOC, 0), function(classId){
+					when(self.store.getOneByAssocType(viewId, MAPSTO_ASSOC, 0), function(classId){
 						if(!classId) throw new Error('View '+item.viewId+' must map to one class ');
 						var addObj = {
-							viewId: self.viewIdsArr[0], //TODO what about more than one
+							viewId: viewId, //TODO what about more than one
 							classId: classId
 						};
 						var directives = {
 								parent:{id:self.selectedObjIdPreviousLevel}
 						};
-						var newItem = self.store.add(addObj, directives);
-						//when(newItem, function(item){
-						//	self.grid.refresh();//we should be getting refresh from observe
-						//	self.grid.select(item);
-						//});
+						self.store.add(addObj, directives);
 					});
 
 		        },

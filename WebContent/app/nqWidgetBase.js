@@ -79,9 +79,9 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			return when(this.store.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefs){
 				//console.log('attrRefs', attrRefs);
 				var promisses = [];
-				promisses.push({field: 'id', label: 'id', hidden: false});
-				promisses.push({field: 'viewId', label: 'viewId', hidden: false});
-				promisses.push({field: 'classId', label: 'classId', hidden: false});
+				promisses.push({field: 'id', name: 'id', label: 'id', readonly:true, hidden: false});
+				promisses.push({field: 'viewId', name: 'viewId', label: 'viewId', readonly:true,  hidden: false});
+				promisses.push({field: 'classId', name: 'classId', label: 'classId', readonly:true,  hidden: false});
 				for(var i=0;i<attrRefs.length;i++){
 					var attrRef = attrRefs[i];
 					promisses.push(self.makeProperties(attrRef));
