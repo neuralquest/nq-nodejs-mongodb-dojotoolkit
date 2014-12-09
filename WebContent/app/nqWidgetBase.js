@@ -140,10 +140,12 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			//get the helptext that this attribute reference has as an attribute
 			attrPromises[4] = this.store.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, DESCRIPTION);
 			return when(all(attrPromises), function(propertiesArr){
-				if(!propertiesArr[1]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 				var labelId = propertiesArr[0];
+				//if(!propertiesArr[1]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
+				if(!propertiesArr[1]) return {label:'[undefined assocType]'};
 				var assocType = propertiesArr[1];
-				if(!propertiesArr[2]) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
+				//if(!propertiesArr[2]) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
+				if(!propertiesArr[2]) return {label:'[undefined mapsTo]'};
 				var destClassId = propertiesArr[2];
 				var access = propertiesArr[3];
 				var helptextId = propertiesArr[4];
@@ -233,20 +235,20 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 							break;	
 						case INTEGER_CLASS_ID: 
 							property.editor = 'number';
-							property.editorArgs.constraints = {
+							//property.editorArgs.constraints = {
 								//minimum: attrRef[MINIMUM_ATTR_ID],
 								//maximum: attrRef[MAXIMUM_ATTR_ID],
 								//places: attrRef[PLACES_ATTR_ID],
 								//fractional: attrRef[FRACTIONAL_ATTR_ID]
-							}
+							//}
 							break;	
 						case NUMBER_CLASS_ID: 
 							property.editor = 'number';
-							property.editorArgs.constraints = {
+							//property.editorArgs.constraints = {
 								//minimum: attrRef[MINIMUM_ATTR_ID],
 								//maximum: attrRef[MAXIMUM_ATTR_ID],
-								places: 0
-							}
+								//places: 0
+							//}
 							break;	
 						case BOOLEAN_CLASS_ID: 
 							property.editor = 'radio';

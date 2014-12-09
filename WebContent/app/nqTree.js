@@ -88,12 +88,15 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				query : {itemId: this.selectedObjIdPreviousLevel, viewId: this.viewIdsArr[0]}
 			});			
 			this.treeModel.getRoot = function(onItem, onError){
+				var self = this;
 				var collection = this.store.filter(this.query);
 				collection.on('remove, add', function(event){
 					var parent = event.parent;
 					var collection = self.childrenCache[parent.id];
-					var children = collection.fetch();
-					self.onChildrenChange(parent, children);
+					if(collection){
+						var children = collection.fetch();
+						self.onChildrenChange(parent, children);
+					}
 				});	
 				collection.on('update', function(event){
 					var obj = event.target;
@@ -112,19 +115,15 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					when(this.childrenCache[id], onComplete, onError);
 					return;
 				}
-				if(parentItem.id==2016){
-					parentItem.viewId = 2485;
-					var collection = this.childrenCache[id] = this.store.getChildren(parentItem);
-					var children = collection.fetch();
-					return onComplete(children);
-				}
 				var collection = this.childrenCache[id] = this.store.getChildren(parentItem);
 				// Setup observer in case children list changes, or the item(s) in the children list are updated.
 				collection.on('remove, add', function(event){
 					var parent = event.parent;
 					var collection = self.childrenCache[parent.id];
-					var children = collection.fetch();
-					self.onChildrenChange(parent, children);
+					if(collection){
+						var children = collection.fetch();
+						self.onChildrenChange(parent, children);
+					}
 				});	
 				collection.on('update', function(event){
 					var obj = event.target;
@@ -322,7 +321,6 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			//attrPromises[1] = self.store.query({sourceFk: viewId, type: MAPSTO_ASSOC});
 			attrPromises[1] = self.store.getOneByAssocType(viewId, MAPSTO_ASSOC, CLASS_TYPE, false);
 			when(all(attrPromises), function(arr){
-				var viewId2 = viewId;
 				if(!arr[0]) throw new Error('View '+viewId+' must have an association type as an attribute ');
 				var assocType = arr[0];
 				var assocName = self.store.getCell(assocType).name;//TODO will fail if it is asysnc

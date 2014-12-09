@@ -289,6 +289,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 											var assoc = assocArr[0];
 											assoc.sourceFk = oldParentId;
 											assoc.type = ORDERED_ASSOC;
+											assoc.parentId = oldParentId;//needed for serverside validation
 											assocStore.put(assoc);
 										});					
 									}
@@ -303,6 +304,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 											if(assocArr.length!=1) throw new Error('Expected to find one association');
 											var assoc = assocArr[0];
 											assoc.sourceFk = oldParentChildren[idx-1];
+											assoc.parentId = oldParentId;//needed for serverside validation
 											assocStore.put(assoc);
 										});					
 									}
@@ -327,6 +329,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 										var newParentFollowingAssoc = assocArr[0];
 										newParentFollowingAssoc.sourceFk = movingObjectId;
 										newParentFollowingAssoc.type = NEXT_ASSOC;
+										leadingAssoc.parentId = newParentId;//needed for serverside validation
 										assocStore.put(newParentFollowingAssoc);
 									});					
 								}
@@ -346,6 +349,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 									var leadingAssoc = assocArr[0];
 									leadingAssoc.sourceFk = newParentFollowingAssocSourceFk;
 									leadingAssoc.type = newParentFollowingAssoctype;
+									leadingAssoc.parentId = newParentId;//needed for serverside validation
 									assocStore.put(leadingAssoc);										
 								});					
 							});
@@ -519,15 +523,23 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 							});
 						}
 						else if(query.parentId && query.viewId ){//used by getChildren
-							var promise = this.getManyByParentWidgetOrViewUnion(query.parentId, query.viewId);
-							when(promise, function(res){
-								data = res;
-							});
+							if(query.parentId==2016000){
+								var promise = this.getManyByView(query.parentId, 2485);
+								when(promise, function(res){
+									data = res;
+								});
+							}
+							else {
+								var promise = this.getManyByParentWidgetOrViewUnion(query.parentId, query.viewId);
+								when(promise, function(res){
+									data = res;
+								});
+							}
 						}
-						else if(query.sourceFk || query.destFk){
+						/*else if(query.sourceFk || query.destFk){
 							//return assocStore.query(query, options);
 							return localAssocStore.query(query, options);
-						}
+						}*/
 					}
 				}
 				// store it, with the storage version stamp
@@ -544,28 +556,6 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				totalLength: data.length
 			});
 		},		
-		/*query: function(query, options){
-			if(query.parentId && query.widgetId && query.join){
-				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
-				return QueryResults(promise);
-			}
-			else if(query.cellId && query.viewId ){//used by tree to get the first item
-				return when(this.get(query.cellId, query.viewId), function(item){
-					return QueryResults([item]);
-				});
-			}
-			else if(query.parentId && query.viewId ){//used by getChildren
-				var results = this.getManyByParentWidgetOrViewUnion(query.parentId, query.viewId);
-				return QueryResults(results);
-				//return QueryResults(this.queryEngine(query, options)(results));
-			}
-			else if(query.sourceFk || query.destFk){
-				//return assocStore.query(query, options);
-				return localAssocStore.query(query, options);
-			}
-			//else return JsonRest.prototype.query.call(this, query, options);
-			return [];
-		},*/
 		getChildren: function(parent){
 			//return this.query({parentId: parent.id, viewId: parent.viewId });
 			var collection = this.filter({parentId: parent.id, viewId: parent.viewId });
@@ -661,6 +651,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 
 			var ASSOCS_CLASS_TYPE = 94;
 			var ATTRREF_CLASS_TYPE = 63;
+			var ONLYIFPARENTEQUEALS = 2493;
 			
 			var self = this;
 			var attrPromises = [];
@@ -670,6 +661,8 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			attrPromises[1] = assocStore.query({sourceFk: viewId, type: MAPSTO_ASSOC});
 			//get the attribute references that belong to this view
 			attrPromises[2] = self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
+			//get the Only if Parent Equals that this view has as an attribute
+			attrPromises[3] = self.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, ONLYIFPARENTEQUEALS);
 			return when(all(attrPromises), function(arr){
 				if(!arr[0]) throw new Error('View '+viewId+' must have an association type as an attribute ');
 				var assocType = arr[0];
@@ -681,6 +674,12 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
 				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
 				var destClassId = arr[1][0].destFk;
+				//get the Only if Parent Equals
+				var onlyIfParentEqualsId = arr[3];
+				if(onlyIfParentEqualsId){
+					var onlyIfParentEquals = cellStore.get(onlyIfParentEqualsId);//TODO will this work with async?				
+					if(onlyIfParentEquals.name!=sourceId) return [];
+				}
 				//get the items that result from this source, view
 				var promise = null;
 				if(assocType==INSTANTIATIONS_PASSOC) promise = self.getManyByAssocType(destClassId, SUBCLASSES_PASSOC, OBJECT_TYPE, true);
@@ -709,9 +708,17 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			//get the attribute class that this attribute reference maps to
 			attrPromises[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
 			return when(all(attrPromises), function(arr){
-				if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
+				//if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
+				if(!arr[0]) {
+					item.error = 'no assocType';
+					return null;
+				}
 				var assocType = arr[0];
-				if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
+				//if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
+				if(arr[1].length!=1) {
+					item.error = 'no mapsTo';
+					return null;
+				}
 				var attrClassId = arr[1][0].destFk;
 				/////// Exception for the cell name attribute, as used by the class model ///////////////////
 				if(attrClassId == CELLNAME_ATTR_CLASS) return self.getClassModelCellName(item, objId, attrRefId);

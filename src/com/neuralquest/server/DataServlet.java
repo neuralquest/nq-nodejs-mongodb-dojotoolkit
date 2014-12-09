@@ -337,7 +337,8 @@ public class DataServlet extends HttpServlet implements Constants {
 			return;
 		}
 		else if(sourceCell.getType()==OBJECT || destCell.getType()==OBJECT){
-			if(type==NEXT_ASSOC) throw new RuntimeException("Cannot test NEXT_ASSOC");
+			if(type==NEXT_ASSOC) return;
+//			if(type==NEXT_ASSOC) throw new RuntimeException("Cannot test NEXT_ASSOC");
 //			if(type==PARENT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || ){
 				
 //			}

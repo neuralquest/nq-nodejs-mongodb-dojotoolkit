@@ -331,9 +331,11 @@ public class ConsistancyServlet extends HttpServlet  implements Constants {
 			Cell childAccTabs = itr1.next();
 			//listEl.addElement("h3").addText("AccTab: "+childAccTabs.getIdName(50));
 			listEl.addElement("h4").addAttribute("style", "color:blue;").addText("AccTab: "+childAccTabs.getIdName(50));
+			Cell accTabTypeObj = childAccTabs.getAttributeObjByDestClass(91); //var ACCORDIONORTAB_ATTRCLASS = 91
 			//Cell dispTypeObj = childAccTabs.getAttributeObjByDestClass(DISPLAY_TYPE_ID);
 			//Cell tabMTObj = childAccTabs.getCellByAssocType(MAPSTO_ASSOC);
 			Element listEl3 = listEl.addElement("ol").addText("");
+			listEl3.addElement("li").addText("accoordion or tab: "+(accTabTypeObj==null?"null":accTabTypeObj.getIdName(50)));
 			//listEl3.addElement("li").addText("display type: "+(dispTypeObj==null?"null":dispTypeObj.getIdName(50)));
 			//listEl3.addElement("li").addText("fk: "+(tabMTObj==null?"null":tabMTObj.getIdName(50)));
 			

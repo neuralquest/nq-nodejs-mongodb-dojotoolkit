@@ -56,12 +56,12 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 						dijit = new Editor(property, domConstruct.create('div'));*/
 						dijit = new Editor(property.editorArgs, domConstruct.create('div'));
 //						dijit.addStyleSheet('css/editor.css');
-						dijit.on("NormalizedDisplayChanged", function(){
+						dijit.on("NormalizedDisplayChanged", function(event){
 							var height = domGeometry.getMarginSize(dijit.domNode).h;
 							if(has("opera")){
-								height = dijit.editNode.scrollHeight;
+								height = this.editNode.scrollHeight;
 							}
-							dijit.resize({h: height});
+							this.resize({h: height});
 						});
 						//dijit.destroy = function(){console.log('destroyed editor')};
 							
