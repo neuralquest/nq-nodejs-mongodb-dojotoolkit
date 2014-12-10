@@ -61,7 +61,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		//		All of the page elements of the underlaying levels are completed 
 		
 		
-		return when(processHashLevelRecursive('placeholder', 0), function(result){
+		when(processHashLevelRecursive('placeholder', 0), function(result){
 			return result;
 		}, errorDialog);
 		
@@ -78,14 +78,12 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var parentContentPane = registry.byId(parentPaneId);
 		if(parentContentPane) parentContentPane.destroyDescendants(false);
 		
-		return when(nqDataStore.getManyByAssocTypeAndDestClass(state.viewId, ORDERED_ASSOC, ACCORDIONTABS_ATTRCLASS), function(tabIdsArr){
-			if(tabIdsArr.length==0) return null;
-			else return when(createAccordionOrTabRecursive(tabIdsArr, state.viewId, level), function(selectedTabId){
-				return when(processHashLevelRecursive('slave'+state.viewIdPreviousLevel, level+1));
-			});
+		return when(createAccordionOrTabRecursive(state.viewId, parentContentPane, level), function(newParentContentPane){
+			parentContentPane.resize();//this is a must
+			return when(processHashLevelRecursive('slave'+state.viewId, level+1));
 		});
 	}
-	function createAccordionOrTabRecursive(tabIdsArr, parentViewOrTabId, level){
+	function createAccordionOrTabRecursive(parentViewOrTabId, parentContentPane, level){
 		var ACCORDION_ID = 1777;
 		var ACCORDIONORTAB_ATTRCLASS = 91;
 		var ACCORDIONTABS_ATTRCLASS = 90;
@@ -93,17 +91,20 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		return when(nqDataStore.getOneByAssocTypeAndDestClass(parentViewOrTabId, ATTRIBUTE_ASSOC, ACCORDIONORTAB_ATTRCLASS), function(accordionOrTabId){
 			//are we creating an accordion container in a border container or a tab container?
 			var viewPanePaneCreated = null;
-			if(accordionOrTabId==ACCORDION_ID) viewPanePaneCreated = createAccordionInBorderContainer(tabIdsArr, parentViewOrTabId, level);
-			else viewPanePaneCreated = createTabs(tabIdsArr, parentViewOrTabId, level);
-			return when(viewPanePaneCreated, function(selectedTabId){//returns the selected tabId
-				return when(nqDataStore.getManyByAssocTypeAndDestClass(selectedTabId, ORDERED_ASSOC, ACCORDIONTABS_ATTRCLASS), function(childTabIdsArr){
-					if(childTabIdsArr.length==0) return selectedTabId;
-					else return createAccordionOrTabRecursive(childTabIdsArr, selectedTabId, level);
-				});
-			});
+			if(accordionOrTabId==ACCORDION_ID) viewPanePaneCreated = createAccordionInBorderContainer(parentViewOrTabId, parentContentPane, level);
+			else viewPanePaneCreated = createTabs(parentViewOrTabId, parentContentPane, level);
+			return when(viewPanePaneCreated);
 		});
 	}
-	function createAccordionInBorderContainer(tabIdsArr, parentContainerId, level){
+	function getTabsPathRecursive(tabsArr, selectedTabId){
+		tabsArr.unshift(selectedTabId);//add at the first postion
+		return null;
+		return when(nqDataStore.getOneByAssocTypeAndDestClass(selectedTabId, ORDERED_PARENT_ASSOC, ACCORDIONTABS_ATTRCLASS), function(parentTab){
+			if(parentTab) return getTabsPathRecursive(parentTab);
+			else return null;
+		});
+	}
+	function createAccordionInBorderContainer(parentViewOrTabId, parentContentPane, level){
 		// summary:
 		//		Add an accordion container in a border container to the parent content pane
 		//		The right side of the border container can be used to display content based on a selected object on the left side.
@@ -120,99 +121,102 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		// returns: Promise
 		//		The promise will result in the id of the selected accordion 
 		
+		var ACCORDIONTABS_ATTRCLASS = 90;
 		var PRIMARY_NAMES = 69;
-		
+
 		var state = getState(level);
 		var viewId = state.viewId;
-
-		var selectedTabId = state.tabId&&tabIdsArr.indexOf(state.tabId)>=0?state.tabId:tabIdsArr[0];
-				
-		var design = 'sidebar';//obtain horizontal, vertical, none from viewDef?
-		var borderContainer = new BorderContainer( {
-			'id' : 'borderContainer'+viewId,
-			'region' : 'center',
-			'design' : design,
-			'persist' : true,
-			//'class': 'noOverFlow'
-			'style' : {width: '100%', height: '100%', overflow: 'hidden', padding: '0px', margin: '0px'}
-		});
-		var leftPane = new ContentPane( {
-			'id' : 'master'+viewId,
-			'region' : 'leading',
-			'class' : 'backgroundClass',
-			'splitter' : true,
-			//'class': 'noOverFlow',
-			'style' : {width: '200px',overflow: 'hidden',padding: '0px', margin: '0px'}
-		});
-		var centerPane = new ContentPane( {
-			'id' : 'slave'+viewId,
-			'region' : 'center',
-			'class' : 'backgroundClass',
-			//'content' : '<p>Loading...</p>',
-			//'class': 'noOverFlow'
-			'style' : {overflow: 'hidden',padding: '0px', margin: '0px'}
-		});
-		borderContainer.addChild(leftPane);
-		borderContainer.addChild(centerPane);
-		var parentContentPane = registry.byId(parentContainerId);
-		parentContentPane.containerNode.appendChild(borderContainer.domNode); //appendChild works better than attaching through create
-	
-		var accordianContainer;
-		if(tabIdsArr.length==1){// this is really only to have palce to store viewPane+viewObj.id. Is there a better way?
-			accordianContainer = new ContentPane( {
-				'id' : 'viewPane'+viewId,
+		
+		return when(nqDataStore.getManyByAssocTypeAndDestClass(parentViewOrTabId, ORDERED_ASSOC, ACCORDIONTABS_ATTRCLASS), function(tabIdsArr){
+					
+			var design = 'sidebar';//obtain horizontal, vertical, none from viewDef?
+			var borderContainer = new BorderContainer( {
+				'id' : 'borderContainer'+parentViewOrTabId,
 				'region' : 'center',
-				'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
+				'design' : design,
+				'persist' : true,
+				//'class': 'noOverFlow'
+				'style' : {width: '100%', height: '100%', overflow: 'hidden', padding: '0px', margin: '0px'}
 			});
-		}
-		else {
-			accordianContainer = new AccordionContainer( {
-				'id' : 'viewPane'+viewId,
+			var leftPane = new ContentPane( {
+				'id' : 'master'+parentViewOrTabId,
+				'region' : 'leading',
+				'class' : 'backgroundClass',
+				'splitter' : true,
+				//'class': 'noOverFlow',
+				'style' : {width: '200px',overflow: 'hidden',padding: '0px', margin: '0px'}
+			});
+			var centerPane = new ContentPane( {
+				'id' : 'slave'+parentViewOrTabId,
 				'region' : 'center',
-				'duration' : 0,//animation screws out layout. Is there a better solution?
-				//'persist' : true,//cookies override our hash tabId
-				'class': 'noOverFlow',
-				'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
+				'class' : 'backgroundClass',
+				//'content' : '<p>Loading...</p>',
+				//'class': 'noOverFlow'
+				'style' : {overflow: 'hidden',padding: '0px', margin: '0px'}
 			});
-		}
-		leftPane.addChild(accordianContainer);
-		var promisses = [];
-		for(var i=0;i<tabIdsArr.length;i++){
-			//get the tab name that this tab has as an attribute
-			var tabId = tabIdsArr[i];
-			promisses.push(when(nqDataStore.getOneByAssocTypeAndDestClass(tabId, ATTRIBUTE_ASSOC, PRIMARY_NAMES), function(cellId){
-				return when(nqDataStore.getCell(cellId), function(cell){ return cell.name;});
-			}));
-		};
-		return when(all(promisses), function(tabNamesArr){
+			borderContainer.addChild(leftPane);
+			borderContainer.addChild(centerPane);
+			//parentContentPane.addChild(borderContainer);
+			parentContentPane.containerNode.appendChild(borderContainer.domNode); //appendChild works better than attaching through create
+		
+			var accordianContainer;
+			if(tabIdsArr.length==1){// this is really only to have palce to store viewPane+viewObj.id. Is there a better way?
+				accordianContainer = new ContentPane( {
+					'id' : 'viewPane'+parentViewOrTabId,
+					'region' : 'center',
+					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
+				});
+			}
+			else {
+				accordianContainer = new AccordionContainer( {
+					'id' : 'viewPane'+parentViewOrTabId,
+					'region' : 'center',
+					'duration' : 0,//animation screws out layout. Is there a better solution?
+					//'persist' : true,//cookies override our hash tabId
+					'class': 'noOverFlow',
+					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
+				});
+			}
+			leftPane.addChild(accordianContainer);
+			var promisses = [];
 			for(var i=0;i<tabIdsArr.length;i++){
+				//get the tab name that this tab has as an attribute
 				var tabId = tabIdsArr[i];
-				var tabPane = new ContentPane( {
-					'id' : 'tab'+tabId,
-					'title' : tabNamesArr[i],
-					'selected' : tabId==selectedTabId?true:false,
-					'class' : 'backgroundClass',
-					'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
-				});
-				accordianContainer.addChild(tabPane);
-				accordianContainer.watch("selectedChildWidget", function(name, oval, nval){
-				    //console.log("selected child changed from ", oval.title, " to ", nval.title);
-				    var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
-				    setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
-				});
+				promisses.push(when(nqDataStore.getOneByAssocTypeAndDestClass(tabId, ATTRIBUTE_ASSOC, PRIMARY_NAMES), function(cellId){
+					return when(nqDataStore.getCell(cellId), function(cell){ return cell.name;});
+				}));
 			};
-			
-			//parentPane.addChild(container);
-			accordianContainer.startup();
-			borderContainer.startup();
-			//if(tabIdsArr.length>1) accordianContainer.resize();
-			
-			return selectedTabId;				
-		});
+			return when(all(promisses), function(tabNamesArr){
+				for(var i=0;i<tabIdsArr.length;i++){
+					var tabId = tabIdsArr[i];
+					console.log('accId', tabId, 'parentViewOrTabId', parentViewOrTabId, 'level',level);
+					var tabPane = new ContentPane( {
+						'id' : 'tab'+tabId,
+						'title' : tabNamesArr[i],
+						'selected' : tabId==state.tabId?true:false,
+						'class' : 'backgroundClass',
+						'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
+					});
+					accordianContainer.addChild(tabPane);
+					accordianContainer.watch("selectedChildWidget", function(name, oval, nval){
+					    //console.log("selected child changed from ", oval.title, " to ", nval.title);
+					    var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
+					    setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
+					});
+				};
+				
+				//parentContentPane.addChild(container);
+				//parentPane.addChild(container);
+				accordianContainer.startup();
+				borderContainer.startup();
+				//if(tabIdsArr.length>1) accordianContainer.resize();
+				
+				return centerPane;				
+			});
 
-	
+		});
 	}
-	function createTabs(tabIdsArr, parentContainerId, level){
+	function createTabs(parentViewOrTabId, parentContentPane, level){
 		// summary:
 		//		Add a tab container to the parent content pane
 		//		If there is only one tab, then no container is drawn, just a content  pane.
@@ -230,61 +234,65 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		
 		//get the Display Type id that this widget has as an attribute
 		
+		var ACCORDIONTABS_ATTRCLASS = 90;
 		var PRIMARY_NAMES = 69;
 
 		var state = getState(level);
 		var viewId = state.viewId;
-
-		var selectedTabId = state.tabId&&tabIdsArr.indexOf(state.tabId)>=0?state.tabId:tabIdsArr[0];
-
-		var container;
-		if(tabIdsArr.length==1){// this is really only to have palce to store viewPane+viewId. Is there a better way?
-			container = new ContentPane( {
-				'id' : 'viewPane'+viewId,
-				'region' : 'center'
-			});
-		}
-		else {
-			container = new TabContainer( {
-				'id' : 'viewPane'+viewId,
-				//'persist' : true,//cookies override our hash tabId
-				'region' : 'center'
-			});
-		}
-		var promisses = [];
-		for(var i=0;i<tabIdsArr.length;i++){
-			//get the tab name that this tab has as an attribute
-			var tabId = tabIdsArr[i];
-			promisses.push(when(nqDataStore.getOneByAssocTypeAndDestClass(tabId, ATTRIBUTE_ASSOC, PRIMARY_NAMES), function(cellId){
-				return when(nqDataStore.getCell(cellId), function(cell){ return cell.name;});
-			}));
-		};
-		return when(all(promisses), function(tabNamesArr){
-			for(var i=0;i<tabIdsArr.length;i++){
-				var tabId = tabIdsArr[i];
-				var tabPane = new ContentPane( {
-					'id' : 'tab'+tabId,
-					'title' : tabNamesArr[i],
-					'selected' : tabId==selectedTabId?true:false,
-					'class' : 'backgroundClass',
-					'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
-				});
-				container.addChild(tabPane);
-				container.watch("selectedChildWidget", function(name, oval, nval){
-				    //console.log("selected child changed from ", oval.title, " to ", nval.title);
-				    var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
-				    setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
-				});
-			};
+		
+		return when(nqDataStore.getManyByAssocTypeAndDestClass(parentViewOrTabId, ORDERED_ASSOC, ACCORDIONTABS_ATTRCLASS), function(tabIdsArr){
+			if(tabIdsArr.length==0) return;
 			
-			var parentContentPane = registry.byId(parentContainerId);
-			parentContentPane.addChild(container);
+			var container;
+			if(tabIdsArr.length==1){// this is really only to have palce to store viewPane+viewId. Is there a better way?
+				container = new ContentPane( {
+					'id' : 'viewPane'+parentViewOrTabId,
+					'region' : 'center'
+				});
+			}
+			else {
+				container = new TabContainer( {
+					'id' : 'viewPane'+parentViewOrTabId,
+					//'persist' : true,//cookies override our hash tabId
+					'region' : 'center'
+				});
+			}
 			container.startup();
-			if(tabIdsArr.length>1) container.resize();
-			
-			return selectedTabId;				
+			var promisses = [];
+			for(var i=0;i<tabIdsArr.length;i++){
+				//get the tab name that this tab has as an attribute
+				var tabId = tabIdsArr[i];
+				promisses.push(when(nqDataStore.getOneByAssocTypeAndDestClass(tabId, ATTRIBUTE_ASSOC, PRIMARY_NAMES), function(cellId){
+					return when(nqDataStore.getCell(cellId), function(cell){ return cell.name;});
+				}));
+			};
+			return when(all(promisses), function(tabNamesArr){
+				var subTabPromisses = [];
+				for(var i=0;i<tabIdsArr.length;i++){
+					var tabId = tabIdsArr[i];
+					console.log('tabId', tabId, 'parentViewOrTabId', parentViewOrTabId, 'level',level);
+					var tabPane = new ContentPane( {
+						'id' : 'tab'+tabId,
+						'title' : tabNamesArr[i],
+						'selected' : tabId==state.tabId?true:false,
+						'class' : 'backgroundClass',
+						'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
+					});
+					container.addChild(tabPane);
+					container.watch("selectedChildWidget", function(name, oval, nval){
+					    //console.log("selected child changed from ", oval.title, " to ", nval.title);
+					    var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
+					    setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
+					});
+					subTabPromisses.push(createAccordionOrTabRecursive(tabId, tabPane, level));
+				};
+				
+				parentContentPane.addChild(container);
+				
+				return when(all(subTabPromisses));				
+			});
 		});
-	}	
+	}
 	function XinterpretHash(hash, level){
 		// summary:
 		//		Interpret the hash change. The hash consists of sets of threes: viewId.tabId.selectedObjectId.
