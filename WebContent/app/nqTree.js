@@ -383,6 +383,14 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					}));*/
 				}, nq.errorDialog);
 			}, nq.errorDialog);			
-		}
+		},
+		getNodePathRecursive: function(nodesArr, selectedTabId){
+			nodesArr.unshift(selectedTabId);//add at the first postion
+			return null;
+			return when(nqDataStore.getOneByAssocTypeAndDestClass(selectedTabId, ORDERED_PARENT_ASSOC, ACCORDIONTABS_ATTRCLASS), function(parentTab){
+				if(parentTab) return getTabsPathRecursive(parentTab);
+				else return null;
+			});
+		}	
 	});
 });
