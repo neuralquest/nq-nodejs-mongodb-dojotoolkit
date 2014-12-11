@@ -63,9 +63,10 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		console.log('hash', _hash);
 		when(processHashLevelRecursive('placeholder', 0), function(result){
 			var hashArr = hash().split('.');
-			var levels = Math.ceil(hashArr.length/3);
-			for(var level = 0; level<levels; level++){
-				return darawWidgetsRecursive(level);
+			var levels = Math.ceil(hashArr.length/3);//determine the number of levels, rounded to the highest integer
+			var promisses = [];
+			for(var level = levels-1; level>=0; level--){
+				darawWidgetsRecursive(level);
 			}
 		}, errorDialog);
 		
@@ -77,8 +78,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var state = getState(level);
 		//nothing left to display
 		if(!state.viewId) return parentPaneId;
-		// if the ContentPane already exists we can simply return
-		if(registry.byId('viewPane'+state.viewId)) return parentPaneId;		
+		// if the view pane already exists we can simply try the next level
+		if(registry.byId('viewPane'+state.viewId)) return processHashLevelRecursive('slave'+state.viewId, level+1);		
 		// We're filling a slave, clean it first. It may have been used by another view before
 		var parentContentPane = registry.byId(parentPaneId);
 		if(parentContentPane) parentContentPane.destroyDescendants(false);
@@ -90,7 +91,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			else viewPaneCreated = createTabs(state.viewId, parentContentPane, level);
 			return when(viewPaneCreated, function(newParentContentPane){
 				parentContentPane.resize();//this is a must
-				return when(processHashLevelRecursive('slave'+state.viewId, level+1));
+				return processHashLevelRecursive('slave'+state.viewId, level+1);//try the next level
 			});
 		});
 	}
@@ -120,11 +121,13 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	function getSelectedTabRecursive(paneId){
 		var tabContainer = registry.byId('viewPane'+paneId);
 		if(!tabContainer) return false;
-		var tabId = tabContainer.selectedChildWidget.id;
+		var tabId;
+		if(tabContainer.selectedChildWidget) tabId = tabContainer.selectedChildWidget.id;
+		else tabId = tabContainer.containerNode.firstChild.id;
 		if(!tabId) return false;
 		var subTab = getSelectedTabRecursive(tabId.substring(3));
-		if(subTab) return subTab;
-		else return tabId.substring(3);		
+		if(subTab) return subTab;// there's a selected tab below us, so return it's id
+		else return tabId.substring(3);//we are at the bottom, so return our id		
 	}
 	function createAccordionInBorderContainer(parentViewOrTabId, parentContentPane, level){
 		// summary:

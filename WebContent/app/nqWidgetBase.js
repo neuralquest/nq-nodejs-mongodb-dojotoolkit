@@ -193,6 +193,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 						switch(attrClassType){
 						case PERMITTEDVAULE_CLASS_ID: 
 							//property.editor = 'Select';
+							nameValuePairs.push({id:null,name:'[not selected]'} );
 							var selectStore = new Memory({data: nameValuePairs});
 							property.editorArgs = {
 									name: property.field,
