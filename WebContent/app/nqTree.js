@@ -7,35 +7,36 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 	return declare("nqTree", [nqWidgetBase], {
 		allowedClassesObj: {},//Check Item Acceptance needs this
 		labelAttrIdArr: [], //get Label needs this
+		permittedClassesByViewArr: [],
+		attrRefByViewArr: [],
+		parentId: null,
 		
 		postCreate: function(){
 			this.inherited(arguments);
 			var self = this;
-			when(this.getTheParentAttr(), function(parentId){
-				self.selectedObjIdPreviousLevel = parentId;
-				if(parentId){
-					when(self.findTheLabels(), function(attrRefs){
-						self.createTree();
-						self.createMenus();
-					}, nq.errorDialog);
-				}
-				else self.createDeferred.resolve(self);
+			when(this.getAttrRefPropertiesForWidget(this.widgetId), function(attrRefs){
+				self.attrRefByViewArr = attrRefs;
+				return when(self.getPermittedClassesforWidget(self.widgetId), function(permittedClassesObjs){
+					self.permittedClassesByViewArr = permittedClassesObjs;
+					self.createMenusForWidget();
+					//get the parentId that this widget has as an attribute
+					return when(self.getTheParentAttr(), function(parentId){
+						self.selectedObjIdPreviousLevel = parentId;
+						self.createDeferred.resolve(self);
+						if(parentId) self.createTree();
+						return true;
+					});
+				});
 			}, nq.errorDialog);
 		},
 		setSelectedObjIdPreviousLevel: function(value){
 			var self = this;
-			//var value = this.parentId;
-			//load the data
 			if(!value || value == this.selectedObjIdPreviousLevel) return this;
 			this.selectedObjIdPreviousLevel = value;
-			when(self.findTheLabels(), function(attrRefs){
-				if(self.tree) self.tree.destroy(); 
-				self.createTree();
-				self.treeModel.query = {itemId: self.selectedObjIdPreviousLevel, viewId: self.viewIdsArr[0]};
-//				self.tree.refreshModel();
-				self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
-				self.createMenus();
-			}, nq.errorDialog);
+			if(self.tree) self.tree.destroy(); 
+			self.createTree();
+			self.treeModel.query = {itemId: self.selectedObjIdPreviousLevel, viewId: self.viewIdsArr[0]};
+			self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
 		setSelectedObjIdThisLevel: function(value){
@@ -43,7 +44,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			//TODO expand tree
 			if(this.selectedObjIdThisLevel == value) return this;
 			this.selectedObjIdThisLevel = value;
-			if(value == 824) this.tree.set('path', ['810', '2016', '2020', '824']);
+			//if(value == 824) this.tree.set('path', ['810', '2016', '2020', '824']);
 		},
 
 		getTheParentAttr: function(){
@@ -56,28 +57,6 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					if(parentCell && parentCell.name!='') return parentCell.name;
 					return undefined;
 				});
-			});
-		},
-		findTheLabels: function(){
-			var OBJECT_TYPE = 1;
-			
-			var self = this;
-			//recursivily get all of the views that belong to this widget
-			return when(self.store.getManyByAssocType(self.widgetId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewIdsArr){
-				self.viewIdsArr = viewIdsArr;
-				var attrRefPropertiesPromisses = [];
-				for(var i=0;i<viewIdsArr.length;i++){
-					var viewId = viewIdsArr[i];
-					attrRefPropertiesPromisses.push(self.viewLabelPairs(viewId));
-				}
-				return all(attrRefPropertiesPromisses);
-			});
-		},
-		viewLabelPairs: function(viewId){
-			var ATTRREF_CLASS_TYPE = 63;
-			var self = this;
-			return when(this.store.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE), function(attrRefsArr){
-				self.labelAttrIdArr[viewId] = attrRefsArr[0];//assume the first attrRef is the label
 			});
 		},
 		createTree: function(){
@@ -171,7 +150,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				},
 				getLabel: function(item){
 					if(!item) return 'no item';
-					var labelAttrId = self.labelAttrIdArr[item.viewId];
+					var labelAttrId = self.attrRefByViewArr[item.viewId][0].name;
 					return item[labelAttrId];
 				},
 				onLoad: function(){
@@ -179,20 +158,6 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					//console.dir(self.createDeferred.resolve(self));
 					self.createDeferred.resolve(self);//ready to be loaded with data/
 //					self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
-				},
-				refreshModel: function () {
-					// reset the itemNodes Map
-					this._itemNodesMap = {};
-					// reset the state of the rootNode
-//					this.rootNode.state = "UNCHECKED";
-					// Nullify the tree.model's root-children
-					this.model.root.children = null;
-					// remove the rootNode
-					if (this.rootNode) {
-						this.rootNode.destroyRecursive();
-					}
-					// reload the tree
-					this._load();
 				}
 			}, domConstruct.create('div'));
 			this.pane.containerNode.appendChild(this.tree.domNode);
@@ -201,7 +166,59 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 
 		},
 		
-		createMenus: function(){
+		createMenusForWidget: function(){
+			var self = this;
+			for(viewId in self.permittedClassesByViewArr) {
+				var parentMenu = new Menu({targetNodeIds: [this.pane.containerNode], selector: ".css"+viewId});
+				//var parentMenu = new Menu({targetNodeIds: [self.tree.domNode], selector: ".css"+viewId});
+				var addMenu = new Menu({parentMenu: parentMenu});
+				parentMenu.addChild(new PopupMenuItem({
+					label:"New",
+					iconClass:"addIcon",
+					popup: addMenu
+				}));
+				parentMenu.addChild(new MenuItem({
+					label:"Delete",
+					iconClass:"removeIcon",
+					onClick: function(){
+						var selectedItem = self.tree.get("selectedItem");
+						self.store.remove(selectedItem.id,selectedItem.viewId);
+					}
+				}));
+				var permittedClassesArr = self.permittedClassesByViewArr[viewId];
+				for(var i=0;i<permittedClassesArr.length;i++){
+					classesObj = permittedClassesArr[i];
+
+					var menuItem = new MenuItem({
+						label: "View: "+classesObj.subViewName+" Object Type: <b>"+classesObj.subClassName+"</b> association: <span style='color:blue'>"+classesObj.assocName+"</span>",
+						iconClass: "icon"+classesObj.subClassId,
+						subClassId: classesObj.subClassId,
+						viewId: classesObj.viewId
+					});
+					menuItem.on("click", function(evt){
+						//console.log('menu item on', this.subClassId);
+						var subViewId = classesObj.subViewId;
+						var subClassId = classesObj.subClassId;
+						var addObj = {
+								'type': 1,
+								'viewId': subViewId, 
+								'classId': subClassId
+							};
+						var selectedItem = self.tree.get("selectedItem");
+						var directives = {parent:{id: selectedItem.id}};
+						var newItem = self.store.add(addObj, directives);
+						
+						var selectedNodes = self.tree.getNodesByItem(selectedItem);
+						if(!selectedNodes[0].isExpanded){
+							self.tree._expandNode(selectedNodes[0]);
+						}
+						self.tree.set('selectedItem', newItem.id);
+					});
+					addMenu.addChild(menuItem);	
+				}
+			};
+		},
+/*		createMenus: function(){
 			var OBJECT_TYPE = 1;
 			var ASSOCS_ATTR_ID = 1613;
 			var SUBCLASSES_PASSOC = 15;
@@ -219,6 +236,15 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			}, nq.errorDialog);		
 		},
 		createMenuforView: function(viewId){
+			var CLASSMODEL_VIEWID = 844;
+			var CLASSMODEL_ATTRTREFID = 852;
+			var CLASSES_VIEWID = 733;
+			var ASSOCIATIONS_VIEWID = 1934 ;
+			var CLASSES_ATTRTREFID = 756;
+			var SUBCLASSES_PASSOC = 15;
+			var ASSOCS_CLASS_TYPE = 94;
+			var CLASS_TYPE = 0;
+			var CELNAME_ATTR = 852;
 			var CLASSMODEL_VIEWID = 844;
 			var CLASSMODEL_ATTRTREFID = 852;
 			var CLASSES_VIEWID = 733;
@@ -295,7 +321,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 							label:"View",
 							//iconClass:"addIcon",
 							popup: addSubMenu
-						}));*/
+						}));* /
 						self.createMenuforSubView(subViewId, addMenu);
 					}
 				}, nq.errorDialog);				
@@ -380,10 +406,10 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 						label:"To",
 						iconClass:"icon"+assocType,
 						popup: addMenu
-					}));*/
+					}));* /
 				}, nq.errorDialog);
 			}, nq.errorDialog);			
-		},
+		},*/
 		getNodePathRecursive: function(nodesArr, selectedTabId){
 			nodesArr.unshift(selectedTabId);//add at the first postion
 			return null;

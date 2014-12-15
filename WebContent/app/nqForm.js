@@ -26,7 +26,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			var item = null;
 			var tableNode = domConstruct.create('table', {style: 'border-spacing:5px;'}, this.pane.containerNode);
 			var self = this;
-			when(this.getAttrRefProperties(this.viewId), function(propertiesArr){
+			when(this.getAttrRefPropertiesForView(this.viewId), function(propertiesArr){
 				for(var i=0;i<propertiesArr.length;i++){
 					var property = propertiesArr[i];
 				

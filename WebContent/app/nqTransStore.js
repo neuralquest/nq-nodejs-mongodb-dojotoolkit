@@ -499,8 +499,8 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			}
 		}),
 		fetch: function () {
-			var data = this.data;
-			//var data =[];
+			//var data = this.data;
+			var data =[];
 			if (!data || data._version !== this.storage.version || 1==1) {
 				// our data is absent or out-of-date, so we requery from the root
 				// start with the root data

@@ -12,12 +12,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 
 	return declare("nqDocument", [nqWidgetBase], {
 		parentId: null,
-		viewId: '846',
-		HEADER_ATTRREF: 873,
+		viewId: null,
+/*		HEADER_ATTRREF: 873,
 		PARAGRAPH_ATTRREF: 959,
 
-/*		HEADER_ATTRREF: 558,
-		PARAGRAPH_ATTRREF: 762,
+		HEADER_ATTRREF: 2535,
+		PARAGRAPH_ATTRREF: 2537,
 		SVG_ATTRREF: 747,
 		IMAGEURL_ATTRREF: 1613,
 		ANNOTATION_ATTRREF: 1734,
@@ -133,8 +133,18 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			this.normalToolbar.addChild(button6);
 			
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
+
+			var self = this;
+			when(self.store.getOneByAssocType(this.widgetId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewId){
+				self.viewId = viewId; 
+				when(self.getAttrRefPropertiesForView(viewId), function(attrRefArr){
+					self.HEADER_ATTRREF = attrRefArr[0].name;
+					self.PARAGRAPH_ATTRREF = attrRefArr[1].name;
+					self.createDeferred.resolve(self);//ready to be loaded with data
+				});
+			}, nq.errorDialog);
 			
-			this.createDeferred.resolve(this);//ready to be loaded with data
+//			this.createDeferred.resolve(this);//ready to be loaded with data
 		},
 		setSelectedObjIdPreviousLevel: function(value){
 			//load the data
@@ -336,8 +346,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				item: item,
 				'height': '', //auto grow
 			    'minHeight': '30px',
-//			    'extraPlugins': this.extraPlugins,
-//			    'value': storedRtf,
+			    'extraPlugins': this.extraPlugins,
 				'toolbar': toolbar,
 				focusOnLoad: true,
 				'onChange': function(evt){
