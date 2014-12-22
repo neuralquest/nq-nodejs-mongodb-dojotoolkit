@@ -307,7 +307,6 @@ public class DataServlet extends HttpServlet implements Constants {
 		}
 		catch (Exception e) {
 			session.getTransaction().rollback();
-			throw new ServletException(e.getMessage()); // or display error message
 		}		
 	}
 
@@ -356,6 +355,7 @@ public class DataServlet extends HttpServlet implements Constants {
 			System.out.println("source:\t"+sourceCell.getIdName(50));
 			System.out.println("assoc type:\t"+type);
 			System.out.println("dest:\t"+destCell.getIdName(50));
+			System.out.println("dest parents:\t"+listToString(destCellParentsList));
 			throw new RuntimeException("Object to Object association not allowed");
 		}
 		else if(sourceCell.getType()==CLASS || destCell.getType()==OBJECT){
@@ -576,6 +576,14 @@ public class DataServlet extends HttpServlet implements Constants {
 		}
 		return null;
 	}
+	private String listToString(LinkedList<Cell> list){
+		String retString = "";
+		for(Iterator<Cell> itr1=list.iterator();itr1.hasNext();){
+			Cell cell = itr1.next();
+			retString += ", "+cell.getIdName(50);
+		}
+		return retString;
+	}
 	//experimental
 	/*
 	private void assocsViewChildren(JSONArray assocArray, Cell selectedObj, Cell viewObj, Session session) throws Exception {
@@ -678,14 +686,7 @@ public class DataServlet extends HttpServlet implements Constants {
 	   }  
 	}
 
-	private String listToString(LinkedList<Cell> list){
-		String retString = "";
-		for(Iterator<Cell> itr1=list.iterator();itr1.hasNext();){
-			Cell cell = itr1.next();
-			retString += ", "+cell.getIdName(50);
-		}
-		return retString;
-	}
+
 
 	// ********************************************************************************
 	// Get Row Data

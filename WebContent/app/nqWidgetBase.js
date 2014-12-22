@@ -110,9 +110,9 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 					promisses.push(self.makeProperties(attrRef));
 				};
 				return when(all(promisses), function(results){
-					results.push({field: 'id', name: 'id', label: 'id', readonly:true, hidden: false});
+					/*results.push({field: 'id', name: 'id', label: 'id', readonly:true, hidden: false});
 					results.push({field: 'viewId', name: 'viewId', label: 'viewId', readonly:true,  hidden: false});
-					results.push({field: 'classId', name: 'classId', label: 'classId', readonly:true,  hidden: false});
+					results.push({field: 'classId', name: 'classId', label: 'classId', readonly:true,  hidden: false});*/
 					return results;
 				});
 			});
@@ -171,7 +171,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				var labelId = propertiesArr[0];
 				if(!propertiesArr[1]) return {label:'[undefined assocType]'};//fail gracefully
 				var assocType = propertiesArr[1];
-				if(!propertiesArr[2]) return {label:'[undefined mapsTo]'};//fail gracefully
+				//if(!propertiesArr[2]) return {label:'[undefined mapsTo]'};//fail gracefully
 				var destClassId = propertiesArr[2];
 				var access = propertiesArr[3];
 				var helptextId = propertiesArr[4];
@@ -179,11 +179,18 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				var attrPromises = [];
 				//get the label that this attribute reference has as an attribute
 				attrPromises[0] = self.store.getCell(labelId);
-				//get the parent of the attribute class that this attribute reference maps to
-				////////////////////Exception for the cell name as used by the class model///////////////////
-				if(destClassId == CLASSNAME_CLASS_ID) attrPromises[1] = destClassId;
-				else attrPromises[1] = self.store.getOneByAssocType(destClassId, PARENT_ASSOC, CLASS_TYPE, true, false);
-				attrPromises[2] = self.store.isA(destClassId, PERMITTEDVAULE_CLASS_ID);
+				if(destClassId){
+					//get attribute class type (parent of)
+					////////////////////Exception for the cell name as used by the class model///////////////////
+					if(destClassId == CLASSNAME_CLASS_ID) attrPromises[1] = destClassId;
+					else attrPromises[1] = self.store.getOneByAssocType(destClassId, PARENT_ASSOC, CLASS_TYPE, true, false);
+					//find out if the destination class is a permitted value 
+					attrPromises[2] = self.store.isA(destClassId, PERMITTEDVAULE_CLASS_ID);					
+				}
+				else{//fail gracefully
+					attrPromises[1] = STRING_CLASS_ID; //attribute class type to default
+					attrPromises[2] = false;//the destination class is not a permitted value
+				}
 				//get the helptext that this attribute reference has as an attribute
 				if(helptextId) attrPromises[3] = self.store.getCell(helptextId);
 				return when(all(attrPromises), function(propsArr){
@@ -357,6 +364,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				//if(!arr[1]) throw new Error('View '+subViewId+' must map to one class ');
 				//if(arr[1].length!=1) console.log('View '+subViewId+' should map to one class ');
 				var destClassId = arr[1];
+				if(!destClassId) return [];//fail gracefully
 				var viewNameId = arr[2];
 				var viewName = self.store.getCell(viewNameId).name;//TODO will fail if it is asysnc
 				var subViewNameId = arr[3];

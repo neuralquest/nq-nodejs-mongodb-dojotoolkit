@@ -31,7 +31,11 @@ public class ConsistancyServlet extends HttpServlet  implements Constants {
 			Element htmlEl = doc.addElement("html");
 			Element headEl = htmlEl.addElement("head");
 			Element styleEl = headEl.addElement("style").addAttribute("type", "text/css");
-			styleEl.addText("body {font-family: sans-serif; background: #FFFFFF url(../img/testsBodyBg.gif) repeat-x scroll left top; }");
+			//Element styleE2 = headEl.addElement("link").addAttribute("rel", "stylesheet").addAttribute("href", "app/resources/neuralquest.css");
+			styleEl.addText("body {font-family: sans-serif; background: #FFFFFF url(../img/testsBodyBg.gif) repeat-x scroll left top; }"
+					+ "table{border-collapse:collapse;}"
+					+ "th{text-align: center; font-weight: bold; background-color: lightblue; }"
+					+ "td{padding:3px; border-width:1px; border-color:lightgray; border-style:solid; vertical-align:top;}");
 			Element bodyEl = htmlEl.addElement("body");
 			
 			
@@ -60,11 +64,57 @@ public class ConsistancyServlet extends HttpServlet  implements Constants {
 		
 			
 			bodyEl.addElement("h2").addText("Attributes");
-			bodyEl.addElement("p").addText("All attributes must be owned by one object, unless it's a 'permitted value'.");
+			bodyEl.addElement("p").addText("All attribute classes must be owned by one class, unless it's a 'permitted value'.");
+			Element tableEl0 = bodyEl.addElement("table").addAttribute("class","nqtable");			
+			Element rowEl0 = tableEl0.addElement("tr");
+			rowEl0.addElement("th").addText("id");
+			rowEl0.addElement("th").addText("name");
+			rowEl0.addElement("th").addText("type");
+			rowEl0.addElement("th").addText("owner id");
+			rowEl0.addElement("th").addText("owner name");
+			rowEl0.addElement("th").addText("omwer type");
+			Cell pagesClass0 = (Cell) session.load(Cell.class, new Long(ATTRIBUTES_ID));//contents
+			LinkedList<Cell> attrClassList0 = pagesClass0.getLsitOfSubClasses();
+			for(Iterator<Cell> itr0=attrClassList0.iterator();itr0.hasNext();){
+				Cell attrClass = itr0.next();
+				if(attrClass.isA(PERMITTED_VALUES_ID)) continue;
+				LinkedList<Cell> objList0 = attrClass.getLsitOfAllSubClasses();
+				for(Iterator<Cell> itr2=objList0.iterator();itr2.hasNext();){
+					Cell obj = itr2.next();
+					if(obj.equals(attrClass)) continue;
+					LinkedList<Cell> parentAttrList = obj.getListOfRelatedObjectsByAssocTypeAndDestClassId(ATTRIBUTE_OF_PASSOC, 0);
+					if(parentAttrList.isEmpty()){
+						Element rowEl2 = tableEl0.addElement("tr");
+						rowEl2.addElement("td").addText(String.valueOf(obj.getId()));
+						rowEl2.addElement("td").addText(obj.getName());
+						rowEl2.addElement("td").addText(obj.getCellByAssocType(PARENT_ASSOC).getName());
+						//destroyCell(obj, session);
+
+					}
+					if(parentAttrList.size()>1){
+						for(Iterator<Cell> itr3=parentAttrList.iterator();itr3.hasNext();){
+							Cell attrParent = itr3.next();
+							Element rowEl2 = tableEl0.addElement("tr");
+							rowEl2.addElement("td").addText(String.valueOf(obj.getId()));
+							rowEl2.addElement("td").addText(obj.getName());
+							rowEl2.addElement("td").addText(obj.getCellByAssocType(PARENT_ASSOC).getName());
+							rowEl2.addElement("td").addText(String.valueOf(attrParent.getId()));
+							rowEl2.addElement("td").addText(attrParent.getName()==null?"null":attrParent.getName());
+							rowEl2.addElement("td").addText(attrParent.getCellByAssocType(PARENT_ASSOC).getName());
+						}
+					}
+				}
+			}
+
+			
+		
+			
+//			bodyEl.addElement("h2").addText("Attributes");
+			bodyEl.addElement("p").addText("All attribute objects must be owned by one object, unless it's a 'permitted value'.");
 			Element tableEl1 = bodyEl.addElement("table").addAttribute("border","0");			
 			Element rowEl1 = tableEl1.addElement("tr");
 			rowEl1.addElement("th").addText("id");
-			rowEl1.addElement("th").addText("name");
+			rowEl1.addElement("th").addText("value");
 			rowEl1.addElement("th").addText("type");
 			rowEl1.addElement("th").addText("owner id");
 			rowEl1.addElement("th").addText("owner name");
@@ -84,8 +134,8 @@ public class ConsistancyServlet extends HttpServlet  implements Constants {
 
 				}
 				if(parentAttrList.size()>1){
-					for(Iterator<Cell> itr1=parentAttrList.iterator();itr2.hasNext();){
-						Cell attrParent = itr1.next();
+					for(Iterator<Cell> itr3=parentAttrList.iterator();itr3.hasNext();){
+						Cell attrParent = itr3.next();
 						Element rowEl2 = tableEl1.addElement("tr");
 						rowEl2.addElement("td").addText(String.valueOf(obj.getId()));
 						rowEl2.addElement("td").addText(obj.getName());
@@ -202,10 +252,10 @@ public class ConsistancyServlet extends HttpServlet  implements Constants {
 			for(Iterator<Cell> itr2=checkObjList.iterator();itr2.hasNext();){
 				Cell obj = itr2.next();
 				if(validObjList.contains(obj)) continue;
-				Element rowEl0 = tableEl.addElement("tr");
-				rowEl0.addElement("td").addText(String.valueOf(obj.getId()));
-				rowEl0.addElement("td").addText(obj.getName(50));
-				rowEl0.addElement("td").addText(obj.getCellByAssocType(PARENT_ASSOC).getName(50));
+				Element rowEl4 = tableEl.addElement("tr");
+				rowEl4.addElement("td").addText(String.valueOf(obj.getId()));
+				rowEl4.addElement("td").addText(obj.getName(50));
+				rowEl4.addElement("td").addText(obj.getCellByAssocType(PARENT_ASSOC).getName(50));
 				//destroyCell(obj, session);
 			}
 

@@ -170,7 +170,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			});	
 			var children = collection.fetch();
 			var item = children[0];
-			var promise = when(self.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
+			var promise = when(self.generateNextLevelContents(item, 1, [], null, false), function(item){
 				registry.byId('tab'+self.tabId).resize();
 //				self.pane.resize();
 				self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
@@ -179,7 +179,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
 		//Create an ordinary HTML page recursivly by obtaining data from the server
-		generateNextLevelContents: function(item, viewId, headerLevel, paragraphNrArr, parentId, previousParagrphHasRightFloat){
+		generateNextLevelContents: function(item, headerLevel, paragraphNrArr, parentId, previousParagrphHasRightFloat){
 			var self = this;
 			var hearderObj = item['attrRef'+this.HEADER_ATTRREF];
 			var paragraphObj = item['attrRef'+this.PARAGRAPH_ATTRREF];
@@ -329,7 +329,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				for(var i=0;i<children.length;i++){
 					var childItem = children[i];
 					paragraphNrArr[headerLevel-1] = i+1;
-					self.generateNextLevelContents(childItem, viewId, headerLevel+1, paragraphNrArr, item.id, previousParagrphHasRightFloat);
+					self.generateNextLevelContents(childItem, headerLevel+1, paragraphNrArr, item.id, previousParagrphHasRightFloat);
 					paragraphNrArr.splice(headerLevel,100);//remove old shit
 //					previousParagrphHasRightFloat = childItem[self.PARAGRAPH_ATTRREF].indexOf('floatright')==-1?false:true;
 				}				

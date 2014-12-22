@@ -536,10 +536,13 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 								});
 							}
 						}
-						/*else if(query.sourceFk || query.destFk){
+						else if(query.sourceFk || query.destFk){
 							//return assocStore.query(query, options);
-							return localAssocStore.query(query, options);
-						}*/
+							var promise = localAssocStore.query(query);
+							when(promise, function(res){
+								data = res;
+							});
+						}
 					}
 				}
 				// store it, with the storage version stamp

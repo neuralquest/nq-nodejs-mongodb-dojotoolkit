@@ -76,6 +76,15 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 	
 			when(this.getAttrRefPropertiesForWidget(this.widgetId), function(attrRefByViewArr){
 				var columns = [];
+				var iconColumn = {
+					label: "",
+					//width: '15px',
+					field: "classId",
+					formatter: function (value) {
+						return '<img class="icon'+value+'"/>';
+					}
+			    };
+				columns.push(iconColumn);
 				for(viewId in attrRefByViewArr) {
 					var subViewsArr = attrRefByViewArr[viewId];
 					columns = columns.concat(subViewsArr); 
@@ -107,11 +116,12 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 							else date = dojo.date.stamp.fromISOString(value);
 							html.set(node, date.toLocaleDateString());
 						};
-						property.set = function(item) {
-							var value = item[prop.name];
+						/*property.set = function(item) {
+							var value = item[this.field];
 							if(!value) return;
-							return value.toISOString();
-						};
+							var date = dojo.date.stamp.fromISOString(value);
+							return stamp.toISOString(date);
+						};*/
 						//property.autoSave = true;
 						property.editor = DateTextBox;
 						break;	
@@ -134,6 +144,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 //							for(var key in gridStyle){
 //								this.grid.styleColumn(key, gridStyle[key]);
 //							}
+				self.grid.styleColumn('classId', 'width:2em');//doesn't work for some reason
 				self.pane.containerNode.appendChild(self.grid.domNode);
 
 				collection.on('remove, add, update', function(event){

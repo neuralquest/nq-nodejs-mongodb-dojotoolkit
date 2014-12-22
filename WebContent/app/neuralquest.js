@@ -150,6 +150,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var viewId = state.viewId;
 		
 		return when(nqDataStore.getManyByAssocTypeAndDestClass(parentViewOrTabId, ORDERED_ASSOC, ACCORDIONTABS_ATTRCLASS), function(tabIdsArr){
+			if(tabIdsArr.length==0) return false;
 					
 			var design = 'sidebar';//obtain horizontal, vertical, none from viewDef?
 			var borderContainer = new BorderContainer( {

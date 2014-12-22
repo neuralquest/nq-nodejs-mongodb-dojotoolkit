@@ -192,17 +192,14 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					var menuItem = new MenuItem({
 						label: "View: "+classesObj.subViewName+" Object Type: <b>"+classesObj.subClassName+"</b> association: <span style='color:blue'>"+classesObj.assocName+"</span>",
 						iconClass: "icon"+classesObj.subClassId,
-						subClassId: classesObj.subClassId,
-						viewId: classesObj.viewId
+						classId: classesObj.subClassId,
+						viewId: classesObj.subViewId
 					});
 					menuItem.on("click", function(evt){
-						//console.log('menu item on', this.subClassId);
-						var subViewId = classesObj.subViewId;
-						var subClassId = classesObj.subClassId;
 						var addObj = {
 								'type': 1,
-								'viewId': subViewId, 
-								'classId': subClassId
+								'viewId': this.viewId, 
+								'classId': this.classId
 							};
 						var selectedItem = self.tree.get("selectedItem");
 						var directives = {parent:{id: selectedItem.id}};
