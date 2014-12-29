@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -408,8 +407,9 @@ public class DataServlet extends HttpServlet implements Constants {
 		}
 		else if(attrRefMTClass.isA(DATE_ID)) {//date
 		    // will throw ParseException or IllegalArgumentException
-			DateFormat dateFormat = DateFormat.getDateInstance (DateFormat.SHORT); // YYYY-MM-DD
-		    dateFormat.parse(valueStr);
+			//DateFormat dateFormat = DateFormat.getDateInstance (DateFormat.SHORT); // YYYY-MM-DD
+			String formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").format(valueStr);
+		    //dateFormat.parse(valueStr);
 		}
 		else if(attrRefMTClass.isA(CURRENCY_ID)){
 			// will throw NumberFormatException

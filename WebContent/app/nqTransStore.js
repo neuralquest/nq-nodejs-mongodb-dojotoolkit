@@ -579,7 +579,6 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			//		An array of prommises. Each promise will result in an item.
 			
 			var VIEW_ID = 74;
-			
 			var self = this;
 			return when(this.getManyByAssocTypeAndDestClass(parentWidgetOrViewId, MANYTOMANY_ASSOC, VIEW_ID), function(subViewsArr){
 				var promisses = [];
@@ -654,7 +653,8 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 
 			var ASSOCS_CLASS_TYPE = 94;
 			var ATTRREF_CLASS_TYPE = 63;
-			var ONLYIFPARENTEQUEALS = 2493;
+			var ONLYIFPARENTEQUEALS = 109;
+			var PLATOSCAVE_ID = 460;
 			
 			var self = this;
 			var attrPromises = [];
@@ -685,7 +685,8 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				}
 				//get the items that result from this source, view
 				var promise = null;
-				if(assocType==INSTANTIATIONS_PASSOC) promise = self.getManyByAssocType(destClassId, SUBCLASSES_PASSOC, OBJECT_TYPE, true);
+				if(assocType==THE_USER_PASSOC) promise = [PLATOSCAVE_ID];
+				else if(assocType==INSTANTIATIONS_PASSOC) promise = self.getManyByAssocType(destClassId, SUBCLASSES_PASSOC, OBJECT_TYPE, true);
 				else promise = self.getManyByAssocTypeAndDestClass(sourceId, assocType, destClassId);
 				return when(promise, function(objArr){
 					//for each related object 
@@ -713,20 +714,23 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			return when(all(attrPromises), function(arr){
 				//if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 				if(!arr[0]) {
-					item.error = 'no assocType';
+					item[attrRefId] = '[no assocType]';
 					return null;
 				}
 				var assocType = arr[0];
 				//if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
 				if(arr[1].length!=1) {
-					item.error = 'no mapsTo';
+					item[attrRefId] = '[no mapsTo]';
 					return null;
 				}
 				var attrClassId = arr[1][0].destFk;
 				/////// Exception for the cell name attribute, as used by the class model ///////////////////
-				if(attrClassId == CELLNAME_ATTR_CLASS) return self.getClassModelCellName(item, objId, attrRefId);
+				if(attrClassId == CELLNAME_ATTR_CLASS) self.getClassModelCellName(item, objId, attrRefId);
 				/////// Exception for the cell type attribute, as used by the class model ///////////////////
-				else if(attrClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
+				else if(attrClassId == CELLTYPE_ATTR_CLASS) {
+					item[attrRefId] = 0;
+					//throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
+				}
 				//get the value for this object, attribute reference
 				else return when(self.getOneByAssocTypeAndDestClass(objId, assocType, attrClassId), function(valueObjId){
 					if(assocType == ATTRIBUTE_ASSOC){

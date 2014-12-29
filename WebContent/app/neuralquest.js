@@ -33,11 +33,12 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		});
 
 		when(nqDataStore.preFetch(), function(results){
-			fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();		
+			//fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();	
+			domStyle.set('loadingOverlay', 'display', 'none');
 			if(hash() == "") {
 				var neuralquestState = cookie('neuralquestState');
 				if(neuralquestState) hash(neuralquestState, true);
-				else hash("842.1784.824.846.1866", true);
+				else hash("842.1784.702.2485", true);
 			}
 			else interpretHash();
 		}, errorDialog);
@@ -59,8 +60,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		when(processHashLevelRecursive(0), function(result){
 			var hashArr = hash().split('.');
 			var levels = Math.ceil(hashArr.length/3);//determin the number of levels, rounded to the highest integer
-			var promisses = [];
 			for(var level = levels-1; level>=0; level--){
+				//setTimeout(drawWidgets(level), 500);//allow the browser to redraw the page. Does this really work?
 				drawWidgets(level);
 			}
 		}, errorDialog);
@@ -388,7 +389,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					id: 'nqWidget'+widgetId,
 					store: nqDataStore,
 					createDeferred: createDeferred, //tell us when your done by returning the widget
-					viewId: viewId,
+					widgetId: widgetId, 
+					//viewId: viewId,
 				}, domConstruct.create('div'));
 				tab.addChild(widget);
 				break;	
@@ -651,8 +653,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	OWNED_BY_PASSOC = 24;		//TO ONE
 	//Special
 	INSTANTIATIONS_PASSOC = 27;	//TO MANY
-//	THE_USER_PASSOC = 28;		//TO MANY
-	BYASSOCTPE_PASSOC = 30; 		//TO MANY		
+	THE_USER_PASSOC = 28;		//TO ONE
+	BYASSOCTPE_PASSOC = 30; 	//TO MANY		
 	ASSOCS_PASSOC = 31; 		//TO MANY		
 
 	

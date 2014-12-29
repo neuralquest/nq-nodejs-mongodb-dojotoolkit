@@ -37,7 +37,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 //				'class' : 'backgroundClass',
 				'doLayout' : 'true',
 //				'content': 'Some Conetent',
-				'style' : { 'overflow': 'auto', 'padding': '10px', 'margin': '0px', width: '100%', height: '100%', background:'transparent'}
+//				'style' : { 'overflow': 'auto', 'padding': '0px', 'margin': '0px', width: '100%', height: '100%', background:'transparent'}
 			},  domConstruct.create('div'));
 			this.domNode.appendChild(this.pane.domNode);
 			this.own(this.pane);
@@ -245,6 +245,13 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 								if(!value) return -1;//dropdown will display [not selected]
 								return value;
 							};*/
+							property.get = function(item){
+								var value = item[property.name];
+								if(!value) return -1;//dropdown will display [not selected]
+								return value;
+							};
+							//width: attrRef[WIDTH_ATTR_ID]+'em',
+							property.style = 'width:8em';
 							break;	
 						case RTF_CLASS_ID: 
 							//property.editor = 'RTFEditor';
@@ -265,6 +272,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 							break;	
 						case DATE_CLASS_ID:
 							//property.editor = 'DateTextBox';
+							property.style = 'width:6em';
 							break;	
 						case STRING_CLASS_ID:
 							property.editor = 'text';
@@ -273,6 +281,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 								//minLength: attrRef[MINLENGTH_ATTR_ID],
 								//regRex: attrRef[REGEX_ATTR_ID], //e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
 							};
+							property.style = 'width:10em';
 							break;	
 						case INTEGER_CLASS_ID: 
 							property.editor = 'number';
@@ -282,6 +291,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 								//places: attrRef[PLACES_ATTR_ID],
 								//fractional: attrRef[FRACTIONAL_ATTR_ID]
 							//}
+							property.style = 'width:5em';
 							break;	
 						case NUMBER_CLASS_ID: 
 							property.editor = 'number';
@@ -290,12 +300,15 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 								//maximum: attrRef[MAXIMUM_ATTR_ID],
 								//places: 0
 							//}
-							break;	
+							break;
+							property.style = 'width:5em';
 						case BOOLEAN_CLASS_ID: 
 							property.editor = 'radio';
+							property.style = 'width:3em';
 							break;
 						default:
 							property.editor = 'text';
+							property.style = 'width:20em';
 						};
 						return property;
 					});							

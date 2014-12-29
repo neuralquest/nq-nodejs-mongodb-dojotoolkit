@@ -35,6 +35,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			domStyle.set(this.pageToolbarDivNode, 'display' , '');
 			// Create toolbar and place it at the top of the page
 			this.normalToolbar = new Toolbar({});
+			domStyle.set(this.pane.containerNode, 'padding-left' , '10px');
+			domStyle.set(this.pane.containerNode, 'padding-right' , '10px');
 			var self = this;
 			// Add edit mode toggle button
 			this.editModeButton = new ToggleButton({

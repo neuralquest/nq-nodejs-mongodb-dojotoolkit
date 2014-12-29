@@ -51,7 +51,10 @@ var profile = {
 		'dijit',
 		'dojo',
 		'dojox',
+		'META-INF',
 		'put-selector',
+		'threejs',
+		'WEB-INF',
 		'xstyle'
 	],
 

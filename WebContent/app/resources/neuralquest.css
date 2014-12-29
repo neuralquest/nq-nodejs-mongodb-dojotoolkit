@@ -14,6 +14,7 @@ html, body, #fullPage, #placholder {width: 100%;height: 100%;overflow: hidden;pa
 /* add padding to each contentpane inside the tab container, and scrollbar if necessary 
 .dojoTabPane {padding : 10px 10px 10px 10px; overflow: auto;}*/
 
+
 .backgroundClass{background: #FFFFFF url(img/Neuralquest/testsBodyBg.gif) repeat-x scroll left top;    }
 
 p,ul,ol {text-align: justify; margin-top: 0em; margin-bottom: 0em; font-family: sans-serif;}
@@ -24,6 +25,8 @@ code {border:none; font-size: 100%;}
 
 /*dgrid*/
 .nqGrid .dgrid-cell-padding {padding: 0px;}
+/*.field-classId {width:2em} icon column*/
+.dgrid-content .ui-widget-content {background: none;}
 /*.nqGrid .dgrid-cell {border: none;}*/
 /*.nqGrid .dgrid-row-odd {background: #F2F5F9;}*/
 /*.dgrid-selected { background: #999; / * Make selected rows be gray * /}*/
@@ -90,8 +93,8 @@ div.todofloatright p {font-size: 90%; background-color: rgb(252, 252, 181);}
 
 
 
-/* Gennerated by means of nqserver/nqSprites.css */
-/* You can also gennerate a sprite template using nqserver/nqSprites.png */
+/* Gennerated by means of nqapp/nqSprites.css */
+/* You can also gennerate a sprite template using nqapp/nqSprites.png */
 .icondefault { background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1264px; width: 16px; height: 16px;} /*  79 - page  */
 .icon0 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px 0px; width: 16px; height: 16px;} /*  0 - class  */
 .icon1 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -16px; width: 16px; height: 16px;} /*  1 - object  */
@@ -172,3 +175,9 @@ div.todofloatright p {font-size: 90%; background-color: rgb(252, 252, 181);}
 .icon101 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1616px; width: 16px; height: 16px;} /*  101 - Cell Name  */
 .icon102 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1632px; width: 16px; height: 16px;} /*  102 - Cell Type  */
 .icon103 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1648px; width: 16px; height: 16px;} /*  103 - Persons  */
+.icon104 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1664px; width: 16px; height: 16px;} /*  104 - Image URL  */
+.icon105 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1680px; width: 16px; height: 16px;} /*  105 - SVG  */
+.icon106 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1696px; width: 16px; height: 16px;} /*  106 - Paragraph SVG  */
+.icon107 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1712px; width: 16px; height: 16px;} /*  107 - Paragraph Annotation  */
+.icon108 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1728px; width: 16px; height: 16px;} /*  108 - Inset  */
+.icon109 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1744px; width: 16px; height: 16px;} /*  109 - OnlyIfParentEquals  */
