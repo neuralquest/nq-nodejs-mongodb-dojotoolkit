@@ -31,15 +31,14 @@ public class SpriteServlet extends HttpServlet implements Constants {
 				int width = 200, height = 3200;
 				// TYPE_INT_ARGB specifies the image format: 8-bit RGBA packed
 				// into integer pixels
-				BufferedImage bufferedImage = new BufferedImage(width, height,
-						BufferedImage.TYPE_INT_ARGB);
+				BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
 				Graphics2D g2d = bufferedImage.createGraphics();
-				// g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN,
-				// 0.0f));
+				g2d.setBackground(new Color(0, true));//transparent
+				//g2d.clearRect(0, 0, 16, height);
+				g2d.setColor(Color.WHITE);
+				g2d.fillRect(16, 0, width-16, height);
 
-				//g2d.setColor(Color.white);
-				// g2d.fillRect(0, 0, width, height);
 				g2d.setColor(Color.BLUE);
 				g2d.drawLine(16, 0, 16, height);
 

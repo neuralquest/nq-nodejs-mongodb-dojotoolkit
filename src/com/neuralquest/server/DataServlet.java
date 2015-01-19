@@ -261,10 +261,13 @@ public class DataServlet extends HttpServlet implements Constants {
 				if(table.equals("assoc") && (method.equals("add") || method.equals("put"))){
 					JSONObject data = actionObj.getJSONObject("target");
 					String idString = data.getString("id");
+					String parentIdStr = data.optString("parentId", null);//used for server side validation of next associations
+					Cell parentCell = null;
+					if(parentIdStr!=null) parentCell = (Cell)session.load(Cell.class, Long.parseLong(parentIdStr));
 					Assoc assoc = null;
 					if(idString.contains("cid")) assoc = idAssocMap.get(idString);//do we know this cell already, was it created in the same conversation?
 					else assoc = (Assoc)session.load(Assoc.class, Long.parseLong(idString));
-					isAssocAllowed(assoc);
+					isAssocAllowed(assoc, parentCell);
 				}
 			}
 			JSONArray newIdsArr = new JSONArray();
@@ -306,6 +309,7 @@ public class DataServlet extends HttpServlet implements Constants {
 		}
 		catch (Exception e) {
 			session.getTransaction().rollback();
+			throw new ServletException(e); // or display error message
 		}		
 	}
 
@@ -314,7 +318,7 @@ public class DataServlet extends HttpServlet implements Constants {
 	 * Otherwise throws runtime exception
 	 * @param assoc
 	 */
-	private void isAssocAllowed(Assoc assoc){
+	private void isAssocAllowed(Assoc assoc, Cell parentCell) throws RuntimeException {
 		Cell sourceCell =assoc.getSourceFk();
 		byte type = assoc.getType();
 		Cell destCell = assoc.getDestFk();
@@ -335,12 +339,12 @@ public class DataServlet extends HttpServlet implements Constants {
 			return;
 		}
 		else if(sourceCell.getType()==OBJECT || destCell.getType()==OBJECT){
-			if(type==NEXT_ASSOC) return;
-//			if(type==NEXT_ASSOC) throw new RuntimeException("Cannot test NEXT_ASSOC");
-//			if(type==PARENT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || ){
-				
-//			}
-			LinkedList<Cell> sourceCellParentsList = sourceCell.getListOfSuperClasses();
+			LinkedList<Cell> sourceCellParentsList = null;
+			if(type==NEXT_ASSOC && parentCell != null) {
+				type = ORDERED_ASSOC;
+				sourceCellParentsList = parentCell.getListOfSuperClasses();
+			}
+			else sourceCellParentsList = sourceCell.getListOfSuperClasses();
 			LinkedList<Cell> destCellParentsList = destCell.getListOfSuperClasses();
 			for(Iterator<Cell> itr1=sourceCellParentsList.iterator();itr1.hasNext();){
 				Cell sourceCellParent = itr1.next();

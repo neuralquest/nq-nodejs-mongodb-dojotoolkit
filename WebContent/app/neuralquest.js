@@ -3,18 +3,18 @@ require([
 'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct', 'dojo/_base/declare',
 'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',// 'dstore/Trackable', //"app/nqObservable", //"dojo/store/Observable", 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
-'app/nqTransStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument',
+'app/nqStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument',
 'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct, declare,  
 		Deferred, when, all, query, BorderContainer,// Trackable,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
-		nqTransStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
+		nqStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
 		instrumentation, styles) {
 	
-	var nqDataStore = new nqTransStore();
-	//var nqDataStore = declare([new nqTransStore(), Trackable]);
-	//var nqDataStore = Observable(new nqTransStore());
+	var nqDataStore = new nqStore();
+	//var nqDataStore = declare([new nqStore(), Trackable]);
+	//var nqDataStore = Observable(new nqStore());
 	//var nqDataStore = Observable(new nqStore());
 	//var transaction = nqDataStore.transaction();
 		var self = this;
@@ -528,7 +528,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			title: err.message, 
 			extractContent: true,//important in the case of server response, it'll screw your css. 
 			onClick: function(evt){this.hide();},//click anywhere to close
-			content: err.responseText?err.responseText:err.stack
+			content: err.response.text?err.response.text:err.stack
 		});
 		dlg.show();
 		if(!err.responseText) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
@@ -640,7 +640,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	MANYTOMANY_ASSOC = 10;		//TO MANY
 	ONETOMANY_ASSOC = 11;		//TO MANY
 	OWNS_ASSOC = 12;			//TO MANY
-	// Pseudo Assoc tppes (reverse of the real assocs)
+	// Pseudo Assoc tppes (inverse of the real assocs)
 	SUBCLASSES_PASSOC = 15;		//TO MANY
 	ATTRIBUTE_OF_PASSOC = 16;	//TO MANY
 	MAPPED_TO_BY_PASSOC = 17;	//TO MANY

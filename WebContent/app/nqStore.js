@@ -1,8 +1,8 @@
-define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dstore/QueryResults", 'dstore/Store', /*'dstore/Trackable',*/'dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array", 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/Filter'],
+define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dstore/QueryResults", 'app/Store'/*'dstore/Store', 'dstore/Trackable'*/,'dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array", 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/Filter'],
 function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transaction, LocalDB, JsonRest, Memory, Cache, request, registry, array, SimpleQuery, QueryMethod, Filter ){
 
 // module:
-//		js/nqTransStore
+//		js/nqStore
  
 	var transactionLogStore = new Memory();
     var masterCellStore = new JsonRest({
@@ -31,10 +31,10 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 		return localAssocStore.query(query, directives);
 	};
 
-    cellStore.transaction();//trun autocommit off
-    assocStore.transaction();//trun autocommit off
+    cellStore.transaction();//turn autocommit off
+    assocStore.transaction();//turn autocommit off
 
-	//return declare('nqTransStore',[Store],{
+	//return declare('nqStore',[Store],{
 	return declare(Store,{
 	//return declare(Store,{
 		_createSortQuerier: SimpleQuery.prototype._createSortQuerier,
@@ -329,7 +329,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 										var newParentFollowingAssoc = assocArr[0];
 										newParentFollowingAssoc.sourceFk = movingObjectId;
 										newParentFollowingAssoc.type = NEXT_ASSOC;
-										leadingAssoc.parentId = newParentId;//needed for serverside validation
+										newParentFollowingAssoc.parentId = newParentId;//needed for serverside validation
 										assocStore.put(newParentFollowingAssoc);
 									});					
 								}
@@ -360,7 +360,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 							// get the ordered children as seen from the new parent
 							when(self.getManyByAssocTypeAndDestClass(newParentId, ORDERED_ASSOC, destClassId), function(newParentChildren){
 								if(newParentChildren.length>0){
-									self.addAssoc({sourceFk: newParentChildren[newParentChildren.length-1], type: NEXT_ASSOC, destFk: movingObjectId});
+									self.addAssoc({sourceFk: newParentChildren[newParentChildren.length-1], type: NEXT_ASSOC, destFk: movingObjectId, parentId:newParentId});
 								}
 								else{
 									self.addAssoc({sourceFk: newParentId, type: ORDERED_ASSOC, destFk: movingObjectId});									
@@ -400,7 +400,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				}
 			});		
 		},		
-		remove: function(itemId, viewId){			
+		remove: function(itemId, viewId, directives){			
 			var PERTMITTEDVALUE_CLASS = 58;
 			var ASSOCS_CLASS_TYPE = 94;
 			var CELLNAME_ATTR_CLASS = 101;
@@ -422,7 +422,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 						if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 						var assocType = arr[0];
 						if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
-						var destClassId = arr[1][0].destFk;
+						var attrClassId = arr[1][0].destFk;
 						/////// Exception for the cell type attribute, as used by the class model ///////////////////
 						if(attrClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
 						//find out if the attribute class is a permitted value
@@ -452,14 +452,28 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				}		
 			}, nq.errorDialog);
 			//TODO fix linked lists		
-			when(assocStore.query({sourceFk:itemId}), function(assocsArr){
-				for(var i = 0;i<assocsArr.length;i++){
-					assocStore.remove(assocsArr[0].id);
-				}
-			}, nq.errorDialog);
 			when(assocStore.query({destFk:itemId}), function(assocsArr){
 				for(var i = 0;i<assocsArr.length;i++){
-					assocStore.remove(assocsArr[0].id);
+					var assoc = assocsArr[i];
+					if(assoc.type == NEXT_ASSOC){
+						var leadingItemId = assoc.sourceFk; 
+						when(assocStore.query({sourceFk:itemId, type:NEXT_ASSOC}), function(followingAssocsArr){
+							if(followingAssocsArr.length>1) throw new Error('Only one next expected');
+							var followingAssoc = followingAssocsArr[0];
+							if(followingAssoc){
+								if(!directives)  throw new Error('Must have directives to splice linkedlist');
+								followingAssoc.sourceFk = leadingItemId;
+								followingAssoc.parentId = directives.parent.id
+								assocStore.put(followingAssoc);
+							}
+						}, nq.errorDialog);						
+					}
+					assocStore.remove(assocsArr[i].id);
+				}
+			}, nq.errorDialog);
+			when(assocStore.query({sourceFk:itemId}), function(assocsArr){
+				for(var i = 0;i<assocsArr.length;i++){
+					assocStore.remove(assocsArr[i].id);
 				}
 			}, nq.errorDialog);
 					
@@ -616,7 +630,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 					//console.log('itemsArr', itemsArr);
 					var promisses = [];
 					for(var i=0;i<itemsArr.length;i++){
-						item = itemsArr[i];
+						var item = itemsArr[i];
 						promisses.push(self.getManyByParentWidgetJoin(item.id, item.viewId));
 					}
 					return when(all(promisses), function(arrayOfItemsArr){
@@ -1131,7 +1145,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 						promises.push(cellStore.get(key));//get the corresponding cell so we can use the name.
 					}
 					return when(all(promises), function(assocCellsArr){
-						items= [];
+						var items= [];
 						for(var j=0;j<assocCellsArr.length;j++){
 							var type = assocCellsArr[j].id;
 							var item = {id: sourceId+'/'+type, sourceId:sourceId,  viewId: viewId, classId: type};

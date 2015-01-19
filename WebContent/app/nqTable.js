@@ -36,7 +36,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			this.normalToolbar = new Toolbar({});
 			var self = this;
 			// Add sibling toggle button
-			var siblingButton = new ToggleButton({
+			var siblingButton = new Button({
 		        showLabel: true,
 		        label: 'Add Row',
 				iconClass: 'addIcon',
@@ -49,9 +49,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 							viewId: viewId, //TODO what about more than one
 							classId: classId
 						};
-						var directives = {
-								parent:{id:self.selectedObjIdPreviousLevel}
-						};
+						var directives = {parent:{id:self.selectedObjIdPreviousLevel}};
 						self.store.add(addObj, directives);
 					});
 
@@ -60,15 +58,18 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			});
 			this.normalToolbar.addChild(siblingButton);
 			// Add delete toggle button
-			this.deleteButton = new ToggleButton({
+			this.deleteButton = new Button({
 		        showLabel: true,
 		        checked: false,
 		        label: 'Delete Row',
 				iconClass: 'removeIcon',
 				style : {'margin-left':'5px'}, 
 		        onClick: function(evt){
-		        	var item = null;
-					self.store.remove(item.id, item.viewId);//what if there is more than one view?
+		        	for(var rowid in self.grid.selection){ 
+		        		var item=self.grid.row(rowid).data; 
+						var directives = {parent:{id:self.selectedObjIdPreviousLevel}};
+	                    self.store.remove(item.id, item.viewId, directives);//what if there is more than one view?
+		        	}
 				}
 			});
 			this.normalToolbar.addChild(this.deleteButton);
