@@ -65,7 +65,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			//		The identifier of the view that will tell us which attributes to retreive
 			//		viewId is used for things like identifing labels and menus in trees, also getChildren as requested by trees
 			// returns: object 
-			//		A prommises. The promise will result in an item.			
+			//		A promises. The promise will result in an item.			
 			var ATTRREF_CLASS_TYPE = 63;
 
 			var self = this;
@@ -759,7 +759,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 									});								
 								}
 								else{
-									item[attrRefId] = null;//add the identifier to the item
+									item[attrRefId] = -1;//-1 represents null in dorpdown listboxes
 									return null;																		
 								}
 							}
@@ -786,7 +786,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 						}
 						else{
 							//TODO get the default
-							item[attrRefId] = null;//add the identifier to the item
+							item[attrRefId] = -1;//-1 represents null in dorpdown listboxes
 							return null;																		
 						}
 					}

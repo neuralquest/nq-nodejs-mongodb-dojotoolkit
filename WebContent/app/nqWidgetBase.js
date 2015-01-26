@@ -158,7 +158,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			var attrPromises = [];
 			//get the label that this attribute reference has as an attribute
 			attrPromises[0] = this.store.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, PRIMARY_NAMES);
-			//get the assocication type that this attribute reference has as an attribute
+			//get the association type that this attribute reference has as an attribute
 			attrPromises[1] = this.store.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, TOONEASSOCS_TYPE);
 			//get the attribute class that this attribute reference maps to
 			//attrPromises[2] = this.store.getOneByAssocTypeAndDestClass(attrRefId, MAPSTO_ASSOC, ATTRIBUTE);
@@ -221,7 +221,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 							//currency: attrRef[CURRENCY_ATTR_ID],
 							editOn: 'dblclick',  // for dgrid
 							autoSave: true, // for dgrid
-							sortable: true
+							sortable: true,
+							style: 'width:100%'// for forms (grids will have a specific width)
 						};
 						switch(attrClassType){
 						case PERMITTEDVAULE_CLASS_ID: 
@@ -251,7 +252,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 								return value;
 							};
 							//width: attrRef[WIDTH_ATTR_ID]+'em',
-							property.style = 'width:8em';
+							property.columnWidth = '8em';
+							property.nullValue = -1;
 							break;	
 						case RTF_CLASS_ID: 
 							//property.editor = 'RTFEditor';
@@ -266,13 +268,17 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 							};					
 							property.get = function(item){
 								var value = item[property.name];
-								if(!value) return '<p></p>';//editor will crash if it does not have a value
+								if(!value) return '<p>[no text]</p>';//editor will crash if it does not have a value
 								return value;
 							};
+							property.height = '';//auto-expand mode
+							property.columnWidth = '100%';
+							property.nullValue = '<p>[no text]</p>';
 							break;	
 						case DATE_CLASS_ID:
 							//property.editor = 'DateTextBox';
-							property.style = 'width:6em';
+							property.columnWidth = '6em';
+							property.nullValue = null;
 							break;	
 						case STRING_CLASS_ID:
 							property.editor = 'text';
@@ -281,7 +287,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 								//minLength: attrRef[MINLENGTH_ATTR_ID],
 								//regRex: attrRef[REGEX_ATTR_ID], //e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
 							};
-							property.style = 'width:10em';
+							property.columnWidth = '10em';
+							property.nullValue = '[no value]';
 							break;	
 						case INTEGER_CLASS_ID: 
 							property.editor = 'number';
@@ -291,7 +298,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 								//places: attrRef[PLACES_ATTR_ID],
 								//fractional: attrRef[FRACTIONAL_ATTR_ID]
 							//}
-							property.style = 'width:5em';
+							property.columnWidth = '5em';
+							property.nullValue = null;
 							break;	
 						case NUMBER_CLASS_ID: 
 							property.editor = 'number';
@@ -300,15 +308,18 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 								//maximum: attrRef[MAXIMUM_ATTR_ID],
 								//places: 0
 							//}
+							property.columnWidth = '5em';
+							property.nullValue = null;
 							break;
-							property.style = 'width:5em';
 						case BOOLEAN_CLASS_ID: 
 							property.editor = 'radio';
-							property.style = 'width:3em';
+							property.columnWidth = '3em';
+							property.nullValue = null;
 							break;
 						default:
 							property.editor = 'text';
-							property.style = 'width:20em';
+							property.columnWidth = '10em';
+							property.nullValue = null;
 						};
 						return property;
 					});							

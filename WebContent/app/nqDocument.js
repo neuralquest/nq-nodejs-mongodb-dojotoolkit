@@ -172,7 +172,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			});	
 			var children = collection.fetch();
 			var item = children[0];
-			var promise = when(self.generateNextLevelContents(item, 1, [], null, false), function(item){
+			var promise = when(self.generateNextLevelContents(item, 1, null, false), function(item){
 				registry.byId('tab'+self.tabId).resize();
 //				self.pane.resize();
 				self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
@@ -181,19 +181,18 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
 		//Create an ordinary HTML page recursivly by obtaining data from the server
-		generateNextLevelContents: function(item, headerLevel, paragraphNrArr, parentId, previousParagrphHasRightFloat){
+		generateNextLevelContents: function(item, headerLevel, parentId, previousParagrphHasRightFloat){
+			//console.log('do item',item[2535]);
 			var self = this;
 			var hearderObj = item['attrRef'+this.HEADER_ATTRREF];
 			var paragraphObj = item['attrRef'+this.PARAGRAPH_ATTRREF];
 			
 			//Header
-			var paragraphNrStr = paragraphNrArr.length==0?'':paragraphNrArr.join('.');
 			var headerNode = domConstruct.create(
 					'h'+headerLevel, 
 					{style: {'clear': previousParagrphHasRightFloat?'both':'none'}}, 
 					this.pane.containerNode
 				);
-			if(headerLevel>1) domConstruct.create('span', { innerHTML: paragraphNrStr, style: { 'margin-right':'30px'}}, headerNode);
 			var textDijit = new ValidationTextBox({
 				item: item,
 			    'type': 'text',
@@ -328,13 +327,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			var children = collection.fetch();
 			children.forEach(function(childItem){
 				var previousParagrphHasRightFloat = false;
-				for(var i=0;i<children.length;i++){
-					var childItem = children[i];
-					paragraphNrArr[headerLevel-1] = i+1;
-					self.generateNextLevelContents(childItem, headerLevel+1, paragraphNrArr, item.id, previousParagrphHasRightFloat);
-					paragraphNrArr.splice(headerLevel,100);//remove old shit
-//					previousParagrphHasRightFloat = childItem[self.PARAGRAPH_ATTRREF].indexOf('floatright')==-1?false:true;
-				}				
+				self.generateNextLevelContents(childItem, headerLevel+1, item.id, previousParagrphHasRightFloat);
+				previousParagrphHasRightFloat = childItem[self.PARAGRAPH_ATTRREF]&&childItem[self.PARAGRAPH_ATTRREF].indexOf('floatright')==-1?false:true;
 			});
 		},
 		replaceParagraphWithEditor: function(replaceDiv, item){
@@ -384,8 +378,10 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		},
 		replaceNodeWithParagraph: function(replaceDiv, item){
 			var self = this;
+			var value = item[this.PARAGRAPH_ATTRREF];
+			if(!value) value = '<p>[no text]</p>'
 			var paragraphNode = domConstruct.create('div', {
-				innerHTML: item[this.PARAGRAPH_ATTRREF], 
+				innerHTML: value, 
 			}, replaceDiv, "replace");
 
 			this.own(on(paragraphNode, mouse.enter, function(evt){

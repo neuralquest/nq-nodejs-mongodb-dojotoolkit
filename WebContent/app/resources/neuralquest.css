@@ -18,11 +18,26 @@ html, body, #fullPage, #placholder {width: 100%;height: 100%;overflow: hidden;pa
 .backgroundClass{background: #FFFFFF url(img/Neuralquest/testsBodyBg.gif) repeat-x scroll left top;    }
 
 p,ul,ol {text-align: justify; margin-top: 0em; margin-bottom: 0em; font-family: sans-serif;}
-ul,ol {margin-left: -2em;}
+ul,ol {margin-left: -1em;}
 
-h1, h2, h3, h4, h5, h6 {margin-top: 0.5em; margin-bottom: 0em;}
+h1, h2, h3, h4, h5, h6 {margin-top: 0.5em; margin-bottom: 0em; overflow:hidden;}
 code {border:none; font-size: 100%;}
 .dojoDndContainerOver {	border: 0px;}
+
+/*Fancy bit copied from the Internet: generate header numbers*/
+  body {counter-reset: h2}
+  h2 {counter-reset: h3}
+  h3 {counter-reset: h4}
+  h4 {counter-reset: h5}
+  h5 {counter-reset: h6}
+
+  h2:before {counter-increment: h2; content: counter(h2) ". "}
+  h3:before {counter-increment: h3; content: counter(h2) "." counter(h3) ". "}
+  h4:before {counter-increment: h4; content: counter(h2) "." counter(h3) "." counter(h4) ". "}
+  h5:before {counter-increment: h5; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". "}
+  h6:before {counter-increment: h6; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". "}
+
+  h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.nocount:before, h6.nocount:before { content: ""; counter-increment: none } 
 
 /*dgrid*/
 .nqGrid .dgrid-cell-padding {padding: 0px;}

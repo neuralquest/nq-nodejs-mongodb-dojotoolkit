@@ -92,6 +92,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 				}
 				for(var i=0;i<columns.length;i++){
 					var property = columns[i];
+					property.style = 'width:'+property.columnWidth;//tables have their column widths set
 					switch(property.attrClassType){
 					case PERMITTEDVAULE_CLASS_ID: 
 						property.renderCell = function(object, value, node, options){

@@ -37,11 +37,15 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 						//the label
 						domConstruct.create("td", {innerHTML: (property.label), style: "padding: 3px"}, row);
 						
+						if(property.attrClassType==RTF_CLASS_ID){//place the editor on a new row with colspan 2
+							var row = domConstruct.create("tr", null, tableNode);							
+						}
+						
 						//the dijit
-						var tdDom = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row);/*background: rgba(249, 249, 182, 0.5)*/
+						var tdDom = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row);
 						var dijit = null;
 						switch(property.attrClassType){
-						case PERMITTEDVAULE_CLASS_ID: //defect not being called
+						case PERMITTEDVAULE_CLASS_ID:
 							dijit = new Select(property.editorArgs, domConstruct.create('div'));
 							break;	
 						case RTF_CLASS_ID:
@@ -56,17 +60,20 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 							//property.styleSheet = 'css/editor.css';
 							property.value = '<p></p>';
 							dijit = new Editor(property, domConstruct.create('div'));*/
-							dijit = new Editor(property.editorArgs, domConstruct.create('div'));
+							dijit = new Editor(property, domConstruct.create('div', {name: property.name}));/*setting the name wont be done autoamticly*/
 	//						dijit.addStyleSheet('css/editor.css');
 							dijit.on("NormalizedDisplayChanged", function(event){
-								var height = domGeometry.getMarginSize(dijit.domNode).h;
+								var height = domGeometry.getMarginSize(this.editNode).h;
 								if(has("opera")){
 									height = this.editNode.scrollHeight;
 								}
-								this.resize({h: height});
+								console.log('height',domGeometry.getMarginSize(this.editNode));
+								
+								//this.resize({h: height});
+								domGeometry.setMarginBox(this.iframe, { h: height });
 							});
 							//dijit.destroy = function(){console.log('destroyed editor')};
-								
+							domAttr.set(tdDom, 'colspan', '2');	
 							break;	
 						case DATE_CLASS_ID:
 							dijit = new DateTextBox(property, domConstruct.create('input'));
@@ -135,7 +142,16 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 				var attrQuery = "[name='"+attrRefId+"']";
 				query(attrQuery).forEach(function(input){
 					var wid = registry.getEnclosingWidget(input);
-					wid.set('value',self.item[attrRefId], false);// do not fire change
+					var value = self.item[attrRefId];
+					var widType = wid.declaredClass;
+					console.log('widType', widType);
+					if(!value){
+						if(widType == "dijit.form.Select") value = -1;
+						if(widType == "dijit.form.ValidationTextBox") value = '[no value]';
+						if(widType == "dijit.form.NumberTextBox") value = 'null';
+						if(widType == "dijit.Editor") value = '<p>[no text]</p>';
+					}
+					wid.set('value',value, false);// do not fire change
 				});
 		    }
 			self.setSelectedObjIdPreviousLevelDeferred.resolve(self);

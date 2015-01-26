@@ -88,13 +88,17 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				var self = this;
 				var id = this.store.getIdentity(parentItem);
 
-				if(this.childrenCache[id]){
+				/*if(this.childrenCache[id]){
 					// If this.childrenCache[id] is defined, then it always has the latest list of children
 					// (like a live collection), so just return it.
+					//TODO why aren't my collections like a live collection? something is wrong  
 					when(this.childrenCache[id], onComplete, onError);
 					return;
 				}
-				var collection = this.childrenCache[id] = this.store.getChildren(parentItem);
+				var collection = this.childrenCache[id] = this.store.getChildren(parentItem);*/
+				
+				var collection = this.childrenCache[id];
+				if(!collection) collection = this.childrenCache[id] = this.store.getChildren(parentItem);
 				// Setup observer in case children list changes, or the item(s) in the children list are updated.
 				collection.on('remove, add', function(event){
 					var parent = event.parent;
