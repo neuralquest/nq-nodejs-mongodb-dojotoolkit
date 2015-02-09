@@ -179,8 +179,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				var attrPromises = [];
 				//get the label that this attribute reference has as an attribute
 				attrPromises[0] = self.store.getCell(labelId);
+				//get attribute class type (parent of)
 				if(destClassId){
-					//get attribute class type (parent of)
 					////////////////////Exception for the cell name as used by the class model///////////////////
 					if(destClassId == CLASSNAME_CLASS_ID) attrPromises[1] = destClassId;
 					else attrPromises[1] = self.store.getOneByAssocType(destClassId, PARENT_ASSOC, CLASS_TYPE, true, false);

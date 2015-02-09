@@ -92,9 +92,15 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				//});
 				for(var j=0;j<attrRefArr.length;j++){
 					var attrRefId = attrRefArr[j];
-					valuePromises.push(self.getAttributeValue(item, itemId, attrRefId));
+					valuePromises.push(self.getAttributeProperties(itemId, attrRefId));
 				}
-				return when(all(valuePromises), function(valueObjArr){return item;});
+				return when(all(valuePromises), function(attrPropsArr){
+					for(var j=0;j<attrPropsArr.length;j++){
+						var attrProp = attrPropsArr[j];
+						item[attrProp.attrRefId] = attrProp.widgetValue;
+					}
+					return item;
+				});
 			}, nq.errorDialog);
 		},
 		add: function(item, directives){
@@ -159,6 +165,70 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			}, nq.errorDialog);			
 		},		
 		put: function(item, directives){
+			var PERTMITTEDVALUE_CLASS_ID = 58;
+			var ASSOCS_CLASS_TYPE = 94;
+			var CELLNAME_ATTR_CLASS = 101;
+			var CELLTYPE_ATTR_CLASS = 102;
+			
+			this.enableTransactionButtons();
+			var self = this;
+			
+			
+			var valuePromises = [];
+			for(attrRefId in item){
+				if(isNaN(attrRefId, item)) continue;
+				console.log('UPDATE ATTRREF', attrRefId, item[attrRefId]);
+				valuePromises.push(self.getAttributeProperties(itemId, attrRefId));
+			}				
+			return when(all(valuePromises), function(attrPropsArr){
+				for(var j=0;j<attrPropsArr.length;j++){
+					var attrProp = attrPropsArr[j];
+					//{attrRefId:attrRefId, widgetValue:widgetValue, attrClassTypeId:attrClassTypeId, nullValue:nullValue};
+					if(attrProp.widgetValue == item[attrProp.attrRefId]) continue;
+					if(attrProp.attrClassTypeId == PERTMITTEDVALUE_CLASS_ID){//we're dealing with a permitted value
+						if(item[attrProp.attrRefId] == attrProp.nullValue){//the new value is null (and the are not the same)
+							assocStore.remove(attrProp.assoc.id);	//remove the association
+						}
+						else {
+							if(attrProp.widgetValue == attrProp.nullValue){//the current value is null
+								//add an association
+								var assoc = {sourceFk:item.id, type:assocType, destFk:item[attrRefId]};
+								self.addAssoc(assoc);
+							}
+							else{//the current value is NOT null
+								//update the association
+								attrProp.assoc.destFk = item[attrProp.attrRefId];
+								assocStore.put(attrProp.assoc);
+							}
+						} 
+					}
+					else{
+						if(item[attrProp.attrRefId] == attrProp.nullValue){//the new value is null (and the are not the same)
+							//remove the attribute
+						}
+						else{
+							if(attrProp.widgetValue == attrProp.nullValue){//the current value is null
+								//add a cell
+								var newCell = self.addCell({type:1, name:item[attrProp.attrRefId], attrRefId:attrProp.attrRefId});
+								self.addAssoc({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:attrProp.attrClassId});
+								self.addAssoc({sourceFk:item.id, type:attrProp.assocType, destFk:newCell.id});
+							}
+							else{//the current value is NOT null
+								//update the cell
+								var cell = attrProp.cell;
+								cell.name = item[attrProp.attrRefId];
+								cell.attrRefId = attrProp.attrRefId;//used to validate on the server
+								cellStore.put(cell);
+							}
+						}
+					}
+				}
+				if(directives) this.processDirectives(item, directives);
+				return item;
+			});
+
+		},		
+		XXXput: function(item, directives){
 			var PERTMITTEDVALUE_CLASS = 58;
 			var ASSOCS_CLASS_TYPE = 94;
 			var CELLNAME_ATTR_CLASS = 101;
@@ -170,8 +240,9 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			for(attrRefId in item){
 				if(isNaN(attrRefId, item)) continue;
 				console.log('UPDATE ATTRREF', attrRefId, item[attrRefId]);
+				
 				var attrPromises = [];
-				//get the assocication type that this attribute reference has as an attribute
+				//get the association type that this attribute reference has as an attribute
 				attrPromises[0] = this.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
 				//get the attribute class that this attribute reference maps to
 				attrPromises[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
@@ -245,8 +316,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 					
 			if(directives) this.processDirectives(item, directives);
 			return item;
-		},		
-
+		},	
 		processDirectives: function(object, directives){
 			var ASSOCS_CLASS_TYPE = 94;
 
@@ -713,7 +783,105 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				});
 			});
 		},		
-		getAttributeValue: function(item, objId, attrRefId){			
+		getAttributeProperties: function(objId, attrRefId){
+			var ASSOCS_CLASS_TYPE = 94;
+			var CELLNAME_ATTR_CLASS = 101;
+			var CELLTYPE_ATTR_CLASS = 102;
+
+			var PERMITTEDVALUE_CLASS_ID = 58;
+			var RTF_CLASS_ID = 65;
+			var DATE_CLASS_ID = 52;
+			var STRING_CLASS_ID = 54;
+			var INTEGER_CLASS_ID = 55;
+			var NUMBER_CLASS_ID = 56;
+			var BOOLEAN_CLASS_ID = 57;
+
+			var self = this;
+			var attrRefPromArr1 = [];
+			//get the assocication type that this attribute reference has as an attribute
+			attrRefPromArr1[0] = self.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
+			//get the attribute class that this attribute reference maps to
+			attrRefPromArr1[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
+			return when(all(attrRefPromArr1), function(promResArr){
+				var assocType = null;
+				if(promResArr[0]) assocType = promResArr[0];
+				var attrClassId = null;
+				if(promResArr[1].length=1) attrClassId = promResArr[1][0].destFk;
+
+				/////// Exception for the class model ///////////////////
+				if(attrClassId == CELLNAME_ATTR_CLASS){
+					return when(cellStore.get(objId), function(valueObj){
+						if(valueObj.type==0){//is a class
+							var cellValue = valueObj.name?valueObj.name:'[no name]';
+							return {attrRefId:attrRefId, widgetValue:valueObj.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]'};
+						}
+						else { //is an object
+							//find out if the object is a process class
+							return when(self.isA(objId, PROCESSCLASSES_CLASS), function(trueFalse){
+								if(trueFalse) {
+									//get the primary name of the object
+									return when(self.getOneByAssocTypeAndDestClass(objId, ATTRIBUTE_ASSOC, PRIMARYNAME_CLASS), function(valueObjId){
+										if(!valueObjId) return null; 
+										else return when(cellStore.get(valueObjId), function(valueObj){
+											var cellValue = valueObj.name?valueObj.name:'[no name]';
+											return {attrRefId:attrRefId, widgetValue:valueObj.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]'};
+										});
+									});
+								}
+								else{
+									var cellValue = valueObj.name?valueObj.name:'[no name]';
+									return {attrRefId:attrRefId, widgetValue:valueObj.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]'};
+								}
+							});
+						}
+					});
+				}
+				if(attrClassId == CELLTYPE_ATTR_CLASS){
+					return when(cellStore.get(objId), function(valueObj){
+						return {attrRefId:attrRefId, widgetValue:valueObj.type, attrClassTypeId:CELLTYPE_ATTR_CLASS, nullValue:'[no type]'};
+					});
+				}
+				
+				var attrRefPromArr2 = [];
+				//get the valueObjId for this object, attribute reference
+				attrRefPromArr2[0] = self.getOneByAssocTypeAndDestClass(objId, assocType, attrClassId);
+				//get the attribute class TYPE that this attribute class has as a parent
+				attrRefPromArr2[1] = assocStore.query({sourceFk: attrClassId, type: PARENT_ASSOC});
+				//find out if the attribute class is a permitted value
+				attrRefPromArr2[2] = self.isA(attrClassId, PERMITTEDVALUE_CLASS_ID);
+				return when(all(attrRefPromArr2), function(promResArr2){
+					var valueObjId = null;
+					if(promResArr2[0]) valueObjId = promResArr2[0];
+					var attrClassTypeId = null;
+					if(promResArr2[1].length==1) attrClassTypeId = promResArr2[1][0].destFk;
+					var isAPermittedValue = promResArr2[2];
+					
+					var attrClassTypeId = (isAPermittedValue||assocType!=ATTRIBUTE_ASSOC)?PERMITTEDVALUE_CLASS_ID:attrClassTypeId;
+					var widgetValue = null;
+					var nullValue = null;
+					if(attrClassTypeId == PERMITTEDVALUE_CLASS_ID){
+						nullValue = -1;
+						if(valueObjId) widgetValue = valueObjId;
+						else widgetValue = nullValue;
+					}
+					else {
+						if(attrClassTypeId == RTF_CLASS_ID) nullValue = '<p>[no text]</p>';
+						else if(attrClassTypeId == DATE_CLASS_ID) nullValue = null;
+						else if(attrClassTypeId == STRING_CLASS_ID) nullValue = '[no value]';
+						else if(attrClassTypeId == INTEGER_CLASS_ID) nullValue = '[null]';
+						else if(attrClassTypeId == NUMBER_CLASS_ID) nullValue = '[null]';
+						else if(attrClassTypeId == BOOLEAN_CLASS_ID) nullValue = false;
+						if(valueObjId) {
+							var valueCell = cellStore.get(valueObjId);//TODO does this work with async?
+							widgetValue = valueCell.name;
+						}
+						else widgetValue = nullValue;
+					};
+					return {attrRefId:attrRefId, widgetValue:widgetValue, attrClassTypeId:attrClassTypeId, nullValue:nullValue};
+				});
+			});
+		},
+		XXXgetAttributeValue: function(item, objId, attrRefId){			
 			var PERTMITTEDVALUE_CLASS = 58;
 			var ASSOCS_CLASS_TYPE = 94;
 			var CELLNAME_ATTR_CLASS = 101;
@@ -1050,7 +1218,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			});
 		},
 		/////// Exception for the class model //////////////////////////////////////////////////
-		getClassModelCellName: function(item, objId, attrRefId){
+		XXXgetClassModelCellName: function(item, objId, attrRefId){
 			var PROCESSCLASSES_CLASS = 67;
 			var PRIMARYNAME_CLASS = 69;
 			

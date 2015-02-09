@@ -144,13 +144,13 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 					var wid = registry.getEnclosingWidget(input);
 					var value = self.item[attrRefId];
 					var widType = wid.declaredClass;
-					console.log('widType', widType);
+					/*console.log('widType', widType);
 					if(!value){
-						if(widType == "dijit.form.Select") value = -1;
+						//if(widType == "dijit.form.Select") value = -1;
 						if(widType == "dijit.form.ValidationTextBox") value = '[no value]';
 						if(widType == "dijit.form.NumberTextBox") value = 'null';
 						if(widType == "dijit.Editor") value = '<p>[no text]</p>';
-					}
+					}*/
 					wid.set('value',value, false);// do not fire change
 				});
 		    }
