@@ -303,7 +303,7 @@ public class DataServlet extends HttpServlet implements Constants {
 			}
 			idCellMap.clear();
 
-			//if(1==1) throw new RuntimeException("Silly wabbit");
+			if(1==1) throw new RuntimeException("Silly wabbit");
 
 			session.getTransaction().commit();
 		}

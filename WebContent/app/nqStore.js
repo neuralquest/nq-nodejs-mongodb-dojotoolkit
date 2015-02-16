@@ -180,36 +180,57 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				console.log('UPDATE ATTRREF', attrRefId, item[attrRefId]);
 				valuePromises.push(self.getAttributeProperties(itemId, attrRefId));
 			}				
-			return when(all(valuePromises), function(attrPropsArr){
+			when(all(valuePromises), function(attrPropsArr){
 				for(var j=0;j<attrPropsArr.length;j++){
 					var attrProp = attrPropsArr[j];
-					//{attrRefId:attrRefId, widgetValue:widgetValue, attrClassTypeId:attrClassTypeId, nullValue:nullValue};
+					//{attrRefId:attrRefId, widgetValue:widgetValue, attrClassTypeId:attrClassTypeId, nullValue:nullValue, valueCell:valueCell, assocType:assocType};
 					if(attrProp.widgetValue == item[attrProp.attrRefId]) continue;
 					if(attrProp.attrClassTypeId == PERTMITTEDVALUE_CLASS_ID){//we're dealing with a permitted value
 						if(item[attrProp.attrRefId] == attrProp.nullValue){//the new value is null (and the are not the same)
 							assocStore.remove(attrProp.assoc.id);	//remove the association
 						}
-						else {
+						else {//the new value is not null
 							if(attrProp.widgetValue == attrProp.nullValue){//the current value is null
 								//add an association
-								var assoc = {sourceFk:item.id, type:assocType, destFk:item[attrRefId]};
+								var assoc = null
+								if(attrProp.assocType < 15) assoc = {sourceFk:item.id, type:attrProp.assocType, destFk:item[attrRefId]};
+								else assoc = {destFk:item[attrRefId], type:(attrProp.assocType-12), sourceFk:item.id };
 								self.addAssoc(assoc);
 							}
-							else{//the current value is NOT null
-								//update the association
-								attrProp.assoc.destFk = item[attrProp.attrRefId];
-								assocStore.put(attrProp.assoc);
+							else{//the current value is NOT null, so update the association
+								//first get it
+								var assoc = null
+								if(attrProp.assocType < 15) {
+									var assocArr = assocStore.query({sourceFk:item.id, type:attrProp.assocType, destFk:attrProp.widgetValue});
+									if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
+									assoc = assocArr[0];
+									assoc.destFk = item[attrProp.attrRefId];
+								}
+								else {
+									var assocArr = assocStore.query({sourceFk:attrProp.widgetValue, type:(attrProp.assocType-12), destFk:item.id});
+									if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
+									assoc = assocArr[0];
+									assoc.sourceFk = item[attrProp.attrRefId];
+								}
+								assocStore.put(assoc);
 							}
 						} 
 					}
 					else{
 						if(item[attrProp.attrRefId] == attrProp.nullValue){//the new value is null (and the are not the same)
 							//remove the attribute
+							cellStore.remove(attrProp.valueCell.id);
+							when(assocStore.query({sourceFk:attrProp.valueCell.id, type:PARENT_ASSOC, destFk:attrProp.attrClassTypeId}), function(assocsArr){
+								if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
+							}, nq.errorDialog);
+							when(assocStore.query({sourceFk:item.id, type:attrProp.assocType, destFk:attrProp.valueCell.id}), function(assocsArr){
+								if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
+							}, nq.errorDialog);
 						}
-						else{
+						else{//the new value is not null
 							if(attrProp.widgetValue == attrProp.nullValue){//the current value is null
 								//add a cell
-								var newCell = self.addCell({type:1, name:item[attrProp.attrRefId], attrRefId:attrProp.attrRefId});
+								var newCell = self.addCell({type:1, name:item[attrProp.attrRefId].name, attrRefId:attrProp.attrRefId});
 								self.addAssoc({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:attrProp.attrClassId});
 								self.addAssoc({sourceFk:item.id, type:attrProp.assocType, destFk:newCell.id});
 							}
@@ -808,12 +829,12 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				var attrClassId = null;
 				if(promResArr[1].length=1) attrClassId = promResArr[1][0].destFk;
 
-				/////// Exception for the class model ///////////////////
+				/////////////////// Exception for the class model ///////////////////
 				if(attrClassId == CELLNAME_ATTR_CLASS){
-					return when(cellStore.get(objId), function(valueObj){
-						if(valueObj.type==0){//is a class
-							var cellValue = valueObj.name?valueObj.name:'[no name]';
-							return {attrRefId:attrRefId, widgetValue:valueObj.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]'};
+					return when(cellStore.get(objId), function(valueCell){
+						if(valueCell.type==0){//is a class
+							var cellValue = valueCell.name?valueCell.name:'[no name]';
+							return {attrRefId:attrRefId, widgetValue:valueCell.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]', valueCell:valueCell};
 						}
 						else { //is an object
 							//find out if the object is a process class
@@ -822,25 +843,27 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 									//get the primary name of the object
 									return when(self.getOneByAssocTypeAndDestClass(objId, ATTRIBUTE_ASSOC, PRIMARYNAME_CLASS), function(valueObjId){
 										if(!valueObjId) return null; 
-										else return when(cellStore.get(valueObjId), function(valueObj){
-											var cellValue = valueObj.name?valueObj.name:'[no name]';
-											return {attrRefId:attrRefId, widgetValue:valueObj.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]'};
+										else return when(cellStore.get(valueObjId), function(valueCell){
+											var cellValue = valueCell.name?valueCell.name:'[no name]';
+											return {attrRefId:attrRefId, widgetValue:valueCell.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]', valueCell:valueCell};
 										});
 									});
 								}
 								else{
-									var cellValue = valueObj.name?valueObj.name:'[no name]';
-									return {attrRefId:attrRefId, widgetValue:valueObj.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]'};
+									var cellValue = valueCell.name?valueCell.name:'[no name]';
+									return {attrRefId:attrRefId, widgetValue:valueCell.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]', valueCell:valueCell};
 								}
 							});
 						}
 					});
 				}
 				if(attrClassId == CELLTYPE_ATTR_CLASS){
-					return when(cellStore.get(objId), function(valueObj){
-						return {attrRefId:attrRefId, widgetValue:valueObj.type, attrClassTypeId:CELLTYPE_ATTR_CLASS, nullValue:'[no type]'};
+					return when(cellStore.get(objId), function(valueCell){
+						return {attrRefId:attrRefId, widgetValue:valueCell.type, attrClassTypeId:CELLTYPE_ATTR_CLASS, nullValue:'[no type]', valueCell:valueCell};
 					});
 				}
+				/////////////////// End of exception ///////////////////
+				
 				
 				var attrRefPromArr2 = [];
 				//get the valueObjId for this object, attribute reference
@@ -863,21 +886,20 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 						nullValue = -1;
 						if(valueObjId) widgetValue = valueObjId;
 						else widgetValue = nullValue;
+						return {attrRefId:attrRefId, widgetValue:widgetValue, attrClassTypeId:attrClassTypeId, nullValue:nullValue, assocType:assocType};
 					}
-					else {
-						if(attrClassTypeId == RTF_CLASS_ID) nullValue = '<p>[no text]</p>';
-						else if(attrClassTypeId == DATE_CLASS_ID) nullValue = null;
-						else if(attrClassTypeId == STRING_CLASS_ID) nullValue = '[no value]';
-						else if(attrClassTypeId == INTEGER_CLASS_ID) nullValue = '[null]';
-						else if(attrClassTypeId == NUMBER_CLASS_ID) nullValue = '[null]';
-						else if(attrClassTypeId == BOOLEAN_CLASS_ID) nullValue = false;
-						if(valueObjId) {
-							var valueCell = cellStore.get(valueObjId);//TODO does this work with async?
-							widgetValue = valueCell.name;
-						}
-						else widgetValue = nullValue;
-					};
-					return {attrRefId:attrRefId, widgetValue:widgetValue, attrClassTypeId:attrClassTypeId, nullValue:nullValue};
+					if(attrClassTypeId == RTF_CLASS_ID) nullValue = '<p>[no text]</p>';
+					else if(attrClassTypeId == DATE_CLASS_ID) nullValue = null;
+					else if(attrClassTypeId == STRING_CLASS_ID) nullValue = '[no value]';
+					else if(attrClassTypeId == INTEGER_CLASS_ID) nullValue = '[null]';
+					else if(attrClassTypeId == NUMBER_CLASS_ID) nullValue = '[null]';
+					else if(attrClassTypeId == BOOLEAN_CLASS_ID) nullValue = false;
+					if(valueObjId) {
+						var valueCell = cellStore.get(valueObjId);//TODO does this work with async?
+						widgetValue = valueCell.name;
+					}
+					else widgetValue = nullValue;
+					return {attrRefId:attrRefId, widgetValue:widgetValue, attrClassTypeId:attrClassTypeId, nullValue:nullValue, valueCell:valueCell};
 				});
 			});
 		},
