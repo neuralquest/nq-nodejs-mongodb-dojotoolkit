@@ -170,7 +170,6 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			var CELLNAME_ATTR_CLASS = 101;
 			var CELLTYPE_ATTR_CLASS = 102;
 			
-			this.enableTransactionButtons();
 			var self = this;
 			
 			
@@ -178,16 +177,30 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			for(attrRefId in item){
 				if(isNaN(attrRefId, item)) continue;
 				console.log('UPDATE ATTRREF', attrRefId, item[attrRefId]);
-				valuePromises.push(self.getAttributeProperties(itemId, attrRefId));
+				valuePromises.push(self.getAttributeProperties(item.id, attrRefId));
 			}				
 			when(all(valuePromises), function(attrPropsArr){
 				for(var j=0;j<attrPropsArr.length;j++){
 					var attrProp = attrPropsArr[j];
 					//{attrRefId:attrRefId, widgetValue:widgetValue, attrClassTypeId:attrClassTypeId, nullValue:nullValue, valueCell:valueCell, assocType:assocType};
 					if(attrProp.widgetValue == item[attrProp.attrRefId]) continue;
+					self.enableTransactionButtons();
 					if(attrProp.attrClassTypeId == PERTMITTEDVALUE_CLASS_ID){//we're dealing with a permitted value
 						if(item[attrProp.attrRefId] == attrProp.nullValue){//the new value is null (and the are not the same)
-							assocStore.remove(attrProp.assoc.id);	//remove the association
+							//first get it
+							var assoc = null
+							if(attrProp.assocType < 15) {
+								var assocsArr = assocStore.query({sourceFk:item.id, type:attrProp.assocType, destFk:attrProp.widgetValue});
+								if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
+								assoc = assocsArr[0];
+							}
+							else {
+								var assocsArr = assocStore.query({sourceFk:attrProp.widgetValue, type:(attrProp.assocType-12), destFk:item.id});
+								if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
+								assoc = assocsArr[0];
+							}
+							if(!assoc) throw new Error('There must be one permitted value');
+							assocStore.remove(assoc.id);	//remove the association
 						}
 						else {//the new value is not null
 							if(attrProp.widgetValue == attrProp.nullValue){//the current value is null
@@ -201,17 +214,18 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 								//first get it
 								var assoc = null
 								if(attrProp.assocType < 15) {
-									var assocArr = assocStore.query({sourceFk:item.id, type:attrProp.assocType, destFk:attrProp.widgetValue});
+									var assocsArr = assocStore.query({sourceFk:item.id, type:attrProp.assocType, destFk:attrProp.widgetValue});
 									if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
-									assoc = assocArr[0];
+									assoc = assocsArr[0];
 									assoc.destFk = item[attrProp.attrRefId];
 								}
 								else {
-									var assocArr = assocStore.query({sourceFk:attrProp.widgetValue, type:(attrProp.assocType-12), destFk:item.id});
+									var assocsArr = assocStore.query({sourceFk:attrProp.widgetValue, type:(attrProp.assocType-12), destFk:item.id});
 									if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
-									assoc = assocArr[0];
+									assoc = assocsArr[0];
 									assoc.sourceFk = item[attrProp.attrRefId];
 								}
+								if(!assoc) throw new Error('There must be one permitted value');
 								assocStore.put(assoc);
 							}
 						} 
@@ -236,7 +250,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 							}
 							else{//the current value is NOT null
 								//update the cell
-								var cell = attrProp.cell;
+								var cell = attrProp.valueCell;
 								cell.name = item[attrProp.attrRefId];
 								cell.attrRefId = attrProp.attrRefId;//used to validate on the server
 								cellStore.put(cell);
