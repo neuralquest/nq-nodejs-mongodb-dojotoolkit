@@ -1,8 +1,8 @@
-define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dojo/store/util/QueryResults", 'dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array"],
-function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest, Memory, Cache, request, registry, array ){
+define(['dojo/_base/declare', "dojo/_base/lang","dojo/when", "dojo/promise/all", "dstore/QueryResults", 'app/Store'/*'dstore/Store', 'dstore/Trackable'*/,'dojox/store/transaction', 'dojox/store/LocalDB', "dojo/store/JsonRest" , 'dojo/store/Memory', 'dojo/store/Cache', 'dojo/request', 'dijit/registry', "dojo/_base/array", 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/Filter'],
+function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transaction, LocalDB, JsonRest, Memory, Cache, request, registry, array, SimpleQuery, QueryMethod, Filter ){
 
 // module:
-//		js/nqTransStore
+//		js/nqStore
  
 	var transactionLogStore = new Memory();
     var masterCellStore = new JsonRest({
@@ -31,13 +31,16 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 		return localAssocStore.query(query, directives);
 	};
 
-    cellStore.transaction();//trun autocommit off
-    assocStore.transaction();//trun autocommit off
+    cellStore.transaction();//turn autocommit off
+    assocStore.transaction();//turn autocommit off
 
-	return declare("nqTransStore", [], {
+	//return declare('nqStore',[Store],{
+	return declare(Store,{
+	//return declare(Store,{
+		_createSortQuerier: SimpleQuery.prototype._createSortQuerier,
 		
 		getCell: function(id){
-			//still used by nqWidgetbase to develope permitted values
+			//still used by nqWidgetbase to develop permitted values
 			return cellStore.get(id);
 		},
 		getIdentity: function(object){
@@ -62,7 +65,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			//		The identifier of the view that will tell us which attributes to retreive
 			//		viewId is used for things like identifing labels and menus in trees, also getChildren as requested by trees
 			// returns: object 
-			//		A prommises. The promise will result in an item.			
+			//		A promises. The promise will result in an item.			
 			var ATTRREF_CLASS_TYPE = 63;
 
 			var self = this;
@@ -89,9 +92,15 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				//});
 				for(var j=0;j<attrRefArr.length;j++){
 					var attrRefId = attrRefArr[j];
-					valuePromises.push(self.getAttributeValue(item, itemId, attrRefId));
+					valuePromises.push(self.getAttributeProperties(itemId, attrRefId));
 				}
-				return when(all(valuePromises), function(valueObjArr){return item;});
+				return when(all(valuePromises), function(attrPropsArr){
+					for(var j=0;j<attrPropsArr.length;j++){
+						var attrProp = attrPropsArr[j];
+						item[attrProp.attrRefId] = attrProp.widgetValue;
+					}
+					return item;
+				});
 			}, nq.errorDialog);
 		},
 		add: function(item, directives){
@@ -150,12 +159,111 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				var valuePromises = [];
 				for(var j=0;j<attrRefArr.length;j++){
 					var attrRefId = attrRefArr[j];
-					valuePromises.push(self.addAttributeValue(item, attrRefId));
+//					valuePromises.push(self.addAttributeValue(item, attrRefId));
 				}
 				return when(all(valuePromises), function(valueObjArr){return item;});
 			}, nq.errorDialog);			
 		},		
 		put: function(item, directives){
+			var PERTMITTEDVALUE_CLASS_ID = 58;
+			var ASSOCS_CLASS_TYPE = 94;
+			var CELLNAME_ATTR_CLASS = 101;
+			var CELLTYPE_ATTR_CLASS = 102;
+			
+			var self = this;
+			
+			
+			var valuePromises = [];
+			for(attrRefId in item){
+				if(isNaN(attrRefId, item)) continue;
+				console.log('UPDATE ATTRREF', attrRefId, item[attrRefId]);
+				valuePromises.push(self.getAttributeProperties(item.id, attrRefId));
+			}				
+			when(all(valuePromises), function(attrPropsArr){
+				for(var j=0;j<attrPropsArr.length;j++){
+					var attrProp = attrPropsArr[j];
+					//{attrRefId:attrRefId, widgetValue:widgetValue, attrClassTypeId:attrClassTypeId, nullValue:nullValue, valueCell:valueCell, assocType:assocType};
+					if(attrProp.widgetValue == item[attrProp.attrRefId]) continue;
+					self.enableTransactionButtons();
+					if(attrProp.attrClassTypeId == PERTMITTEDVALUE_CLASS_ID){//we're dealing with a permitted value
+						if(item[attrProp.attrRefId] == attrProp.nullValue){//the new value is null (and the are not the same)
+							//first get it
+							var assoc = null
+							if(attrProp.assocType < 15) {
+								var assocsArr = assocStore.query({sourceFk:item.id, type:attrProp.assocType, destFk:attrProp.widgetValue});
+								if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
+								assoc = assocsArr[0];
+							}
+							else {
+								var assocsArr = assocStore.query({sourceFk:attrProp.widgetValue, type:(attrProp.assocType-12), destFk:item.id});
+								if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
+								assoc = assocsArr[0];
+							}
+							if(!assoc) throw new Error('There must be one permitted value');
+							assocStore.remove(assoc.id);	//remove the association
+						}
+						else {//the new value is not null
+							if(attrProp.widgetValue == attrProp.nullValue){//the current value is null
+								//add an association
+								var assoc = null
+								if(attrProp.assocType < 15) assoc = {sourceFk:item.id, type:attrProp.assocType, destFk:item[attrRefId]};
+								else assoc = {destFk:item[attrRefId], type:(attrProp.assocType-12), sourceFk:item.id };
+								self.addAssoc(assoc);
+							}
+							else{//the current value is NOT null, so update the association
+								//first get it
+								var assoc = null
+								if(attrProp.assocType < 15) {
+									var assocsArr = assocStore.query({sourceFk:item.id, type:attrProp.assocType, destFk:attrProp.widgetValue});
+									if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
+									assoc = assocsArr[0];
+									assoc.destFk = item[attrProp.attrRefId];
+								}
+								else {
+									var assocsArr = assocStore.query({sourceFk:attrProp.widgetValue, type:(attrProp.assocType-12), destFk:item.id});
+									if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
+									assoc = assocsArr[0];
+									assoc.sourceFk = item[attrProp.attrRefId];
+								}
+								if(!assoc) throw new Error('There must be one permitted value');
+								assocStore.put(assoc);
+							}
+						} 
+					}
+					else{
+						if(item[attrProp.attrRefId] == attrProp.nullValue){//the new value is null (and the are not the same)
+							//remove the attribute
+							cellStore.remove(attrProp.valueCell.id);
+							when(assocStore.query({sourceFk:attrProp.valueCell.id, type:PARENT_ASSOC, destFk:attrProp.attrClassTypeId}), function(assocsArr){
+								if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
+							}, nq.errorDialog);
+							when(assocStore.query({sourceFk:item.id, type:attrProp.assocType, destFk:attrProp.valueCell.id}), function(assocsArr){
+								if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
+							}, nq.errorDialog);
+						}
+						else{//the new value is not null
+							if(attrProp.widgetValue == attrProp.nullValue){//the current value is null
+								//add a cell
+								var newCell = self.addCell({type:1, name:item[attrProp.attrRefId].name, attrRefId:attrProp.attrRefId});
+								self.addAssoc({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:attrProp.attrClassId});
+								self.addAssoc({sourceFk:item.id, type:attrProp.assocType, destFk:newCell.id});
+							}
+							else{//the current value is NOT null
+								//update the cell
+								var cell = attrProp.valueCell;
+								cell.name = item[attrProp.attrRefId];
+								cell.attrRefId = attrProp.attrRefId;//used to validate on the server
+								cellStore.put(cell);
+							}
+						}
+					}
+				}
+				if(directives) this.processDirectives(item, directives);
+				return item;
+			});
+
+		},		
+		XXXput: function(item, directives){
 			var PERTMITTEDVALUE_CLASS = 58;
 			var ASSOCS_CLASS_TYPE = 94;
 			var CELLNAME_ATTR_CLASS = 101;
@@ -167,8 +275,9 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			for(attrRefId in item){
 				if(isNaN(attrRefId, item)) continue;
 				console.log('UPDATE ATTRREF', attrRefId, item[attrRefId]);
+				
 				var attrPromises = [];
-				//get the assocication type that this attribute reference has as an attribute
+				//get the association type that this attribute reference has as an attribute
 				attrPromises[0] = this.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
 				//get the attribute class that this attribute reference maps to
 				attrPromises[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
@@ -242,8 +351,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					
 			if(directives) this.processDirectives(item, directives);
 			return item;
-		},		
-
+		},	
 		processDirectives: function(object, directives){
 			var ASSOCS_CLASS_TYPE = 94;
 
@@ -264,7 +372,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				var assocType = arr[0];
 				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
 				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
-				var attrClassId = arr[1][0].destFk;
+				var destClassId = arr[1][0].destFk;
 				if(assocType==ORDERED_ASSOC){
 					if(oldParentId){
 						// The leading Assoc will remain attached to the Object that's being moved
@@ -286,6 +394,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 											var assoc = assocArr[0];
 											assoc.sourceFk = oldParentId;
 											assoc.type = ORDERED_ASSOC;
+											assoc.parentId = oldParentId;//needed for serverside validation
 											assocStore.put(assoc);
 										});					
 									}
@@ -300,6 +409,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 											if(assocArr.length!=1) throw new Error('Expected to find one association');
 											var assoc = assocArr[0];
 											assoc.sourceFk = oldParentChildren[idx-1];
+											assoc.parentId = oldParentId;//needed for serverside validation
 											assocStore.put(assoc);
 										});					
 									}
@@ -324,6 +434,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 										var newParentFollowingAssoc = assocArr[0];
 										newParentFollowingAssoc.sourceFk = movingObjectId;
 										newParentFollowingAssoc.type = NEXT_ASSOC;
+										newParentFollowingAssoc.parentId = newParentId;//needed for serverside validation
 										assocStore.put(newParentFollowingAssoc);
 									});					
 								}
@@ -343,6 +454,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 									var leadingAssoc = assocArr[0];
 									leadingAssoc.sourceFk = newParentFollowingAssocSourceFk;
 									leadingAssoc.type = newParentFollowingAssoctype;
+									leadingAssoc.parentId = newParentId;//needed for serverside validation
 									assocStore.put(leadingAssoc);										
 								});					
 							});
@@ -353,7 +465,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 							// get the ordered children as seen from the new parent
 							when(self.getManyByAssocTypeAndDestClass(newParentId, ORDERED_ASSOC, destClassId), function(newParentChildren){
 								if(newParentChildren.length>0){
-									self.addAssoc({sourceFk: newParentChildren[newParentChildren.length-1], type: NEXT_ASSOC, destFk: movingObjectId});
+									self.addAssoc({sourceFk: newParentChildren[newParentChildren.length-1], type: NEXT_ASSOC, destFk: movingObjectId, parentId:newParentId});
 								}
 								else{
 									self.addAssoc({sourceFk: newParentId, type: ORDERED_ASSOC, destFk: movingObjectId});									
@@ -364,27 +476,36 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				}
 				else{
 					if(oldParentId == newParentId) return;
-					//TODO new assoc?
-					if(assocType<SUBCLASSES_PASSOC){
-						when(assocStore.query({sourceFk: oldParentId, type: assocType, destFk: movingObjectId}), function(assocArr){
-							if(assocArr.length!=1) throw new Error('Expected to find one association');
-							var assoc = assocArr[0];
-							assoc.sourceFk = newParentId;
-							assocStore.put(assoc);
-						});					
+					if(oldParentId){
+						if(assocType<SUBCLASSES_PASSOC){
+							when(assocStore.query({sourceFk: oldParentId, type: assocType, destFk: movingObjectId}), function(assocArr){
+								if(assocArr.length!=1) throw new Error('Expected to find one association');
+								var assoc = assocArr[0];
+								assoc.sourceFk = newParentId;
+								assocStore.put(assoc);
+							});					
+						}
+						else {
+							when(assocStore.query({sourceFk:movingObjectId , type: assocType-12, destFk: oldParentId}), function(assocArr){
+								if(assocArr.length!=1) throw new Error('Expected to find one association');
+								var assoc = assocArr[0];
+								assoc.destFk = newParentId;
+								assocStore.put(assoc);
+							});					
+						}
 					}
-					else {
-						when(assocStore.query({sourceFk:movingObjectId , type: assocType-12, destFk: oldParentId}), function(assocArr){
-							if(assocArr.length!=1) throw new Error('Expected to find one association');
-							var assoc = assocArr[0];
-							assoc.destFk = newParentId;
-							assocStore.put(assoc);
-						});					
+					else{//new assoc
+						if(assocType<SUBCLASSES_PASSOC){
+							self.addAssoc({sourceFk: newParentId, type: assocType, destFk: movingObjectId});									
+						}
+						else {
+							self.addAssoc({sourceFk: movingObjectId, type: assocType-12, destFk: newParentId});									
+						}
 					}
 				}
 			});		
 		},		
-		remove: function(itemId, viewId){			
+		remove: function(itemId, viewId, directives){			
 			var PERTMITTEDVALUE_CLASS = 58;
 			var ASSOCS_CLASS_TYPE = 94;
 			var CELLNAME_ATTR_CLASS = 101;
@@ -406,7 +527,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 						var assocType = arr[0];
 						if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
-						var destClassId = arr[1][0].destFk;
+						var attrClassId = arr[1][0].destFk;
 						/////// Exception for the cell type attribute, as used by the class model ///////////////////
 						if(attrClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
 						//find out if the attribute class is a permitted value
@@ -436,49 +557,132 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				}		
 			}, nq.errorDialog);
 			//TODO fix linked lists		
-			when(assocStore.query({sourceFk:itemId}), function(assocsArr){
-				for(var i = 0;i<assocsArr.length;i++){
-					assocStore.remove(assocsArr[0].id);
-				}
-			}, nq.errorDialog);
 			when(assocStore.query({destFk:itemId}), function(assocsArr){
 				for(var i = 0;i<assocsArr.length;i++){
-					assocStore.remove(assocsArr[0].id);
+					var assoc = assocsArr[i];
+					if(assoc.type == NEXT_ASSOC){
+						var leadingItemId = assoc.sourceFk; 
+						when(assocStore.query({sourceFk:itemId, type:NEXT_ASSOC}), function(followingAssocsArr){
+							if(followingAssocsArr.length>1) throw new Error('Only one next expected');
+							var followingAssoc = followingAssocsArr[0];
+							if(followingAssoc){
+								if(!directives)  throw new Error('Must have directives to splice linkedlist');
+								followingAssoc.sourceFk = leadingItemId;
+								followingAssoc.parentId = directives.parent.id
+								assocStore.put(followingAssoc);
+							}
+						}, nq.errorDialog);						
+					}
+					assocStore.remove(assocsArr[i].id);
+				}
+			}, nq.errorDialog);
+			when(assocStore.query({sourceFk:itemId}), function(assocsArr){
+				for(var i = 0;i<assocsArr.length;i++){
+					assocStore.remove(assocsArr[i].id);
 				}
 			}, nq.errorDialog);
 					
 			cellStore.remove(itemId);
+		},
+		_createSubCollection: function (kwArgs) {
+			var newCollection = lang.delegate(this.constructor.prototype);
+
+			for (var i in this) {
+				if (this._includePropertyInSubCollection(i, newCollection)) {
+					newCollection[i] = this[i];
+				}
+			}
+
+			return declare.safeMixin(newCollection, kwArgs);
+		},
+
+		// queryLog: __QueryLogEntry[]
+		//		The query operations represented by this collection
+		queryLog: [],	// NOTE: It's ok to define this on the prototype because the array instance is never modified
+		_includePropertyInSubCollection: function (name, subCollection) {
+			return !(name in subCollection) || subCollection[name] !== this[name];
+		},
+		_getQuerierFactory: function (type) {
+			var uppercaseType = type[0].toUpperCase() + type.substr(1);
+			return this['_create' + uppercaseType + 'Querier'];
+		},
+		Filter: Filter,
+		filter: new QueryMethod({
+			type: 'filter',
+			normalizeArguments: function (filter) {
+				var Filter = this.Filter;
+				if (filter instanceof Filter) {
+					return [filter];
+				}
+				return [new Filter(filter)];
+			}
+		}),
+		fetch: function () {
+			//var data = this.data;
+			var data =[];
+			if (!data || data._version !== this.storage.version || 1==1) {
+				// our data is absent or out-of-date, so we requery from the root
+				// start with the root data
+				//data = this.storage.fullData;
+				var queryLog = this.queryLog;
+				// iterate through the query log, applying each querier
+				for (var i = 0, l = queryLog.length; i < l; i++) {
+					if(queryLog[i].type == 'filter'){
+						var query = queryLog[i].arguments[0];
+						if(query.parentId && query.widgetId && query.join){//used by nqTable
+							var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
+							when(promise, function(res){
+								data = res;
+							});
+						}
+						else if(query.itemId && query.viewId ){//used by tree to get the first item
+							var promise = this.get(query.itemId, query.viewId);
+							when(promise, function(res){
+								data = [res];
+							});
+						}
+						else if(query.parentId && query.viewId ){//used by getChildren
+							if(query.parentId==2016000){
+								var promise = this.getManyByView(query.parentId, 2485);
+								when(promise, function(res){
+									data = res;
+								});
+							}
+							else {
+								var promise = this.getManyByParentWidgetOrViewUnion(query.parentId, query.viewId);
+								when(promise, function(res){
+									data = res;
+								});
+							}
+						}
+						else if(query.sourceFk || query.destFk){
+							//return assocStore.query(query, options);
+							var promise = localAssocStore.query(query);
+							when(promise, function(res){
+								data = res;
+							});
+						}
+					}
+				}
+				// store it, with the storage version stamp
+				data._version = this.storage.version;
+				this.data = data;
+			}
+			return new QueryResults(data);
+		},
+		fetchRange: function (kwArgs) {
+			var data = this.fetch(),
+				start = kwArgs.start,
+				end = kwArgs.end;
+			return new QueryResults(data.slice(start, end), {
+				totalLength: data.length
+			});
 		},		
-
-		query: function(query, options){
-			if(query.parentId && query.widgetId && query.join){
-				var promise = this.getManyByParentWidgetJoin(query.parentId, query.widgetId);
-				/*when(promise, function(res){
-					console.log(res);
-				});*/
-				return QueryResults(promise);
-			}
-			else if(query.cellId && query.viewId ){//used by tree to get the first item
-				return when(this.get(query.cellId, query.viewId), function(item){
-					return QueryResults([item]);
-				});
-			}
-			else if(query.parentId && query.viewId ){//used by getChildren
-				var results = this.getManyByParentWidgetOrViewUnion(query.parentId, query.viewId);
-				return QueryResults(results);
-				//return QueryResults(this.queryEngine(query, options)(results));
-			}
-			else if(query.sourceFk || query.destFk){
-				//return assocStore.query(query, options);
-				return localAssocStore.query(query, options);
-			}
-			//else return JsonRest.prototype.query.call(this, query, options);
-			return [];
-		},
 		getChildren: function(parent){
-			return this.query({parentId: parent.id, viewId: parent.viewId });
+			//return this.query({parentId: parent.id, viewId: parent.viewId });
+			var collection = this.filter({parentId: parent.id, viewId: parent.viewId });
+			return collection;
 		},
-
 
 		getManyByParentWidgetOrViewUnion: function(sourceId, parentWidgetOrViewId){
 			// summary:
@@ -494,7 +698,6 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			//		An array of prommises. Each promise will result in an item.
 			
 			var VIEW_ID = 74;
-			
 			var self = this;
 			return when(this.getManyByAssocTypeAndDestClass(parentWidgetOrViewId, MANYTOMANY_ASSOC, VIEW_ID), function(subViewsArr){
 				var promisses = [];
@@ -532,7 +735,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 					//console.log('itemsArr', itemsArr);
 					var promisses = [];
 					for(var i=0;i<itemsArr.length;i++){
-						item = itemsArr[i];
+						var item = itemsArr[i];
 						promisses.push(self.getManyByParentWidgetJoin(item.id, item.viewId));
 					}
 					return when(all(promisses), function(arrayOfItemsArr){
@@ -569,6 +772,8 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 
 			var ASSOCS_CLASS_TYPE = 94;
 			var ATTRREF_CLASS_TYPE = 63;
+			var ONLYIFPARENTEQUEALS = 109;
+			var PLATOSCAVE_ID = 460;
 			
 			var self = this;
 			var attrPromises = [];
@@ -578,6 +783,8 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			attrPromises[1] = assocStore.query({sourceFk: viewId, type: MAPSTO_ASSOC});
 			//get the attribute references that belong to this view
 			attrPromises[2] = self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
+			//get the Only if Parent Equals that this view has as an attribute
+			attrPromises[3] = self.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, ONLYIFPARENTEQUEALS);
 			return when(all(attrPromises), function(arr){
 				if(!arr[0]) throw new Error('View '+viewId+' must have an association type as an attribute ');
 				var assocType = arr[0];
@@ -589,9 +796,16 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
 				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
 				var destClassId = arr[1][0].destFk;
+				//get the Only if Parent Equals
+				var onlyIfParentEqualsId = arr[3];
+				if(onlyIfParentEqualsId){
+					var onlyIfParentEquals = cellStore.get(onlyIfParentEqualsId);//TODO will this work with async?				
+					if(onlyIfParentEquals.name!=sourceId) return [];
+				}
 				//get the items that result from this source, view
 				var promise = null;
-				if(assocType==INSTANTIATIONS_PASSOC) promise = self.getManyByAssocType(destClassId, SUBCLASSES_PASSOC, OBJECT_TYPE, true);
+				if(assocType==THE_USER_PASSOC) promise = [PLATOSCAVE_ID];
+				else if(assocType==INSTANTIATIONS_PASSOC) promise = self.getManyByAssocType(destClassId, SUBCLASSES_PASSOC, OBJECT_TYPE, true);
 				else promise = self.getManyByAssocTypeAndDestClass(sourceId, assocType, destClassId);
 				return when(promise, function(objArr){
 					//for each related object 
@@ -604,7 +818,106 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 				});
 			});
 		},		
-		getAttributeValue: function(item, objId, attrRefId){			
+		getAttributeProperties: function(objId, attrRefId){
+			var ASSOCS_CLASS_TYPE = 94;
+			var CELLNAME_ATTR_CLASS = 101;
+			var CELLTYPE_ATTR_CLASS = 102;
+
+			var PERMITTEDVALUE_CLASS_ID = 58;
+			var RTF_CLASS_ID = 65;
+			var DATE_CLASS_ID = 52;
+			var STRING_CLASS_ID = 54;
+			var INTEGER_CLASS_ID = 55;
+			var NUMBER_CLASS_ID = 56;
+			var BOOLEAN_CLASS_ID = 57;
+
+			var self = this;
+			var attrRefPromArr1 = [];
+			//get the assocication type that this attribute reference has as an attribute
+			attrRefPromArr1[0] = self.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
+			//get the attribute class that this attribute reference maps to
+			attrRefPromArr1[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
+			return when(all(attrRefPromArr1), function(promResArr){
+				var assocType = null;
+				if(promResArr[0]) assocType = promResArr[0];
+				var attrClassId = null;
+				if(promResArr[1].length=1) attrClassId = promResArr[1][0].destFk;
+
+				/////////////////// Exception for the class model ///////////////////
+				if(attrClassId == CELLNAME_ATTR_CLASS){
+					return when(cellStore.get(objId), function(valueCell){
+						if(valueCell.type==0){//is a class
+							var cellValue = valueCell.name?valueCell.name:'[no name]';
+							return {attrRefId:attrRefId, widgetValue:valueCell.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]', valueCell:valueCell};
+						}
+						else { //is an object
+							//find out if the object is a process class
+							return when(self.isA(objId, PROCESSCLASSES_CLASS), function(trueFalse){
+								if(trueFalse) {
+									//get the primary name of the object
+									return when(self.getOneByAssocTypeAndDestClass(objId, ATTRIBUTE_ASSOC, PRIMARYNAME_CLASS), function(valueObjId){
+										if(!valueObjId) return null; 
+										else return when(cellStore.get(valueObjId), function(valueCell){
+											var cellValue = valueCell.name?valueCell.name:'[no name]';
+											return {attrRefId:attrRefId, widgetValue:valueCell.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]', valueCell:valueCell};
+										});
+									});
+								}
+								else{
+									var cellValue = valueCell.name?valueCell.name:'[no name]';
+									return {attrRefId:attrRefId, widgetValue:valueCell.name, attrClassTypeId:CELLNAME_ATTR_CLASS, nullValue:'[no name]', valueCell:valueCell};
+								}
+							});
+						}
+					});
+				}
+				if(attrClassId == CELLTYPE_ATTR_CLASS){
+					return when(cellStore.get(objId), function(valueCell){
+						return {attrRefId:attrRefId, widgetValue:valueCell.type, attrClassTypeId:CELLTYPE_ATTR_CLASS, nullValue:'[no type]', valueCell:valueCell};
+					});
+				}
+				/////////////////// End of exception ///////////////////
+				
+				
+				var attrRefPromArr2 = [];
+				//get the valueObjId for this object, attribute reference
+				attrRefPromArr2[0] = self.getOneByAssocTypeAndDestClass(objId, assocType, attrClassId);
+				//get the attribute class TYPE that this attribute class has as a parent
+				attrRefPromArr2[1] = assocStore.query({sourceFk: attrClassId, type: PARENT_ASSOC});
+				//find out if the attribute class is a permitted value
+				attrRefPromArr2[2] = self.isA(attrClassId, PERMITTEDVALUE_CLASS_ID);
+				return when(all(attrRefPromArr2), function(promResArr2){
+					var valueObjId = null;
+					if(promResArr2[0]) valueObjId = promResArr2[0];
+					var attrClassTypeId = null;
+					if(promResArr2[1].length==1) attrClassTypeId = promResArr2[1][0].destFk;
+					var isAPermittedValue = promResArr2[2];
+					
+					var attrClassTypeId = (isAPermittedValue||assocType!=ATTRIBUTE_ASSOC)?PERMITTEDVALUE_CLASS_ID:attrClassTypeId;
+					var widgetValue = null;
+					var nullValue = null;
+					if(attrClassTypeId == PERMITTEDVALUE_CLASS_ID){
+						nullValue = -1;
+						if(valueObjId) widgetValue = valueObjId;
+						else widgetValue = nullValue;
+						return {attrRefId:attrRefId, widgetValue:widgetValue, attrClassTypeId:attrClassTypeId, nullValue:nullValue, assocType:assocType};
+					}
+					if(attrClassTypeId == RTF_CLASS_ID) nullValue = '<p>[no text]</p>';
+					else if(attrClassTypeId == DATE_CLASS_ID) nullValue = null;
+					else if(attrClassTypeId == STRING_CLASS_ID) nullValue = '[no value]';
+					else if(attrClassTypeId == INTEGER_CLASS_ID) nullValue = '[null]';
+					else if(attrClassTypeId == NUMBER_CLASS_ID) nullValue = '[null]';
+					else if(attrClassTypeId == BOOLEAN_CLASS_ID) nullValue = false;
+					if(valueObjId) {
+						var valueCell = cellStore.get(valueObjId);//TODO does this work with async?
+						widgetValue = valueCell.name;
+					}
+					else widgetValue = nullValue;
+					return {attrRefId:attrRefId, widgetValue:widgetValue, attrClassTypeId:attrClassTypeId, nullValue:nullValue, valueCell:valueCell};
+				});
+			});
+		},
+		XXXgetAttributeValue: function(item, objId, attrRefId){			
 			var PERTMITTEDVALUE_CLASS = 58;
 			var ASSOCS_CLASS_TYPE = 94;
 			var CELLNAME_ATTR_CLASS = 101;
@@ -617,14 +930,25 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			//get the attribute class that this attribute reference maps to
 			attrPromises[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
 			return when(all(attrPromises), function(arr){
-				if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
+				//if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
+				if(!arr[0]) {
+					item[attrRefId] = '[no assocType]';
+					return null;
+				}
 				var assocType = arr[0];
-				if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
+				//if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
+				if(arr[1].length!=1) {
+					item[attrRefId] = '[no mapsTo]';
+					return null;
+				}
 				var attrClassId = arr[1][0].destFk;
 				/////// Exception for the cell name attribute, as used by the class model ///////////////////
-				if(attrClassId == CELLNAME_ATTR_CLASS) return self.getClassModelCellName(item, objId, attrRefId);
+				if(attrClassId == CELLNAME_ATTR_CLASS) self.getClassModelCellName(item, objId, attrRefId);
 				/////// Exception for the cell type attribute, as used by the class model ///////////////////
-				else if(attrClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
+				else if(attrClassId == CELLTYPE_ATTR_CLASS) {
+					item[attrRefId] = 0;
+					//throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
+				}
 				//get the value for this object, attribute reference
 				else return when(self.getOneByAssocTypeAndDestClass(objId, assocType, attrClassId), function(valueObjId){
 					if(assocType == ATTRIBUTE_ASSOC){
@@ -639,7 +963,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 									});								
 								}
 								else{
-									item[attrRefId] = null;//add the identifier to the item
+									item[attrRefId] = -1;//-1 represents null in dorpdown listboxes
 									return null;																		
 								}
 							}
@@ -666,7 +990,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						}
 						else{
 							//TODO get the default
-							item[attrRefId] = null;//add the identifier to the item
+							item[attrRefId] = -1;//-1 represents null in dorpdown listboxes
 							return null;																		
 						}
 					}
@@ -930,7 +1254,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 			});
 		},
 		/////// Exception for the class model //////////////////////////////////////////////////
-		getClassModelCellName: function(item, objId, attrRefId){
+		XXXgetClassModelCellName: function(item, objId, attrRefId){
 			var PROCESSCLASSES_CLASS = 67;
 			var PRIMARYNAME_CLASS = 69;
 			
@@ -1025,7 +1349,7 @@ function(declare, lang, when, all, QueryResults, transaction, LocalDB, JsonRest,
 						promises.push(cellStore.get(key));//get the corresponding cell so we can use the name.
 					}
 					return when(all(promises), function(assocCellsArr){
-						items= [];
+						var items= [];
 						for(var j=0;j<assocCellsArr.length;j++){
 							var type = assocCellsArr[j].id;
 							var item = {id: sourceId+'/'+type, sourceId:sourceId,  viewId: viewId, classId: type};

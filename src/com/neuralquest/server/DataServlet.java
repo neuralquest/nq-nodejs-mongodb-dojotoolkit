@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -262,10 +261,13 @@ public class DataServlet extends HttpServlet implements Constants {
 				if(table.equals("assoc") && (method.equals("add") || method.equals("put"))){
 					JSONObject data = actionObj.getJSONObject("target");
 					String idString = data.getString("id");
+					String parentIdStr = data.optString("parentId", null);//used for server side validation of next associations
+					Cell parentCell = null;
+					if(parentIdStr!=null) parentCell = (Cell)session.load(Cell.class, Long.parseLong(parentIdStr));
 					Assoc assoc = null;
 					if(idString.contains("cid")) assoc = idAssocMap.get(idString);//do we know this cell already, was it created in the same conversation?
 					else assoc = (Assoc)session.load(Assoc.class, Long.parseLong(idString));
-					isAssocAllowed(assoc);
+					isAssocAllowed(assoc, parentCell);
 				}
 			}
 			JSONArray newIdsArr = new JSONArray();
@@ -301,13 +303,13 @@ public class DataServlet extends HttpServlet implements Constants {
 			}
 			idCellMap.clear();
 
-			//if(1==1) throw new RuntimeException("Silly wabbit");
+			if(1==1) throw new RuntimeException("Silly wabbit");
 
 			session.getTransaction().commit();
 		}
 		catch (Exception e) {
 			session.getTransaction().rollback();
-			throw new ServletException(e.getMessage()); // or display error message
+			throw new ServletException(e); // or display error message
 		}		
 	}
 
@@ -316,7 +318,7 @@ public class DataServlet extends HttpServlet implements Constants {
 	 * Otherwise throws runtime exception
 	 * @param assoc
 	 */
-	private void isAssocAllowed(Assoc assoc){
+	private void isAssocAllowed(Assoc assoc, Cell parentCell) throws RuntimeException {
 		Cell sourceCell =assoc.getSourceFk();
 		byte type = assoc.getType();
 		Cell destCell = assoc.getDestFk();
@@ -337,11 +339,12 @@ public class DataServlet extends HttpServlet implements Constants {
 			return;
 		}
 		else if(sourceCell.getType()==OBJECT || destCell.getType()==OBJECT){
-			if(type==NEXT_ASSOC) throw new RuntimeException("Cannot test NEXT_ASSOC");
-//			if(type==PARENT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || type==NEXT_ASSOC || ){
-				
-//			}
-			LinkedList<Cell> sourceCellParentsList = sourceCell.getListOfSuperClasses();
+			LinkedList<Cell> sourceCellParentsList = null;
+			if(type==NEXT_ASSOC && parentCell != null) {
+				type = ORDERED_ASSOC;
+				sourceCellParentsList = parentCell.getListOfSuperClasses();
+			}
+			else sourceCellParentsList = sourceCell.getListOfSuperClasses();
 			LinkedList<Cell> destCellParentsList = destCell.getListOfSuperClasses();
 			for(Iterator<Cell> itr1=sourceCellParentsList.iterator();itr1.hasNext();){
 				Cell sourceCellParent = itr1.next();
@@ -355,6 +358,7 @@ public class DataServlet extends HttpServlet implements Constants {
 			System.out.println("source:\t"+sourceCell.getIdName(50));
 			System.out.println("assoc type:\t"+type);
 			System.out.println("dest:\t"+destCell.getIdName(50));
+			System.out.println("dest parents:\t"+listToString(destCellParentsList));
 			throw new RuntimeException("Object to Object association not allowed");
 		}
 		else if(sourceCell.getType()==CLASS || destCell.getType()==OBJECT){
@@ -407,8 +411,9 @@ public class DataServlet extends HttpServlet implements Constants {
 		}
 		else if(attrRefMTClass.isA(DATE_ID)) {//date
 		    // will throw ParseException or IllegalArgumentException
-			DateFormat dateFormat = DateFormat.getDateInstance (DateFormat.SHORT); // YYYY-MM-DD
-		    dateFormat.parse(valueStr);
+			//DateFormat dateFormat = DateFormat.getDateInstance (DateFormat.SHORT); // YYYY-MM-DD
+			String formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX").format(valueStr);
+		    //dateFormat.parse(valueStr);
 		}
 		else if(attrRefMTClass.isA(CURRENCY_ID)){
 			// will throw NumberFormatException
@@ -575,6 +580,14 @@ public class DataServlet extends HttpServlet implements Constants {
 		}
 		return null;
 	}
+	private String listToString(LinkedList<Cell> list){
+		String retString = "";
+		for(Iterator<Cell> itr1=list.iterator();itr1.hasNext();){
+			Cell cell = itr1.next();
+			retString += ", "+cell.getIdName(50);
+		}
+		return retString;
+	}
 	//experimental
 	/*
 	private void assocsViewChildren(JSONArray assocArray, Cell selectedObj, Cell viewObj, Session session) throws Exception {
@@ -677,14 +690,7 @@ public class DataServlet extends HttpServlet implements Constants {
 	   }  
 	}
 
-	private String listToString(LinkedList<Cell> list){
-		String retString = "";
-		for(Iterator<Cell> itr1=list.iterator();itr1.hasNext();){
-			Cell cell = itr1.next();
-			retString += ", "+cell.getIdName(50);
-		}
-		return retString;
-	}
+
 
 	// ********************************************************************************
 	// Get Row Data

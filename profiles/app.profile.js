@@ -51,9 +51,11 @@ var profile = {
 		'dijit',
 		'dojo',
 		'dojox',
+		'META-INF',
 		'put-selector',
-		'xstyle',
-		'threejs'
+		'threejs',
+		'WEB-INF',
+		'xstyle'
 	],
 
 	// Strips all calls to console functions within the code. You can also set this to "warn" to strip everything

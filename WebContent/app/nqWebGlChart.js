@@ -1,6 +1,6 @@
 define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array", "dijit/_WidgetBase", 'dojo/dom-construct', "dojo/_base/lang", 
-        "dojo/dom-geometry", "dojo/Deferred", 'dijit/registry', 
-        'threejs/build/three.js', 'threejs/examples/js/controls/TrackballControls.js', 'threejs/examples/js/Detector.js', 'threejs/examples/js/libs/stats.min.js', 'threejs/examples/js/libs/tween.min.js', 'threejs/examples/fonts/helvetiker_regular.typeface.js'],
+        "dojo/dom-geometry", "dojo/Deferred", 'dijit/registry'], 
+//        'threejs/examples/js/controls/TrackballControls.js', 'threejs/examples/js/Detector.js', 'threejs/examples/js/libs/stats.min.js', 'threejs/examples/js/libs/tween.min.js', 'threejs/examples/fonts/helvetiker_regular.typeface.js', 'threejs/build/three.js'],
 	function(declare, when, all, arrayUtil, _WidgetBase, domConstruct, lang, domGeom, Deferred, registry){
 	var renderer, camera, scene, controls, projector, stats, requestId;
 	

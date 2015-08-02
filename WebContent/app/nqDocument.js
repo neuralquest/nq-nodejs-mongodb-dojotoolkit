@@ -12,12 +12,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 
 	return declare("nqDocument", [nqWidgetBase], {
 		parentId: null,
-		viewId: '846',
-		HEADER_ATTRREF: 873,
+		viewId: null,
+/*		HEADER_ATTRREF: 873,
 		PARAGRAPH_ATTRREF: 959,
 
-/*		HEADER_ATTRREF: 558,
-		PARAGRAPH_ATTRREF: 762,
+		HEADER_ATTRREF: 2535,
+		PARAGRAPH_ATTRREF: 2537,
 		SVG_ATTRREF: 747,
 		IMAGEURL_ATTRREF: 1613,
 		ANNOTATION_ATTRREF: 1734,
@@ -35,6 +35,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			domStyle.set(this.pageToolbarDivNode, 'display' , '');
 			// Create toolbar and place it at the top of the page
 			this.normalToolbar = new Toolbar({});
+			domStyle.set(this.pane.containerNode, 'padding-left' , '10px');
+			domStyle.set(this.pane.containerNode, 'padding-right' , '10px');
 			var self = this;
 			// Add edit mode toggle button
 			this.editModeButton = new ToggleButton({
@@ -133,8 +135,18 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			this.normalToolbar.addChild(button6);
 			
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
+
+			var self = this;
+			when(self.store.getOneByAssocType(this.widgetId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewId){
+				self.viewId = viewId; 
+				when(self.getAttrRefPropertiesForView(viewId), function(attrRefArr){
+					self.HEADER_ATTRREF = attrRefArr[0].name;
+					self.PARAGRAPH_ATTRREF = attrRefArr[1].name;
+					self.createDeferred.resolve(self);//ready to be loaded with data
+				});
+			}, nq.errorDialog);
 			
-			this.createDeferred.resolve(this);//ready to be loaded with data
+//			this.createDeferred.resolve(this);//ready to be loaded with data
 		},
 		setSelectedObjIdPreviousLevel: function(value){
 			//load the data
@@ -146,31 +158,41 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 
 			var self = this;
 			var viewId = this.viewId;
-			when(this.store.get(this.selectedObjIdPreviousLevel, this.viewId), function(item){//TODO change to query and listen for chages
-			//when(this.store.getCell(this.selectedObjIdPreviousLevel), function(item){
-				return when(self.generateNextLevelContents(item, viewId, 1, [], null, false), function(item){
-					registry.byId('tab'+self.tabId).resize();
-//					self.pane.resize();
-					self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
-					return item;
-				});
-			}, nq.errorDialog);
+			var query = {itemId:this.selectedObjIdPreviousLevel, viewId:this.viewId};
+			var collection = this.store.filter(query);
+			collection.on('remove, add', function(event){
+				var parent = event.parent;
+				var collection = self.childrenCache[parent.id];
+				var children = collection.fetch();
+				self.onChildrenChange(parent, children);
+			});	
+			collection.on('update', function(event){
+				var obj = event.target;
+				self.onChange(obj);
+			});	
+			var children = collection.fetch();
+			var item = children[0];
+			var promise = when(self.generateNextLevelContents(item, 1, null, false), function(item){
+				registry.byId('tab'+self.tabId).resize();
+//				self.pane.resize();
+				self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
+				return item;
+			});
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
 		//Create an ordinary HTML page recursivly by obtaining data from the server
-		generateNextLevelContents: function(item, viewId, headerLevel, paragraphNrArr, parentId, previousParagrphHasRightFloat){
+		generateNextLevelContents: function(item, headerLevel, parentId, previousParagrphHasRightFloat){
+			//console.log('do item',item[2535]);
 			var self = this;
 			var hearderObj = item['attrRef'+this.HEADER_ATTRREF];
 			var paragraphObj = item['attrRef'+this.PARAGRAPH_ATTRREF];
 			
 			//Header
-			var paragraphNrStr = paragraphNrArr.length==0?'':paragraphNrArr.join('.');
 			var headerNode = domConstruct.create(
 					'h'+headerLevel, 
 					{style: {'clear': previousParagrphHasRightFloat?'both':'none'}}, 
 					this.pane.containerNode
 				);
-			if(headerLevel>1) domConstruct.create('span', { innerHTML: paragraphNrStr, style: { 'margin-right':'30px'}}, headerNode);
 			var textDijit = new ValidationTextBox({
 				item: item,
 			    'type': 'text',
@@ -290,23 +312,24 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			if(item.classId==80) return; //folder
 			
 			//Get the sub- headers/paragraphs
-			var res = this.store.getChildren(item);
-			if(res) this.own(res);
-			when(res, function(children){
+			var collection = this.store.getChildren(item);
+			// Setup observer in case children list changes, or the item(s) in the children list are updated.
+			collection.on('remove, add', function(event){
+				var parent = event.parent;
+				var collection = self.childrenCache[parent.id];
+				var children = collection.fetch();
+				self.onChildrenChange(parent, children);
+			});	
+			collection.on('update', function(event){
+				var obj = event.target;
+				self.onChange(obj);
+			});	
+			var children = collection.fetch();
+			children.forEach(function(childItem){
 				var previousParagrphHasRightFloat = false;
-				for(var i=0;i<children.length;i++){
-					var childItem = children[i];
-					paragraphNrArr[headerLevel-1] = i+1;
-					self.generateNextLevelContents(childItem, viewId, headerLevel+1, paragraphNrArr, item.id, previousParagrphHasRightFloat);
-					paragraphNrArr.splice(headerLevel,100);//remove old shit
-//					previousParagrphHasRightFloat = childItem[self.PARAGRAPH_ATTRREF].indexOf('floatright')==-1?false:true;
-				}
-			}, nq.errorDialog);
-			res.observe(
-				function(obj, removedFrom, insertedInto){
-					//console.log("observe on children of ", item, ": ", obj, removedFrom, insertedInto);
-					if(obj.id == item.id) self.setSelectedObjIdPreviousLevel();
-				}, true);	// true means to notify on item changes
+				self.generateNextLevelContents(childItem, headerLevel+1, item.id, previousParagrphHasRightFloat);
+				previousParagrphHasRightFloat = childItem[self.PARAGRAPH_ATTRREF]&&childItem[self.PARAGRAPH_ATTRREF].indexOf('floatright')==-1?false:true;
+			});
 		},
 		replaceParagraphWithEditor: function(replaceDiv, item){
 			var self = this;
@@ -319,8 +342,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				item: item,
 				'height': '', //auto grow
 			    'minHeight': '30px',
-//			    'extraPlugins': this.extraPlugins,
-//			    'value': storedRtf,
+			    'extraPlugins': this.extraPlugins,
 				'toolbar': toolbar,
 				focusOnLoad: true,
 				'onChange': function(evt){
@@ -356,8 +378,10 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		},
 		replaceNodeWithParagraph: function(replaceDiv, item){
 			var self = this;
+			var value = item[this.PARAGRAPH_ATTRREF];
+			if(!value) value = '<p>[no text]</p>'
 			var paragraphNode = domConstruct.create('div', {
-				innerHTML: item[this.PARAGRAPH_ATTRREF], 
+				innerHTML: value, 
 			}, replaceDiv, "replace");
 
 			this.own(on(paragraphNode, mouse.enter, function(evt){

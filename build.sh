@@ -48,4 +48,8 @@ perl -pe 's/<\!--.*?-->//g;    # Strip HTML comments' |
 perl -pe 's/isDebug: *true,//; # Remove isDebug' |
 perl -pe 's/\s+/ /g;           # Collapse whitespace' > "$DISTDIR/index.html"
 
+cp -r $SRCDIR/META-INF $DISTDIR
+cp -r $SRCDIR/WEB-INF $DISTDIR
+cp -r $SRCDIR/favicon.ico $DISTDIR/favicon.ico
+
 echo "Build complete"

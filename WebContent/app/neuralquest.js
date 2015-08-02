@@ -1,19 +1,20 @@
 require([
 'dojo/_base/array', 'dojo/dom-style', 'dojo/_base/fx', 'dojo/ready', 'dojo/topic', "dojo/on", 'dojo/hash', 'dijit/registry', 
 'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct', 'dojo/_base/declare',
-'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer', "app/nqObservable", //"dojo/store/Observable", 
+'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',// 'dstore/Trackable', //"app/nqObservable", //"dojo/store/Observable", 
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
-'app/nqTransStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument',
+'app/nqStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument',
 'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2'], 
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct, declare,  
-		Deferred, when, all, query, BorderContainer, Observable,
+		Deferred, when, all, query, BorderContainer,// Trackable,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
-		nqTransStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
+		nqStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
 		instrumentation, styles) {
 	
-	//var nqDataStore = new nqTransStore();
-	var nqDataStore = Observable(new nqTransStore());
+	var nqDataStore = new nqStore();
+	//var nqDataStore = declare([new nqStore(), Trackable]);
+	//var nqDataStore = Observable(new nqStore());
 	//var nqDataStore = Observable(new nqStore());
 	//var transaction = nqDataStore.transaction();
 		var self = this;
@@ -24,11 +25,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		//		Setup listerners, prefetch data which is often used, determin landing page
 		
 		topic.subscribe("/dojo/hashchange", interpretHash);
-		on(registry.byId('logonButtonId'), 'change', function(value){
-				if(value) request.post('j_security_check').then(function(data){
-					console.log(this, data);
-		    	}, errorDialog);
-		});
 		on(registry.byId('cancelButtonId'), 'click', function(event){nqDataStore.abort();});
 		on(registry.byId('saveButtonId'), 'click', function(event){nqDataStore.commit();});
 		on(registry.byId('helpButtonId'), 'change', function(value){
@@ -37,17 +33,18 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		});
 
 		when(nqDataStore.preFetch(), function(results){
-			fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();		
+			//fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();	
+			domStyle.set('loadingOverlay', 'display', 'none');
 			if(hash() == "") {
 				var neuralquestState = cookie('neuralquestState');
 				if(neuralquestState) hash(neuralquestState, true);
-				else hash("842.1784.824.846.1866", true);
+				else hash("842.1784.702.2485", true);
 			}
 			else interpretHash();
 		}, errorDialog);
 
 	});
-	function interpretHash(hash, level){
+	function interpretHash(_hash){
 		// summary:
 		//		Interpret the hash change. The hash consists of sets of threes: viewId.tabId.selectedObjectId.
 		//		Each set is interpreted consecutively.
@@ -58,53 +55,79 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		//		The level we are currently processing. Defaults to 0 as is the case when we are called by on hash change topic
 		// returns: Promise
 		//		All of the page elements of the underlaying levels are completed 
+		//var currentHash = hash();		
+		console.log('hash', _hash);
+		when(processHashLevelRecursive(0), function(result){
+			var hashArr = hash().split('.');
+			var levels = Math.ceil(hashArr.length/3);//determin the number of levels, rounded to the highest integer
+			for(var level = levels-1; level>=0; level--){
+				//setTimeout(drawWidgets(level), 500);//allow the browser to redraw the page. Does this really work?
+				drawWidgets(level);
+			}
+		}, errorDialog);
 		
+	}	
+	function processHashLevelRecursive(level){
 		var ACCORDION_ID = 1777;
-		var WIDGETS_ATTRCLASS = 99;
 		var ACCORDIONORTAB_ATTRCLASS = 91;
 		
-		level = level||0;
-		//var level = lvl?lvl:0;
+		var state = getState(level);
+		console.log('state', state);
+		if(!state.viewId) return false;//nothing left to display
+		// if the view pane already exists we can simply go on to the next level
+		if(registry.byId('viewPane'+state.viewId)) return processHashLevelRecursive(level+1);		
+		// We're filling a slave, clean it first. It may have been used by another view before
+		var parentContentPane; 
+		if(!state.viewIdPreviousLevel) parentContentPane = registry.byId('placeholder');
+		else parentContentPane = registry.byId('slave'+state.viewIdPreviousLevel);
+		if(!parentContentPane) parentContentPane = registry.byId('slave'+state.tabIdPreviousLevel);
+		if(!parentContentPane) return false; 
+		parentContentPane.destroyDescendants(false);
+		
+		//are we creating an accordion container in a border container or a tab container?
+		return when(nqDataStore.getOneByAssocTypeAndDestClass(state.viewId, ATTRIBUTE_ASSOC, ACCORDIONORTAB_ATTRCLASS), function(accordionOrTabId){
+			var viewPaneCreated;
+			if(accordionOrTabId==ACCORDION_ID) viewPaneCreated = createAccordionInBorderContainer(state.viewId, parentContentPane, level);
+			else viewPaneCreated = createTabs(state.viewId, parentContentPane, level);
+			return when(viewPaneCreated, function(newParentContentPane){
+				parentContentPane.resize();//this is a must
+				return processHashLevelRecursive(level+1);//try the next level
+			});
+		});
+	}
+	function drawWidgets(level){		
+		var WIDGETS_ATTRCLASS = 99;
+		
 		var state = getState(level);
 		if(!state.viewId) return true;
-		
-		//find the parent pane to display in
-		var parentViewPane = null;
-		if(!state.viewIdPreviousLevel) parentViewPane = registry.byId('placeholder');//no previous level. use placeholder defined in index.html
-		else parentViewPane = registry.byId('slave'+state.viewIdPreviousLevel);//use the slave from the previous level
-		//get the accordion/tab id that this widget has as an attribute
-		return when(nqDataStore.getOneByAssocTypeAndDestClass(state.viewId, ATTRIBUTE_ASSOC, ACCORDIONORTAB_ATTRCLASS), function(accordionOrTabId){
-			if(!accordionOrTabId) throw new Error('View '+state.viewId+' must have an accordion/tab indicator as an attribute ');
-			//are we creating an accordion container in a border container or a tab container?
-			var viewPanePaneCreated = null;
-			if(accordionOrTabId==ACCORDION_ID) viewPanePaneCreated = createAccordionInBorderContainer(parentViewPane, state.viewId, state.tabId, level);
-			else viewPanePaneCreated = createTabs(parentViewPane, state.viewId, state.tabId, level);
-			return when(viewPanePaneCreated, function(selectedTabId){//returns the selected tabId
-				//when the viewpane is created, fill the selected tab
-				parentViewPane.resize();//this is a must
-				//start the creation of the widgets as a separate thread (so no return from this when)
-				when(nqDataStore.getManyByAssocTypeAndDestClass(selectedTabId, ORDERED_ASSOC, WIDGETS_ATTRCLASS), function(widgetsIdsArr){
-					//when we've got all the child widgets that belong to this tab, create them
-					for(var i=0;i<widgetsIdsArr.length;i++){
-						var widgetId = widgetsIdsArr[i];
-						when(createNqWidget(widgetId, selectedTabId, state.viewId, level), function(widget){
-							//when the widget is created tell it which object was selected on the previous level
-							//widget types will responde diferently: fill the form, set the query for the table, recreate the tree, fly to the object in 3D, etc.
-							when(widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel), function(wid){
-								wid.setSelectedObjIdThisLevel(state.selectedObjId);
-							}, errorDialog);
-						}, errorDialog);
-					}
-					return widgetsIdsArr;
+		var selectedTabId = getSelectedTabRecursive(state.viewId);
+		return when(nqDataStore.getManyByAssocTypeAndDestClass(selectedTabId, ORDERED_ASSOC, WIDGETS_ATTRCLASS), function(widgetsIdsArr){
+			//when we've got all the child widgets that belong to this tab, create them
+			for(var i=0;i<widgetsIdsArr.length;i++){
+				var widgetId = widgetsIdsArr[i];
+				when(createNqWidget(widgetId, selectedTabId, state.viewId, level), function(widget){
+					//when the widget is created tell it which object was selected on the previous level
+					//widget types will respond diferently: fill the form, set the query for the table, recreate the tree, fly to the object in 3D, etc.
+					when(widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel), function(wid){
+						wid.setSelectedObjIdThisLevel(state.selectedObjId);
+					}, errorDialog);
 				}, errorDialog);
-				//We do not have to wait for the widgets to be completed. Instead we can continue with a recurssive call to interpretHash
-				return when(interpretHash(hash, level+1), function(result){
-					return result;
-				});
-			});
-		}, errorDialog);
-	}	
-	function createAccordionInBorderContainer(parentContentPane, viewId, _selectedTabId, level){
+			}
+			return widgetsIdsArr;
+		});
+	}
+	function getSelectedTabRecursive(paneId){
+		var tabContainer = registry.byId('viewPane'+paneId);
+		if(!tabContainer) return false;
+		var tabId;
+		if(tabContainer.selectedChildWidget) tabId = tabContainer.selectedChildWidget.id;
+		else tabId = tabContainer.containerNode.firstChild.id;
+		if(!tabId) return false;
+		var subTab = getSelectedTabRecursive(tabId.substring(3));
+		if(subTab) return subTab;// there's a selected tab below us, so return it's id
+		else return tabId.substring(3);//we are at the bottom, so return our id		
+	}
+	function createAccordionInBorderContainer(parentViewOrTabId, parentContentPane, level){
 		// summary:
 		//		Add an accordion container in a border container to the parent content pane
 		//		The right side of the border container can be used to display content based on a selected object on the left side.
@@ -123,21 +146,16 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		
 		var ACCORDIONTABS_ATTRCLASS = 90;
 		var PRIMARY_NAMES = 69;
+
+		var state = getState(level);
+		var viewId = state.viewId;
 		
-		return when(nqDataStore.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ACCORDIONTABS_ATTRCLASS), function(tabIdsArr){
-			var selectedTabId = _selectedTabId&&tabIdsArr.indexOf(_selectedTabId)>=0?_selectedTabId:tabIdsArr[0];
-			// if the ContentPane already exists we can simply return the selectedTabId
-			if(registry.byId('viewPane'+viewId)) {
-				return selectedTabId;
-			}
-			// We're filling a slave, clean it first. It may have been used by another view before
-			arrayUtil.forEach(parentContentPane.getChildren(), function(childWidget){
-				if(childWidget.destroyRecursive) childWidget.destroyRecursive();
-			});
+		return when(nqDataStore.getManyByAssocTypeAndDestClass(parentViewOrTabId, ORDERED_ASSOC, ACCORDIONTABS_ATTRCLASS), function(tabIdsArr){
+			if(tabIdsArr.length==0) return false;
 					
 			var design = 'sidebar';//obtain horizontal, vertical, none from viewDef?
 			var borderContainer = new BorderContainer( {
-				'id' : 'borderContainer'+viewId,
+				'id' : 'borderContainer'+parentViewOrTabId,
 				'region' : 'center',
 				'design' : design,
 				'persist' : true,
@@ -145,7 +163,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				'style' : {width: '100%', height: '100%', overflow: 'hidden', padding: '0px', margin: '0px'}
 			});
 			var leftPane = new ContentPane( {
-				'id' : 'master'+viewId,
+				'id' : 'master'+parentViewOrTabId,
 				'region' : 'leading',
 				'class' : 'backgroundClass',
 				'splitter' : true,
@@ -153,7 +171,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				'style' : {width: '200px',overflow: 'hidden',padding: '0px', margin: '0px'}
 			});
 			var centerPane = new ContentPane( {
-				'id' : 'slave'+viewId,
+				'id' : 'slave'+parentViewOrTabId,
 				'region' : 'center',
 				'class' : 'backgroundClass',
 				//'content' : '<p>Loading...</p>',
@@ -162,19 +180,20 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			});
 			borderContainer.addChild(leftPane);
 			borderContainer.addChild(centerPane);
+			//parentContentPane.addChild(borderContainer);
 			parentContentPane.containerNode.appendChild(borderContainer.domNode); //appendChild works better than attaching through create
 		
 			var accordianContainer;
 			if(tabIdsArr.length==1){// this is really only to have palce to store viewPane+viewObj.id. Is there a better way?
 				accordianContainer = new ContentPane( {
-					'id' : 'viewPane'+viewId,
+					'id' : 'viewPane'+parentViewOrTabId,
 					'region' : 'center',
 					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
 				});
 			}
 			else {
 				accordianContainer = new AccordionContainer( {
-					'id' : 'viewPane'+viewId,
+					'id' : 'viewPane'+parentViewOrTabId,
 					'region' : 'center',
 					'duration' : 0,//animation screws out layout. Is there a better solution?
 					//'persist' : true,//cookies override our hash tabId
@@ -194,10 +213,11 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			return when(all(promisses), function(tabNamesArr){
 				for(var i=0;i<tabIdsArr.length;i++){
 					var tabId = tabIdsArr[i];
+					//console.log('accId', tabId, 'parentViewOrTabId', parentViewOrTabId, 'level',level);
 					var tabPane = new ContentPane( {
 						'id' : 'tab'+tabId,
 						'title' : tabNamesArr[i],
-						'selected' : tabId==selectedTabId?true:false,
+						'selected' : tabId==state.tabId?true:false,
 						'class' : 'backgroundClass',
 						'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
 					});
@@ -209,17 +229,18 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					});
 				};
 				
+				//parentContentPane.addChild(container);
 				//parentPane.addChild(container);
 				accordianContainer.startup();
 				borderContainer.startup();
 				//if(tabIdsArr.length>1) accordianContainer.resize();
 				
-				return selectedTabId;				
+				return centerPane;				
 			});
 
 		});
 	}
-	function createTabs(parentPane, viewId, _selectedTabId, level){
+	function createTabs(parentViewOrTabId, parentContentPane, level){
 		// summary:
 		//		Add a tab container to the parent content pane
 		//		If there is only one tab, then no container is drawn, just a content  pane.
@@ -237,32 +258,33 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		
 		//get the Display Type id that this widget has as an attribute
 		
-		var ACCORDIONTABS_ATTRCLASS = 90;
 		var PRIMARY_NAMES = 69;
-		
-		return when(nqDataStore.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ACCORDIONTABS_ATTRCLASS), function(tabIdsArr){
-			var selectedTabId = _selectedTabId&&tabIdsArr.indexOf(_selectedTabId)>=0?_selectedTabId:tabIdsArr[0];
-			// if the ContentPane already exists we can simply return the selectedTabId
-			if(registry.byId('viewPane'+viewId)) {
-				return selectedTabId;
-			}
-			// We're filling a slave, clean it first. It may have been used by another view before
-			if(parentPane) parentPane.destroyDescendants(false);
+		var ACCORDION_ID = 1777;
+		var ACCORDIONORTAB_ATTRCLASS = 91;
+		var ACCORDIONTABS_ATTRCLASS = 90;
 
+		var state = getState(level);
+		var viewId = state.viewId;
+		
+		return when(nqDataStore.getManyByAssocTypeAndDestClass(parentViewOrTabId, ORDERED_ASSOC, ACCORDIONTABS_ATTRCLASS), function(tabIdsArr){
+			if(tabIdsArr.length==0) return false;
+			
 			var container;
 			if(tabIdsArr.length==1){// this is really only to have palce to store viewPane+viewId. Is there a better way?
 				container = new ContentPane( {
-					'id' : 'viewPane'+viewId,
+					'id' : 'viewPane'+parentViewOrTabId,
 					'region' : 'center'
 				});
 			}
 			else {
 				container = new TabContainer( {
-					'id' : 'viewPane'+viewId,
+					'id' : 'viewPane'+parentViewOrTabId,
 					//'persist' : true,//cookies override our hash tabId
 					'region' : 'center'
 				});
 			}
+			parentContentPane.addChild(container);
+			container.startup();
 			var promisses = [];
 			for(var i=0;i<tabIdsArr.length;i++){
 				//get the tab name that this tab has as an attribute
@@ -272,31 +294,51 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				}));
 			};
 			return when(all(promisses), function(tabNamesArr){
+				var selectedFound = false;
+				var subTabPromisses = [];
 				for(var i=0;i<tabIdsArr.length;i++){
 					var tabId = tabIdsArr[i];
+					if(tabId==state.tabId) selectedFound = tabId;
+					//console.log('tabId', tabId, 'parentViewOrTabId', parentViewOrTabId, 'level',level);
 					var tabPane = new ContentPane( {
 						'id' : 'tab'+tabId,
 						'title' : tabNamesArr[i],
-						'selected' : tabId==selectedTabId?true:false,
+						//'selected' : tabId==state.tabId?true:false,
 						'class' : 'backgroundClass',
 						'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
 					});
 					container.addChild(tabPane);
 					container.watch("selectedChildWidget", function(name, oval, nval){
-					    //console.log("selected child changed from ", oval.title, " to ", nval.title);
+					    console.log("selected child changed from ", oval.title, " to ", nval.title);
 					    var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
 					    setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
 					});
+					subTabPromisses.push(		
+						//are we creating an accordion container in a border container or a tab container?
+						when(nqDataStore.getOneByAssocTypeAndDestClass(tabId, ATTRIBUTE_ASSOC, ACCORDIONORTAB_ATTRCLASS), function(accordionOrTabId){
+							if(accordionOrTabId==ACCORDION_ID) return(createAccordionInBorderContainer(tabId, tabPane, level));
+							else return when(createTabs(tabId, tabPane, level), function(subTabIsSelected){//returns the tabId if the subtab is selected
+								if(subTabIsSelected){
+									container.selectChild(registry.byId('tab'+subTabIsSelected));
+									return parentViewOrTabId;
+								}
+								return false;//not selected or there are no subTabs
+							});
+						})
+					);
 				};
 				
-				parentPane.addChild(container);
-				container.startup();
-				if(tabIdsArr.length>1) container.resize();
 				
-				return selectedTabId;				
+				if(selectedFound && container.selectChild) container.selectChild(registry.byId('tab'+selectedFound));//must be set programmatically		
+				return when(all(subTabPromisses), function(result){
+					//tell the super tabPane that it should select our superTab because its subtab is also selected
+					if(selectedFound) return parentViewOrTabId;
+					else return false;
+				});				
+				return when(all(subTabPromisses));				
 			});
 		});
-	}	
+	}
 	function createNqWidget(widgetId, tabId, viewId, level){
 		// summary:
 		//		Add a nqWidget to the content pane, depending on DISPLAYTYPE_ATTR
@@ -337,8 +379,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					id: 'nqWidget'+widgetId,
 					store: nqDataStore,
 					createDeferred: createDeferred, //tell us when your done by returning the widget
-					widgetId: widgetId, //used to get the name of the widget
-					viewId: viewId,
+					widgetId: widgetId, 
 					tabId: tabId // used by resize
 				}, domConstruct.create('div'));
 				tab.addChild(widget);
@@ -348,9 +389,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					id: 'nqWidget'+widgetId,
 					store: nqDataStore,
 					createDeferred: createDeferred, //tell us when your done by returning the widget
-					viewId: viewId,
+					widgetId: widgetId, 
+					//viewId: viewId,
 				}, domConstruct.create('div'));
-				//tabNode.appendChild(widget.domNode);
 				tab.addChild(widget);
 				break;	
 			case TABLE_DISPTYPE_ID:
@@ -360,7 +401,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					createDeferred: createDeferred, //tell us when your done by returning the widget
 					widgetId: widgetId,
 					selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//dgrid needs an initial query
-//					viewsArr: viewsArr,//still used by create item
 					level: level, // used by onClick
 					tabId: tabId, // used by onClick
 					query: query
@@ -423,8 +463,15 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			viewId: parseInt(hashArr[level*3+0]),
 			tabId: parseInt(hashArr[level*3+1]),
 			selectedObjId: parseInt(hashArr[level*3+2]),
-			selectedObjectIdPreviousLevel: parseInt(hashArr[level*3-1]),
-			viewIdPreviousLevel: parseInt(hashArr[level*3-3])
+			//selectedObjectIdPreviousLevel: parseInt(hashArr[level*3-1]),
+			selectedObjectIdPreviousLevel: hashArr[level*3-1],
+			viewIdPreviousLevel: parseInt(hashArr[level*3-3]),
+			tabIdPreviousLevel: parseInt(hashArr[level*3-2])
+			/*viewId: hashArr[level*3+0],
+			tabId: hashArr[level*3+1],
+			selectedObjId: hashArr[level*3+2],
+			selectedObjectIdPreviousLevel: hashArr[level*3-1],
+			viewIdPreviousLevel: hashArr[level*3-3]*/
 		};
 	}
 	function setHashTabId(level, tabId, viewId){
@@ -452,7 +499,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 
 		
 		var hashArr = hash().split('.');
-		hashArr[level*3+1] = tabId;//it may have changed
+//		hashArr[level*3+1] = tabId;//it may have changed
 		hashArr[level*3+2] = selectedObjId;//it will have changed
 		if(hashArr[(level+1)*3+0] != viewId){//if its changed
 			//remove anything following this level in the hash since it is nolonger valid
@@ -481,7 +528,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			title: err.message, 
 			extractContent: true,//important in the case of server response, it'll screw your css. 
 			onClick: function(evt){this.hide();},//click anywhere to close
-			content: err.responseText?err.responseText:err.stack
+			content: err.response.text?err.response.text:err.stack
 		});
 		dlg.show();
 		if(!err.responseText) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
@@ -593,7 +640,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	MANYTOMANY_ASSOC = 10;		//TO MANY
 	ONETOMANY_ASSOC = 11;		//TO MANY
 	OWNS_ASSOC = 12;			//TO MANY
-	// Pseudo Assoc tppes (reverse of the real assocs)
+	// Pseudo Assoc tppes (inverse of the real assocs)
 	SUBCLASSES_PASSOC = 15;		//TO MANY
 	ATTRIBUTE_OF_PASSOC = 16;	//TO MANY
 	MAPPED_TO_BY_PASSOC = 17;	//TO MANY
@@ -606,8 +653,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	OWNED_BY_PASSOC = 24;		//TO ONE
 	//Special
 	INSTANTIATIONS_PASSOC = 27;	//TO MANY
-//	THE_USER_PASSOC = 28;		//TO MANY
-	BYASSOCTPE_PASSOC = 30; 		//TO MANY		
+	THE_USER_PASSOC = 28;		//TO ONE
+	BYASSOCTPE_PASSOC = 30; 	//TO MANY		
 	ASSOCS_PASSOC = 31; 		//TO MANY		
 
 	

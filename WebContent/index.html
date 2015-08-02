@@ -5,6 +5,15 @@
 		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 		<title>Neuralquest - Browser based process modeling and execution.</title>
 		<link rel="stylesheet" href="app/resources/neuralquest.css">	
+		<!-- load Threejs scripts -->
+		<script type='text/javascript' src="threejs/three.js"></script>
+		<script type='text/javascript' src="threejs/examples/js/controls/TrackballControls.js"></script>
+		<script type='text/javascript' src="threejs/examples/js/Detector.js"></script>
+		<script type='text/javascript' src="threejs/examples/js/libs/stats.min.js"></script>
+		<script type='text/javascript' src='threejs/examples/js/libs/tween.min.js'></script>
+		<script type='text/javascript' src="threejs/examples/fonts/helvetiker_regular.typeface.js"></script>
+		<!-- <script src="js/threejs/examples/fonts/helvetiker_regular.typeface.js"></script>
+		<script src="js/threejs/examples/fonts/helvetiker_bold.typeface.js"></script> -->	
 		<!-- provide config -->
 		<script>	
 			dojoConfig = {
@@ -48,17 +57,27 @@
 		<script>
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-			 m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');				
-			ga('create', 'UA-41199782-1', 'neuralquest');
-			ga('send', 'pageview');			
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-41199782-1', 'auto');
+			ga('send', 'pageview');
 		</script>
 	</head>
 	<body class="soria" >
 		<div  id="fullPage" data-dojo-id="fullPage" data-dojo-type="dijit.layout.BorderContainer" data-dojo-props="design:'headline', gutters:'false'" persist="true">	
 			<div class="noOverFlow" style="padding: 0px;" id="placeholder" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center'" class="backgroundClass" >	</div>
 			<div data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'bottom'" class="backgroundClass">
-				<button id="logonButtonId" data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'helpIcon'" >Logon</button>
+				<select name="select1"  style="width: 100px;" data-dojo-type="dijit/form/Select">
+				    <option value=460 selected="selected">Plato's Cave</option>
+				    <option value=2463>Emile Esperanza</option>
+				    <option value=2464>Whitney Winrow</option>
+				    <option value=2465>Jazmine Jeffery</option>
+				    <option value=2466>Rosario Reinhart</option>
+				    <option value=2467>Jayne Jeansonne</option>
+				    <option value=2468>Dione Defoor</option>
+				    <option value=2469>Susy Shippy</option>
+				    <option value=2462>Tyrone Trembath</option>
+				</select>
 				<button data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){fullPage.resize();}">Resize</button>
 				<button data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){nq.test();}">Test</button>
 				<div style="float: right;">

@@ -100,7 +100,9 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			var self = this;
 			if(type<15) {
 				var query = {sourceFk: id, type: type};
-				return when(this.store.query(query), function(assocsArr){
+				var collection = this.store.filter(query);
+				var assocsArr = collection.fetch();
+				//return when(this.store.query(query), function(assocsArr){
 					var childrenArr = [];
 					var promisses = [];
 					for(var i=0;i<assocsArr.length;i++){
@@ -112,8 +114,8 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 							return cell;
 						}));
 					}
-					return when(all(promisses), function(res){return childrenArr});
-				});
+					return when(all(promisses), function(res){return childrenArr;});
+				//});
 			}
 			else{
 					/*filter doesn't work with promises
@@ -136,7 +138,9 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				});
 					 */
 				var query = {destFk: id, type: type-12};
-				return when(this.store.query(query), function(assocsArr){
+				var collection = this.store.filter(query);
+				var assocsArr = collection.fetch();
+				//return when(this.store.filter(query), function(assocsArr){
 					var childrenArr = [];
 					var promisses = [];
 					for(var i=0;i<assocsArr.length;i++){
@@ -148,7 +152,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 						}));
 					}
 					return when(all(promisses), function(res){return childrenArr});
-				});
+				//});
 					
 			}
 		},

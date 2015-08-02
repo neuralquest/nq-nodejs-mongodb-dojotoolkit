@@ -37,7 +37,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 //				'class' : 'backgroundClass',
 				'doLayout' : 'true',
 //				'content': 'Some Conetent',
-				'style' : { 'overflow': 'auto', 'padding': '10px', 'margin': '0px', width: '100%', height: '100%', background:'transparent'}
+//				'style' : { 'overflow': 'auto', 'padding': '0px', 'margin': '0px', width: '100%', height: '100%', background:'transparent'}
 			},  domConstruct.create('div'));
 			this.domNode.appendChild(this.pane.domNode);
 			this.own(this.pane);
@@ -71,7 +71,33 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			});
 			this.pane.resize();
 		},
-		getAttrRefProperties: function(viewId){
+		getAttrRefPropertiesForWidget: function(widgetId){
+			var self = this;			
+			//recursivily get all of the views that belong to this widget
+			return when(self.store.getManyByAssocType(widgetId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewIdsArr){
+				self.viewIdsArr = viewIdsArr;
+				var promisses = [];
+				for(var i=0;i<viewIdsArr.length;i++){
+					var viewId = viewIdsArr[i];
+					promisses.push(self.getAttrRefPropertiesForView(viewId));
+				}
+				return when(all(promisses), function(arrayOfArrays){
+					var results = [];//create a sparsely populated array with the viewId as index
+					for(var i=0;i<viewIdsArr.length;i++){
+						var viewId = viewIdsArr[i];
+						var attrRefProperties = arrayOfArrays[i];
+						results[viewId] = attrRefProperties;
+					}
+					return results;
+				});
+				return when(all(promisses), function(arrayOfArrays){
+					var merged = [];
+					return merged.concat.apply(merged, arrayOfArrays);
+				});
+	
+			});
+		},
+		getAttrRefPropertiesForView: function(viewId){
 			//console.log('viewId', viewId);
 			var ATTRREF_CLASS_TYPE = 63;
 			var self = this;			
@@ -83,7 +109,12 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 					var attrRef = attrRefs[i];
 					promisses.push(self.makeProperties(attrRef));
 				};
-				return all(promisses);
+				return when(all(promisses), function(results){
+					/*results.push({field: 'id', name: 'id', label: 'id', readonly:true, hidden: false});
+					results.push({field: 'viewId', name: 'viewId', label: 'viewId', readonly:true,  hidden: false});
+					results.push({field: 'classId', name: 'classId', label: 'classId', readonly:true,  hidden: false});*/
+					return results;
+				});
 			});
 		},
 		makeProperties: function(attrRefId){
@@ -127,7 +158,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			var attrPromises = [];
 			//get the label that this attribute reference has as an attribute
 			attrPromises[0] = this.store.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, PRIMARY_NAMES);
-			//get the assocication type that this attribute reference has as an attribute
+			//get the association type that this attribute reference has as an attribute
 			attrPromises[1] = this.store.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, TOONEASSOCS_TYPE);
 			//get the attribute class that this attribute reference maps to
 			//attrPromises[2] = this.store.getOneByAssocTypeAndDestClass(attrRefId, MAPSTO_ASSOC, ATTRIBUTE);
@@ -137,10 +168,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			//get the helptext that this attribute reference has as an attribute
 			attrPromises[4] = this.store.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, DESCRIPTION);
 			return when(all(attrPromises), function(propertiesArr){
-				if(!propertiesArr[1]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 				var labelId = propertiesArr[0];
+				if(!propertiesArr[1]) return {label:'[undefined assocType]'};//fail gracefully
 				var assocType = propertiesArr[1];
-				if(!propertiesArr[2]) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
+				//if(!propertiesArr[2]) return {label:'[undefined mapsTo]'};//fail gracefully
 				var destClassId = propertiesArr[2];
 				var access = propertiesArr[3];
 				var helptextId = propertiesArr[4];
@@ -148,11 +179,18 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				var attrPromises = [];
 				//get the label that this attribute reference has as an attribute
 				attrPromises[0] = self.store.getCell(labelId);
-				//get the parent of the attribute class that this attribute reference maps to
-				////////////////////Exception for the cell name as used by the class model///////////////////
-				if(destClassId == CLASSNAME_CLASS_ID) attrPromises[1] = destClassId;
-				else attrPromises[1] = self.store.getOneByAssocType(destClassId, PARENT_ASSOC, CLASS_TYPE, true, false);
-				attrPromises[2] = self.store.isA(destClassId, PERMITTEDVAULE_CLASS_ID);
+				//get attribute class type (parent of)
+				if(destClassId){
+					////////////////////Exception for the cell name as used by the class model///////////////////
+					if(destClassId == CLASSNAME_CLASS_ID) attrPromises[1] = destClassId;
+					else attrPromises[1] = self.store.getOneByAssocType(destClassId, PARENT_ASSOC, CLASS_TYPE, true, false);
+					//find out if the destination class is a permitted value 
+					attrPromises[2] = self.store.isA(destClassId, PERMITTEDVAULE_CLASS_ID);					
+				}
+				else{//fail gracefully
+					attrPromises[1] = STRING_CLASS_ID; //attribute class type to default
+					attrPromises[2] = false;//the destination class is not a permitted value
+				}
 				//get the helptext that this attribute reference has as an attribute
 				if(helptextId) attrPromises[3] = self.store.getCell(helptextId);
 				return when(all(attrPromises), function(propsArr){
@@ -166,42 +204,30 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 					else permRes = true;
 					return when(permRes, function(nameValuePairs){
 						var property = {
-								field: attrRefId.toString(), // for dgrid
-								name: attrRefId.toString(), //for input
-								assocType: assocType,
-								attrClassType: attrClassType,
-								label: label,
-								helpText: helptext,
-								required: access==MANDATORY_VALUE_ID?true:false,
-								editable: access==MODIFY_VALUE_ID||MANDATORY_VALUE_ID?true:false,
-								trim: true,
-
-//								get: getValue,
-								//placeholder: attrRef[PLACEHOLDER_ATTR_ID],
-								//'default': attrRef[DEFAULT_ATTR_ID],
-								//width: attrRef[WIDTH_ATTR_ID]+'em',
-								width: '30em',
-//									style: {width: '30em'}, causes editor to crash
-								//invalidMessage: attrRef[INVALIDMESSAGE_ATTR_ID],
-								//maxLength: attrRef[MAXLENGTH_ATTR_ID],
-								//minLength: attrRef[MINLENGTH_ATTR_ID],
-								//currency: attrRef[CURRENCY_ATTR_ID],
-								//regRex: attrRef[REGEX_ATTR_ID], //e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
-								constraints: {
-									//minimum: attrRef[MINIMUM_ATTR_ID],
-									//maximum: attrRef[MAXIMUM_ATTR_ID],
-									//places: attrRef[PLACES_ATTR_ID],
-									//fractional: attrRef[FRACTIONAL_ATTR_ID]
-								},
-								//permittedValues: nameValuePairs,
-								//permittedValues:[{ id:0, name:'undefined'}], 
-								editOn: 'click',  // for dgrid
-								autoSave: true // for dgrid
-							};
-
+							field: attrRefId.toString(), // for dgrid
+							name: attrRefId.toString(), //for input
+							assocType: assocType,
+							attrClassType: attrClassType,
+							label: label,
+							helpText: helptext,
+							required: access==MANDATORY_VALUE_ID?true:false,
+							editable: access==MODIFY_VALUE_ID||MANDATORY_VALUE_ID?true:false,
+							trim: true,
+							//default: attrRef[DEFAULT_ATTR_ID],
+							//width: attrRef[WIDTH_ATTR_ID]+'em',
+							//width: '30em',
+							//style: {width: '30em'}, causes editor to crash
+							//invalidMessage: attrRef[INVALIDMESSAGE_ATTR_ID],
+							//currency: attrRef[CURRENCY_ATTR_ID],
+							editOn: 'dblclick',  // for dgrid
+							autoSave: true, // for dgrid
+							sortable: true,
+							style: 'width:100%'// for forms (grids will have a specific width)
+						};
 						switch(attrClassType){
 						case PERMITTEDVAULE_CLASS_ID: 
-							property.editor = 'Select';
+							//property.editor = 'Select';
+							nameValuePairs.push({id:-1,name:'[not selected]'} );
 							var selectStore = new Memory({data: nameValuePairs});
 							property.editorArgs = {
 									name: property.field,
@@ -213,9 +239,24 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 									queryOptions: { ignoreCase: true }//doesnt work
 									//value: 749
 							};
+							/*property.editorArgs.set = function(attr, value){
+								if(attr=='value'&&!value) return -1;
+								return value;
+								var value = item[property.name];
+								if(!value) return -1;//dropdown will display [not selected]
+								return value;
+							};*/
+							property.get = function(item){
+								var value = item[property.name];
+								if(!value) return -1;//dropdown will display [not selected]
+								return value;
+							};
+							//width: attrRef[WIDTH_ATTR_ID]+'em',
+							property.columnWidth = '8em';
+							property.nullValue = -1;
 							break;	
 						case RTF_CLASS_ID: 
-							property.editor = 'text';
+							//property.editor = 'RTFEditor';
 							var toolbar = new Toolbar({
 								//'style': {'display': 'none'}
 							});
@@ -223,31 +264,62 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 									'toolbar': toolbar, 
 									'addStyleSheet': 'css/editor.css',
 									'extraPlugins': self.extraPlugins,
-									'maxHeight': -1
+									//'maxHeight': -1
 							};					
 							property.get = function(item){
 								var value = item[property.name];
-								if(!value) return '<p></p>';//editor will crash if it does not have a value
+								if(!value) return '<p>[no text]</p>';//editor will crash if it does not have a value
 								return value;
-							}
+							};
+							property.height = '';//auto-expand mode
+							property.columnWidth = '100%';
+							property.nullValue = '<p>[no text]</p>';
 							break;	
 						case DATE_CLASS_ID:
-							property.editor = 'DateTextBox';
+							//property.editor = 'DateTextBox';
+							property.columnWidth = '6em';
+							property.nullValue = null;
 							break;	
 						case STRING_CLASS_ID:
 							property.editor = 'text';
+							property.editorArgs = {
+								//maxLength: attrRef[MAXLENGTH_ATTR_ID],
+								//minLength: attrRef[MINLENGTH_ATTR_ID],
+								//regRex: attrRef[REGEX_ATTR_ID], //e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
+							};
+							property.columnWidth = '10em';
+							property.nullValue = '[no value]';
 							break;	
 						case INTEGER_CLASS_ID: 
 							property.editor = 'number';
+							//property.editorArgs.constraints = {
+								//minimum: attrRef[MINIMUM_ATTR_ID],
+								//maximum: attrRef[MAXIMUM_ATTR_ID],
+								//places: attrRef[PLACES_ATTR_ID],
+								//fractional: attrRef[FRACTIONAL_ATTR_ID]
+							//}
+							property.columnWidth = '5em';
+							property.nullValue = null;
 							break;	
 						case NUMBER_CLASS_ID: 
 							property.editor = 'number';
-							break;	
+							//property.editorArgs.constraints = {
+								//minimum: attrRef[MINIMUM_ATTR_ID],
+								//maximum: attrRef[MAXIMUM_ATTR_ID],
+								//places: 0
+							//}
+							property.columnWidth = '5em';
+							property.nullValue = null;
+							break;
 						case BOOLEAN_CLASS_ID: 
 							property.editor = 'radio';
+							property.columnWidth = '3em';
+							property.nullValue = null;
 							break;
 						default:
 							property.editor = 'text';
+							property.columnWidth = '10em';
+							property.nullValue = null;
 						};
 						return property;
 					});							
@@ -255,7 +327,95 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
 			});	
 		},
+		getPermittedClassesforWidget: function(widgetId){
+			var self = this;
+			//recursivily get all of the views that belong to this widget
+			return when(this.store.getManyByAssocType(widgetId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewIdsArr){
+				var promisses = [];
+				for(var i=0;i<viewIdsArr.length;i++){
+					var viewId = viewIdsArr[i];
+					promisses.push(self.getPermittedClassesforView(viewId));
+				}
+				return when(all(promisses), function(arrayOfArrays){
+					var results = [];//create a sparsely populated array with the viewId as index
+					for(var i=0;i<viewIdsArr.length;i++){
+						var viewId = viewIdsArr[i];
+						var permittedClassesId = arrayOfArrays[i];
+						results[viewId] = permittedClassesId;
+					}
+					return results;
+				});
+			});
+		},
+		getPermittedClassesforView: function(viewId){
+			var self = this;
+			return when(this.store.getManyByAssocType(viewId, MANYTOMANY_ASSOC, OBJECT_TYPE, false), function(viewIdArr){
+				var promisses = [];
+				for(var i=0;i<viewIdArr.length;i++){
+					subViewId = viewIdArr[i];
+					promisses.push(self.getPermittedClassesforSubView(viewId, subViewId));
+				}
+				return when(all(promisses), function(arrayOfArrays){
+					var merged = [];
+					return merged.concat.apply(merged, arrayOfArrays);
+				});
+			});				
 
+		},	
+		getPermittedClassesforSubView: function(viewId, subViewId){
+			var PRIMARY_NAMES = 69;
+			var SUBCLASSES_PASSOC = 15;
+			var ASSOCS_CLASS_TYPE = 94;
+			var CLASS_TYPE = 0;
+			
+			var self = this;
+			
+			var results = [];
+			
+			var attrPromises = [];
+			//get the assocication type that this view has as an attribute
+			attrPromises[0] = self.store.getOneByAssocTypeAndDestClass(subViewId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
+			//get the class that this view maps to
+			attrPromises[1] = self.store.getOneByAssocType(subViewId, MAPSTO_ASSOC, CLASS_TYPE, false);
+			//get the name of the view
+			attrPromises[2] = self.store.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, PRIMARY_NAMES);
+			//get the name of the subView
+			attrPromises[3] = self.store.getOneByAssocTypeAndDestClass(subViewId, ATTRIBUTE_ASSOC, PRIMARY_NAMES);
+			return when(all(attrPromises), function(arr){
+				//if(!arr[0]) throw new Error('View '+subViewId+' must have an association type as an attribute ');
+				var assocType = arr[0];
+				var assocName = self.store.getCell(assocType).name;//TODO will fail if it is asysnc
+				//if(!arr[1]) throw new Error('View '+subViewId+' must map to one class ');
+				//if(arr[1].length!=1) console.log('View '+subViewId+' should map to one class ');
+				var destClassId = arr[1];
+				if(!destClassId) return [];//fail gracefully
+				var viewNameId = arr[2];
+				var viewName = self.store.getCell(viewNameId).name;//TODO will fail if it is asysnc
+				var subViewNameId = arr[3];
+				var subViewName = self.store.getCell(subViewNameId).name;//TODO will fail if it is asysnc
+				//get the subclasses as seen from the destClass
+				return when(self.store.getManyCellsByAssocType(destClassId, SUBCLASSES_PASSOC, CLASS_TYPE, true), function(subClassArr){
+					subClassArr.push(self.store.getCell(destClassId));//TODO should getManyByAssocType also return destClassId?
+					for(var j=0;j<subClassArr.length;j++){
+						var subClassCell = subClassArr[j];
+						var subClassId = subClassCell.id;
+						var subClassName = subClassCell.name;
+						//console.log(subClass);
+						results.push({
+							viewId:viewId, 
+							viewName: viewName, 
+							subViewId: subViewId, 
+							subViewName: subViewName, 
+							assocType: assocType, 
+							assocName: assocName, 
+							subClassId: subClassId, 
+							subClassName: subClassName
+						});
+					}
+					return results;
+				});
+			});			
+		},
 		extraPlugins:[
      		'|',
      		'foreColor','hiliteColor',

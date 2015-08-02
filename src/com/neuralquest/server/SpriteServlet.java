@@ -31,15 +31,14 @@ public class SpriteServlet extends HttpServlet implements Constants {
 				int width = 200, height = 3200;
 				// TYPE_INT_ARGB specifies the image format: 8-bit RGBA packed
 				// into integer pixels
-				BufferedImage bufferedImage = new BufferedImage(width, height,
-						BufferedImage.TYPE_INT_ARGB);
+				BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
 				Graphics2D g2d = bufferedImage.createGraphics();
-				// g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN,
-				// 0.0f));
+				g2d.setBackground(new Color(0, true));//transparent
+				//g2d.clearRect(0, 0, 16, height);
+				g2d.setColor(Color.WHITE);
+				g2d.fillRect(16, 0, width-16, height);
 
-				//g2d.setColor(Color.white);
-				// g2d.fillRect(0, 0, width, height);
 				g2d.setColor(Color.BLUE);
 				g2d.drawLine(16, 0, 16, height);
 
@@ -53,7 +52,7 @@ public class SpriteServlet extends HttpServlet implements Constants {
 
 				for (int id = 1; id <= 200; id++) {
 					g2d.setColor(Color.BLUE);
-					g2d.drawLine(0, id * 16, width, id * 16);
+					g2d.drawLine(16, id * 16, width, id * 16);
 					List<Cell> results = session.createQuery("from Cell c where c.id='" + (id - 1) + "'").list();
 					if (results.isEmpty())
 						continue;
@@ -61,10 +60,10 @@ public class SpriteServlet extends HttpServlet implements Constants {
 					String message = cell.getId() + " - " + cell.getName();
 					g2d.setColor(Color.BLACK);
 					g2d.drawString(message, 20, id * 16 - 2);
-					g2d.setColor(Color.gray);
-					g2d.fillRect(5, (id*16)-9, 5, 5);
-					g2d.setColor(Color.magenta);
-					g2d.fillRect(4, (id*16)-8, 5, 5);
+					//g2d.setColor(Color.gray);
+					//g2d.fillRoundRect(5, (id*16)-9, 6, 6, 2, 2);
+					g2d.setColor(Color.blue);
+					g2d.fillOval(4, (id*16)-10, 7, 7);
 				}
 
 				g2d.dispose();
@@ -78,16 +77,16 @@ public class SpriteServlet extends HttpServlet implements Constants {
 
 				out.println("/* Gennerated by means of nqapp/nqSprites.css */");
 				out.println("/* You can also gennerate a sprite template using nqapp/nqSprites.png */");
-				out.println(".icondefault { background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -1264px; width: 16px; height: 16px;} /*  79 - page  */");
-				out.println(".icon0 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px 0px; width: 16px; height: 16px;} /*  0 - class  */");
-				out.println(".icon1 {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -16px; width: 16px; height: 16px;} /*  1 - object  */");
+				out.println(".icondefault { background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1264px; width: 16px; height: 16px;} /*  79 - page  */");
+				out.println(".icon0 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px 0px; width: 16px; height: 16px;} /*  0 - class  */");
+				out.println(".icon1 {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -16px; width: 16px; height: 16px;} /*  1 - object  */");
 				for(int id=3;id<=200;id++){
 					List<Cell> results = session.createQuery("from Cell c where c.id='"+(id-1)+"'").list();
 					if(results.isEmpty()) continue;
 					Cell cell = (Cell)results.get(0);
 					int yPos = (int)cell.getId();
 					yPos = yPos*16;
-				    String message = ".icon"+cell.getId()+" {background: transparent url('../img/Neuralquest/nqSprites.png') no-repeat 0px -"+yPos+"px; width: 16px; height: 16px;} /*  "+cell.getIdName(50)+"  */";
+				    String message = ".icon"+cell.getId()+" {background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -"+yPos+"px; width: 16px; height: 16px;} /*  "+cell.getIdName(50)+"  */";
 				    out.println(message);
 				}				
 			}
