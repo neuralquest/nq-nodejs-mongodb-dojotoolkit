@@ -75,14 +75,14 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			//get the attribute references that belong to this view
 			attrPromises[0] = self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
 			//get the class that this view maps to
-			attrPromises[1] = assocStore.query({sourceFk: viewId, type: MAPSTO_ASSOC});
+			attrPromises[1] = assocStore.query({fk_source: viewId, type: MAPSTO_ASSOC});
 			//get the class type of this item
-			attrPromises[2] = assocStore.query({sourceFk: itemId, type: PARENT_ASSOC});
+			attrPromises[2] = assocStore.query({fk_source: itemId, type: PARENT_ASSOC});
 			return when(all(attrPromises), function(arr){
 				var attrRefArr = arr[0];
 				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
-				var destClassId = arr[1][0].destFk;
-				if(arr[2].length==1) item.classId = arr[2][0].destFk;//classId is used to identify icons in trees
+				var destClassId = arr[1][0].fk_dest;
+				if(arr[2].length==1) item.classId = arr[2][0].fk_dest;//classId is used to identify icons in trees
 				else item.classId = 0; // the root has no parent
 				
 				var valuePromises = [];
@@ -126,7 +126,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			/////// Exception for the class model views///////////////////
 			if(viewId == CLASSMODEL_VIEWID || viewId == CLASSES_VIEWID){
 				var newCell = this.addCell(item);
-				this.addAssoc({sourceFk: newCell.id, type: PARENT_ASSOC, destFk: directives.parent.id});
+				this.addAssoc({fk_source: newCell.id, type: PARENT_ASSOC, fk_dest: directives.parent.id});
 				return this.get(newCell.id, viewId);
 			}
 			
@@ -140,21 +140,21 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			//get the attribute references that belong to this view
 			attrPromises[0] = self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
 			//get the class that this view maps to
-			attrPromises[1] = assocStore.query({sourceFk: viewId, type: MAPSTO_ASSOC});
+			attrPromises[1] = assocStore.query({fk_source: viewId, type: MAPSTO_ASSOC});
 			//get the class type of this item
-			attrPromises[2] = assocStore.query({sourceFk: item.id, type: PARENT_ASSOC});
+			attrPromises[2] = assocStore.query({fk_source: item.id, type: PARENT_ASSOC});
 			// add the new item to the new parent in directives
 			attrPromises[3] = self.processDirectives(item, directives);
 			return when(all(attrPromises), function(arr){
 				var attrRefArr = arr[0];
 				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
-				var destClassId = arr[1][0].destFk;
+				var destClassId = arr[1][0].fk_dest;
 				
 				if(!item.classId){
 					if(arr[2].length!=1) throw new Error('Object must have one parent');
-					item.classId = arr[2][0].destFk;//classId is used to identify icons in trees
+					item.classId = arr[2][0].fk_dest;//classId is used to identify icons in trees
 				}
-				self.addAssoc({sourceFk: obj.id, type: PARENT_ASSOC, destFk: item.classId});
+				self.addAssoc({fk_source: obj.id, type: PARENT_ASSOC, fk_dest: item.classId});
 
 				var valuePromises = [];
 				for(var j=0;j<attrRefArr.length;j++){
@@ -190,12 +190,12 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 							//first get it
 							var assoc = null
 							if(attrProp.assocType < 15) {
-								var assocsArr = assocStore.query({sourceFk:item.id, type:attrProp.assocType, destFk:attrProp.widgetValue});
+								var assocsArr = assocStore.query({fk_source:item.id, type:attrProp.assocType, fk_dest:attrProp.widgetValue});
 								if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
 								assoc = assocsArr[0];
 							}
 							else {
-								var assocsArr = assocStore.query({sourceFk:attrProp.widgetValue, type:(attrProp.assocType-12), destFk:item.id});
+								var assocsArr = assocStore.query({fk_source:attrProp.widgetValue, type:(attrProp.assocType-12), fk_dest:item.id});
 								if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
 								assoc = assocsArr[0];
 							}
@@ -206,24 +206,24 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 							if(attrProp.widgetValue == attrProp.nullValue){//the current value is null
 								//add an association
 								var assoc = null
-								if(attrProp.assocType < 15) assoc = {sourceFk:item.id, type:attrProp.assocType, destFk:item[attrRefId]};
-								else assoc = {destFk:item[attrRefId], type:(attrProp.assocType-12), sourceFk:item.id };
+								if(attrProp.assocType < 15) assoc = {fk_source:item.id, type:attrProp.assocType, fk_dest:item[attrRefId]};
+								else assoc = {fk_dest:item[attrRefId], type:(attrProp.assocType-12), fk_source:item.id };
 								self.addAssoc(assoc);
 							}
 							else{//the current value is NOT null, so update the association
 								//first get it
 								var assoc = null
 								if(attrProp.assocType < 15) {
-									var assocsArr = assocStore.query({sourceFk:item.id, type:attrProp.assocType, destFk:attrProp.widgetValue});
+									var assocsArr = assocStore.query({fk_source:item.id, type:attrProp.assocType, fk_dest:attrProp.widgetValue});
 									if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
 									assoc = assocsArr[0];
-									assoc.destFk = item[attrProp.attrRefId];
+									assoc.fk_dest = item[attrProp.attrRefId];
 								}
 								else {
-									var assocsArr = assocStore.query({sourceFk:attrProp.widgetValue, type:(attrProp.assocType-12), destFk:item.id});
+									var assocsArr = assocStore.query({fk_source:attrProp.widgetValue, type:(attrProp.assocType-12), fk_dest:item.id});
 									if(assocsArr.length!=1) throw new Error('There must be one permitted value: '+assocsArr);
 									assoc = assocsArr[0];
-									assoc.sourceFk = item[attrProp.attrRefId];
+									assoc.fk_source = item[attrProp.attrRefId];
 								}
 								if(!assoc) throw new Error('There must be one permitted value');
 								assocStore.put(assoc);
@@ -234,10 +234,10 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 						if(item[attrProp.attrRefId] == attrProp.nullValue){//the new value is null (and the are not the same)
 							//remove the attribute
 							cellStore.remove(attrProp.valueCell.id);
-							when(assocStore.query({sourceFk:attrProp.valueCell.id, type:PARENT_ASSOC, destFk:attrProp.attrClassTypeId}), function(assocsArr){
+							when(assocStore.query({fk_source:attrProp.valueCell.id, type:PARENT_ASSOC, fk_dest:attrProp.attrClassTypeId}), function(assocsArr){
 								if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
 							}, nq.errorDialog);
-							when(assocStore.query({sourceFk:item.id, type:attrProp.assocType, destFk:attrProp.valueCell.id}), function(assocsArr){
+							when(assocStore.query({fk_source:item.id, type:attrProp.assocType, fk_dest:attrProp.valueCell.id}), function(assocsArr){
 								if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
 							}, nq.errorDialog);
 						}
@@ -245,8 +245,8 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 							if(attrProp.widgetValue == attrProp.nullValue){//the current value is null
 								//add a cell
 								var newCell = self.addCell({type:1, name:item[attrProp.attrRefId].name, attrRefId:attrProp.attrRefId});
-								self.addAssoc({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:attrProp.attrClassId});
-								self.addAssoc({sourceFk:item.id, type:attrProp.assocType, destFk:newCell.id});
+								self.addAssoc({fk_source:newCell.id, type:PARENT_ASSOC, fk_dest:attrProp.attrClassId});
+								self.addAssoc({fk_source:item.id, type:attrProp.assocType, fk_dest:newCell.id});
 							}
 							else{//the current value is NOT null
 								//update the cell
@@ -280,12 +280,12 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				//get the association type that this attribute reference has as an attribute
 				attrPromises[0] = this.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
 				//get the attribute class that this attribute reference maps to
-				attrPromises[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
+				attrPromises[1] = assocStore.query({fk_source: attrRefId, type: MAPSTO_ASSOC});
 				when(all(attrPromises), function(arr){
 					if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 					var assocType = arr[0];
 					if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
-					var attrClassId = arr[1][0].destFk;
+					var attrClassId = arr[1][0].fk_dest;
 					/////// Exception for the cell type attribute, as used by the class model ///////////////////
 					if(attrClassId == CELLNAME_ATTR_CLASS) return self.putClassModelCellName(item, attrRefId);
 					//get the value for this object, attribute reference
@@ -294,7 +294,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 						when(self.isA(attrClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
 							if(trueFalse || assocType != ATTRIBUTE_ASSOC) {
 								//TODO we have to take reverse assoc into account
-								when(assocStore.query({sourceFk:item.id, type:assocType, destFk:valueObjId}), function(assocsArr){
+								when(assocStore.query({fk_source:item.id, type:assocType, fk_dest:valueObjId}), function(assocsArr){
 									if(assocsArr.length>1) throw new Error('More than one permitted value found: '+assocsArr);
 									if(assocsArr.length==1) {
 										if(item[attrRefId]==null){
@@ -304,15 +304,15 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 											var assoc = assocsArr[0];
 											//TODO can we update assoc directly without the put? I wonder. It would bypass the transaction store.
 											//I think we're already doing it by accident
-											if(assoc.destFk != item[attrRefId]) {
-												assoc.destFk = item[attrRefId];
+											if(assoc.fk_dest != item[attrRefId]) {
+												assoc.fk_dest = item[attrRefId];
 												assocStore.put(assoc);
 											}
 										}
 									}
 									else{
 										if(item[attrRefId]!=null){
-											var assoc = {sourceFk:item.id, type:assocType, destFk:item[attrRefId]};
+											var assoc = {fk_source:item.id, type:assocType, fk_dest:item[attrRefId]};
 											self.addAssoc(assoc);
 										}
 									}
@@ -338,8 +338,8 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 									if(item[attrRefId]!=null){
 										//cretae a new cell and its associations
 										var newCell = self.addCell({type:1, name:item[attrRefId], attrRefId:attrRefId});
-										self.addAssoc({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:attrClassId});
-										self.addAssoc({sourceFk:item.id, type:assocType, destFk:newCell.id});
+										self.addAssoc({fk_source:newCell.id, type:PARENT_ASSOC, fk_dest:attrClassId});
+										self.addAssoc({fk_source:item.id, type:assocType, fk_dest:newCell.id});
 									}
 								}
 							}
@@ -366,13 +366,13 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			//get the assocication type that this view has as an attribute
 			attrPromises[0] = self.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
 			//get the class that this view maps to
-			attrPromises[1] = assocStore.query({sourceFk: viewId, type: MAPSTO_ASSOC});
+			attrPromises[1] = assocStore.query({fk_source: viewId, type: MAPSTO_ASSOC});
 			when(all(attrPromises), function(arr){
 				if(!arr[0]) throw new Error('View '+viewId+' must have an association type as an attribute ');
 				var assocType = arr[0];
 				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
 				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
-				var destClassId = arr[1][0].destFk;
+				var destClassId = arr[1][0].fk_dest;
 				if(assocType==ORDERED_ASSOC){
 					if(oldParentId){
 						// The leading Assoc will remain attached to the Object that's being moved
@@ -388,11 +388,11 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 									leadingAssocSourceFk = oldParentId;
 									leadingAssoctype = ORDERED_ASSOC;
 									if(oldParentChildren.length>1){//there is at least one other object following the moving object, find it's assoc
-										when(assocStore.query({sourceFk: movingObjectId, type: NEXT_ASSOC, destFk: oldParentChildren[1]}), function(assocArr){
+										when(assocStore.query({fk_source: movingObjectId, type: NEXT_ASSOC, fk_dest: oldParentChildren[1]}), function(assocArr){
 											// update it so that it has the old parent as source
 											if(assocArr.length!=1) throw new Error('Expected to find one association');
 											var assoc = assocArr[0];
-											assoc.sourceFk = oldParentId;
+											assoc.fk_source = oldParentId;
 											assoc.type = ORDERED_ASSOC;
 											assoc.parentId = oldParentId;//needed for serverside validation
 											assocStore.put(assoc);
@@ -404,11 +404,11 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 									leadingAssocSourceFk = oldParentChildren[idx-1];
 									leadingAssoctype = NEXT_ASSOC;
 									if(idx < oldParentChildren.length-1){//there is at least one other object following the moving object, find it's assoc
-										when(assocStore.query({sourceFk: movingObjectId, type: NEXT_ASSOC, destFk: oldParentChildren[idx+1]}), function(assocArr){
+										when(assocStore.query({fk_source: movingObjectId, type: NEXT_ASSOC, fk_dest: oldParentChildren[idx+1]}), function(assocArr){
 											//update it so that it has the previous object as source
 											if(assocArr.length!=1) throw new Error('Expected to find one association');
 											var assoc = assocArr[0];
-											assoc.sourceFk = oldParentChildren[idx-1];
+											assoc.fk_source = oldParentChildren[idx-1];
 											assoc.parentId = oldParentId;//needed for serverside validation
 											assocStore.put(assoc);
 										});
@@ -429,10 +429,10 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 										newParentFollowingAssoctype = NEXT_ASSOC;
 									}
 									//get the following assoc and update it so that it has the moving object as source
-									when(assocStore.query({sourceFk: newParentFollowingAssocSourceFk, type: newParentFollowingAssoctype, destFk: beforeId}), function(assocArr){
+									when(assocStore.query({fk_source: newParentFollowingAssocSourceFk, type: newParentFollowingAssoctype, fk_dest: beforeId}), function(assocArr){
 										if(assocArr.length!=1) throw new Error('Expected to find one association');
 										var newParentFollowingAssoc = assocArr[0];
-										newParentFollowingAssoc.sourceFk = movingObjectId;
+										newParentFollowingAssoc.fk_source = movingObjectId;
 										newParentFollowingAssoc.type = NEXT_ASSOC;
 										newParentFollowingAssoc.parentId = newParentId;//needed for serverside validation
 										assocStore.put(newParentFollowingAssoc);
@@ -449,10 +449,10 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 									}
 								}
 								//Fianlly attach the new parent/preceding object to the moving object
-								when(assocStore.query({sourceFk: leadingAssocSourceFk, type: leadingAssoctype, destFk: movingObjectId}), function(assocArr){
+								when(assocStore.query({fk_source: leadingAssocSourceFk, type: leadingAssoctype, fk_dest: movingObjectId}), function(assocArr){
 									if(assocArr.length!=1) throw new Error('Expected to find one association');
 									var leadingAssoc = assocArr[0];
-									leadingAssoc.sourceFk = newParentFollowingAssocSourceFk;
+									leadingAssoc.fk_source = newParentFollowingAssocSourceFk;
 									leadingAssoc.type = newParentFollowingAssoctype;
 									leadingAssoc.parentId = newParentId;//needed for serverside validation
 									assocStore.put(leadingAssoc);
@@ -465,10 +465,10 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 							// get the ordered children as seen from the new parent
 							when(self.getManyByAssocTypeAndDestClass(newParentId, ORDERED_ASSOC, destClassId), function(newParentChildren){
 								if(newParentChildren.length>0){
-									self.addAssoc({sourceFk: newParentChildren[newParentChildren.length-1], type: NEXT_ASSOC, destFk: movingObjectId, parentId:newParentId});
+									self.addAssoc({fk_source: newParentChildren[newParentChildren.length-1], type: NEXT_ASSOC, fk_dest: movingObjectId, parentId:newParentId});
 								}
 								else{
-									self.addAssoc({sourceFk: newParentId, type: ORDERED_ASSOC, destFk: movingObjectId});
+									self.addAssoc({fk_source: newParentId, type: ORDERED_ASSOC, fk_dest: movingObjectId});
 								}
 							});
 						}
@@ -478,28 +478,28 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 					if(oldParentId == newParentId) return;
 					if(oldParentId){
 						if(assocType<SUBCLASSES_PASSOC){
-							when(assocStore.query({sourceFk: oldParentId, type: assocType, destFk: movingObjectId}), function(assocArr){
+							when(assocStore.query({fk_source: oldParentId, type: assocType, fk_dest: movingObjectId}), function(assocArr){
 								if(assocArr.length!=1) throw new Error('Expected to find one association');
 								var assoc = assocArr[0];
-								assoc.sourceFk = newParentId;
+								assoc.fk_source = newParentId;
 								assocStore.put(assoc);
 							});
 						}
 						else {
-							when(assocStore.query({sourceFk:movingObjectId , type: assocType-12, destFk: oldParentId}), function(assocArr){
+							when(assocStore.query({fk_source:movingObjectId , type: assocType-12, fk_dest: oldParentId}), function(assocArr){
 								if(assocArr.length!=1) throw new Error('Expected to find one association');
 								var assoc = assocArr[0];
-								assoc.destFk = newParentId;
+								assoc.fk_dest = newParentId;
 								assocStore.put(assoc);
 							});
 						}
 					}
 					else{//new assoc
 						if(assocType<SUBCLASSES_PASSOC){
-							self.addAssoc({sourceFk: newParentId, type: assocType, destFk: movingObjectId});
+							self.addAssoc({fk_source: newParentId, type: assocType, fk_dest: movingObjectId});
 						}
 						else {
-							self.addAssoc({sourceFk: movingObjectId, type: assocType-12, destFk: newParentId});
+							self.addAssoc({fk_source: movingObjectId, type: assocType-12, fk_dest: newParentId});
 						}
 					}
 				}
@@ -522,19 +522,19 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 					//get the assocication type that this attribute reference has as an attribute
 					attrPromises[0] = self.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
 					//get the attribute class that this attribute reference maps to
-					attrPromises[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
+					attrPromises[1] = assocStore.query({fk_source: attrRefId, type: MAPSTO_ASSOC});
 					when(all(attrPromises), function(arr){
 						if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 						var assocType = arr[0];
 						if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
-						var attrClassId = arr[1][0].destFk;
+						var attrClassId = arr[1][0].fk_dest;
 						/////// Exception for the cell type attribute, as used by the class model ///////////////////
 						if(attrClassId == CELLTYPE_ATTR_CLASS) throw new Error('CELLTYPE_ATTR_CLASS not yet implemented ');
 						//find out if the attribute class is a permitted value
 						when(self.isA(attrClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
 							if(trueFalse || assocType != ATTRIBUTE_ASSOC) {
 								//TODO we have to take reverse assoc into account
-								when(assocStore.query({sourceFk:item.id, type:assocType, destFk:item[attrRefId]}), function(assocsArr){
+								when(assocStore.query({fk_source:item.id, type:assocType, fk_dest:item[attrRefId]}), function(assocsArr){
 									if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
 								});
 							}
@@ -543,10 +543,10 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 								when(self.getOneByAssocTypeAndDestClass(item.id, assocType, attrClassId), function(valueObjId){
 									if(valueObjId) {
 										cellStore.remove(valueObjId);
-										when(assocStore.query({sourceFk:valueObjId, type:PARENT_ASSOC, destFk:attrClassId}), function(assocsArr){
+										when(assocStore.query({fk_source:valueObjId, type:PARENT_ASSOC, fk_dest:attrClassId}), function(assocsArr){
 											if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
 										}, nq.errorDialog);
-										when(assocStore.query({sourceFk:item.id, type:assocType, destFk:valueObjId}), function(assocsArr){
+										when(assocStore.query({fk_source:item.id, type:assocType, fk_dest:valueObjId}), function(assocsArr){
 											if(assocsArr.length==1) assocStore.remove(assocsArr[0].id);
 										}, nq.errorDialog);
 									}
@@ -557,17 +557,17 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				}
 			}, nq.errorDialog);
 			//TODO fix linked lists
-			when(assocStore.query({destFk:itemId}), function(assocsArr){
+			when(assocStore.query({fk_dest:itemId}), function(assocsArr){
 				for(var i = 0;i<assocsArr.length;i++){
 					var assoc = assocsArr[i];
 					if(assoc.type == NEXT_ASSOC){
-						var leadingItemId = assoc.sourceFk;
-						when(assocStore.query({sourceFk:itemId, type:NEXT_ASSOC}), function(followingAssocsArr){
+						var leadingItemId = assoc.fk_source;
+						when(assocStore.query({fk_source:itemId, type:NEXT_ASSOC}), function(followingAssocsArr){
 							if(followingAssocsArr.length>1) throw new Error('Only one next expected');
 							var followingAssoc = followingAssocsArr[0];
 							if(followingAssoc){
 								if(!directives)  throw new Error('Must have directives to splice linkedlist');
-								followingAssoc.sourceFk = leadingItemId;
+								followingAssoc.fk_source = leadingItemId;
 								followingAssoc.parentId = directives.parent.id
 								assocStore.put(followingAssoc);
 							}
@@ -576,7 +576,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 					assocStore.remove(assocsArr[i].id);
 				}
 			}, nq.errorDialog);
-			when(assocStore.query({sourceFk:itemId}), function(assocsArr){
+			when(assocStore.query({fk_source:itemId}), function(assocsArr){
 				for(var i = 0;i<assocsArr.length;i++){
 					assocStore.remove(assocsArr[i].id);
 				}
@@ -655,7 +655,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 								});
 							}
 						}
-						else if(query.sourceFk || query.destFk){
+						else if(query.fk_source || query.fk_dest){
 							//return assocStore.query(query, options);
 							var promise = localAssocStore.query(query);
 							when(promise, function(res){
@@ -780,7 +780,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			//get the assocication type that this view has as an attribute
 			attrPromises[0] = self.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
 			//get the class that this view maps to
-			attrPromises[1] = assocStore.query({sourceFk: viewId, type: MAPSTO_ASSOC});
+			attrPromises[1] = assocStore.query({fk_source: viewId, type: MAPSTO_ASSOC});
 			//get the attribute references that belong to this view
 			attrPromises[2] = self.getManyByAssocTypeAndDestClass(viewId, ORDERED_ASSOC, ATTRREF_CLASS_TYPE);
 			//get the Only if Parent Equals that this view has as an attribute
@@ -795,7 +795,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				else if(assocType == BYASSOCTPE_PASSOC) return self.getClassModelCelltems(sourceId, attrRefArr, viewId);
 				if(arr[1].length!=1) throw new Error('View '+viewId+' must map to one class ');
 				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
-				var destClassId = arr[1][0].destFk;
+				var destClassId = arr[1][0].fk_dest;
 				//get the Only if Parent Equals
 				var onlyIfParentEqualsId = arr[3];
 				if(onlyIfParentEqualsId){
@@ -836,12 +836,12 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			//get the assocication type that this attribute reference has as an attribute
 			attrRefPromArr1[0] = self.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
 			//get the attribute class that this attribute reference maps to
-			attrRefPromArr1[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
+			attrRefPromArr1[1] = assocStore.query({fk_source: attrRefId, type: MAPSTO_ASSOC});
 			return when(all(attrRefPromArr1), function(promResArr){
 				var assocType = null;
 				if(promResArr[0]) assocType = promResArr[0];
 				var attrClassId = null;
-				if(promResArr[1].length=1) attrClassId = promResArr[1][0].destFk;
+				if(promResArr[1].length=1) attrClassId = promResArr[1][0].fk_dest;
 
 				/////////////////// Exception for the class model ///////////////////
 				if(attrClassId == CELLNAME_ATTR_CLASS){
@@ -883,14 +883,14 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				//get the valueObjId for this object, attribute reference
 				attrRefPromArr2[0] = self.getOneByAssocTypeAndDestClass(objId, assocType, attrClassId);
 				//get the attribute class TYPE that this attribute class has as a parent
-				attrRefPromArr2[1] = assocStore.query({sourceFk: attrClassId, type: PARENT_ASSOC});
+				attrRefPromArr2[1] = assocStore.query({fk_source: attrClassId, type: PARENT_ASSOC});
 				//find out if the attribute class is a permitted value
 				attrRefPromArr2[2] = self.isA(attrClassId, PERMITTEDVALUE_CLASS_ID);
 				return when(all(attrRefPromArr2), function(promResArr2){
 					var valueObjId = null;
 					if(promResArr2[0]) valueObjId = promResArr2[0];
 					var attrClassTypeId = null;
-					if(promResArr2[1].length==1) attrClassTypeId = promResArr2[1][0].destFk;
+					if(promResArr2[1].length==1) attrClassTypeId = promResArr2[1][0].fk_dest;
 					var isAPermittedValue = promResArr2[2];
 
 					var attrClassTypeId = (isAPermittedValue||assocType!=ATTRIBUTE_ASSOC)?PERMITTEDVALUE_CLASS_ID:attrClassTypeId;
@@ -928,7 +928,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			//get the assocication type that this attribute reference has as an attribute
 			attrPromises[0] = self.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
 			//get the attribute class that this attribute reference maps to
-			attrPromises[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
+			attrPromises[1] = assocStore.query({fk_source: attrRefId, type: MAPSTO_ASSOC});
 			return when(all(attrPromises), function(arr){
 				//if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 				if(!arr[0]) {
@@ -941,7 +941,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 					item[attrRefId] = '[no mapsTo]';
 					return null;
 				}
-				var attrClassId = arr[1][0].destFk;
+				var attrClassId = arr[1][0].fk_dest;
 				/////// Exception for the cell name attribute, as used by the class model ///////////////////
 				if(attrClassId == CELLNAME_ATTR_CLASS) self.getClassModelCellName(item, objId, attrRefId);
 				/////// Exception for the cell type attribute, as used by the class model ///////////////////
@@ -957,7 +957,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 						return when(self.isA(attrClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
 							if(trueFalse) {
 								if(valueObjId){
-									return when(assocStore.query({sourceFk: objId, type: assocType, destFk: valueObjId}), function(assocArr){
+									return when(assocStore.query({fk_source: objId, type: assocType, fk_dest: valueObjId}), function(assocArr){
 										item[attrRefId] = valueObjId;//add the identifier to the item
 										return valueObjId;
 									});
@@ -983,7 +983,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 					}
 					else {
 						if(valueObjId){
-							return when(assocStore.query({sourceFk: objId, type: assocType, destFk: valueObjId}), function(assocArr){
+							return when(assocStore.query({fk_source: objId, type: assocType, fk_dest: valueObjId}), function(assocArr){
 								item[attrRefId] = valueObjId;//add the identifier to the item
 								return valueObjId;
 							});
@@ -1009,12 +1009,12 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 			//get the assocication type that this attribute reference has as an attribute
 			attrPromises[0] = self.getOneByAssocTypeAndDestClass(attrRefId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
 			//get the attribute class that this attribute reference maps to
-			attrPromises[1] = assocStore.query({sourceFk: attrRefId, type: MAPSTO_ASSOC});
+			attrPromises[1] = assocStore.query({fk_source: attrRefId, type: MAPSTO_ASSOC});
 			return when(all(attrPromises), function(arr){
 				if(!arr[0]) throw new Error('Attribute Reference '+attrRefId+' must have an association type as an attribute ');
 				var assocType = arr[0];
 				if(arr[1].length!=1) throw new Error('Attribute Reference '+attrRefId+' must map to one class ');
-				var attrClassId = arr[1][0].destFk;
+				var attrClassId = arr[1][0].fk_dest;
 				var defaultValue = null;//TODO
 
 				if(item[attrRefId]!=null) item[attrRefId] = defaultValue;
@@ -1023,13 +1023,13 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				//find out if the attribute class is a permitted value
 				return when(self.isA(attrClassId, PERTMITTEDVALUE_CLASS), function(trueFalse){
 					if(trueFalse || assocType != ATTRIBUTE_ASSOC) {
-						if(item[attrRefId]!=null) assocStore.put({sourceFk:item.id, type:assocType, destFk:item[attrRefId]});
+						if(item[attrRefId]!=null) assocStore.put({fk_source:item.id, type:assocType, fk_dest:item[attrRefId]});
 					}
 					else {
 						//cretae a new cell and its associations
 						var newCell = cellStore.put({type:1, name:item[attrRefId], attrRefId:attrRefId});
-						assocStore.put({sourceFk:newCell.id, type:PARENT_ASSOC, destFk:attrClassId});
-						assocStore.put({sourceFk:item.id, type:assocType, destFk:newCell.id});
+						assocStore.put({fk_source:newCell.id, type:PARENT_ASSOC, fk_dest:attrClassId});
+						assocStore.put({fk_source:item.id, type:assocType, fk_dest:newCell.id});
 					}
 				});
 			});
@@ -1053,12 +1053,12 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 
 			var self = this;
 			if(assocType==ORDERED_ASSOC){
-				return when(assocStore.query({sourceFk: sourceId, type: assocType}), function(assocs){
+				return when(assocStore.query({fk_source: sourceId, type: assocType}), function(assocs){
 					var promisses = [];
 					var resultArr = [];
 					for(var j=0;j<assocs.length;j++){
 						var assoc = assocs[j];
-						promisses.push(self.filterCandidates(assoc.destFk, destClassId, resultArr));
+						promisses.push(self.filterCandidates(assoc.fk_dest, destClassId, resultArr));
 					}
 					return when(all(promisses), function(results){
 						if(resultArr.length==0) return [];
@@ -1068,7 +1068,7 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 							var promisses = [];
 							for(var j=0;j<assocs.length;j++){
 								var assoc = assocs[j];
-								promisses.push(self.filterCandidates(assoc.destFk, destClassId, resultArr));
+								promisses.push(self.filterCandidates(assoc.fk_dest, destClassId, resultArr));
 							}
 							return when(all(promisses), function(results){
 								return resultArr;
@@ -1078,12 +1078,12 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				});
 			}
 			else if(assocType < SUBCLASSES_PASSOC){//navigate forward
-				return when(assocStore.query({sourceFk: sourceId, type: assocType}), function(assocs){
+				return when(assocStore.query({fk_source: sourceId, type: assocType}), function(assocs){
 					var promisses = [];
 					var resultArr = [];
 					for(var j=0;j<assocs.length;j++){
 						var assoc = assocs[j];
-						promisses.push(self.filterCandidates(assoc.destFk, destClassId, resultArr));
+						promisses.push(self.filterCandidates(assoc.fk_dest, destClassId, resultArr));
 					}
 					return when(all(promisses), function(results){
 						return resultArr;
@@ -1091,12 +1091,12 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 				});
 			}
 			else{//navigate backward
-				return when(assocStore.query({destFk: sourceId, type: assocType-12}), function(assocs){
+				return when(assocStore.query({fk_dest: sourceId, type: assocType-12}), function(assocs){
 					var promisses = [];
 					var resultArr = [];
 					for(var j=0;j<assocs.length;j++){
 						var assoc = assocs[j];
-						promisses.push(self.filterCandidates(assoc.sourceFk, destClassId, resultArr));
+						promisses.push(self.filterCandidates(assoc.fk_source, destClassId, resultArr));
 					}
 					return when(all(promisses), function(results){
 						return resultArr;
@@ -1153,10 +1153,10 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 		},
 		getManyByAssocTypeRecursive: function(sourceId, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr){
 			var self = this;
-			return when(assocStore.query({sourceFk: sourceId, type: assocType}), function(assocsArr){
+			return when(assocStore.query({fk_source: sourceId, type: assocType}), function(assocsArr){
 				var promisses = [];
 				for(var j=0;j<assocsArr.length;j++){
-					var destFk = assocsArr[j].destFk;
+					var destFk = assocsArr[j].fk_dest;
 					if(loopProtectionArr[destFk]) continue;
 					loopProtectionArr[destFk] = true;
 					promisses.push(when(cellStore.get(destFk), function(destCell){
@@ -1175,11 +1175,11 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 		getManyByAssocTypeRecursiveReverse: function(sourceId, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr){
 			//console.log('getManyByAssocTypeRecursiveReverse', sourceId, assocType, classOrObjectType, recursive, resultArr, loopProtectionArr);
 			var self = this;
-			return when(assocStore.query({destFk: sourceId, type: assocType}), function(assocsArr){
+			return when(assocStore.query({fk_dest: sourceId, type: assocType}), function(assocsArr){
 				//console.log('assocsArr', assocsArr);
 				var promisses = [];
 				for(var j=0;j<assocsArr.length;j++){
-					var sourceFk = assocsArr[j].sourceFk;
+					var sourceFk = assocsArr[j].fk_source;
 					if(loopProtectionArr[sourceFk]) continue;
 					loopProtectionArr[sourceFk] = true;
 					promisses.push(when(cellStore.get(sourceFk), function(sourceCell){
@@ -1236,21 +1236,21 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 //			if(objectId==556) debugger;
 			if(objectId == destClassId) return true;//found it
 			var self = this;
-			return when(assocStore.query({sourceFk: objectId, type: PARENT_ASSOC}), function(assocs){
+			return when(assocStore.query({fk_source: objectId, type: PARENT_ASSOC}), function(assocs){
 				if(assocs.length>1) debugger;
 				if(assocs.length>1) throw new Error('More than one parent found');
 				if(assocs.length==0) return false;//we're at the root
-				//if(assocs[0].destFk==1) return false;//we're at the root
-				return self.isA(assocs[0].destFk, destClassId);
+				//if(assocs[0].fk_dest==1) return false;//we're at the root
+				return self.isA(assocs[0].fk_dest, destClassId);
 			});
 		},
 		addNextToAssocsArr: function(sourceId, destClassId, assocsArr){
 			var self = this;
-			return when(assocStore.query({sourceFk: sourceId, type: NEXT_ASSOC}), function(assocs){
+			return when(assocStore.query({fk_source: sourceId, type: NEXT_ASSOC}), function(assocs){
 				if(assocs.length==0) return true;
 				if(assocs.length>1) throw new Error('More than one next found');
-				assocsArr.push(assocs[0].destFk);
-				return self.addNextToAssocsArr(assocs[0].destFk, destClassId, assocsArr);
+				assocsArr.push(assocs[0].fk_dest);
+				return self.addNextToAssocsArr(assocs[0].fk_dest, destClassId, assocsArr);
 			});
 		},
 		/////// Exception for the class model //////////////////////////////////////////////////
@@ -1333,13 +1333,13 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 		},
 		getClassModelAssocItems: function(sourceId, attrRefArr, viewId){
 			var uniqueTypes = {};
-			return when(assocStore.query({sourceFk: sourceId}), function(sourceTypesArr){
+			return when(assocStore.query({fk_source: sourceId}), function(sourceTypesArr){
 				for(var i=0;i<sourceTypesArr.length;i++){
 					var type = sourceTypesArr[i].type;
 					if(type == 3) continue;
 					uniqueTypes[type] = true;
 				}
-				return when(assocStore.query({destFk: sourceId}), function(destypesArr){
+				return when(assocStore.query({fk_dest: sourceId}), function(destypesArr){
 					for(var i=0;i<destypesArr.length;i++){
 						var type = (destypesArr[i].type)+12;
 						uniqueTypes[type] = true;
@@ -1405,12 +1405,12 @@ function(declare, lang, when, all, QueryResults, Store, /*Trackable,*/ transacti
 						cachingStore.remove(cid);
 						cachingStore.put(target);
 						if(store=='cell') {
-							localAssocStore.query({sourceFk:cid}).map(function(assoc){
-								assoc.sourceFk = target.id;
+							localAssocStore.query({fk_source:cid}).map(function(assoc){
+								assoc.fk_source = target.id;
 								localAssocStore.put(assoc);
 							});
-							localAssocStore.query({destFk:cid}).map(function(assoc){
-								assoc.destFk = target.id;
+							localAssocStore.query({fk_dest:cid}).map(function(assoc){
+								assoc.fk_dest = target.id;
 								localAssocStore.put(assoc);
 							});						
 						}

@@ -99,7 +99,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			var OBJECT_TYPE = 1;
 			var self = this;
 			if(type<15) {
-				var query = {sourceFk: id, type: type};
+				var query = {fk_source: id, type: type};
 				var collection = this.store.filter(query);
 				var assocsArr = collection.fetch();
 				//return when(this.store.query(query), function(assocsArr){
@@ -108,7 +108,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 					for(var i=0;i<assocsArr.length;i++){
 						var assoc = assocsArr[i];
 //get rid of promise
-						promisses.push(when(self.store.getCell(assoc.destFk), function(cell){
+						promisses.push(when(self.store.getCell(assoc.fk_dest), function(cell){
 							//if(cell.type == OBJECT_TYPE) return cell;
 							childrenArr.push(cell.id);
 							return cell;
@@ -119,12 +119,12 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			}
 			else{
 					/*filter doesn't work with promises
-				var query = {destFk: id, type: type-12};
+				var query = {fk_dest: id, type: type-12};
 				return when(this.store.query(query), function(assocsArr){
 					console.log('assocsArr', assocsArr);
 					return when(assocsArr.filter(function(assoc, index){
-						console.log('getCell', self.store.getCell(assoc.sourceFk));
-						return when(self.store.getCell(assoc.sourceFk), function(cell){
+						console.log('getCell', self.store.getCell(assoc.fk_source));
+						return when(self.store.getCell(assoc.fk_source), function(cell){
 							if(cell.type == OBJECT_TYPE) console.log('isObject', cell);;
 							if(cell.type == OBJECT_TYPE) return false;
 							return true;
@@ -132,12 +132,12 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 					}), function(filteredArray){
 						console.log('filteredArray', filteredArray);
 						return filteredArray.map(function(assoc, index){
-							return assoc.sourceFk;
+							return assoc.fk_source;
 						});
 					});
 				});
 					 */
-				var query = {destFk: id, type: type-12};
+				var query = {fk_dest: id, type: type-12};
 				var collection = this.store.filter(query);
 				var assocsArr = collection.fetch();
 				//return when(this.store.filter(query), function(assocsArr){
@@ -145,7 +145,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 					var promisses = [];
 					for(var i=0;i<assocsArr.length;i++){
 						var assoc = assocsArr[i];
-						promisses.push(when(self.store.getCell(assoc.sourceFk), function(cell){
+						promisses.push(when(self.store.getCell(assoc.fk_source), function(cell){
 							if(cell.type == OBJECT_TYPE) return cell;
 							childrenArr.push(cell.id);
 							return cell;
