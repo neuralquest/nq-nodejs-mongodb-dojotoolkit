@@ -14,8 +14,7 @@ var profile = {
 	// `basePath` is relative to the directory containing this profile file; in this case, it is being set to the
 	// src/ directory, which is the same place as the `baseUrl` directory in the loader configuration. (If you change
 	// this, you will also need to update run.js.)
-	//basePath: '../src/',
-	basePath: '../WebContent/',
+	basePath: '../src/',
 
 	// This is the directory within the release directory where built packages will be placed. The release directory
 	// itself is defined by `build.sh`. You should probably not use this; it is a legacy option dating back to Dojo
@@ -46,15 +45,11 @@ var profile = {
 	packages: [
 		// Using a string as a package is shorthand for `{ name: 'app', location: 'app' }`
 		'app',
-		'dstore',
 		'dgrid',
 		'dijit',
 		'dojo',
 		'dojox',
-		'META-INF',
 		'put-selector',
-		'threejs',
-		'WEB-INF',
 		'xstyle'
 	],
 

@@ -1,24 +1,21 @@
-[submodule "WebContent/xstyle"]
-	path = WebContent/xstyle
+[submodule "public/xstyle"]
+	path = public/xstyle
 	url = https://github.com/kriszyp/xstyle.git
-[submodule "WebContent/put-selector"]
-	path = WebContent/put-selector
+[submodule "public/put-selector"]
+	path = public/put-selector
 	url = https://github.com/kriszyp/put-selector.git
-[submodule "WebContent/util"]
-	path = WebContent/util
-	url = https://github.com/dojo/util.git
-[submodule "WebContent/dgrid"]
-	path = WebContent/dgrid
+[submodule "public/dgrid"]
+	path = public/dgrid
 	url = https://github.com/SitePen/dgrid.git
-[submodule "WebContent/dijit"]
-	path = WebContent/dijit
+[submodule "public/dijit"]
+	path = public/dijit
 	url = https://github.com/dojo/dijit.git
-[submodule "WebContent/dojo"]
-	path = WebContent/dojo
+[submodule "public/dojo"]
+	path = public/dojo
 	url = https://github.com/dojo/dojo.git
-[submodule "WebContent/dojox"]
-	path = WebContent/dojox
+[submodule "public/dojox"]
+	path = public/dojox
 	url = https://github.com/dojo/dojox.git
-[submodule "WebContent/dstore"]
-	path = WebContent/dstore
+[submodule "public/dstore"]
+	path = public/dstore
 	url = https://github.com/SitePen/dstore.git
