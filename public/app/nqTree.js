@@ -15,7 +15,8 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			this.inherited(arguments);
 			var self = this;
 			when(this.getAttrRefPropertiesForWidget(this.widgetId), function(attrRefs){
-				self.attrRefByViewArr = attrRefs;
+				console.log('attrRefs',attrRefs);
+				/*self.attrRefByViewArr = attrRefs;
 				return when(self.getPermittedClassesforWidget(self.widgetId), function(permittedClassesObjs){
 					self.permittedClassesByViewArr = permittedClassesObjs;
 					self.createMenusForWidget();
@@ -26,7 +27,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 						if(parentId) self.createTree();
 						return true;
 					});
-				});
+				});*/
 			}, nq.errorDialog);
 		},
 		setSelectedObjIdPreviousLevel: function(value){
@@ -35,7 +36,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			this.selectedObjIdPreviousLevel = value;
 			if(self.tree) self.tree.destroy(); 
 			self.createTree();
-			self.treeModel.query = {itemId: self.selectedObjIdPreviousLevel, viewId: self.viewIdsArr[0]};
+			self.treeModel.query = {source: self.selectedObjIdPreviousLevel, view: self.viewIdsArr[0]};
 			self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
@@ -64,7 +65,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			this.treeModel = new ObjectStoreModel({
 				childrenAttr: this.viewIdsArr,
 				store : this.store,
-				query : {itemId: this.selectedObjIdPreviousLevel, viewId: this.viewIdsArr[0]}
+				query : {source: this.selectedObjIdPreviousLevel, view: this.viewIdsArr[0]}
 			});			
 			this.treeModel.getRoot = function(onItem, onError){
 				var self = this;

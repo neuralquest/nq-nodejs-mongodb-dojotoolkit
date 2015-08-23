@@ -71,10 +71,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			});
 			this.pane.resize();
 		},
-		getAttrRefPropertiesForWidget: function(widgetId){
+		XXXXgetAttrRefPropertiesForWidget: function(widgetId){
 			var self = this;			
 			//recursivily get all of the views that belong to this widget
-			return when(self.store.getManyByAssocType(widgetId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewIdsArr){
+			return itemStore.query({source: widgetId, type: 'many to many', destClass: XXX}).then(function(viewIdsArr){
 				self.viewIdsArr = viewIdsArr;
 				var promisses = [];
 				for(var i=0;i<viewIdsArr.length;i++){
@@ -97,7 +97,53 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 	
 			});
 		},
+		getAttrRefPropertiesForWidget: function(widgetId){
+			var self = this;
+			var VIEW_CLASS_TYPE = 74;
+			//recursively get all of the views that belong to this widget
+			return self.store.query({sourceId: widgetId, type: 'many to many', destClassId: VIEW_CLASS_TYPE}).then(function(viewsArr) {
+				var promises = [];
+				viewsArr.forEach(function(view) {
+					promises.push(self.getAttrRefPropertiesForView(view._id));
+				})
+				return when(all(promises));
+			})
+		},
 		getAttrRefPropertiesForView: function(viewId){
+			var ATTRREF_CLASS_TYPE = 63;
+			var self = this;
+			//get all of the attrRefs that belong to this widget
+			return self.store.query({sourceId: viewId, type: 'ordered', destClassId: ATTRREF_CLASS_TYPE}).then(function(attrRefsArr) {
+				return attrRefsArr;
+			})
+		},
+		XXXgetAttrRefPropertiesForWidget: function(widgetId){
+			var self = this;
+			//recursivily get all of the views that belong to this widget
+			return when(self.store.getManyByAssocType(widgetId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewIdsArr){
+				self.viewIdsArr = viewIdsArr;
+				var promisses = [];
+				for(var i=0;i<viewIdsArr.length;i++){
+					var viewId = viewIdsArr[i];
+					promisses.push(self.getAttrRefPropertiesForView(viewId));
+				}
+				return when(all(promisses), function(arrayOfArrays){
+					var results = [];//create a sparsely populated array with the viewId as index
+					for(var i=0;i<viewIdsArr.length;i++){
+						var viewId = viewIdsArr[i];
+						var attrRefProperties = arrayOfArrays[i];
+						results[viewId] = attrRefProperties;
+					}
+					return results;
+				});
+				return when(all(promisses), function(arrayOfArrays){
+					var merged = [];
+					return merged.concat.apply(merged, arrayOfArrays);
+				});
+
+			});
+		},
+		XXXgetAttrRefPropertiesForView: function(viewId){
 			//console.log('viewId', viewId);
 			var ATTRREF_CLASS_TYPE = 63;
 			var self = this;			

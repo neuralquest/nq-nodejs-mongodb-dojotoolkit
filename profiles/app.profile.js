@@ -14,7 +14,7 @@ var profile = {
 	// `basePath` is relative to the directory containing this profile file; in this case, it is being set to the
 	// src/ directory, which is the same place as the `baseUrl` directory in the loader configuration. (If you change
 	// this, you will also need to update run.js.)
-	basePath: '../src/',
+	basePath: '../public/',
 
 	// This is the directory within the release directory where built packages will be placed. The release directory
 	// itself is defined by `build.sh`. You should probably not use this; it is a legacy option dating back to Dojo
@@ -49,7 +49,9 @@ var profile = {
 		'dijit',
 		'dojo',
 		'dojox',
+		'dstore',
 		'put-selector',
+		'threejs',
 		'xstyle'
 	],
 
@@ -83,7 +85,7 @@ var profile = {
 		// but this helps provide a basic illustration of how multi-layer builds work.) Note that when you create a new
 		// layer, the module referenced by the layer is always included in the layer (in this case, `app/main`), so it
 		// does not need to be explicitly defined in the `include` array.
-		'app/main': {}
+		//'app/main': {}
 	},
 
 	// Providing hints to the build system allows code to be conditionally removed on a more granular level than simple

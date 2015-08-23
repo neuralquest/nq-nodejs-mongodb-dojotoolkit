@@ -1,43 +1,52 @@
 {
-	"name": "neuralquest",
-	"author": "Chris de Jong",
-	"version": "0.1.0",
-	"description": "A Browser based process modeling and execution environment.",
-	"license": "BSD-3-Clause",
-    "maintainers": [
-	    {
-	 	   "name": "Chris de Jong",
-	 	   "email": "chris@neuralquest.org"
-	    }
-    ],
-  	"repository": {
-		"type": "git",
-		"url": "https://github.com/Neuralquest/neuralquest.git"
-	},
-	"private": true,
-	"scripts": {
-		"start": "node ./bin/www"
-	},
-	"dependencies": {
-		"body-parser": "~1.13.2",
-		"cookie-parser": "~1.3.5",
-		"debug": "~2.2.0",
-		"ejs": "~2.3.3",
-		"express": "~4.13.1",
-		"morgan": "~1.6.1",
-		"mysql": "^2.8.0",
-		"serve-favicon": "~2.3.0",
-		"stylus": "0.42.3"
-	},
-	"devDependencies": {
-		"intern": "~2.0.0",
-		"stylus": "~0.48.0"
-	},
-	"bugs": "http://neuralquest.org",
-	"keywords": [ "Process Modeling", "Javascript", "Dojo", "WebGL", "Threejs"],
-	"homepage": "http://neuralquest.org",
-	"icon": "https://raw.githubusercontent.com/Neuralquest/neuralquest/master/WebContent/favicon.ico",
-	"help" : {
-        "web" : "http://neuralquest.org"
+  "name": "neuralquest",
+  "author": "Chris de Jong",
+  "version": "0.1.0",
+  "description": "A Browser based process modeling and execution environment.",
+  "license": "BSD-3-Clause",
+  "maintainers": [
+    {
+      "name": "Chris de Jong",
+      "email": "chris@neuralquest.org"
     }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Neuralquest/neuralquest.git"
+  },
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.13.2",
+    "cookie-parser": "~1.3.5",
+    "debug": "~2.2.0",
+    "ejs": "~2.3.3",
+    "express": "~4.13.1",
+    "express-mongo-db": "^2.0.3",
+    "mongodb": "2.0.34",
+    "morgan": "~1.6.1",
+    "mysql": "^2.8.0",
+    "promise": "^7.0.4",
+    "serve-favicon": "~2.3.0",
+    "stylus": "0.42.3"
+  },
+  "devDependencies": {
+    "intern": "~2.0.0",
+    "stylus": "~0.48.0"
+  },
+  "bugs": "http://neuralquest.org",
+  "keywords": [
+    "Process Modeling",
+    "Javascript",
+    "Dojo",
+    "WebGL",
+    "Threejs"
+  ],
+  "homepage": "http://neuralquest.org",
+  "icon": "https://raw.githubusercontent.com/Neuralquest/neuralquest/master/WebContent/favicon.ico",
+  "help": {
+    "web": "http://neuralquest.org"
+  }
 }
