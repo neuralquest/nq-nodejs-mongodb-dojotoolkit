@@ -50,12 +50,40 @@ exports.oauth = {
 };
 exports.constants = {
   VIEW_CLASS: 74,
-  ATTRREF_CLASS: 1789
+  ATTRREF_CLASS: 63
 };
 exports.reveseAssoc = {
-  parent:'children'
+  subClasses:'parent',
+  orderedParent:'ordered',
+  previous:'next',
+  manyToManyReverse:'many to many',
+  manyToOne:'one to many',
+  ownedBy:'owns'
+};
+exports.cardinality = {
   //to many
-  // ["subclasses", "many to many", "ordered", "instantiations", "one to many", "many to many reverse", "attribute of", "mapped to by", "owns", "associations", "default of", "by association type"]
+  "subClasses":'many',
+  "many to many":'many',
+  "ordered":'many',
+  "instantiations":'many',
+  "one to many":'many',
+  "many to many reverse":'many',
+  "attribute of":'many',
+  "mapped to by":'many',
+  "owns":'many',
+  "associations":'many',
+  "default of":'many',
+  "by association type":'many',
   //to one
-  // ["parent", "the user", "attribute", "maps to", "default", "one to one", "next", "ordered parent", "owned by", "one to one reverse", "many to one"]
+  "parent": 'one',
+  "the user": 'one',
+  "attribute": 'one',
+  "maps to": 'one',
+  "default": 'one',
+  "one to one": 'one',
+  "next": 'one',
+  "ordered parent": 'one',
+  "owned by": 'one',
+  "one to one reverse": 'one',
+  "many to one": 'one'
 };

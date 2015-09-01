@@ -16,13 +16,65 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(logger('dev'));//Disable logging for static content requests by loading the logger middleware after the static middleware:
+//app.use(logger('dev'));//Disable logging for static content requests by loading the logger middleware after the static middleware:
 
+app.get("/items", function (req, res) {
+    var itemsColl = req.db.collection('items');
+    itemsColl.find().toArray(function(err, itemsArr) {
+        if(err) res.status(500).send(err);
+        else res.json(itemsArr);
+    });
+});
+app.get("/assocs", function (req, res) {
+    var assocsColl = req.db.collection('assocs');
+    assocsColl.find().toArray(function(err, assocsArr) {
+        if(err) res.status(500).send(err);
+        else res.json(assocsArr);
+    });
+});
 app.get("/item/*/*", function (req, res) {
-    getData.getItem(req, res);
+    var reqs = req.path.split('/');
+    var viewId = Number(reqs[reqs.length-2]);
+    var itemId = Number(reqs[reqs.length-1]);
+
+    getData.getItem(req.db, viewId, itemId, function(err, item){
+        if(err) res.status(500).send(err);
+        else res.json(item);
+    });
 });
 app.get("/item", function (req, res) {
-    getData.getItemsByQuery(req, res);
+    console.log('req.query', req.query);
+    var parentViewId = Number(req.query.parentViewId);
+    var viewId = Number(req.query.viewId);
+    var parentId = Number(req.query.parentId);
+    var itemId = Number(req.query.itemId);
+    var destClassId = Number(req.query.destClassId);
+    var type = req.query.type;
+    if(viewId && itemId){
+        getData.getItem(req.db, viewId, itemId, function(err, item){
+            if(err) res.status(500).send(err);
+            else res.json(item);
+        });
+    }
+    else if(viewId && parentId){
+        getData.getItemsByParentId(req.db, viewId, parentId, function(err, itemsArr){
+            if(err) res.status(500).send(err);
+            else res.json(itemsArr);
+        });
+    }
+    else if(parentViewId && parentId) {
+        getData.getItemsByParentIdAndParentView(req.db, parentViewId, parentId, function(err, itemsArr){
+            if(err) res.status(500).send(err);
+            else res.json(itemsArr);
+        });
+    }
+    else if(parentId && type && destClassId) {
+        getData.getItemsByAssocTypeAndDestClass(req.db, parentId, type, destClassId, function(err, itemsArr){
+            if(err) res.status(500).send(err);
+            else res.json(itemsArr);
+        });
+    }
+    else res.status(500).send(new Error('Invalid query:' + req.json(query)));
 });
 app.get("/prefetch", function (req, res) {
     mysql2Mango.getPublicData(res, pool);

@@ -1,3 +1,4 @@
+var Promise = require('promise');
 var mysql = require('mysql');
 var pool = mysql.createPool({
     connectionLimit: 100, //important
@@ -18,11 +19,11 @@ function transform(req, res){
 
         console.log('connected as id ' + connection.threadId);
 
-        connection.query("select c2.id as id, c2.type as type, c4.name as attrName, c3.name as attrValue  "+
+        connection.query("select c1.id as icon, c2.id as id, a2.type as type, c4.name as attrName, c3.name as attrValue , c3.id as attrId   "+
             "		from cell c1, assoc a1, cell c2 "+
             "		LEFT JOIN (assoc a2, cell c3, assoc a3, cell c4) "+
             "		on (a2.fk_source = c2.id  "+
-            "		and a2.type = 4  "+
+            "		and a2.type in(4,5) " +
             "		and a2.fk_dest = c3.id "+
             "		and a3.fk_source = c3.id  "+
             "		and a3.type = 3  "+
@@ -33,6 +34,7 @@ function transform(req, res){
             "	and a1.fk_source = c2.id "+
             "	and c2.type = 1 "+
             "   order by id; ",function(err,cells){
+            console.log('cells', cells);
             if(!err) {
                 var newCells = [];
                 var newCell = {};
@@ -42,12 +44,15 @@ function transform(req, res){
                     if (newCell._id != cellPart.id) {
                         if (newCell._id) newCells.push(newCell);
                         //console.log('newCell', newCell);
-                        newCell = {_id: cellPart.id, _type: 'object'};
+                        newCell = {_id: cellPart.id, _type: 'object', _icon:cellPart.icon};
                     }
-                    if (cellPart.attrName) {
+                    if(cellPart.type == 4 && cellPart.attrName) {
                         var camelAttr = camelize(cellPart.attrName);
                         if(camelAttr == 'primaryNames') camelAttr = 'name';
                         newCell[camelAttr] = cellPart.attrValue;
+                    }
+                    else if(cellPart.type == 5) {
+                        newCell.mapsTo = cellPart.attrId;
                     }
                 }
                 connection.query("select c1.id as id, c1.type as type, c1.name as name, c2.name as attrName, c3.name as attrType, c4.name as permittedValue "+
@@ -117,6 +122,7 @@ function transform(req, res){
                             " where assoc.type = cell.id " +
                             " and assoc.type != 4",function(err,assocs) {
                             if (!err) {
+                                //console.log('all assocs', assocs);
                                 for (var i in assocs) {
                                     var assoc = assocs[i];
                                     processAssoc(assoc, itemsColl, assocColl)
@@ -140,6 +146,40 @@ function transform(req, res){
     });
 }
 function processAssoc(assoc, itemsColl, assocColl){
+    //console.log('callAssoc',assoc);
+    var sourceId = assoc.fk_source;
+    var destId = assoc.fk_dest;
+    var itemPromisses = [];
+    itemPromisses.push(new Promise(function(resolve, reject){
+        itemsColl.findOne({_id:sourceId}, function(err, item){
+            if(err) {
+                console.log('err', err);
+                reject(err);
+            }
+            else  resolve(item);
+        })
+    }));
+    itemPromisses.push(new Promise(function(resolve, reject){
+        itemsColl.findOne({_id:destId}, function(err, item){
+            if(err) {
+                console.log('err', err);
+                reject(err);
+            }
+            else resolve(item);
+        })
+    }));
+    Promise.all(itemPromisses).then(function(items){
+        //console.log('ITEMS', items);
+        var source = items[0];
+        var dest = items[1];
+        if(source && dest){
+            var newAssoc = {source:source._id, type:assoc.type, dest:dest._id};
+            assocColl.insert(newAssoc);
+
+        }
+    });
+}
+function XXXprocessAssoc(assoc, itemsColl, assocColl){
     itemsColl.find({$or:[{_id:assoc.fk_source },{_id:assoc.fk_dest }]}).toArray(function (err, array) {
         console.log('array' ,array);
         if(err) console.log(err);

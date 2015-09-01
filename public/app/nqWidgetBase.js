@@ -97,24 +97,31 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 	
 			});
 		},
-		getAttrRefPropertiesForWidget: function(widgetId){
+		getWidgetProperties: function(widgetId){
 			var self = this;
 			var VIEW_CLASS_TYPE = 74;
-			//recursively get all of the views that belong to this widget
-			return self.store.query({sourceId: widgetId, type: 'many to many', destClassId: VIEW_CLASS_TYPE}).then(function(viewsArr) {
-				var promises = [];
-				viewsArr.forEach(function(view) {
-					promises.push(self.getAttrRefPropertiesForView(view._id));
+			return self.store.get(538+'/'+widgetId).then(function(widget){
+				//recursively get all of the views that belong to this widget
+				return self.store.query({parentId: widgetId, type: 'many to many', destClassId: VIEW_CLASS_TYPE}).then(function(viewsArr) {
+					var promises = [];
+					viewsArr.forEach(function(view) {
+						promises.push(self.getAttrRefPropertiesForView(view));
+					});
+					return when(all(promises), function(viewsArr){
+						widget.views = viewsArr;
+						return widget;
+					});
+					//return
 				})
-				return when(all(promises));
-			})
+			});
 		},
-		getAttrRefPropertiesForView: function(viewId){
+		getAttrRefPropertiesForView: function(view){
 			var ATTRREF_CLASS_TYPE = 63;
 			var self = this;
 			//get all of the attrRefs that belong to this widget
-			return self.store.query({sourceId: viewId, type: 'ordered', destClassId: ATTRREF_CLASS_TYPE}).then(function(attrRefsArr) {
-				return attrRefsArr;
+			return self.store.query({parentId: view._id, type: 'ordered', destClassId: ATTRREF_CLASS_TYPE}).then(function(attrRefsArr) {
+				view.attrRefs = attrRefsArr;
+				return view;
 			})
 		},
 		XXXgetAttrRefPropertiesForWidget: function(widgetId){

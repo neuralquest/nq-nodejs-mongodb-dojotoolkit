@@ -3,39 +3,48 @@ require([
 'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct', 'dojo/_base/declare',
 'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
-'app/nqNewStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument',
-'dojo/promise/instrumentation', 'dojox/html/styles', 'dojo/query!css2',
-'dojox/store/transaction', "dojo/store/JsonRest" , 'dojo/store/Memory'],
+'app/nqStore', 'dstore/RequestMemory', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument',
+'dojox/html/styles', 'dojo/query!css2'],
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct, declare,  
-		Deferred, when, all, query, BorderContainer,// Trackable,
+		Deferred, when, all, query, BorderContainer,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
-		nqNewStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
-		instrumentation, styles, css2,
-		 transaction, JsonRest, Memory) {
-	
-	var nqDataStore = new nqNewStore();
-	//var nqDataStore = declare([new nqNewStore(), Trackable]);
-	//var nqDataStore = Observable(new nqNewStore());
-	//var nqDataStore = Observable(new nqNewStore());
-	//var transaction = nqDataStore.transaction();
+		nqStore, RequestMemory, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
+		styles, css2) {
 
 
-	var itemStore;
-	var self = this;
+   // var itemsColl = new RequestMemory({ target: '/items', idProperty: '_id'});
+    //var assocsColl = new RequestMemory({ target: '/assocs', idProperty: '_id'});
+    nqStore = new nqStore();
+    var self = this;
 
 	ready( function() {
+
+
 		// summary:
 		//		Initialize
-		//		Setup listerners, prefetch data which is often used, determin landing page
-		var transactionLogStore = new Memory();
-		var masterItemStore = new JsonRest({target: '/item',name: 'item'});
+		//		Setup listerners, prefetch data which is often used, determine landing page
+		/*var transactionLogStore = new Memory();
+		var masterItemStore = new JsonRest({
+			target: '/item',
+			name: 'item',
+			getChildren: function(object, viewId, onComplete){
+				masterItemStore.query({parentId: object._id, parentViewId:object._viewId}).then(function(children) {
+					return onComplete(children || []);
+				});
+			},
+            getIdentity: function(object){
+                return object._id;
+            },
+		});
 		var localItemStore = new Memory();
-		itemStore = transaction({
+		nqStore = transaction({
 			masterStore: masterItemStore,
 			cachingStore: localItemStore,
 			transactionLogStore: transactionLogStore
-		});
+		});*/
+
+        //testInitialize();
 
 		topic.subscribe("/dojo/hashchange", interpretHash);
 		on(registry.byId('cancelButtonId'), 'click', function(event){nqDataStore.abort();});
@@ -45,17 +54,18 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			else dojox.html.removeCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
 		});
 
-		when(nqDataStore.preFetch(), function(results){
+		/*when(nqDataStore.preFetch(), function(results){
 			//fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();	
-			domStyle.set('loadingOverlay', 'display', 'none');
-			if(hash() == "") {
-				var neuralquestState = cookie('neuralquestState');
-				if(neuralquestState) hash(neuralquestState, true);
-				else hash("842.1784.702.2485", true);
-			}
-			else interpretHash();
-		}, errorDialog);
 
+		}, errorDialog);*/
+		domStyle.set('loadingOverlay', 'display', 'none');
+        //return;
+		if(hash() == "") {
+			var neuralquestState = cookie('neuralquestState');
+			if(neuralquestState) hash(neuralquestState, true);
+			else hash("842.1784.702.2485", true);
+		}
+		else interpretHash();
 	});
 	function interpretHash(_hash){
 		// summary:
@@ -74,8 +84,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			var hashArr = hash().split('.');
 			var levels = Math.ceil(hashArr.length/3);//determine the number of levels, rounded to the highest integer
 			for(var level = levels-1; level>=0; level--){
-				setTimeout(drawWidgets(level));//allow the browser to redraw the page. Does this really work?
-				//drawWidgets(level);
+				//setTimeout(drawWidgets(level),0);//allow the browser to redraw the page. Does this really work?
+				drawWidgets(level);
 			}
 		}, errorDialog);
 		
@@ -95,7 +105,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		parentContentPane.destroyDescendants(false);
 		
 		//are we creating an accordion container in a border container or a tab container?
-		return itemStore.get(538+'/'+state.viewId).then(function(view){
+		return nqStore.get(state.viewId).then(function(view){
 			var viewPaneCreated;
 			if(view.accordionOrTab=='Accordion in Border Container') viewPaneCreated = createAccordionInBorderContainer(state.viewId, parentContentPane, level);
 			else viewPaneCreated = createTabs(state.viewId, parentContentPane, level);
@@ -111,7 +121,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var state = getState(level);
 		if(!state.viewId) return true;
 		var selectedTabId = getSelectedTabRecursive(state.viewId);
-        return itemStore.query({sourceId: selectedTabId, type: 'ordered', destClassId: WIDGETS_ATTRCLASS}).then(function(widgetsArr){
+        return nqStore.query({parentId: selectedTabId, type: 'ordered', destClassId: WIDGETS_ATTRCLASS}).then(function(widgetsArr){
 			//when we've got all the child widgets that belong to this tab, create them
 			for(var i=0;i<widgetsArr.length;i++){
 				var widget = widgetsArr[i];
@@ -158,7 +168,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 
 		var state = getState(level);
 		var viewId = state.viewId;
-		return itemStore.query({sourceId: parentViewOrTabId, type: 'ordered', destClassId: ACCORDIONTABS_ATTRCLASS}).then(function(tabsArr){
+		return nqStore.getItemsByAssocTypeAndDestClass(parentViewOrTabId, 'ordered', ACCORDIONTABS_ATTRCLASS).then(function(tabsArr){
 			if(tabsArr.length==0) return false;
 					
 			var design = 'sidebar';//obtain horizontal, vertical, none from viewDef?
@@ -261,8 +271,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 
 		var state = getState(level);
 		var viewId = state.viewId;
-
-		return itemStore.query({sourceId: parentViewOrTabId, type: 'ordered', destClassId: ACCORDIONTABS_ATTRCLASS}).then(function(tabsArr){
+ 		return nqStore.getItemsByAssocTypeAndDestClass(parentViewOrTabId, 'ordered', ACCORDIONTABS_ATTRCLASS).then(function(tabsArr){
 			if(tabsArr.length==0) return false;
 			
 			var container;
@@ -342,7 +351,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         if (widget.displayTypes == 'Document'){
             widgetObj = new nqDocument({
                 id: 'nqWidget' + widget._id,
-                store: itemStore,
+                store: nqStore,
                 createDeferred: createDeferred, //tell us when your done by returning the widgetObj
                 widgetId: widget._id,
                 tabId: tabId // used by resize
@@ -352,7 +361,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         if (widget.displayTypes == 'Form'){
             widgetObj = new nqForm({
                 id: 'nqWidget'+widget._id,
-                store: itemStore,
+                store: nqStore,
                 createDeferred: createDeferred, //tell us when your done by returning the widgetObj
                 widgetId: widget._id,
                 //viewId: viewId,
@@ -362,7 +371,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         if (widget.displayTypes ==  'Table'){
             widgetObj = new nqTable({
                 id: 'nqWidget'+widget._id,
-                store: itemStore,
+                store: nqStore,
                 createDeferred: createDeferred, //tell us when your done by returning the widgetObj
                 widgetId: widget._id,
                 selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//dgrid needs an initial query
@@ -375,7 +384,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         if (widget.displayTypes == 'Tree'){
             widgetObj = new nqTree({
                 id: 'nqWidget'+widget._id,
-                store: itemStore,
+                store: nqStore,
                 createDeferred: createDeferred, //tell us when your done by returning the widgetObj
                 widgetId: widget._id,
                 selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//tree needs an initial query
@@ -383,13 +392,13 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 tabId: tabId, // used by onClick
             }, domConstruct.create('div'));
             tab.addChild(widgetObj);
-            widgetObj.startup();
-            createDeferred.resolve(widgetObj);
+            //widgetObj.startup();
+            //createDeferred.resolve(widgetObj);
         }
         if (widget.displayTypes == 'Process Model'){
             widgetObj = new nqProcessChart({
                 id: 'nqWidget'+widget._id,
-                store: itemStore,
+                store: nqStore,
                 createDeferred: createDeferred, //tell us when your done by returning the widgetObj
                 //viewObj: viewObj,
                 tabId: tabId, // used by resize
@@ -407,7 +416,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         if (widget.displayTypes == '3D Class Model'){
             widgetObj = new nqClassChart({
                 id: 'nqWidget'+widget._id,
-                store: itemStore,
+                store: nqStore,
                 createDeferred: createDeferred, //tell us when your done by returning the widgetObj
                 viewId: viewId,
                 tabId: tabId, // used by resize
@@ -490,10 +499,10 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	lang.setObject("nq.errorDialog", errorDialog);//make the function globally accessable
 	function errorDialog(err){
 		var dlg = new dijit.Dialog({
-			title: err.message, 
+			title: 'Error',
 			extractContent: true,//important in the case of server response, it'll screw your css. 
 			onClick: function(evt){this.hide();},//click anywhere to close
-			content: err.response.text?err.response.text:err.stack
+			content: err.message
 		});
 		dlg.show();
 		if(!err.responseText) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
@@ -504,92 +513,31 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 //    transactionalCellStore.put(someUpdatedProduct);
  //   ... other operations ...
 //    transaction.commit();	
-	
 	lang.setObject("nq.test", test);//make the function globally accessable
-	function test(){
-		nqDataTransStore.test();
+    function test(){
+        console.log('test');
+        itemsColl.put({_id:999, name:'Ha Ha', type:'class'});
+    }
+	function testInitialize(){
+        console.dir(itemsColl);
+        var query = {_type:'class'};
+        var promise = this.itemsColl.get(810);
+        promise.then(function(result){
+            console.log(result)
+        });
+        var collection = this.itemsColl.filter(query);
+        // Setup observer in case children list changes, or the item(s) in the children list are updated.
+        collection.on('remove, add', function(event){
+            console.log('remove, add',event);
+        });
+        collection.on('update', function(event){
+            console.log('update',event);
+        });
+        var children = collection.fetch();
+        children.forEach(function(child){
+            console.log('child', child);
+        });
 
-		
-		/*
-		var self = this;
-		var transaction = nqDataStore.trans();
-		nqDataStore.addTransactionalCellStore({name:'OneName', type:0});
-		nqDataStore.addTransactionalCellStore({name:'TwoName', type:0});
-		var updateObjectId = nqDataStore.addTransactionalCellStore({name:'ThreeName', type:0});
-		var removeObject = nqDataStore.addTransactionalCellStore({name:'FourName', type:0});
-		//var obj = nqDataStore.getTransactionalCellStore(updateObjectId);
-		//obj.name = 'NewThreeName';
-		//nqDataStore.putTransactionalCellStore(obj);
-		transaction.commit();	
-		
-		 when(updateObject, function(obj){
-			obj.name = 'NewThreeName';
-			nqDataStore.putTransactionalCellStore(obj);
-			transaction.commit();	
-			
-		});
-		
-		//var result1 = nqDataStore.getChildren({id: 1016, viewId: 846});
-		var result1 = nqDataStore.query({parentId: 1016, viewId: 846});
-		result1.observe(function(obj, removedFrom, insertedInto){
-			console.log("observe result1 The Identifying The...1016", ": ", obj, removedFrom, insertedInto);
-		});
-
-		//var result2 = nqDataStore.getChildren({id: 2453, viewId: 846});
-		var result2 = nqDataStore.query({parentId: 2453, viewId: 846});
-		result2.observe(function(obj, removedFrom, insertedInto){
-			console.log("observe result2 The Bain...2453", ": ", obj, removedFrom, insertedInto);
-		});
-		var result3 = nqDataStore.query({sourceFk: 1016, type:8});
-		result3.observe(function(obj, removedFrom, insertedInto){
-			console.log("observe on result3...1016", ": ", obj, removedFrom, insertedInto);
-		});
-		var result4 = nqDataStore.query({sourceFk: 2453, type:8});
-		result4.observe(function(obj, removedFrom, insertedInto){
-			console.log("observe on result4...2453", ": ", obj, removedFrom, insertedInto);
-		});
-
-		when(nqDataStore.getAssoc(4597), function(assoc){
-			console.log('assoc before update',assoc);
-			assoc.sourceFk = 2453;
-			assoc.type = ORDERED_ASSOC;
-			nqDataStore.put(assoc);
-			console.log('RESULTS');
-			when(result1, function(children){
-				console.log('result1 Identifying The..');
-				console.log(children);
-			});
-			when(result2, function(children){
-				console.log('result2 The Bain...');
-				console.log(children);
-			});
-			when(result3, function(children){
-				console.log('result3 Identifying The..');
-				console.log(children);
-			});
-			when(result4, function(children){
-				console.log('result4 The Bain...');
-				console.log(children);
-			});
-			console.log('GETCHILDREN');
-			when(nqDataStore.getChildren({id: 1016, viewId: 846}), function(children){
-				console.log('children of Identifying The..');
-				console.log(children);
-			});
-			when(nqDataStore.getChildren({id: 2453, viewId: 846}), function(children){
-				console.log('children of The Bain...');
-				console.log(children);
-			});
-		});
-		/*;
-			when(nqDataStore.getAssoc(4597), function(assoc1){
-				console.log('after update',assoc1);
-
-			});
-		when(nqDataStore.query({sourceFk: 2453, type:8}), function(assocsArr){
-			console.dir(assocsArr);
-		});
-		*/
 	};
 	
 	CLASS_TYPE = 0;

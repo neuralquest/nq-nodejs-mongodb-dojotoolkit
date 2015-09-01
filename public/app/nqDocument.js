@@ -56,7 +56,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		        		domStyle.set(self.editorToolbarDivNode, 'display' , 'none');
 		        	}
 				},
-				style : {'margin-left':'10px'} 
+				style : {'margin-left':'10px'}
 			});
 			this.normalToolbar.addChild(this.editModeButton);
 			// Add sibling toggle button
@@ -65,14 +65,14 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		        checked: false,
 		        label: 'Add Sibling',
 				iconClass: 'addIcon',
-		        onChange: function(val){ 
+		        onChange: function(val){
 		        	if(val) {
 		        		self.editModeButton.set('checked', false);
 		        		self.childButton.set('checked', false);
 		        		self.deleteButton.set('checked', false);
 		        	}
 		        },
-				style : {'margin-left':'5px'} 
+				style : {'margin-left':'5px'}
 			});
 			this.normalToolbar.addChild(this.siblingButton);
 			// Add child toggle button
@@ -88,7 +88,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		        		self.deleteButton.set('checked', false);
 			        }
 	        },
-				style : {'margin-left':'5px'} 
+				style : {'margin-left':'5px'}
 			});
 			this.normalToolbar.addChild(this.childButton);
 			// Add delete toggle button
@@ -97,17 +97,17 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		        checked: false,
 		        label: 'Delete',
 				iconClass: 'removeIcon',
-		        onChange: function(val){ 
+		        onChange: function(val){
 		        	if(val) {
 		        		self.editModeButton.set('checked', false);
 		        		self.siblingButton.set('checked', false);
 		        		self.childButton.set('checked', false);
 		        	}
 		        },
-				style : {'margin-left':'5px'} 
+				style : {'margin-left':'5px'}
 			});
 			this.normalToolbar.addChild(this.deleteButton);
-			
+
 			// these are floated right
 			// Add images toggle button
 			var button5 = new ToggleButton({
@@ -119,7 +119,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				},
 				label: 'llustrations',
 				iconClass: 'annoIcon',
-				style : { 'float': 'right', 'margin-right':'10px'} 
+				style : { 'float': 'right', 'margin-right':'10px'}
 			});
 			this.normalToolbar.addChild(button5);
 			// Add ToDo toggle button
@@ -130,23 +130,22 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				},
 				label: 'ToDo',
 				iconClass: 'todoIcon',
-				style : { 'float': 'right', 'margin-right':'10px'} 				
+				style : { 'float': 'right', 'margin-right':'10px'}
 			});
 			this.normalToolbar.addChild(button6);
-			
+
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
 
 			var self = this;
-			when(self.store.getOneByAssocType(this.widgetId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewId){
-				self.viewId = viewId; 
-				when(self.getAttrRefPropertiesForView(viewId), function(attrRefArr){
-					self.HEADER_ATTRREF = attrRefArr[0].name;
-					self.PARAGRAPH_ATTRREF = attrRefArr[1].name;
-					self.createDeferred.resolve(self);//ready to be loaded with data
-				});
+			self.getWidgetProperties(this.widgetId).then(function(widgetProps){
+				//console.log('widgetProp',widgetProps);
+				self.widgetProps = widgetProps;
+				//self.HEADER_ATTRREF = attrRefArr[0].name;
+				//self.PARAGRAPH_ATTRREF = attrRefArr[1].name;
+				self.createDeferred.resolve(self);//ready to be loaded with data
 			}, nq.errorDialog);
-			
-//			this.createDeferred.resolve(this);//ready to be loaded with data
+
+			//this.createDeferred.resolve(this);//ready to be loaded with data
 		},
 		setSelectedObjIdPreviousLevel: function(value){
 			//load the data
@@ -157,52 +156,54 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			this.pane.destroyDescendants(false);//destroy all the widget but leave the pane intact
 
 			var self = this;
-			var viewId = this.viewId;
-			var query = {itemId:this.selectedObjIdPreviousLevel, viewId:this.viewId};
+			var viewId = this.widgetProps.views[0]._id;
+			/*var query = {itemId:this.selectedObjIdPreviousLevel, viewId:this.viewId};
 			var collection = this.store.filter(query);
 			collection.on('remove, add', function(event){
 				var parent = event.parent;
 				var collection = self.childrenCache[parent.id];
 				var children = collection.fetch();
 				self.onChildrenChange(parent, children);
-			});	
+			});
 			collection.on('update', function(event){
 				var obj = event.target;
 				self.onChange(obj);
-			});	
-			var children = collection.fetch();
-			var item = children[0];
-			var promise = when(self.generateNextLevelContents(item, 1, null, false), function(item){
-				registry.byId('tab'+self.tabId).resize();
-//				self.pane.resize();
-				self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
-				return item;
 			});
-			return this.setSelectedObjIdPreviousLevelDeferred.promise;
+			var children = collection.fetch();
+			var item = children[0];*/
+            self.store.query({itemId: this.selectedObjIdPreviousLevel, viewId:viewId}).then(function(item) {
+                var promise = when(self.generateNextLevelContents(item, 1, null, false), function(item){
+					registry.byId('tab'+self.tabId).resize();
+	//				self.pane.resize();
+					self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
+					return item;
+                });
+			}, nq.errorDialog);
+ 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
 		//Create an ordinary HTML page recursivly by obtaining data from the server
 		generateNextLevelContents: function(item, headerLevel, parentId, previousParagrphHasRightFloat){
 			//console.log('do item',item[2535]);
 			var self = this;
-			var hearderObj = item['attrRef'+this.HEADER_ATTRREF];
-			var paragraphObj = item['attrRef'+this.PARAGRAPH_ATTRREF];
-			
+			//var hearderObj = item['attrRef'+this.HEADER_ATTRREF];
+			//var paragraphObj = item['attrRef'+this.PARAGRAPH_ATTRREF];
+
 			//Header
 			var headerNode = domConstruct.create(
-					'h'+headerLevel, 
-					{style: {'clear': previousParagrphHasRightFloat?'both':'none'}}, 
+					'h'+headerLevel,
+					{style: {'clear': previousParagrphHasRightFloat?'both':'none'}},
 					this.pane.containerNode
 				);
 			var textDijit = new ValidationTextBox({
 				item: item,
 			    'type': 'text',
 			    'trim': true,
-			    'value': item[self.HEADER_ATTRREF],
+			    'value': item.name,
 			    //'style':{width:'90%','background': 'rgba(250, 250, 121, 0.28)', 'border-style': 'none'},//rgba(0,0,255,0.04)
 			    'style':{width:'90%'},
 				'placeHolder': 'Paragraph Header',
 				'onChange': function(evt){
-					item[self.HEADER_ATTRREF] = textDijit.get('value');
+					item[self.name] = textDijit.get('value');
 					self.store.put(item);
 			    }
 			}, domConstruct.create('span'));
@@ -230,7 +231,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					self.siblingButton.set('checked', false);
 					self.editModeButton.set('checked', true);
 					var addObj = {
-						'viewId': item.viewId, 
+						'viewId': item.viewId,
 						'classId': item.classId
 					};
 					var directives = {parent:{id:item.id}};
@@ -240,7 +241,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 					self.childButton.set('checked', false);
 					self.editModeButton.set('checked', true);
 					var addObj = {
-						'viewId': item.viewId, 
+						'viewId': item.viewId,
 						'classId': item.classId
 					};
 					var directives = {parent:{id:item.id}};
@@ -262,27 +263,27 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			}));
 			this.own(textDijit);
 
-			
+
 			//Illustration
 			if(item.id=="1213"){
 				var widgetDomNode = domConstruct.create('div', {
 					'class': 'floatright',
 					objectId: item.id
 				}, this.pane.containerNode);
-				
+
 				self.addWidget(widgetDomNode);
 
 				domConstruct.create('p', {innerHTML: '<b>Page Model</b> example'}, widgetDomNode);
 			}
-			
+
 			//IFrame
 			if(item.id=="1510"){
 				var widgetDomNode = domConstruct.create('div', {
 					style: {width:'300px'},
 					'class': 'floatright',
 					objectId: item.id
-				}, this.pane.containerNode);				
-				
+				}, this.pane.containerNode);
+
 				var wrapper = domConstruct.create('div', {style: {width:'300px', height:'200px', overflow: 'hidden'}}, widgetDomNode);
 				domConstruct.create('iframe', {
 					sandbox:'allow-scripts allow-same-origin',
@@ -290,11 +291,11 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				}, wrapper);
 				domConstruct.create('p', {innerHTML: '<b>Iframe</b> example'}, widgetDomNode);
 			}
-			
-			
+
+
 			//ToDo
 			domConstruct.create('div', {
-				innerHTML: '<p><b>ToDo:</b> Elaborate</p>', 
+				innerHTML: '<p><b>ToDo:</b> Elaborate</p>',
 				'class': 'todofloatright',
 				objectId: item.id,
 				onclick: function(evt){
@@ -307,28 +308,31 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 
 			//Paragraph
 			var paragraphDomNode = domConstruct.create('div', {}, this.pane.containerNode);
-			this.replaceNodeWithParagraph(paragraphDomNode, item);			
+			this.replaceNodeWithParagraph(paragraphDomNode, item);
 
 			if(item.classId==80) return; //folder
-			
+
 			//Get the sub- headers/paragraphs
-			var collection = this.store.getChildren(item);
+			var viewId = this.widgetProps.views[0]._id;
+			/*var collection = this.store.getChildren(item, viewId);
 			// Setup observer in case children list changes, or the item(s) in the children list are updated.
 			collection.on('remove, add', function(event){
 				var parent = event.parent;
 				var collection = self.childrenCache[parent.id];
 				var children = collection.fetch();
 				self.onChildrenChange(parent, children);
-			});	
+			});
 			collection.on('update', function(event){
 				var obj = event.target;
 				self.onChange(obj);
-			});	
-			var children = collection.fetch();
-			children.forEach(function(childItem){
-				var previousParagrphHasRightFloat = false;
-				self.generateNextLevelContents(childItem, headerLevel+1, item.id, previousParagrphHasRightFloat);
-				previousParagrphHasRightFloat = childItem[self.PARAGRAPH_ATTRREF]&&childItem[self.PARAGRAPH_ATTRREF].indexOf('floatright')==-1?false:true;
+			});
+			var children = collection.fetch();*/
+			this.store.getChildren(item, this.widgetId, function(children){
+				children.forEach(function(childItem){
+					var previousParagrphHasRightFloat = false;
+					self.generateNextLevelContents(childItem, headerLevel+1, item.id, previousParagrphHasRightFloat);
+					previousParagrphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
+				})
 			});
 		},
 		replaceParagraphWithEditor: function(replaceDiv, item){
@@ -346,7 +350,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				'toolbar': toolbar,
 				focusOnLoad: true,
 				'onChange': function(evt){
-					item[self.PARAGRAPH_ATTRREF] = editorDijit.get('value');
+					item.description = editorDijit.get('value');
 					self.store.put(item);
 				}
 			}, domConstruct.create('div'));
@@ -358,7 +362,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				}
 				editorDijit.resize({h: height});
 			});
-			editorDijit.set('value', item[self.PARAGRAPH_ATTRREF]);
+			editorDijit.set('value', item.description);
 			domConstruct.place(editorDijit.domNode, replaceDiv, "replace");
 
 			editorDijit.on('mouseenter', function(evt){
@@ -373,12 +377,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			});
 
 			this.own(editorDijit);
-			editorDijit.startup();			
-			
+			editorDijit.startup();
+
 		},
 		replaceNodeWithParagraph: function(replaceDiv, item){
 			var self = this;
-			var value = item[this.PARAGRAPH_ATTRREF];
+			var value = item.description;
 			if(!value) value = '<p>[no text]</p>'
 			var paragraphNode = domConstruct.create('div', {
 				innerHTML: value, 

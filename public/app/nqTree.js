@@ -1,4 +1,4 @@
-define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang', "dijit/registry",/* 'app/nqObjectStoreModel',*/"dijit/tree/ObjectStoreModel", "dojo/hash","dojo/when", "dojo/promise/all",  
+define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang', "dijit/registry",/* 'app/nqObjectStoreModel',*/"dijit/tree/ObjectStoreModel", "dojo/hash","dojo/when", "dojo/promise/all",
         'dojo/dom-construct', 'dijit/tree/dndSource', 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', "dojo/_base/array", 
         'dojo/query!css2'],
 	function(declare, nqWidgetBase, Tree, lang, registry, ObjectStoreModel, hash, when, all,
@@ -14,29 +14,23 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 		postCreate: function(){
 			this.inherited(arguments);
 			var self = this;
-			when(this.getAttrRefPropertiesForWidget(this.widgetId), function(attrRefs){
-				console.log('attrRefs',attrRefs);
-				/*self.attrRefByViewArr = attrRefs;
-				return when(self.getPermittedClassesforWidget(self.widgetId), function(permittedClassesObjs){
-					self.permittedClassesByViewArr = permittedClassesObjs;
-					self.createMenusForWidget();
-					//get the parentId that this widget has as an attribute
-					return when(self.getTheParentAttr(), function(parentId){
-						self.selectedObjIdPreviousLevel = parentId;
-						self.createDeferred.resolve(self);
-						if(parentId) self.createTree();
-						return true;
-					});
-				});*/
+			this.getWidgetProperties(this.widgetId).then(function(widgetProps){
+				//console.log('widgetProp',widgetProps);
+				self.widgetProps = widgetProps;
+				self.createDeferred.resolve(self);//ready to be loaded with data
 			}, nq.errorDialog);
 		},
 		setSelectedObjIdPreviousLevel: function(value){
-			var self = this;
-			if(!value || value == this.selectedObjIdPreviousLevel) return this;
-			this.selectedObjIdPreviousLevel = value;
+            var self = this;
+            if(this.widgetProps.parentId) {
+                if(this.widgetProps.parentId == this.selectedObjIdPreviousLevel) return this;
+                else this.selectedObjIdPreviousLevel = Number(this.widgetProps.parentId);
+            }
+            else if(!value || value == this.selectedObjIdPreviousLevel) return this;
+			else this.selectedObjIdPreviousLevel = value;
 			if(self.tree) self.tree.destroy(); 
 			self.createTree();
-			self.treeModel.query = {source: self.selectedObjIdPreviousLevel, view: self.viewIdsArr[0]};
+			self.treeModel.query = {parentId: self.selectedObjIdPreviousLevel, viewId: this.widgetId};
 			self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
@@ -47,29 +41,16 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			this.selectedObjIdThisLevel = value;
 			//if(value == 824) this.tree.set('path', ['810', '2016', '2020', '824']);
 		},
-
-		getTheParentAttr: function(){
-			var PARENTID = 100;
-			var self = this;
-			//get the parentId that this widget has as an attribute
-			return when(this.store.getOneByAssocTypeAndDestClass(this.widgetId, ATTRIBUTE_ASSOC, PARENTID), function(parentObjId){
-				if(!parentObjId) return undefined;
-				return when(self.store.getCell(parentObjId), function(parentCell){
-					if(parentCell && parentCell.name!='') return parentCell.name;
-					return undefined;
-				});
-			});
-		},
 		createTree: function(){
 			var self = this;
 			this.treeModel = new ObjectStoreModel({
 				childrenAttr: this.viewIdsArr,
 				store : this.store,
-				query : {source: this.selectedObjIdPreviousLevel, view: this.viewIdsArr[0]}
+				query : {itemId: this.selectedObjIdPreviousLevel, viewId: this.widgetProps.views[0]._id}
 			});			
 			this.treeModel.getRoot = function(onItem, onError){
 				var self = this;
-				var collection = this.store.filter(this.query);
+				/*var collection = this.store.filter(this.query);
 				collection.on('remove, add', function(event){
 					var parent = event.parent;
 					var collection = self.childrenCache[parent.id];
@@ -82,23 +63,26 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					var obj = event.target;
 					self.onChange(obj);
 				});	
-				var children = collection.fetch();
-				onItem(children[0]);
+				var children = collection.fetch();*/
+                self.store.query(this.query).then(function(item) {
+                    onItem(item);
+                });
 			},
 			this.treeModel.getChildren = function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
-				var self = this;
+//				var self = this;
 				var id = this.store.getIdentity(parentItem);
 
-				/*if(this.childrenCache[id]){
+				if(this.childrenCache[id]){
 					// If this.childrenCache[id] is defined, then it always has the latest list of children
 					// (like a live collection), so just return it.
 					//TODO why aren't my collections like a live collection? something is wrong  
 					when(this.childrenCache[id], onComplete, onError);
 					return;
 				}
-				var collection = this.childrenCache[id] = this.store.getChildren(parentItem);*/
+				var children = this.childrenCache[id] = this.store.getChildren(parentItem, self.widgetId, onComplete, onError);
+                return;
 				
-				var collection = this.childrenCache[id];
+				/*var collection = this.childrenCache[id];
 				if(!collection) collection = this.childrenCache[id] = this.store.getChildren(parentItem);
 				// Setup observer in case children list changes, or the item(s) in the children list are updated.
 				collection.on('remove, add', function(event){
@@ -114,7 +98,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					self.onChange(obj);
 				});	
 				var children = collection.fetch();
-				return onComplete(children);
+				return onComplete(children);*/
 			},
 			this.tree = new Tree({
 				id: 'tree'+this.widgetId,
@@ -125,26 +109,27 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				persist: 'true',
 				getIconClass: function(item, opened){
 					if(!item) return 'icondefault';
-					return 'icon'+item.classId;
+                    if(item._type == 'object') return 'icon'+item._icon;
+					return 'icon0';
 				},
 				getRowClass: function(item, opened){
 					if(!item) return '';
-					return 'css'+item.viewId;//used by tree menu to determin which menu to show
+					return 'css'+item._viewId;//used by tree menu to determine which menu to show
 				},
 				getTooltip: function(item, opened){
 					if(!item) return '';
 					//return item.id+' - '+item.viewId+' - '+item.classId;
-					if(dojo.config.isDebug) return item.id+' - '+item.viewId+' - '+item.classId;
+					if(dojo.config.isDebug) return item._id+' - '+item.viewId+' - '+item._icon;
 				},
 				onClick: function(item, node, evt){
 					self.inherited('onClick',arguments);
-					nq.setHashViewId(self.level, item.viewId, self.tabId, item.id);
+					nq.setHashViewId(self.level, item._viewId, self.tabId, item._id);
 				},
 				checkItemAcceptance: function(target, source, position){
 					return true;
 					var targetItem = dijit.getEnclosingWidget(target).item;
-					var subClassIdArr = self.allowedClassesObj[targetItem.viewId];
-					var sourceItemClassId = source.current.item.classId;
+					var subClassIdArr = self.allowedClassesObj[targetItem._viewId];
+					var sourceItemClassId = source.current.item._iconId;
 					//console.log('sourceItemClassId', sourceItemClassId);
 					for(var i = 0;i<subClassArr.length;i++){
 						var mapsToClassId = subClassArr[i].id;
@@ -155,8 +140,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				},
 				getLabel: function(item){
 					if(!item) return 'no item';
-					var labelAttrId = self.attrRefByViewArr[item.viewId][0].name;
-					return item[labelAttrId];
+					return item.name;
 				},
 				onLoad: function(){
 					fullPage.resize();//need this for lazy loaded trees, some how the first tree lags behind
