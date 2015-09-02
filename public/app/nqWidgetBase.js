@@ -100,15 +100,16 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		getWidgetProperties: function(widgetId){
 			var self = this;
 			var VIEW_CLASS_TYPE = 74;
-			return self.store.get(538+'/'+widgetId).then(function(widget){
+			return self.store.get(widgetId).then(function(widget){
 				//recursively get all of the views that belong to this widget
-				return self.store.query({parentId: widgetId, type: 'many to many', destClassId: VIEW_CLASS_TYPE}).then(function(viewsArr) {
+				return self.store.getItemsByAssocTypeAndDestClass(widgetId, 'many to many', VIEW_CLASS_TYPE).then(function(viewsArr) {
 					var promises = [];
 					viewsArr.forEach(function(view) {
 						promises.push(self.getAttrRefPropertiesForView(view));
 					});
 					return when(all(promises), function(viewsArr){
 						widget.views = viewsArr;
+                        console.log(widget);
 						return widget;
 					});
 					//return
@@ -116,14 +117,24 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			});
 		},
 		getAttrRefPropertiesForView: function(view){
-			var ATTRREF_CLASS_TYPE = 63;
-			var self = this;
-			//get all of the attrRefs that belong to this widget
-			return self.store.query({parentId: view._id, type: 'ordered', destClassId: ATTRREF_CLASS_TYPE}).then(function(attrRefsArr) {
-				view.attrRefs = attrRefsArr;
-				return view;
-			})
-		},
+            var self = this;
+            var parentClassesPromises = [];
+            parentClassesPromises.push(self.store.get(Number(view.mapsTo)));
+            return self.store.followAssocType(Number(view.mapsTo), 'parent', parentClassesPromises).then(function(parentClassesArr){
+                var attrRefsArr = [];
+                return all(parentClassesArr).then(function(classesArr){
+                    var attrRefsArr = [];
+                    classesArr.forEach(function(classItem) {
+                        for(classAttr in classItem){
+                            //console.log('classAttr', classAttr);
+                            if(classAttr.charAt(0)=='_') attrRefsArr.push(classAttr);
+                        }
+                    });
+                    view.attrRefs = attrRefsArr;
+                    return view;
+                });
+            });
+  		},
 		XXXgetAttrRefPropertiesForWidget: function(widgetId){
 			var self = this;
 			//recursivily get all of the views that belong to this widget

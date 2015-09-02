@@ -12,40 +12,12 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		nqStore, RequestMemory, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
 		styles, css2) {
 
-
-   // var itemsColl = new RequestMemory({ target: '/items', idProperty: '_id'});
-    //var assocsColl = new RequestMemory({ target: '/assocs', idProperty: '_id'});
     nqStore = new nqStore();
     var self = this;
 
 	ready( function() {
-
-
-		// summary:
-		//		Initialize
-		//		Setup listerners, prefetch data which is often used, determine landing page
-		/*var transactionLogStore = new Memory();
-		var masterItemStore = new JsonRest({
-			target: '/item',
-			name: 'item',
-			getChildren: function(object, viewId, onComplete){
-				masterItemStore.query({parentId: object._id, parentViewId:object._viewId}).then(function(children) {
-					return onComplete(children || []);
-				});
-			},
-            getIdentity: function(object){
-                return object._id;
-            },
-		});
-		var localItemStore = new Memory();
-		nqStore = transaction({
-			masterStore: masterItemStore,
-			cachingStore: localItemStore,
-			transactionLogStore: transactionLogStore
-		});*/
-
         //testInitialize();
-
+        //return;
 		topic.subscribe("/dojo/hashchange", interpretHash);
 		on(registry.byId('cancelButtonId'), 'click', function(event){nqDataStore.abort();});
 		on(registry.byId('saveButtonId'), 'click', function(event){nqDataStore.commit();});
@@ -58,7 +30,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			//fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();	
 
 		}, errorDialog);*/
-		domStyle.set('loadingOverlay', 'display', 'none');
+		//domStyle.set('loadingOverlay', 'display', 'none');
         //return;
 		if(hash() == "") {
 			var neuralquestState = cookie('neuralquestState');
@@ -121,7 +93,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var state = getState(level);
 		if(!state.viewId) return true;
 		var selectedTabId = getSelectedTabRecursive(state.viewId);
-        return nqStore.query({parentId: selectedTabId, type: 'ordered', destClassId: WIDGETS_ATTRCLASS}).then(function(widgetsArr){
+        return nqStore.getItemsByAssocTypeAndDestClass(selectedTabId, 'ordered', WIDGETS_ATTRCLASS).then(function(widgetsArr){
 			//when we've got all the child widgets that belong to this tab, create them
 			for(var i=0;i<widgetsArr.length;i++){
 				var widget = widgetsArr[i];
@@ -519,13 +491,15 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         itemsColl.put({_id:999, name:'Ha Ha', type:'class'});
     }
 	function testInitialize(){
-        console.dir(itemsColl);
-        var query = {_type:'class'};
-        var promise = this.itemsColl.get(810);
-        promise.then(function(result){
-            console.log(result)
-        });
-        var collection = this.itemsColl.filter(query);
+        //var itemsColl = new RequestMemory({ target: '/items', idProperty: '_id'});
+        var assocsColl = new RequestMemory({ target: '/assocs', idProperty: '_id'});
+        //console.dir(itemsColl);
+        //var promise = itemsColl.get(810);
+        //promise.then(function(result){
+            //console.log(result)
+        //});
+        var query = {source: 810, type:'ordered'};
+        var collection = assocsColl.filter(query);
         // Setup observer in case children list changes, or the item(s) in the children list are updated.
         collection.on('remove, add', function(event){
             console.log('remove, add',event);
@@ -533,8 +507,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         collection.on('update', function(event){
             console.log('update',event);
         });
-        var children = collection.fetch();
-        children.forEach(function(child){
+        //var children = collection.fetch();
+        collection.forEach(function(child){
             console.log('child', child);
         });
 
@@ -570,8 +544,33 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	BYASSOCTPE_PASSOC = 30; 	//TO MANY		
 	ASSOCS_PASSOC = 31; 		//TO MANY		
 
-	
-	
-	
-	
+
+
+
+
+
+
+    // summary:
+    //		Initialize
+    //		Setup listerners, prefetch data which is often used, determine landing page
+    /*var transactionLogStore = new Memory();
+     var masterItemStore = new JsonRest({
+     target: '/item',
+     name: 'item',
+     getChildren: function(object, viewId, onComplete){
+     masterItemStore.query({parentId: object._id, parentViewId:object._viewId}).then(function(children) {
+     return onComplete(children || []);
+     });
+     },
+     getIdentity: function(object){
+     return object._id;
+     },
+     });
+     var localItemStore = new Memory();
+     nqStore = transaction({
+     masterStore: masterItemStore,
+     cachingStore: localItemStore,
+     transactionLogStore: transactionLogStore
+     });*/
+
 });

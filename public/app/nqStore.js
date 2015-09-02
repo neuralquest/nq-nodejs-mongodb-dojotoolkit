@@ -35,7 +35,7 @@ function(declare, lang, array, when, all, Store,
 		remove: function(itemId, directives){
             return itemsColl.remove(itemId);
 		},
-        query: function(query){
+        filter: function(query){
             console.log('req.query', query);
             var parentViewId = query.parentViewId;
             var viewId = query.viewId;
@@ -59,14 +59,42 @@ function(declare, lang, array, when, all, Store,
         },
 		getChildren: function(parent){
 			//return this.query({parentId: parent.id, viewId: parent.viewId });
-			//var collection = this.filter({parentId: parent.id, viewId: parent.viewId });
-			//return collection;
+			var collection = this.filter({parentId: parent.id, parentViewId: parent.viewId });
+			return collection;
 		},
-        getItemsByAssocTypeAndDestClass: function(parentId, type, destClassId){
+        getItemsByAssocTypeAndDestClass: function(_parentId, type, _destClassId){
+            var parentId = Number(_parentId);
+            var destClassId = Number(_destClassId);
+            var self = this;
             if(type == 'ordered'){
-                var collection = this.itemsColl.filter({source: parentId, type:'ordered'});
-                var assocsArr = collection.fetch();
-                collection.forEach(function(child){
+                var query = {source: parentId, type:'ordered'};
+                var collection = this.assocsColl.filter(query);
+                var isAPromises = [];
+                collection.forEach(function(assoc){
+                    isAPromises.push(self.isA(assoc.dest, destClassId));
+                });
+                return all(isAPromises).then(function(isADestClassArr){
+                    //console.log('isADestClassArr', isADestClassArr);
+                    var count = 0;
+                    var firstId = null;
+                    for(var i=0;i<isADestClassArr.length;i++) {
+                        if(isADestClassArr[i]) {
+                            firstId = isADestClassArr[i];
+                            count += 1;
+                        }
+                    }
+                    if(count>1) throw new Error(new Error("More than one 'ordered' found"));
+                    else if(count==1){
+                        var itemsPromisesArr = [];
+                        itemsPromisesArr.push(self.itemsColl.get(firstId));//add the first one
+                        return self.followAssocType(firstId, 'next', itemsPromisesArr).then(function(itemsPromisesArrResults){
+                            return all(itemsPromisesArrResults);
+                        });
+                    }
+                    else return([]);
+                });
+                /*var assocsArr = collection.fetch();
+                assocsArr.forEach(function(child){
                     console.log('assocsArr', child);
                 });
                 collection.fetch().then(function(assocsArr) {
@@ -90,40 +118,41 @@ function(declare, lang, array, when, all, Store,
                             var itemsArr = [];
                             this.itemsColl.get({_id:firstId}.then(function(item) {
                                 itemsArr.push(item);
-                                return this.getNextAssocs(firstId, itemsArr);
+                                return this.followAssocType(firstId, 'next', itemsArr);
                             }));
                         }
                         else return([]);
                     });
-                })
+                })*/
             }
             else if(type == 'instantiations'){
-                this.assocsColl.query({dest: destClassId,type:'parent'}.then(function(assocsArr) {
-                    var itemPromises = [];
-                    for (var i = 0; i < assocsArr.length; i++) {
-                        var assoc = assocsArr[i];
-                        itemPromises.push(this.itemsColl.get(assoc.source));
-                    }
-                    return all(itemPromises);
-                }));
+                var query = {dest: destClassId,type:'parent'};
+                var collection = this.assocsColl.filter(query);
+                var itemPromises = [];
+                collection.forEach(function(assoc){
+                    itemPromises.push(self.itemsColl.get(assoc.source));
+                });
             }
             else{
-                this.assocsColl.query({source: parentId,type:type}.then(function(assocsArr) {
-                    var isAPromises = [];
-                    for(var i=0;i<assocsArr.length;i++){
-                        var assoc = assocsArr[i];
-                        isAPromises.push(self.isA(assoc.dest, destClassId));
-                    }
-                    return all(isAPromises).then(function(isADestClassArr){
-                        //console.log('isADestClassArr', isADestClassArr);
-                        var itemPromises = [];
-                        for(var i=0;i<isADestClassArr.length;i++){
-                            var isA = isADestClassArr[i];
-                            if(isA)itemPromises.push(self.get(isA));
-                        }
-                        return all(itemPromises);
+                var query = {source: parentId,type:type};
+                var collection = this.assocsColl.filter(query);
+                var isAPromises = [];
+                collection.forEach(function(assoc){
+                    isAPromises.push(self.isA(assoc.dest, destClassId));
+                });
+                return all(isAPromises).then(function(isADestClassArr){
+                    var itemPromises = [];
+                    isADestClassArr.forEach(function(isA){
+                        if(isA)itemPromises.push(self.get(isA));
                     });
-                }));
+                    /*/console.log('isADestClassArr', isADestClassArr);
+                    var itemPromises = [];
+                    for(var i=0;i<isADestClassArr.length;i++){
+                        var isA = isADestClassArr[i];
+                        if(isA)itemPromises.push(self.get(isA));
+                    }*/
+                    return all(itemPromises);
+                });
             }
         },
 		getManyByParentWidgetOrViewUnion: function(sourceId, parentWidgetOrViewId){
@@ -138,25 +167,27 @@ function(declare, lang, array, when, all, Store,
 		getManyByAssocTypeAndDestClass: function(sourceId, assocType, destClassId) {
         },
 		isA: function(itemId, destClassId, originalId){
-			if(itemId == destClassId) return itemId;
+            var self = this;
             if(!originalId) originalId = itemId;
-			return self.assocsColl.query({source: itemId, type: 'parent'}).then(function(assocs){
-				if(assocs.length>1) throw new Error('More than one parent found');
-				if(assocs.length==0) return null;//we're at the root
-				return self.isA(assocs[0].dest, destClassId , originalId);
-			});
+			if(itemId == destClassId) return originalId;
+            var collection = this.assocsColl.filter({source: itemId, type:'parent'});
+            return collection.fetch().then(function(assocsArr){
+                if(assocsArr.length>1) throw new Error('More than one parent found');
+                if(assocsArr.length==0) return null;//we're at the root
+                return self.isA(assocsArr[0].dest, destClassId, originalId);
+            });
 		},
-        getNextAssocs: function(itemId, itemsArr){
-            return self.assocsColl.query({source: itemId, type:'next'}.then(function(assocsArr){
+        followAssocType: function(itemId, type, itemsPromisesArr){
+            var self = this;
+            var collection = this.assocsColl.filter({source: itemId, type:type});
+            return collection.fetch().then(function(assocsArr){
                 if(assocsArr.length>1) throw new Error('More than one next found');
                 else if(assocsArr.length==1){
-                    self.get(assocsArr[0].dest).then(function(err, item) {
-                        itemsArr.push(item);
-                        self.getNextAssocs(assocsArr[0].dest, itemsArr)
-                    });
+                    itemsPromisesArr.push(self.itemsColl.get(assocsArr[0].dest));
+                    return self.followAssocType(assocsArr[0].dest, type, itemsPromisesArr)
                 }
-                else return itemsArr;
-            }));
+                return itemsPromisesArr;//found the last one
+            });
         },
 		enableTransactionButtons: function(){
 			registry.byId('cancelButtonId').set('disabled',false);
