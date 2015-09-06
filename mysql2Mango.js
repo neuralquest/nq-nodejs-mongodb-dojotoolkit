@@ -1,5 +1,6 @@
 var Promise = require('promise');
 var mysql = require('mysql');
+var getData = require('./getData');
 var pool = mysql.createPool({
     connectionLimit: 100, //important
     host: 'localhost',
@@ -19,6 +20,15 @@ function transform(req, res){
 
         console.log('connected as id ' + connection.threadId);
 
+        var assocsColl = req.db.collection("assocs");
+        assocsColl.find({$and:[{type:'parent'}, {dest: 74},]}).toArray(function(err, assocsArr) {
+            for(var i=0;i<assocsArr.length;i++) {
+                var assoc = assocsArr[i];
+                processView(req.db, assoc.source)
+            }
+        });
+return;
+        //Get the objects and their attributes.
         connection.query("select c1.id as icon, c2.id as id, a2.type as type, c4.name as attrName, c3.name as attrValue , c3.id as attrId   "+
             "		from cell c1, assoc a1, cell c2 "+
             "		LEFT JOIN (assoc a2, cell c3, assoc a3, cell c4) "+
@@ -34,7 +44,7 @@ function transform(req, res){
             "	and a1.fk_source = c2.id "+
             "	and c2.type = 1 "+
             "   order by id; ",function(err,cells){
-            console.log('cells', cells);
+            //console.log('cells', cells);
             if(!err) {
                 var newCells = [];
                 var newCell = {};
@@ -55,6 +65,7 @@ function transform(req, res){
                         newCell.mapsTo = cellPart.attrId;
                     }
                 }
+                //Get the classes and their attributes
                 connection.query("select c1.id as id, c1.type as type, c1.name as name, c2.name as attrName, c3.name as attrType, c4.name as permittedValue "+
                     "            from cell c1 "+
                     "            LEFT JOIN (assoc a2, cell c3, assoc a1, cell c2 "+
@@ -69,7 +80,8 @@ function transform(req, res){
                     "            and a2.fk_source = c2.id  "+
                     "            and a2.type = 3  "+
                     "            and a2.fk_dest = c3.id) "+
-                    " where c1.id in(67,80,70,86,84,110,71,103,51,89,97,98,62,78,85,96,63,74,90,99,79,80,108,95) "+
+                    " where c1.id in(67,80,70,86,84,110,71,103,51,89,97,98,62,78,85,96,63,74,90,99,79,80,108,95," +
+                    "60,61,68,69,82,100,109,64,59,57,66,91,92,94,77,107,101,102,106) "+
                     " order by id; ",function(err,cells){
                     if(!err) {
                         var previousId = 0;
@@ -114,8 +126,7 @@ function transform(req, res){
                         var itemsColl = req.db.collection("items");
                         itemsColl.insert(newCells);
                         req.db.collection('assocs').drop();
-                        var assocColl = req.db.collection("assocs");
-
+                        var assocsColl = req.db.collection("assocs");
 
                         connection.query("select assoc.fk_source as fk_source, cell.name as type, assoc.fk_dest as fk_dest " +
                             " from assoc, cell " +
@@ -125,7 +136,7 @@ function transform(req, res){
                                 //console.log('all assocs', assocs);
                                 for (var i in assocs) {
                                     var assoc = assocs[i];
-                                    processAssoc(assoc, itemsColl, assocColl)
+                                    processAssoc(assoc, itemsColl, assocsColl)
                                 }
                             }
                             else console.log('error',err)
@@ -145,7 +156,7 @@ function transform(req, res){
         });
     });
 }
-function processAssoc(assoc, itemsColl, assocColl){
+function processAssoc(assoc, itemsColl, assocsColl){
     //console.log('callAssoc',assoc);
     var sourceId = assoc.fk_source;
     var destId = assoc.fk_dest;
@@ -173,31 +184,65 @@ function processAssoc(assoc, itemsColl, assocColl){
         var source = items[0];
         var dest = items[1];
         if(source && dest){
-            var newAssoc = {source:source._id, type:assoc.type, dest:dest._id};
-            assocColl.insert(newAssoc);
+            var camelType = camelize(assoc.type);
+            var newAssoc = {source:source._id, type:camelType, dest:dest._id};
+            assocsColl.insert(newAssoc);
 
         }
     });
 }
-function XXXprocessAssoc(assoc, itemsColl, assocColl){
-    itemsColl.find({$or:[{_id:assoc.fk_source },{_id:assoc.fk_dest }]}).toArray(function (err, array) {
-        console.log('array' ,array);
-        if(err) console.log(err);
-        if(array && array.length==2){
-            var newAssoc;
-            console.log('array' ,array);
-            if(array[0]._id == 842) console.log('array' ,array);
-            if(array[0]._id==assoc.fk_source){
-                newAssoc = {source:array[0]._id, type:assoc.type, dest:array[1]._id};
-            }
-            else{
-                newAssoc = {source:array[1]._id, type:assoc.type, dest:array[0]._id};
-            }
-            //console.log('newAssoc' ,newAssoc);
-            assocColl.insert(newAssoc);
+function processView(db, viewId){
+    var itemsColl = db.collection("items");
+    itemsColl.findOne({_id:viewId}, function(err, view) {
+        if (err) return callback(err);
+        else{
+            //console.log('view', view);
+            getData.getItemsByAssocTypeAndDestClass(db, viewId, 'ordered', 63, function (err, attrRefsArr) {
+                //console.log('attrRefsArr', attrRefsArr);
+                if(err) reject(err);
+                else {
+                    var classPromisses = [];
+                    for(var j=0;j<attrRefsArr.length;j++) {
+                        var attrRef = attrRefsArr[j];
+                        //console.log('attrRef', attrRef);
+                        classPromisses.push(new Promise(function(resolve, reject) {
+                            //console.log('mapsTo', attrRef.mapsTo);
+                            itemsColl.findOne({_id: attrRef.mapsTo}, function (err, item) {
+                                if (err) {
+                                    console.log('err', err);
+                                    reject(err);
+                                }
+                                else  resolve(item);
+                            })
+                        }));
+                    }
+                    Promise.all(classPromisses).then(function(attrClassesArr){
+                        //console.log('attrClassesArr', attrClassesArr);
+                        var schema = {};
+                        for(var j=0;j<attrRefsArr.length;j++) {
+                            var attrRef = attrRefsArr[j];
+                            var camelAttr = camelize(attrClassesArr[j]._name);
+                            if(camelAttr == 'primaryNames') camelAttr = 'name';
+
+                            var props = {
+                                type:'String',
+                                required: false,
+                                readOnly: false,
+                                mapsTo:camelAttr};
+                            //var attr = {attrRef.name: props};
+                            schema[attrRef.name] = props;
+                            //attrs.push(attr);
+                        }
+                        view.schema = schema;
+                        console.log('result', view);
+                        itemsColl.update({_id:view._id}, view);
+                    });
+                }
+            });
         }
-    })
+    });
 }
+
 function getPublicData(res, pool){
     pool.getConnection(function(err,connection){
         if (err) {

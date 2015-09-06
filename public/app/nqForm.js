@@ -29,94 +29,62 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			this.getWidgetProperties(this.widgetId).then(function(widgetProps){
 				console.log('widgetProp',widgetProps);
 				self.widgetProps = widgetProps;
-				for(var i=0;i<propertiesArr.length;i++){
-					var property = propertiesArr[i];
-
-					var row = domConstruct.create("tr", null, tableNode);
-
-					//the label
-					domConstruct.create("td", {innerHTML: (property.label), style: "padding: 3px"}, row);
-
-					if(property.attrClassType==RTF_CLASS_ID){//place the editor on a new row with colspan 2
+				widgetProps.views.forEach(function(view){
+					for(attrName in view.schema){
+                        console.dir('attr',attrName);
+                        var attr = view.schema[attrName];
 						var row = domConstruct.create("tr", null, tableNode);
+						//the label
+						domConstruct.create("td", {innerHTML: (attrName), style: "padding: 3px"}, row);
+                        //the dijit
+                        var tdDom = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row);
+                        var dijit = null;
+                        if(attr.type == 'String'){
+                            if(attr.type.enum){
+                                dijit = new Select(attr.type.enum, domConstruct.create('div'));
+                            }
+                            else if(attr.type.media && attr.type.media.mediaType == 'text/html'){
+                                self.editorToolbarDivNode.appendChild(property.editorArgs.toolbar.domNode);
+
+                                dijit = new Editor(property, domConstruct.create('div', {name: property.name}));/*setting the name wont be done autoamticly*/
+                                //						dijit.addStyleSheet('css/editor.css');
+                                dijit.on("NormalizedDisplayChanged", function(event){
+                                    var height = domGeometry.getMarginSize(this.editNode).h;
+                                    if(has("opera")){
+                                        height = this.editNode.scrollHeight;
+                                    }
+                                    console.log('height',domGeometry.getMarginSize(this.editNode));
+
+                                    //this.resize({h: height});
+                                    domGeometry.setMarginBox(this.iframe, { h: height });
+                                });
+                                //dijit.destroy = function(){console.log('destroyed editor')};
+                                domAttr.set(tdDom, 'colspan', '2');
+                            }
+                            else{
+                                var dijit = new ValidationTextBox({}, domConstruct.create('input'));
+                                self.own(dijit);
+                            }
+                        }
+                        else if(attr.type == 'Number'){
+                            dijit = new NumberTextBox(property, domConstruct.create('input'));
+                        }
+                        else if(attr.type == 'Date'){
+                            dijit = new DateTextBox(property, domConstruct.create('input'));
+                        }
+                        if(dijit){
+                            self.own(dijit);
+                            tdDom.appendChild(dijit.domNode);
+                            //dijit.attributeReferenceId = property.name;
+                            self.pane.own(dijit.on('change', function(value){
+                                //self.item[this.attributeReferenceId] = value;
+                                //self.store.put(self.item);
+                            }));
+                            //dijit.startup();will be call after add child and then from widget base
+                        }
+						domConstruct.create("td", { innerHTML: (attr.helpText), style: "padding: 3px", 'class': 'helpTextInvisable'}, row);
 					}
-
-					//the dijit
-					var tdDom = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row);
-					var dijit = null;
-					switch(property.attrClassType){
-						case PERMITTEDVAULE_CLASS_ID:
-							dijit = new Select(property.editorArgs, domConstruct.create('div'));
-							break;
-						case RTF_CLASS_ID:
-							self.editorToolbarDivNode.appendChild(property.editorArgs.toolbar.domNode);
-							//initially show the toolbar div
-							//domStyle.set(self.editorToolbarDivNode, 'display' , '');
-
-							/*property.height = '';//auto grow
-							 property.extraPlugins = self.extraPlugins;
-							 property.toolbar = toolbar;
-							 //self.own(toolbar);
-							 //property.styleSheet = 'css/editor.css';
-							 property.value = '<p></p>';
-							 dijit = new Editor(property, domConstruct.create('div'));*/
-							dijit = new Editor(property, domConstruct.create('div', {name: property.name}));/*setting the name wont be done autoamticly*/
-							//						dijit.addStyleSheet('css/editor.css');
-							dijit.on("NormalizedDisplayChanged", function(event){
-								var height = domGeometry.getMarginSize(this.editNode).h;
-								if(has("opera")){
-									height = this.editNode.scrollHeight;
-								}
-								console.log('height',domGeometry.getMarginSize(this.editNode));
-
-								//this.resize({h: height});
-								domGeometry.setMarginBox(this.iframe, { h: height });
-							});
-							//dijit.destroy = function(){console.log('destroyed editor')};
-							domAttr.set(tdDom, 'colspan', '2');
-							break;
-						case DATE_CLASS_ID:
-							dijit = new DateTextBox(property, domConstruct.create('input'));
-							break;
-						case STRING_CLASS_ID:
-							property.type = 'text';
-							dijit = new ValidationTextBox(property, domConstruct.create('input'));
-							break;
-						case INTEGER_CLASS_ID:
-							dijit = new NumberTextBox(property, domConstruct.create('input'));
-							break;
-						case NUMBER_CLASS_ID:
-							dijit = new NumberTextBox(property, domConstruct.create('input'));
-							break;
-						case BOOLEAN_CLASS_ID:
-							dijit = new CheckBox(property, domConstruct.create('input'));
-							break;
-						case CLASSNAME_CLASS_ID:
-							property.type = 'text';
-							dijit = new ValidationTextBox(property, domConstruct.create('input'));
-							break;
-						default:
-							//domAttr.set(tdDom, 'name', property.field); // set
-							//tdDom.set('name', property.name);
-							//property.type = 'text';
-							dijit = new ValidationTextBox(property, domConstruct.create('input'));
-							break;
-					};
-					if(dijit){
-						self.own(dijit);
-						tdDom.appendChild(dijit.domNode);
-						dijit.attributeReferenceId = property.name;
-						self.pane.own(dijit.on('change', function(value){
-							self.item[this.attributeReferenceId] = value;
-							self.store.put(self.item);
-						}));
-						//dijit.startup();will be call after add child and then from widget base
-					}
-					//else html.set(tdDom, 'unknown attribute type: '+property.attrClassType);
-
-					//the help text
-					domConstruct.create("td", { innerHTML: (property.helpText), style: "padding: 3px", 'class': 'helpTextInvisable'}, row);
-				}
+				});
 				self.createDeferred.resolve(self);//ready to be loaded with data
 			}, nq.errorDialog);
 		},

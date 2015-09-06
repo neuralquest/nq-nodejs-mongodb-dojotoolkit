@@ -71,52 +71,19 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			});
 			this.pane.resize();
 		},
-		XXXXgetAttrRefPropertiesForWidget: function(widgetId){
-			var self = this;			
-			//recursivily get all of the views that belong to this widget
-			return itemStore.query({source: widgetId, type: 'many to many', destClass: XXX}).then(function(viewIdsArr){
-				self.viewIdsArr = viewIdsArr;
-				var promisses = [];
-				for(var i=0;i<viewIdsArr.length;i++){
-					var viewId = viewIdsArr[i];
-					promisses.push(self.getAttrRefPropertiesForView(viewId));
-				}
-				return when(all(promisses), function(arrayOfArrays){
-					var results = [];//create a sparsely populated array with the viewId as index
-					for(var i=0;i<viewIdsArr.length;i++){
-						var viewId = viewIdsArr[i];
-						var attrRefProperties = arrayOfArrays[i];
-						results[viewId] = attrRefProperties;
-					}
-					return results;
-				});
-				return when(all(promisses), function(arrayOfArrays){
-					var merged = [];
-					return merged.concat.apply(merged, arrayOfArrays);
-				});
-	
-			});
-		},
 		getWidgetProperties: function(widgetId){
 			var self = this;
 			var VIEW_CLASS_TYPE = 74;
 			return self.store.get(widgetId).then(function(widget){
 				//recursively get all of the views that belong to this widget
-				return self.store.getItemsByAssocTypeAndDestClass(widgetId, 'many to many', VIEW_CLASS_TYPE).then(function(viewsArr) {
-					var promises = [];
-					viewsArr.forEach(function(view) {
-						promises.push(self.getAttrRefPropertiesForView(view));
-					});
-					return when(all(promises), function(viewsArr){
-						widget.views = viewsArr;
-                        console.log(widget);
-						return widget;
-					});
-					//return
+				return self.store.getItemsByAssocTypeAndDestClass(widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
+					widget.views = viewsArr;
+					//console.log('widget',widget);
+					return widget;
 				})
 			});
 		},
-		getAttrRefPropertiesForView: function(view){
+/*		getAttrRefPropertiesForView: function(view){
             var self = this;
             var parentClassesPromises = [];
             parentClassesPromises.push(self.store.get(Number(view.mapsTo)));
@@ -176,7 +143,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				return when(all(promisses), function(results){
 					/*results.push({field: 'id', name: 'id', label: 'id', readonly:true, hidden: false});
 					results.push({field: 'viewId', name: 'viewId', label: 'viewId', readonly:true,  hidden: false});
-					results.push({field: 'classId', name: 'classId', label: 'classId', readonly:true,  hidden: false});*/
+					results.push({field: 'classId', name: 'classId', label: 'classId', readonly:true,  hidden: false});* /
 					return results;
 				});
 			});
@@ -309,7 +276,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 								var value = item[property.name];
 								if(!value) return -1;//dropdown will display [not selected]
 								return value;
-							};*/
+							};* /
 							property.get = function(item){
 								var value = item[property.name];
 								if(!value) return -1;//dropdown will display [not selected]
@@ -479,7 +446,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 					return results;
 				});
 			});			
-		},
+		},*/
 		extraPlugins:[
      		'|',
      		'foreColor','hiliteColor',

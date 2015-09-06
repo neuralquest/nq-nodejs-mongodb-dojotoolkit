@@ -171,7 +171,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			});
 			var children = collection.fetch();
 			var item = children[0];*/
-            self.store.query({itemId: this.selectedObjIdPreviousLevel, viewId:viewId}).then(function(item) {
+            self.store.get(this.selectedObjIdPreviousLevel, viewId).then(function(item) {
                 var promise = when(self.generateNextLevelContents(item, 1, null, false), function(item){
 					registry.byId('tab'+self.tabId).resize();
 	//				self.pane.resize();

@@ -49,7 +49,6 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				query : {itemId: this.selectedObjIdPreviousLevel, viewId: this.widgetProps.views[0]._id}
 			});			
 			this.treeModel.getRoot = function(onItem, onError){
-				var self = this;
 				/*var collection = this.store.filter(this.query);
 				collection.on('remove, add', function(event){
 					var parent = event.parent;
@@ -64,11 +63,21 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					self.onChange(obj);
 				});	
 				var children = collection.fetch();*/
-                self.store.query(this.query).then(function(item) {
-                    onItem(item);
+                //this.store.getChildren({_id:self.selectedObjIdPreviousLevel, _viewId:self.widgetId}, onItem);
+
+                if(self.selectedObjIdPreviousLevel==1) self.selectedObjIdPreviousLevel=67;
+                self.store.get(self.selectedObjIdPreviousLevel).then(function(item) {
+                    if(!item) onError('item not found');
+                    else {
+                        item._viewId = self.widgetProps.views[0]._id;
+                        onItem(item);
+                    }
                 });
 			},
 			this.treeModel.getChildren = function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
+                this.store.getChildren(parentItem, onComplete);
+                return;
+
 //				var self = this;
 				var id = this.store.getIdentity(parentItem);
 
@@ -79,9 +88,8 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					when(this.childrenCache[id], onComplete, onError);
 					return;
 				}
-				var children = this.childrenCache[id] = this.store.getChildren(parentItem, self.widgetId, onComplete, onError);
+				var children = this.childrenCache[id] = this.store.getChildren(parentItem, onComplete);
                 return;
-				
 				/*var collection = this.childrenCache[id];
 				if(!collection) collection = this.childrenCache[id] = this.store.getChildren(parentItem);
 				// Setup observer in case children list changes, or the item(s) in the children list are updated.
@@ -103,10 +111,17 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			this.tree = new Tree({
 				id: 'tree'+this.widgetId,
 				store: this.store,
-				model: this.treeModel,
+                //model: this.store,
+                model: this.treeModel,
+
 				dndController: dndSource,
 				betweenThreshold: 5, 
 				persist: 'true',
+                getLabel: function(item){
+                    if(!item) return 'no item';
+                    if(item._type == 'object') return item.name;
+                    return item._name;
+                },
 				getIconClass: function(item, opened){
 					if(!item) return 'icondefault';
                     if(item._type == 'object') return 'icon'+item._icon;
@@ -125,7 +140,11 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					self.inherited('onClick',arguments);
 					nq.setHashViewId(self.level, item._viewId, self.tabId, item._id);
 				},
-				checkItemAcceptance: function(target, source, position){
+                mayHaveChildren: function(item){
+                    //return 'children' in item;
+                    return true;
+                },
+                checkItemAcceptance: function(target, source, position){
 					return true;
 					var targetItem = dijit.getEnclosingWidget(target).item;
 					var subClassIdArr = self.allowedClassesObj[targetItem._viewId];
@@ -138,9 +157,10 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					}
 					return false;
 				},
-				getLabel: function(item){
-					if(!item) return 'no item';
-					return item.name;
+				getRoot: function(onItem, onError){
+                    self.store.get(self.selectedObjIdPreviousLevel).then(function(item) {
+                        onItem(item);
+                    });
 				},
 				onLoad: function(){
 					fullPage.resize();//need this for lazy loaded trees, some how the first tree lags behind
