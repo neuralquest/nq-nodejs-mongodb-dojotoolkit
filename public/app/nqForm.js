@@ -35,9 +35,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                         var attr = view.schema[attrName];
 						var row = domConstruct.create("tr", null, tableNode);
 						//the label
-						domConstruct.create("td", {innerHTML: (attrName), style: "padding: 3px"}, row);
+						domConstruct.create("td", {innerHTML: (attr.title), style: "padding: 3px"}, row);
                         //the dijit
                         var tdDom = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row);
+                        var properties = {name:attrName};
                         var dijit = null;
                         if(attr.type == 'String'){
                             if(attr.type.enum){
@@ -62,7 +63,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                 domAttr.set(tdDom, 'colspan', '2');
                             }
                             else{
-                                var dijit = new ValidationTextBox({}, domConstruct.create('input'));
+                                var dijit = new ValidationTextBox(properties, domConstruct.create('input'));
                                 self.own(dijit);
                             }
                         }
@@ -75,14 +76,14 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                         if(dijit){
                             self.own(dijit);
                             tdDom.appendChild(dijit.domNode);
-                            //dijit.attributeReferenceId = property.name;
+                            dijit.attributeReferenceId = attrName;
                             self.pane.own(dijit.on('change', function(value){
                                 //self.item[this.attributeReferenceId] = value;
                                 //self.store.put(self.item);
                             }));
                             //dijit.startup();will be call after add child and then from widget base
                         }
-						domConstruct.create("td", { innerHTML: (attr.helpText), style: "padding: 3px", 'class': 'helpTextInvisable'}, row);
+						domConstruct.create("td", { innerHTML: (attr.description), style: "padding: 3px", 'class': 'helpTextInvisable'}, row);
 					}
 				});
 				self.createDeferred.resolve(self);//ready to be loaded with data
@@ -95,8 +96,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			
 			var self = this;
 
-			var q = {itemId:this.selectedObjIdPreviousLevel, viewId:this.viewId};
-			var collection = this.store.filter(q);
+			var collection = this.store.filter({itemId:this.selectedObjIdPreviousLevel});
 			collection.on('update', function(event){
 				var obj = event.target;
 				self.onChange(obj);

@@ -196,53 +196,108 @@ function processView(db, viewId){
     itemsColl.findOne({_id:viewId}, function(err, view) {
         if (err) return callback(err);
         else{
-            //console.log('view', view);
-            getData.getItemsByAssocTypeAndDestClass(db, viewId, 'ordered', 63, function (err, attrRefsArr) {
-                //console.log('attrRefsArr', attrRefsArr);
-                if(err) reject(err);
-                else {
-                    var classPromisses = [];
-                    for(var j=0;j<attrRefsArr.length;j++) {
-                        var attrRef = attrRefsArr[j];
-                        //console.log('attrRef', attrRef);
-                        classPromisses.push(new Promise(function(resolve, reject) {
-                            //console.log('mapsTo', attrRef.mapsTo);
-                            itemsColl.findOne({_id: attrRef.mapsTo}, function (err, item) {
-                                if (err) {
-                                    console.log('err', err);
-                                    reject(err);
-                                }
-                                else  resolve(item);
-                            })
-                        }));
-                    }
-                    Promise.all(classPromisses).then(function(attrClassesArr){
-                        //console.log('attrClassesArr', attrClassesArr);
-                        var schema = {};
-                        for(var j=0;j<attrRefsArr.length;j++) {
-                            var attrRef = attrRefsArr[j];
-                            var camelAttr = camelize(attrClassesArr[j]._name);
-                            if(camelAttr == 'primaryNames') camelAttr = 'name';
-
-                            var props = {
-                                type:'String',
-                                required: false,
-                                readOnly: false,
-                                mapsTo:camelAttr};
-                            //var attr = {attrRef.name: props};
-                            schema[attrRef.name] = props;
-                            //attrs.push(attr);
-                        }
-                        view.schema = schema;
-                        console.log('result', view);
-                        itemsColl.update({_id:view._id}, view);
-                    });
-                }
-            });
+            processParents(db, view);
         }
     });
 }
+function processParents(db, view){
+    var itemsColl = db.collection("items");
+    var attrObj = {};
+    getParents(db, view.mapsTo, attrObj, function(err, parentAttrsObj) {
+        //console.log('view', view.mapsTo);
+        //console.log('parentAttrsObj', parentAttrsObj);
+        getData.getItemsByAssocTypeAndDestClass(db, view._id, 'ordered', 63, function (err, attrRefsArr) {
+            //console.log('attrRefsArr', attrRefsArr);
+            if (err) reject(err);
+            else {
+                var classPromisses = [];
+                for (var j = 0; j < attrRefsArr.length; j++) {
+                    var attrRef = attrRefsArr[j];
+                    //console.log('attrRef', attrRef);
+                    classPromisses.push(new Promise(function (resolve, reject) {
+                        //console.log('mapsTo', attrRef.mapsTo);
+                        itemsColl.findOne({_id: attrRef.mapsTo}, function (err, item) {
+                            if (err) {
+                                console.log('err', err);
+                                reject(err);
+                            }
+                            else  resolve(item);
+                        })
+                    }));
+                }
+                Promise.all(classPromisses).then(function (attrClassesArr) {
+                    console.log('view', view, 'attrRefsArr', attrRefsArr,'parentAttrsObj', parentAttrsObj);
+                    if(view.mapsTo==63){
+                        var a=1;
+                    }
 
+                    var schema = {};
+                    for (var j = 0; j < attrRefsArr.length; j++) {
+                        var attrRef = attrRefsArr[j];
+                        var attrType = attrClassesArr[j];
+                        if(!attrType ||attrType._type == 'object') continue;
+                        var camelAttr = camelize(attrType._name);
+                        if (camelAttr == 'primaryNames') camelAttr = 'name';
+
+                        //console.log('camelAttr',camelAttr,'parentAttrsObj[camelAttr]',parentAttrsObj[camelAttr]);
+
+                        var props = {
+                            type: parentAttrsObj[camelAttr]?parentAttrsObj[camelAttr].type:'String',
+                            required: false,
+                            readOnly: false,
+                            title: attrRef.name,
+                            description: 'attribute description'
+                        };
+                        if(parentAttrsObj[camelAttr]&&parentAttrsObj[camelAttr].enum) props.enum = parentAttrsObj[camelAttr].enum
+                        //var attr = {attrRef.name: props};
+                        schema[camelAttr] = props;
+                    }
+                    view.schema = schema;
+                    console.log('schema', schema);
+                    itemsColl.update({_id: view._id}, view);
+                });
+            }
+        });
+    });
+}
+function getParents(db, itemId, attrObj, callback){
+    var assocsColl = db.collection('assocs');
+    var itemsColl = db.collection('items');
+    itemsColl.findOne({_id:itemId}, function(err, item) {
+        if(err) return callback(err);
+        else{
+            for(var attr in item){
+                if(attr.charAt(0)!='_') attrObj[attr] = item[attr];
+            }
+            assocsColl.findOne({$and:[{source: itemId},{type:'parent'}]}, function(err, assoc) {
+                //console.log('err', err, 'next assoc', assoc);
+                if(err) return callback(err);
+                else if(assoc){
+                    getParents(db, assoc.dest, attrObj, callback)
+                }
+                else return callback(null, attrObj);
+            })
+        }
+    })
+}
+function XgetParents(db, itemId, itemsArr, callback){
+    var assocsColl = db.collection('assocs');
+    var itemsColl = db.collection('items');
+    assocsColl.findOne({$and:[{source: itemId},{type:'parent'}]}, function(err, assoc) {
+        //console.log('err', err, 'next assoc', assoc);
+        if(err) return callback(err);
+        if(assoc){
+            itemsColl.findOne({_id:assoc.dest}, function(err, item) {
+                //console.log('err', err, 'next item', item);
+                if(err) return callback(err);
+                itemsArr.push(item);
+                getParents(db, assoc.dest, itemsArr, callback)
+            })
+
+        }
+        else return callback(null, itemsArr);
+    })
+}
 function getPublicData(res, pool){
     pool.getConnection(function(err,connection){
         if (err) {

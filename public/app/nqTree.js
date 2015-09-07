@@ -134,7 +134,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				getTooltip: function(item, opened){
 					if(!item) return '';
 					//return item.id+' - '+item.viewId+' - '+item.classId;
-					if(dojo.config.isDebug) return item._id+' - '+item.viewId+' - '+item._icon;
+					if(dojo.config.isDebug) return item._id+' - '+item._viewId+' - '+item._icon;
 				},
 				onClick: function(item, node, evt){
 					self.inherited('onClick',arguments);

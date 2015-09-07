@@ -487,8 +487,13 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 //    transaction.commit();	
 	lang.setObject("nq.test", test);//make the function globally accessable
     function test(){
-        console.log('test');
-        itemsColl.put({_id:999, name:'Ha Ha', type:'class'});
+
+		nqStore.get(1784).then(function(item){
+			console.log('item', item);
+			item.name = 'xxxxx';
+			console.log('new', item);
+			nqStore.put(item);
+		});
     }
 	function testInitialize(){
         //var itemsColl = new RequestMemory({ target: '/items', idProperty: '_id'});

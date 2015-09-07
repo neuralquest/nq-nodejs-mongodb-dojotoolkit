@@ -3,24 +3,9 @@ define(['dojo/_base/declare', "dojo/_base/lang", "dojo/_base/array", "dojo/when"
 function(declare, lang, array, when, all, Store, QueryResults,
 		 RequestMemory, registry){
 
-
-    //itemsColl = new RequestMemory({ target: '/items', idProperty: '_id'});
-    //assocsColl = new RequestMemory({ target: '/assocs', idProperty: '_id'});
-
     return declare("nqStore", [Store], {
-        //   itemsColl:null,
-        //    assocsColl:null,
-        //return declare(Store,{
-        /*constructor: function (options) {
-         // perform the mixin
-         options && declare.safeMixin(this, options);
-         itemsColl = new RequestMemory({
-         target: '/items'
-         });
-         },*/
         assocsColl: new RequestMemory({target: '/assocs', idProperty: '_id'}),
         itemsColl: new RequestMemory({target: '/items', idProperty: '_id'}),
-
 
         get: function (_itemId) {
             var itemId = Number(_itemId);
@@ -28,35 +13,13 @@ function(declare, lang, array, when, all, Store, QueryResults,
             return this.itemsColl.get(itemId);
         },
         add: function (item, directives) {
-            return itemsColl.add(item);
+            return this.itemsColl.add(item);
         },
         put: function (item, directives) {
-            return itemsColl.put(item);
+            return this.itemsColl.put(item);
         },
         remove: function (itemId, directives) {
-            return itemsColl.remove(itemId);
-        },
-        filter: function (query) {
-            console.log('req.query', query);
-            var parentViewId = query.parentViewId;
-            var viewId = query.viewId;
-            var parentId = query.parentId;
-            var itemId = query.itemId;
-            var destClassId = query.destClassId;
-            var type = query.type;
-            if (itemId) {
-                return this.get(itemId);
-            }
-            else if (viewId && parentId) {
-                return this.getItemsByView(viewId, parentId);
-            }
-            else if (parentViewId && parentId) {
-                return this.getItemsByParentView(parentViewId, parentId);
-            }
-            else if (parentId && type && destClassId) {
-                return this.getItemsByAssocTypeAndDestClass(parentId, type, destClassId);
-            }
-            else return [];
+            return this.itemsColl.remove(itemId);
         },
         getChildren: function (object, onComplete) {
             var promise = this.getItemsByParentView(object._id, object._viewId);
@@ -81,7 +44,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
          },*/
         getItemsByView: function (parentId, viewId) {
             var self = this;
-            return self.store.get(viewId).then(function (view) {
+            return self.get(viewId).then(function (view) {
                 return self.getItemsByAssocTypeAndDestClass(parentId, view.toMannyAssociations, view.mapsTo)
             });
         },
@@ -176,6 +139,47 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     return all(itemPromises);
                 });
             }
+        },
+        fetch: function () {
+            //var data = this.data;
+            var data =[];
+            if (!data || data._version !== this.storage.version || 1==1) {
+                // our data is absent or out-of-date, so we requery from the root
+                // start with the root data
+                //data = this.storage.fullData;
+                var queryLog = this.queryLog;
+                // iterate through the query log, applying each querier
+                for (var i = 0, l = queryLog.length; i < l; i++) {
+                    if(queryLog[i].type == 'filter'){
+                        var query = queryLog[i].arguments[0];
+                        if(query.itemId) {
+                            this.get(query.itemId).then(function(res){
+                                data = [res];
+                            });
+                        }
+                        else if (query.viewId && query.parentId) {
+                            var promise = this.getItemsByView(query.parentId, query.viewId);
+                            promise.then(function (res) {
+                                data = res;
+                            });
+                        }
+                        else if(query.parentViewId && query.parentId) {
+                            this.getItemsByParentView(query.parentId, query.parentViewId).then(function(res){
+                                data = res;
+                            });
+                        }
+                        else if(query.parentId && query.type && query.destClassId) {
+                            this.getItemsByAssocTypeAndDestClass(query.parentId, query.type, query.destClassId).then(function(res){
+                                data = res;
+                            });
+                        }
+                    }
+                }
+                // store it, with the storage version stamp
+                data._version = this.storage.version;
+                this.data = data;
+            }
+            return new QueryResults(data);
         },
         isA: function (itemId, destClassId, originalId) {
             var self = this;
