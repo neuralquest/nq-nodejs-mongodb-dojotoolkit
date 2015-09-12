@@ -13,15 +13,6 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 	return declare("nqForm", [nqWidgetBase], {
 		postCreate: function(){
 			this.inherited(arguments);
-
-			var PERMITTEDVAULE_CLASS_ID = 58;
-			var RTF_CLASS_ID = 65;
-			var DATE_CLASS_ID = 52;
-			var STRING_CLASS_ID = 54;
-			var INTEGER_CLASS_ID = 55;
-			var NUMBER_CLASS_ID = 56;
-			var BOOLEAN_CLASS_ID = 57;
-			var CLASSNAME_CLASS_ID = 101;
 			
 			var item = null;
 			var tableNode = domConstruct.create('table', {style: 'border-spacing:5px;'}, this.pane.containerNode);
@@ -30,61 +21,55 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 				console.log('widgetProp',widgetProps);
 				self.widgetProps = widgetProps;
 				widgetProps.views.forEach(function(view){
-					for(attrName in view.schema){
-                        console.dir('attr',attrName);
-                        var attr = view.schema[attrName];
-						var row = domConstruct.create("tr", null, tableNode);
-						//the label
-						domConstruct.create("td", {innerHTML: (attr.title), style: "padding: 3px"}, row);
+                    view.properties.forEach(function(property){
+                        //console.dir('property',property);
+                        // var attr = view.schema[attrName];
+                        var row = domConstruct.create("tr", null, tableNode);
+                        //the label
+                        domConstruct.create("td", {innerHTML: (property.label), style: "padding: 3px"}, row);
                         //the dijit
                         var tdDom = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row);
-                        var properties = {name:attrName};
                         var dijit = null;
-                        if(attr.type == 'String'){
-                            if(attr.type.enum){
-                                dijit = new Select(attr.type.enum, domConstruct.create('div'));
-                            }
-                            else if(attr.type.media && attr.type.media.mediaType == 'text/html'){
-                                self.editorToolbarDivNode.appendChild(property.editorArgs.toolbar.domNode);
-
-                                dijit = new Editor(property, domConstruct.create('div', {name: property.name}));/*setting the name wont be done autoamticly*/
-                                //						dijit.addStyleSheet('css/editor.css');
-                                dijit.on("NormalizedDisplayChanged", function(event){
-                                    var height = domGeometry.getMarginSize(this.editNode).h;
-                                    if(has("opera")){
-                                        height = this.editNode.scrollHeight;
-                                    }
-                                    console.log('height',domGeometry.getMarginSize(this.editNode));
-
-                                    //this.resize({h: height});
-                                    domGeometry.setMarginBox(this.iframe, { h: height });
-                                });
-                                //dijit.destroy = function(){console.log('destroyed editor')};
-                                domAttr.set(tdDom, 'colspan', '2');
-                            }
-                            else{
-                                var dijit = new ValidationTextBox(properties, domConstruct.create('input'));
-                                self.own(dijit);
-                            }
+                        if(property.dijitType == 'Select') {
+                            dijit = new Select(property.editorArgs, domConstruct.create('div'));
                         }
-                        else if(attr.type == 'Number'){
+                        else if(property.dijitType == 'RichText') {
+                            self.editorToolbarDivNode.appendChild(property.editorArgs.toolbar.domNode);
+                            dijit = new Editor(property, domConstruct.create('div', {name: property.name}));/*setting the name wont be done autoamticly*/
+                            //						dijit.addStyleSheet('css/editor.css');
+                            dijit.on("NormalizedDisplayChanged", function(event){
+                                var height = domGeometry.getMarginSize(this.editNode).h;
+                                if(has("opera")){
+                                    height = this.editNode.scrollHeight;
+                                }
+                                //console.log('height',domGeometry.getMarginSize(this.editNode));
+                                //this.resize({h: height});
+                                domGeometry.setMarginBox(this.iframe, { h: height });
+                            });
+                            //dijit.destroy = function(){console.log('destroyed editor')};
+                            domAttr.set(tdDom, 'colspan', '2');
+                        }
+                        else if(property.dijitType == 'String') {
+                            var dijit = new ValidationTextBox(property, domConstruct.create('input'));
+                        }
+                        else if(property.dijitType == 'Number') {
                             dijit = new NumberTextBox(property, domConstruct.create('input'));
                         }
-                        else if(attr.type == 'Date'){
+                        else if(property.dijitType == 'Date') {
                             dijit = new DateTextBox(property, domConstruct.create('input'));
                         }
                         if(dijit){
                             self.own(dijit);
                             tdDom.appendChild(dijit.domNode);
-                            dijit.attributeReferenceId = attrName;
+                            dijit.attributeReferenceId = property.name;
                             self.pane.own(dijit.on('change', function(value){
                                 //self.item[this.attributeReferenceId] = value;
                                 //self.store.put(self.item);
                             }));
                             //dijit.startup();will be call after add child and then from widget base
                         }
-						domConstruct.create("td", { innerHTML: (attr.description), style: "padding: 3px", 'class': 'helpTextInvisable'}, row);
-					}
+                        domConstruct.create("td", { innerHTML: (property.description), style: "padding: 3px", 'class': 'helpTextInvisable'}, row);
+                    });
 				});
 				self.createDeferred.resolve(self);//ready to be loaded with data
 			}, nq.errorDialog);

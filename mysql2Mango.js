@@ -20,6 +20,8 @@ function transform(req, res){
 
         console.log('connected as id ' + connection.threadId);
 
+return;
+        //fix the views
         var assocsColl = req.db.collection("assocs");
         assocsColl.find({$and:[{type:'parent'}, {dest: 74},]}).toArray(function(err, assocsArr) {
             for(var i=0;i<assocsArr.length;i++) {
@@ -27,7 +29,29 @@ function transform(req, res){
                 processView(req.db, assoc.source)
             }
         });
-return;
+        //fix two specific objects
+        var itemsColl = req.db.collection("items");
+        itemsColl.findOne({_id:2166}, function(err, item){
+            if(err) {
+                console.log('err', err);
+                reject(err);
+            }
+            else {
+                item.toMannyAssociations = 'manyToMany'
+                itemsColl.update({_id: item._id}, item);
+            };
+        });
+        itemsColl.findOne({_id:538}, function(err, item){
+            if(err) {
+                console.log('err', err);
+                reject(err);
+            }
+            else {
+                item.toMannyAssociations = 'manyToMany'
+                itemsColl.update({_id: item._id}, item);
+            };
+        });
+//return;
         //Get the objects and their attributes.
         connection.query("select c1.id as icon, c2.id as id, a2.type as type, c4.name as attrName, c3.name as attrValue , c3.id as attrId   "+
             "		from cell c1, assoc a1, cell c2 "+

@@ -15,7 +15,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			this.inherited(arguments);
 			var self = this;
 			this.getWidgetProperties(this.widgetId).then(function(widgetProps){
-				//console.log('widgetProp',widgetProps);
+				console.log('widgetProp',widgetProps);
 				self.widgetProps = widgetProps;
 				self.createDeferred.resolve(self);//ready to be loaded with data
 			}, nq.errorDialog);

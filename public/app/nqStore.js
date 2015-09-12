@@ -124,6 +124,24 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 });
                 return all(itemPromises);
             }
+            else if (type == 'associations') {
+                var query = {source: parentId};
+                var collection = this.assocsColl.filter(query);
+                var assocs = [];
+                collection.forEach(function (assoc) {
+                    assocs.push({_id:parentId, _name:assoc.type, _type:'assoc', _icon:3});
+                });
+                return assocs;
+            }
+            else if (type == 'by association type') {
+                var query = {source: parentId, type: 'parent'};
+                var collection = this.assocsColl.filter(query);
+                var itemPromises = [];
+                collection.forEach(function (assoc) {
+                    itemPromises.push(self.itemsColl.get(assoc.dest));
+                });
+                return all(itemPromises);
+            }
             else {
                 var query = {source: parentId, type: type};
                 var collection = this.assocsColl.filter(query);
@@ -180,6 +198,14 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 this.data = data;
             }
             return new QueryResults(data);
+        },
+        fetchRange: function (kwArgs) {
+            var data = this.fetch(),
+                start = kwArgs.start,
+                end = kwArgs.end;
+            return new QueryResults(data.slice(start, end), {
+                totalLength: data.length
+            });
         },
         isA: function (itemId, destClassId, originalId) {
             var self = this;

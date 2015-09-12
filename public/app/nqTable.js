@@ -18,17 +18,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 		viewIdsArr: [],
 		
 		postCreate: function(){
-			
 			this.inherited(arguments);
-
-			var PERMITTEDVAULE_CLASS_ID = 58;
-			var RTF_CLASS_ID = 65;
-			var DATE_CLASS_ID = 52;
-			var STRING_CLASS_ID = 54;
-			var INTEGER_CLASS_ID = 55;
-			var NUMBER_CLASS_ID = 56;
-			var BOOLEAN_CLASS_ID = 57;
-			
 
 			//initially show the toolbar div
 			domStyle.set(this.pageToolbarDivNode, 'display' , '');
@@ -74,134 +64,111 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			});
 			this.normalToolbar.addChild(this.deleteButton);
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
-	
-			when(this.getAttrRefPropertiesForWidget(this.widgetId), function(attrRefByViewArr){
-				var columns = [];
-				/*var iconColumn = {
-					label: "",
-					field: "classId",
-					formatter: function (value) {
-						return '<img class="icon'+value+'"/>';
-					},
-					style: 'width:2em'
-			    };
-				columns.push(iconColumn);*/
-				for(viewId in attrRefByViewArr) {
-					var subViewsArr = attrRefByViewArr[viewId];
-					columns = columns.concat(subViewsArr); 
-				}
-				for(var i=0;i<columns.length;i++){
-					var property = columns[i];
-					property.style = 'width:'+property.columnWidth;//tables have their column widths set
-					switch(property.attrClassType){
-					case PERMITTEDVAULE_CLASS_ID: 
-						property.renderCell = function(object, value, node, options){
-							if(!value) html.set(node, '[not selected]');
-							//if(!value) node.appendChild(document.createTextNode('[not selected]'));
-							else{
-								var selectedOption = this.editorArgs.store.get(value);
-								if(selectedOption) node.appendChild(document.createTextNode(selectedOption.name));
-								else node.appendChild(document.createTextNode('id: '+value));
-							}
-						};
-						property.editor = Select;
-						break;	
-					case RTF_CLASS_ID: 
-						self.editorToolbarDivNode.appendChild(property.editorArgs.toolbar.domNode);
-						property.renderCell = function(object, value, node, options) {
-							html.set(node, value);
-						};
-						property.editor = RTFEditor;
-						break;	
-					case DATE_CLASS_ID:
-						property.renderCell = function(object, value, node, options) {
-							console.log('value', value);
-							if(!value || value=='') html.set(node, '[no date selected]');
-							else {
-								var date = null;
-								if(lang.isObject(value)) date = value;//the date widget returns an date object
-								else date = dojo.date.stamp.fromISOString(value);
-								html.set(node, date.toLocaleDateString());
-							}
-						};
-						/*property.set = function(item) {
-							var value = item[this.field];
-							if(!value) return;
-							var date = dojo.date.stamp.fromISOString(value);
-							return stamp.toISOString(date);
-						};*/
-						//property.autoSave = true;
-						property.editor = DateTextBox;
-						break;	
-					};
-				}
-				var collection = self.store.filter({parentId: self.selectedObjIdPreviousLevel, widgetId: self.widgetId, join:true});
-				if(self.widgetId == 2393){
-					var subRows = [];
-					subRows[0] = [columns[0],columns[2]];
-					subRows[0][1].rowSpan = 3;
-					subRows[1] = [columns[1]];
-					subRows[2] = [{label:'Name'}];
-					//subRows = [[{label: 'First'},{label: 'First', rowSpan: 3}],[{label: 'First'}], [{label: 'First'}]];
-					self.grid = new (declare([Grid, Selection, Keyboard, DijitRegistry, Dnd, Editor, ColumnResizer]))({
-						collection: collection,
-						selectionMode: "single",
-						loadingMessage: 'Loading data...',
-						noDataMessage: 'No data.',
-						subRows: subRows,
-						cleanAddedRules: true,
-						//className: "dgrid-autoheight",
-						//height: '',//needed for auto grow
-						getBeforePut:false// temporary fix for the fact that a get without a viewId ruins the item sent to the put 
-					}, domConstruct.create('div'));
+
+			var self = this;
+			this.getWidgetProperties(this.widgetId).then(function(widgetProps){
+				console.log('widgetProp',widgetProps);
+				self.widgetProps = widgetProps;
+                var columns = [];
+				widgetProps.views.forEach(function(view){
+					view.properties.forEach(function(property){
+                        columns.push(property);
+						//console.dir('property',property);
+						if(property.dijitType == 'Select') {
+                            property.renderCell = function(object, value, node, options){
+                                if(!value) html.set(node, '[not selected]');
+                                //if(!value) node.appendChild(document.createTextNode('[not selected]'));
+                                else{
+                                    var selectedOption = this.editorArgs.store.get(value);
+                                    if(selectedOption) node.appendChild(document.createTextNode(selectedOption.label));
+                                    else node.appendChild(document.createTextNode('id: '+value));
+                                }
+                            };
+                            property.editor = Select;
+                        }
+						else if(property.dijitType == 'RichText') {
+                            self.editorToolbarDivNode.appendChild(property.editorArgs.toolbar.domNode);
+                            property.renderCell = function(object, value, node, options) {
+                                html.set(node, value);
+                            };
+                            property.editor = RTFEditor;
+						}
+						else if(property.dijitType == 'String') {
+                            property.editor == 'text';
+						}
+                        else if(property.dijitType == 'Number') {
+                            property.editor == 'number';
+                        }
+                        else if(property.dijitType == 'Boolean') {
+                            property.editor = 'radio';
+                        }
+						else if(property.dijitType == 'Date') {
+                            property.renderCell = function(object, value, node, options) {
+                                console.log('value', value);
+                                if(!value || value=='') html.set(node, '[no date selected]');
+                                else {
+                                    var date = null;
+                                    if(lang.isObject(value)) date = value;//the date widget returns an date object
+                                    else date = dojo.date.stamp.fromISOString(value);
+                                    html.set(node, date.toLocaleDateString());
+                                }
+                            };
+                            /*property.set = function(item) {
+                             var value = item[this.field];
+                             if(!value) return;
+                             var date = dojo.date.stamp.fromISOString(value);
+                             return stamp.toISOString(date);
+                             };*/
+                            //property.autoSave = true;
+                            property.editor = DateTextBox;
+						}
+					});
+				});
+                var collection = self.store.filter({parentId: self.selectedObjIdPreviousLevel, parentViewId: self.widgetId, join:true});
+                self.grid = new (declare([Grid, Selection, Keyboard, DijitRegistry, Dnd, Editor, ColumnResizer]))({
+                    collection: collection,
+                    selectionMode: "single",
+                    loadingMessage: 'Loading data...',
+                    noDataMessage: 'No data.',
+                    columns: columns,
+                    //subRows: [columns],
+                    cleanAddedRules: true,
+                    //className: "dgrid-autoheight",
+                    //height: '',//needed for auto grow
+                    getBeforePut:false// temporary fix for the fact that a get without a viewId ruins the item sent to the put
+                }, domConstruct.create('div'));
 //					self.grid.startup();
-					self.grid.styleColumn(0, 'width:2em');	
-				}
-				else{
-					self.grid = new (declare([Grid, Selection, Keyboard, DijitRegistry, Dnd, Editor, ColumnResizer]))({
-						collection: collection,
-						selectionMode: "single",
-						loadingMessage: 'Loading data...',
-						noDataMessage: 'No data.',
-						columns: columns,
-						//subRows: [columns],
-						cleanAddedRules: true,
-						//className: "dgrid-autoheight",
-						//height: '',//needed for auto grow
-						getBeforePut:false// temporary fix for the fact that a get without a viewId ruins the item sent to the put 
-					}, domConstruct.create('div'));
-//					self.grid.startup();
-					for(var i=0;i<columns.length;i++){
-						var property = columns[i];
-						self.grid.styleColumn(i, property.style);
-					}
-				}
-				self.pane.containerNode.appendChild(self.grid.domNode);
+                for(var i=0;i<columns.length;i++){
+                    var property = columns[i];
+                    self.grid.styleColumn(i, property.style);
+                }
 
-				collection.on('remove, add, update', function(event){
-					self.grid.refresh();
-				});					
-				self.grid.on(".dgrid-row:click", function(event){
-					var item = self.grid.row(event).data;
-					//var level = self.level;
-					nq.setHashViewId(self.level, item.viewId, self.tabId, item.id);	
-				});
-				self.grid.on("dgrid-error", function(event) {
-					//nq.errorDialog;
-					// Display an error message above the grid when an error occurs.
-	    	    	new dijit.Dialog({title: "Get Error", extractContent: true, content: event.error.message}).show();
-				});
-				/*self.grid.on("dgrid-refresh-complete", function(event){
-					var row = grid.row(event);
-					console.log("Row complete:", event);
-				});
-				*/
+                self.pane.containerNode.appendChild(self.grid.domNode);
+
+                collection.on('remove, add, update', function(event){
+                    self.grid.refresh();
+                });
+                self.grid.on(".dgrid-row:click", function(event){
+                    var item = self.grid.row(event).data;
+                    //var level = self.level;
+                    nq.setHashViewId(self.level, item.viewId, self.tabId, item.id);
+                });
+                self.grid.on("dgrid-error", function(event) {
+                    //nq.errorDialog;
+                    // Display an error message above the grid when an error occurs.
+                    new dijit.Dialog({title: "Get Error", extractContent: true, content: event.error.message}).show();
+                });
+                /*self.grid.on("dgrid-refresh-complete", function(event){
+                 var row = grid.row(event);
+                 console.log("Row complete:", event);
+                 });
+                 */
 
 
-				
-				self.own(self.normalToolbar);
-				self.own(self.grid);
-				self.createDeferred.resolve(self);//ready to be loaded with data					
+
+                self.own(self.normalToolbar);
+                self.own(self.grid);
+                self.createDeferred.resolve(self);//ready to be loaded with data
 			}, nq.errorDialog);
 		},
 		setSelectedObjIdPreviousLevel: function(value){
@@ -211,7 +178,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			
 			//does this return a promise?
 			//var collection = this.store;
-			var collection = this.store.filter({parentId: value, widgetId: this.widgetId, join:true});
+			var collection = this.store.filter({parentId: value, parentViewId: this.widgetId, join:true});
 			var promise = this.grid.set('collection', collection);
 
 //			this.grid.set('query',{parentId: value, widgetId: this.widgetId, join:true});
@@ -221,5 +188,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 			this.setSelectedObjIdPreviousLevelDeferred.resolve(this);
 		}
+
 	});
 });
+

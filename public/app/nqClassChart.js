@@ -59,7 +59,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			var PERTMITTEDVALUE_CLASS = 58;
 			var OBJECT_TYPE = 1;
 			var self = this;
-			return when(self.store.getCell(id), function(cell){
+			return when(self.store.get(id), function(cell){
 				if(cell.type == OBJECT_TYPE) return cell;
 				var isAPermittedvalue = pv?pv:cell.id==PERTMITTEDVALUE_CLASS;
 				var associations = {};
