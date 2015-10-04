@@ -20,9 +20,10 @@ function transform(req, res){
 
         console.log('connected as id ' + connection.threadId);
 
-return;
-        //fix the views
         var assocsColl = req.db.collection("assocs");
+
+
+        //fix the views
         assocsColl.find({$and:[{type:'parent'}, {dest: 74},]}).toArray(function(err, assocsArr) {
             for(var i=0;i<assocsArr.length;i++) {
                 var assoc = assocsArr[i];
@@ -51,7 +52,13 @@ return;
                 itemsColl.update({_id: item._id}, item);
             };
         });
-//return;
+        var newAssoc = {source:50, type:'parent', dest:67};
+        assocsColl.insert(newAssoc);
+
+ res.send('done');
+ return;
+
+
         //Get the objects and their attributes.
         connection.query("select c1.id as icon, c2.id as id, a2.type as type, c4.name as attrName, c3.name as attrValue , c3.id as attrId   "+
             "		from cell c1, assoc a1, cell c2 "+
@@ -62,7 +69,7 @@ return;
             "		and a3.fk_source = c3.id  "+
             "		and a3.type = 3  "+
             "		and a3.fk_dest = c4.id) "+
-            "	where c1.id  in(67,80,70,86,84,110,71,103,51,89,97,98,62,78,85,96,63,74,90,99,79,80,108,95) "+
+            "	where c1.id  in(67,80,70,86,84,110,71,103,51,89,97,98,62,78,85,96,63,74,90,99,79,80,108,95,88,50) "+
             "	and a1.fk_dest = c1.id  "+
             "	and a1.type = 3  "+
             "	and a1.fk_source = c2.id "+
@@ -104,7 +111,7 @@ return;
                     "            and a2.fk_source = c2.id  "+
                     "            and a2.type = 3  "+
                     "            and a2.fk_dest = c3.id) "+
-                    " where c1.id in(67,80,70,86,84,110,71,103,51,89,97,98,62,78,85,96,63,74,90,99,79,80,108,95," +
+                    " where c1.id in(67,80,70,86,84,110,71,103,51,89,97,98,62,78,85,96,63,74,90,99,79,80,108,95,88,50," +
                     "60,61,68,69,82,100,109,64,59,57,66,91,92,94,77,107,101,102,106) "+
                     " order by id; ",function(err,cells){
                     if(!err) {

@@ -88,8 +88,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		});
 	}
 	function drawWidgets(level){		
-		var WIDGETS_ATTRCLASS = 99;
-		
 		var state = getState(level);
 		if(!state.viewId) return true;
 		var selectedTabId = getSelectedTabRecursive(state.viewId);
@@ -134,9 +132,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		// level: Number
 		//		The level we are curently processing (used to update the hash after something has been clicked)
 		// returns: Promise
-		//		The promise will result in the id of the selected accordion 
-		
-		var ACCORDIONTABS_ATTRCLASS = 90;
+		//		The promise will result in the id of the selected accordion
 
 		var state = getState(level);
 		var viewId = state.viewId;
@@ -238,8 +234,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		//		The promise will result in the id of the selected tab
 		
 		//get the Display Type id that this widget has as an attribute
-		
-		var ACCORDIONTABS_ATTRCLASS = 90;
 
 		var state = getState(level);
 		var viewId = state.viewId;
@@ -276,7 +270,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				});
 				container.addChild(tabPane);
 				container.watch("selectedChildWidget", function(name, oval, nval){
-					console.log("selected child changed from ", oval.title, " to ", nval.title);
+					//console.log("selected child changed from ", oval.title, " to ", nval.title);
 					var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
 					setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
 				});
@@ -518,7 +512,125 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         });
 
 	};
-	
+
+	WIDGETS_ATTRCLASS = 99;
+	ACCORDIONTABS_ATTRCLASS = 90;
+	VIEW_CLASS_TYPE = 74;
+	ASSOCPROPERTIES = {
+        parent: {
+            inverse :'children',
+            pseudo : false,
+            cardinality: 'one',
+            icon: 3},
+        mapsTo: {
+            inverse :'mappedToBy',
+            pseudo : false,
+            cardinality: 'one',
+            icon: 5},
+        default: {
+            inverse :'defaultOf',
+            pseudo : false,
+            cardinality: 'one',
+            icon: 6},
+        oneToOne: {
+            inverse :'oneToOneReverse',
+            pseudo : false,
+            cardinality: 'one',
+            icon: 7},
+        ordered: {
+            inverse :'orderedParent',
+            pseudo : false,
+            cardinality: 'many',
+            icon: 8},
+        next: {
+            inverse :'previous',
+            pseudo : false,
+            cardinality: 'one',
+            icon: 9},
+        manyToMany: {
+            inverse :'manyToManyReverse',
+            pseudo : false,
+            cardinality: 'many',
+            icon: 10},
+        oneToMany: {
+            inverse :'manyToOne',
+            pseudo : false,
+            icon: 11},
+        owns: {
+            inverse :'ownedBy',
+            pseudo : false,
+            cardinality: 'many',
+            icon: 12},
+        subClasses: {
+            inverse :'parent',
+            pseudo : true,
+            cardinality: 'many',
+            icon: 15,
+            type : 'class'},
+        instantiations: {
+            inverse :'parent',
+            pseudo : true,
+            cardinality: 'many',
+            icon: 15,
+            type : 'object'},
+        children: {
+            inverse :'parent',
+            pseudo : true,
+            cardinality: 'many',
+            icon: 15},
+        mappedToBy: {
+            inverse :'mapsTo',
+            pseudo : true,
+            cardinality: 'many',
+            icon: 17},
+        defaultOf: {
+            inverse :'default',
+            pseudo : true,
+            cardinality: 'many',
+            icon: 18},
+        oneToOneReverse: {
+            inverse :'oneToOne',
+            pseudo : true,
+            icon: 19},
+        orderedParent: {
+            inverse :'ordered',
+            pseudo : true,
+            cardinality: 'one',
+            icon: 20},
+        previous: {
+            inverse :'next',
+            pseudo : true,
+            cardinality: 'one',
+            icon: 21},
+        manyToManyReverse: {
+            inverse :'manyToMany',
+            pseudo : true,
+            cardinality: 'many',
+            icon: 22},
+        manyToOne: {
+            inverse :'oneToMany',
+            pseudo : true,
+            cardinality: 'one',
+            icon: 23},
+        ownedBy: {
+            inverse :'owns',
+            pseudo : true,
+            cardinality: 'one',
+            icon: 24},
+        associations: {
+            inverse :'associations',
+            pseudo : true,
+            cardinality: 'many',
+            icon: 11},
+        'by association type': {
+            inverse :'by association type',
+            pseudo : true,
+            cardinality: 'many',
+            icon: 24}
+    };
+
+
+/*
 	CLASS_TYPE = 0;
 	OBJECT_TYPE = 1;	
 	// Primitive Assoc types (as used by the Assoc table)
@@ -549,7 +661,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	BYASSOCTPE_PASSOC = 30; 	//TO MANY		
 	ASSOCS_PASSOC = 31; 		//TO MANY		
 
-
+*/
 
 
 

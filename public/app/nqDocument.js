@@ -327,7 +327,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				self.onChange(obj);
 			});
 			var children = collection.fetch();*/
-			this.store.getChildren(item, this.widgetId, function(children){
+			this.store.getChildren(item, function(children){
 				children.forEach(function(childItem){
 					var previousParagrphHasRightFloat = false;
 					self.generateNextLevelContents(childItem, headerLevel+1, item.id, previousParagrphHasRightFloat);

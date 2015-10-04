@@ -23,7 +23,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			var loader = new THREE.JSONLoader(true);			
 			loader.load("app/resources/img/Neuralquest/mesh/classMesh.js", function(geometry, materials) {
 				self.classGeometry = geometry;
-				when(self.buildHierarchy(self.XYAXISROOTID, false), function(res){
+				when(self.buildHierarchy(self.XYAXISROOTID), function(res){
 					console.dir(cellPostionsStore);
 					var newPos = new THREE.Vector3( 0, 0, 0 );
 					self.postionObjectsXY(self.XYAXISROOTID, newPos);
@@ -36,7 +36,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 					self.clearScene();
 					var sceneObject3D = self.fillScene(self.XYAXISROOTID);
 					self.addToScene(sceneObject3D);
-					when(self.buildHierarchy(self.ZYAXISROOTID, true), function(res){
+					/*when(self.buildHierarchy(self.ZYAXISROOTID), function(res){
 						self.positionAttributeClasses();
 						var newPos = new THREE.Vector3( 0, 0, 0 );
 						self.postionObjectsZY(self.ZYAXISROOTID, newPos);
@@ -51,51 +51,75 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 						self.drawAssociations();
 						self.createDeferred.resolve(self);//tell the caller that the diagram is done	
 						//console.dir(cellPostionsStore);
-					},nq.errorDialog);
+					},nq.errorDialog);*/
+                    self.drawAssociations();
+                    self.createDeferred.resolve(self);//tell the caller that the diagram is done
 				},nq.errorDialog);
 			});
 		},
-		buildHierarchy: function(id, isAttribute, pv){
-			var PERTMITTEDVALUE_CLASS = 58;
-			var OBJECT_TYPE = 1;
+		buildHierarchy: function(id){
 			var self = this;
 			return when(self.store.get(id), function(cell){
-				if(cell.type == OBJECT_TYPE) return cell;
-				var isAPermittedvalue = pv?pv:cell.id==PERTMITTEDVALUE_CLASS;
+				if(cell._type == 'object') return cell;
+				//var isAPermittedvalue = pv?pv:cell.id==PERTMITTEDVALUE_CLASS;
 				var associations = {};
 				var promisses = [];
-				promisses.push(when(self.addAssociations(id, SUBCLASSES_PASSOC), function(childrenArr){
-					associations[SUBCLASSES_PASSOC] = childrenArr;				
-					return childrenArr;
-				}));
-				promisses.push(when(self.addAssociations(id, ATTRIBUTE_ASSOC), function(childrenArr){
-					associations[ATTRIBUTE_ASSOC] = childrenArr;				
-					return childrenArr;
-				}));
-				promisses.push(when(self.addAssociations(id, ORDERED_ASSOC), function(childrenArr){
-					associations[ORDERED_ASSOC] = childrenArr;				
-					return childrenArr;
-				}));
-				promisses.push(when(self.addAssociations(id, MANYTOMANY_ASSOC), function(childrenArr){
-					associations[MANYTOMANY_ASSOC] = childrenArr;				
-					return childrenArr;
-				}));
-				promisses.push(when(self.addAssociations(id, ONETOMANY_ASSOC), function(childrenArr){
-					associations[ONETOMANY_ASSOC] = childrenArr;				
-					return childrenArr;
-				}));
-				cellPostionsStore.put({id:cell.id, name: cell.name, type: cell.type, isAttribute:isAttribute, isAPermittedvalue:isAPermittedvalue, associations:associations}); 
-				return when(all(promisses), function(res){
+                promisses.push(self.store.getItemsByAssocType(id, 'subclasses'));
+                promisses.push(self.store.getItemsByAssocType(id, 'ordered'));
+                promisses.push(self.store.getItemsByAssocType(id, 'oneToMany'));
+                promisses.push(self.store.getItemsByAssocType(id, 'manyToMany'));
+                promisses.push(self.store.getItemsByAssocType(id, 'mapsTo'));
+                promisses.push(self.store.getItemsByAssocType(id, 'owns'));
+
+				cellPostionsStore.put({id:cell._id, name: cell._name, type: cell._type, associations:associations});
+				return when(all(promisses), function(resArrArr){
+                    var subClassesArr = [];
+                    resArrArr[0].forEach(function(child){
+                        subClassesArr.push(child._id);
+                    });
+                    associations['subclasses'] = subClassesArr;
+
+                    var orderedArr = [];
+                    resArrArr[1].forEach(function(child){
+                        orderedArr.push(child._id);
+                    });
+                    associations['ordered'] = orderedArr;
+
+                    var oneToManyArr = [];
+                    resArrArr[2].forEach(function(child){
+                        oneToManyArr.push(child._id);
+                    });
+                    associations['oneToMany'] = oneToManyArr;
+
+                    var manyToManyArr = [];
+                    resArrArr[3].forEach(function(child){
+                        manyToManyArr.push(child._id);
+                    });
+                    associations['manyToMany'] = manyToManyArr;
+
+                    var mapsToArr = [];
+                    resArrArr[4].forEach(function(child){
+                        mapsToArr.push(child._id);
+                    });
+                    associations['mapsTo'] = mapsToArr;
+
+                    var ownsArr = [];
+                    resArrArr[5].forEach(function(child){
+                        ownsArr.push(child._id);
+                    });
+                    associations['owns'] = ownsArr;
+
 					var childPromisses = [];
-					for(var i=0;i<associations[SUBCLASSES_PASSOC].length;i++){
-						var childId = associations[SUBCLASSES_PASSOC][i];
-						childPromisses.push(self.buildHierarchy(childId, isAttribute, isAPermittedvalue));
+					for(var i=0;i<associations['subclasses'].length;i++){
+						var childId = associations['subclasses'][i];
+						childPromisses.push(self.buildHierarchy(childId));
 					}
 					return all(childPromisses);
 				});
 			});
 		},
-		addAssociations: function(id, type){
+/*
+		XaddAssociations: function(id, type){
 			var OBJECT_TYPE = 1;
 			var self = this;
 			if(type<15) {
@@ -136,7 +160,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 						});
 					});
 				});
-					 */
+					 * /
 				var query = {fk_dest: id, type: type-12};
 				var collection = this.store.filter(query);
 				var assocsArr = collection.fetch();
@@ -171,7 +195,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				}
 				return cellPosArr;
 			});
-		},
+		},*/
 		postionObjectsXY: function(id, ourPos){
 			var cellPositionsObj = cellPostionsStore.get(id);
 			if(!cellPositionsObj) return ourPos.x;
@@ -180,7 +204,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			var z = ourPos.z;
 			var maxXUntilNow = ourPos.x;
 			cellPositionsObj.isAttr = false;
-			var children = cellPositionsObj.associations[SUBCLASSES_PASSOC];
+			var children = cellPositionsObj.associations['subclasses'];
 			for(var i=0;i<children.length;i++){
 				var subObjectId = children[i];
 				var newPos = new THREE.Vector3( x, y, z );
@@ -190,15 +214,18 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			//place our position over the center of the children
 			if(children.length>1){
 				var maxXId = children[children.length-1];
-				var maxX = cellPostionsStore.get(maxXId).pos.x;
-				var minXId = children[0];
-				var minX = cellPostionsStore.get(minXId).pos.x;
-				ourPos.x = (maxX - minX)/2 + minX;
+                if(cellPostionsStore.get(maxXId)){
+                    var maxX = cellPostionsStore.get(maxXId).pos.x;
+                    var minXId = children[0];
+                    var minX = cellPostionsStore.get(minXId).pos.x;
+                    ourPos.x = (maxX - minX)/2 + minX;
+                }
 			}
+
 			cellPositionsObj.pos = ourPos;
 			return maxXUntilNow;
 		},
-		postionObjectsZY: function(id, ourPos){
+		/*postionObjectsZY: function(id, ourPos){
 			var cellPositionsObj = cellPostionsStore.get(id);
 			if(!cellPositionsObj) return ourPos.x;
 			if(cellPositionsObj.pos){//already has a position, got it from positionAttributeClasses
@@ -212,7 +239,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				var z = ourPos.z;
 				var minZUntilNow = ourPos.z;
 				cellPositionsObj.isAttr = true;
-				var children = cellPositionsObj.associations[SUBCLASSES_PASSOC];
+				var children = cellPositionsObj.associations['subclasses'];
 				for(var i=0;i<children.length;i++){
 					var subObjectId = children[i];
 					var newPos = new THREE.Vector3( x, y, z );
@@ -232,7 +259,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				cellPositionsObj.pos = ourPos;
 				return minZUntilNow;
 			}
-		},
+		},*/
 		fillScene: function(){
 			var classMaterial = new THREE.MeshLambertMaterial( {color: 0x8904B1});
 			//var connectorMaterial =  new THREE.MeshPhongMaterial({specular: 0xffffff, color: 0x9F9F9F, emissive: 0x4F4F4F,shininess: 100 });
@@ -277,11 +304,13 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				//this.addToScene(classObject);
 				sceneObject3D.add(classObject);
 			}
+
+
 			//now add connectors
 			for(var i=0;i<cellPosArr.length;i++){
 				//console.log('connectors positionInfo', positionInfo);
 				var positionInfo = cellPosArr[i];
-				var children = positionInfo.associations[SUBCLASSES_PASSOC];
+				var children = positionInfo.associations['subclasses'];
 				var parentPos = positionInfo.pos;
 				if(children.length==0) continue;
 				//for the subclasses
@@ -300,9 +329,12 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 					lastPos.z = cellPostionsStore.get(lastId).pos.z;
 					//lastPos.z = cellPositionsObj[lastId].pos.z;
 				}
-				else{
+                else {
 					//get the length of the connector
 					var firstId = children[0];
+                    if(!cellPostionsStore.get(firstId)) {
+                        return sceneObject3D;
+                    }
 					var lastId = children[children.length -1];
 					firstPos.x = cellPostionsStore.get(firstId).pos.x;
 					//firstPos.x = cellPositionsObj[firstId].pos.x;
@@ -363,7 +395,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				if(!fromMesh) continue;
 				var fromPosition = new THREE.Vector3();
 				fromPosition.getPositionFromMatrix( fromMesh.matrixWorld );
-				var attibutesArr = associations[ATTRIBUTE_ASSOC];//attributes
+				/*var attibutesArr = associations[ATTRIBUTE_ASSOC];//attributes
 				if(attibutesArr){
 					var connectorMaterial = new THREE.MeshLambertMaterial({color: 0x000EF});//blue
 					for(var i=0;i<attibutesArr.length;i++){
@@ -374,8 +406,8 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 						toPosition.getPositionFromMatrix( toMesh.matrixWorld );
 						this.drawBeam(fromPosition, toPosition, connectorMaterial, sceneObject3D, 'attribute', false, false);
 					}
-				}
-				var attibutesArr = associations[ORDERED_ASSOC];// ordered
+				}*/
+				var attibutesArr = associations['ordered'];// ordered
 				if(attibutesArr){
 					var connectorMaterial = new THREE.MeshLambertMaterial({color: 0xEF0000}); //red
 					for(var i=0;i<attibutesArr.length;i++){
@@ -387,7 +419,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 						this.drawHorseshoe(fromPosition, toPosition, this.bodyViewDepth/4, connectorMaterial, sceneObject3D, 'ordered', false, true);
 					}
 				}
-				var attibutesArr = associations[MANYTOMANY_ASSOC];//many to many
+				var attibutesArr = associations['oneToMany'];//many to many
 				if(attibutesArr){
 					var connectorMaterial = new THREE.MeshLambertMaterial({color: 0x00EFEF});
 					for(var i=0;i<attibutesArr.length;i++){
@@ -396,10 +428,10 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 						if(!toMesh) continue;
 						var toPosition = new THREE.Vector3();
 						toPosition.getPositionFromMatrix( toMesh.matrixWorld );
-						this.drawHorseshoe(fromPosition, toPosition, this.bodyViewDepth/2, connectorMaterial, sceneObject3D, 'many to many', true, true);
+						this.drawHorseshoe(fromPosition, toPosition, this.bodyViewDepth/2, connectorMaterial, sceneObject3D, 'one to many', false, true);
 					}
 				}
-				var attibutesArr = associations[ONETOMANY_ASSOC]; // one to many
+				var attibutesArr = associations['manyToMany']; // one to many
 				if(attibutesArr){
 					var connectorMaterial = new THREE.MeshLambertMaterial({color: 0x00EF00});//green
 					for(var i=0;i<attibutesArr.length;i++){
@@ -408,9 +440,33 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 						if(!toMesh) continue;
 						var toPosition = new THREE.Vector3();
 						toPosition.getPositionFromMatrix( toMesh.matrixWorld );
-						this.drawHorseshoe(fromPosition, toPosition, (this.bodyViewDepth/4)*3, connectorMaterial, sceneObject3D, 'one to many', false, true);
+						this.drawHorseshoe(fromPosition, toPosition, (this.bodyViewDepth/4)*3, connectorMaterial, sceneObject3D, 'many to many', true, true);
 					}
 				}
+                var attibutesArr = associations['mapsTo']; // one to many
+                if(attibutesArr){
+                    var connectorMaterial = new THREE.MeshLambertMaterial({color: 0xEFEF00});//?
+                    for(var i=0;i<attibutesArr.length;i++){
+                        var toObjId = attibutesArr[i];
+                        var toMesh = this.getMeshByName(toObjId);
+                        if(!toMesh) continue;
+                        var toPosition = new THREE.Vector3();
+                        toPosition.getPositionFromMatrix( toMesh.matrixWorld );
+                        this.drawHorseshoe(fromPosition, toPosition, (this.bodyViewDepth/4)*4, connectorMaterial, sceneObject3D, 'mapsTo', false, true);
+                    }
+                }
+                var attibutesArr = associations['owns']; // one to many
+                if(attibutesArr){
+                    var connectorMaterial = new THREE.MeshLambertMaterial({color: 0x000EF});//blue
+                    for(var i=0;i<attibutesArr.length;i++){
+                        var toObjId = attibutesArr[i];
+                        var toMesh = this.getMeshByName(toObjId);
+                        if(!toMesh) continue;
+                        var toPosition = new THREE.Vector3();
+                        toPosition.getPositionFromMatrix( toMesh.matrixWorld );
+                        this.drawHorseshoe(fromPosition, toPosition, (this.bodyViewDepth/4)*5, connectorMaterial, sceneObject3D, 'ownes', false, true);
+                    }
+                }
 			}
 			this.addToScene(sceneObject3D);			
 		},

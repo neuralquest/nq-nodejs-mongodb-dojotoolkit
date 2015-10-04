@@ -10,12 +10,15 @@ function(declare, lang, array, when, all, Store, QueryResults,
         get: function (_itemId) {
             var itemId = Number(_itemId);
             //return this.itemsColl.fetch({itemId:itemId});
+            this.enableTransactionButtons();
             return this.itemsColl.get(itemId);
         },
         add: function (item, directives) {
+            this.enableTransactionButtons();
             return this.itemsColl.add(item);
         },
         put: function (item, directives) {
+            this.enableTransactionButtons();
             return this.itemsColl.put(item);
         },
         remove: function (itemId, directives) {
@@ -50,19 +53,43 @@ function(declare, lang, array, when, all, Store, QueryResults,
         },
         getItemsByParentView: function (parentId, parentViewId) {
             var self = this;
-            var VIEW_CLASS_TYPE = 74;
             return self.getItemsByAssocTypeAndDestClass(parentViewId, 'manyToMany', VIEW_CLASS_TYPE).then(function (viewsArr) {
                 //console.log('viewsArr',viewsArr);
                 var promises = [];
                 viewsArr.forEach(function (view) {
-                    promises.push(self.getItemsByAssocTypeAndDestClass(parentId, view.toMannyAssociations, view.mapsTo));
+                    /*self.getAllowedAssocClassesForView(view._id).then(function(schema){
+                        console.dir(schema);
+                    });*/
+                    if(view.subDocument) promises.push(self.get(parentId));
+                    else{
+                        var assocType = view.toMannyAssociations;
+                        if(!assocType) assocType = view.toOneAssociations;
+                        if(parentId == 2016) debugger;
+                        if(view.onlyIfParentEquals){
+                            var oipe = Number(view.onlyIfParentEquals);
+                            if(parentId == oipe) promises.push(self.getItemsByAssocTypeAndDestClass(view.mapsTo, assocType));
+                            else promises.push([]);
+                        }
+                        else promises.push(self.getItemsByAssocTypeAndDestClass(parentId, assocType, view.mapsTo));
+                    }
                 });
                 return when(all(promises), function (viewResArr) {
                     var results = [];
                     var count = 0;
+
                     //console.log('viewResArr', viewResArr);
                     viewResArr.forEach(function (itemsArr) {
-                        if (itemsArr) {
+                        var subDocument = viewsArr[count].subDocument;
+                        if(subDocument){
+                            var doc = itemsArr[subDocument];
+                            for(var attrName in doc) {
+                                var subDocItem = doc[attrName];
+                                subDocItem.name = attrName;
+                                subDocItem._viewId = viewsArr[count]._id;
+                                results.push(subDocItem);
+                            };
+                        }
+                        else{
                             itemsArr.forEach(function (item) {
                                 item._viewId = viewsArr[count]._id;
                                 results.push(item);
@@ -74,11 +101,33 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 });
             });
         },
-        getItemsByAssocTypeAndDestClass: function (_parentId, type, _destClassId) {
-            var parentId = Number(_parentId);
-            var destClassId = Number(_destClassId);
+        getItemsByAssocTypeAndDestClass: function (parentId, type, destClassId) {
+            if(!parentId || !type) throw new Error('invalid parms');
             var self = this;
-            if (type == 'ordered') {
+            return when(self.getItemsByAssocType(parentId, type), function(itemsArr){//use when here because getItemsByAssocType sometimes returns a completed array
+                if(!destClassId) return itemsArr;
+                var isAPromises = [];
+                itemsArr.forEach(function(item){
+                    isAPromises.push(self.isA(item._id, destClassId));
+                });
+                return all(isAPromises).then(function (isADestClassArr) {
+                    var results = [];
+                    var count = 0;
+                    isADestClassArr.forEach(function(isADestClass){
+                        if(isADestClass) results.push(itemsArr[count]);
+                        count ++;
+                    });
+                    if(results.length == 1 && type == 'ordered') {
+                        var itemsPromisesArr = [];
+                        itemsPromisesArr.push(results[0]);//add the first one
+                        return self.followAssocType(results[0]._id, 'next', itemsPromisesArr).then(function (itemsPromisesArrResults) {
+                            return all(itemsPromisesArrResults);
+                        });
+                    }
+                    return results;
+                });
+            });
+            /*if (type == 'ordered') {
                 var query = {source: parentId, type: 'ordered'};
                 var collection = this.assocsColl.filter(query);
                 var isAPromises = [];
@@ -127,14 +176,25 @@ function(declare, lang, array, when, all, Store, QueryResults,
             else if (type == 'associations') {
                 var query = {source: parentId};
                 var collection = this.assocsColl.filter(query);
-                var assocs = [];
+                var typesObj = {};
                 collection.forEach(function (assoc) {
-                    assocs.push({_id:parentId, _name:assoc.type, _type:'assoc', _icon:3});
+                    if(assoc.type != 'parent') typesObj[assoc.type] = true;
                 });
+                var query2 = {dest: parentId};
+                var collection2 = this.assocsColl.filter(query2);
+                collection2.forEach(function (assoc) {
+                    var assocProps = ASSOCPROPERTIES[assoc.type];
+                    typesObj[assocProps.inverse] = true;
+                });
+                var assocs = [];
+                for(type in typesObj){
+                    assocs.push({_id:parentId+':'+type, _name:type, _type:'assoc', _icon:11});
+                }
                 return assocs;
             }
             else if (type == 'by association type') {
-                var query = {source: parentId, type: 'parent'};
+                var pars = _parentId.split(':');
+                var query = {source: Number(pars[0]), type: pars[1]};
                 var collection = this.assocsColl.filter(query);
                 var itemPromises = [];
                 collection.forEach(function (assoc) {
@@ -156,9 +216,63 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     });
                     return all(itemPromises);
                 });
+            }*/
+        },
+        getItemsByAssocType: function(_parentId, assocType){
+            if(assocType == 'the user') return [];
+            var parentId = Number(_parentId);
+            var self = this;
+            if (assocType == 'subclasses' || assocType == 'instantiations') {
+                var query = {dest: parentId, type: 'parent'};
+                var collection = this.assocsColl.filter(query);
+                var itemPromises = [];
+                collection.forEach(function (assoc) {
+                    itemPromises.push(self.itemsColl.get(assoc.source));
+                });
+                return all(itemPromises).then(function(itemsArr){
+                    var results = [];
+                    itemsArr.forEach(function (item){
+                        if(assocType == 'subclasses' && item._type == 'class') results.push(item);
+                        else if(assocType == 'instantiations' && item._type == 'object') results.push(item);
+                    });
+                    return results;
+                });
+            }
+            else if (assocType == 'associations') {
+                var query = {source: parentId};
+                var collection = this.assocsColl.filter(query);
+                var typesObj = {};
+                collection.forEach(function (assoc) {
+                    if(assoc.type != 'parent') typesObj[assoc.type] = true;
+                });
+                var query2 = {dest: parentId};
+                var collection2 = this.assocsColl.filter(query2);
+                collection2.forEach(function (assoc) {
+                    var assocProps = ASSOCPROPERTIES[assoc.type];
+                    typesObj[assocProps.inverse] = true;
+                });
+                var assocs = [];
+                for(var type in typesObj){
+                    assocs.push({_id:parentId+':'+type, _name:type, _type:'assoc', _icon:ASSOCPROPERTIES[type].icon});
+                }
+                return assocs;
+            }
+            else if (assocType == 'by association type') {
+                var pars = _parentId.split(':');
+                return self.getItemsByAssocType(Number(pars[0]), pars[1]);
+            }
+            else {
+                var query  = self.normalizeAssocQuery(parentId, assocType);
+                var collection = this.assocsColl.filter(query);
+                var itemPromises = [];
+                collection.forEach(function (assoc) {
+                    if(query.source) itemPromises.push(self.itemsColl.get(assoc.dest));
+                    else itemPromises.push(self.itemsColl.get(assoc.source));
+                });
+                return all(itemPromises);
             }
         },
-        fetch: function () {
+        fetch: function() {
             //var data = this.data;
             var data =[];
             if (!data || data._version !== this.storage.version || 1==1) {
@@ -170,7 +284,13 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 for (var i = 0, l = queryLog.length; i < l; i++) {
                     if(queryLog[i].type == 'filter'){
                         var query = queryLog[i].arguments[0];
-                        if(query.itemId) {
+                        if(query.itemId && query.assocType) {
+                            var promise = this.getItemsByAssocType(query.itemId, query.assocType);
+                            promise.then(function (res) {
+                                data = res;
+                            });
+                        }
+                        else if(query.itemId) {
                             this.get(query.itemId).then(function(res){
                                 data = [res];
                             });
@@ -230,54 +350,161 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return itemsPromisesArr;//found the last one
             });
         },
-        XfollowAssocType: function (itemId, type, itemsPromisesArr) {
+        getCombinedSchemaForView: function(view) {
             var self = this;
-            var query = self.normalizeAssocQuery(itemId, type);
-            console.log('query', query);
-            var collection = this.assocsColl.filter(query);
-            var promises = [];
-            collection.forEach(function(assoc){
-                itemsPromisesArr.push(self.itemsColl.get(assoc.dest));
-                return promises.push(self.followAssocType(assoc.dest, type, itemsPromisesArr));
+            return self.getAttrPropertiesFromAncestors(view.mapsTo).then(function(classAttrObj){
+                var schema = {_viewId: view._id};
+                for(var attrPropName in view.schema){
+                    //if(attrPropName == 'description') debugger;
+                    var newProp = {};
+                    var attrProp = view.schema[attrPropName];
+                    var classAttrProp = null;
+                    for(var classAttrName in classAttrObj){
+                        //debugger;
+                        if(attrPropName == classAttrName){
+                            classAttrProp = classAttrProp = classAttrObj[attrPropName];
+                            break;
+                        }
+                    };
+                    if(!classAttrProp) {
+                        //throw new Error('cant find classAttrProp');
+                        console.warn('classAttrProp not found',attrProp);
+                        continue;
+                    }
+                    //set the defaults
+                    newProp.type = classAttrProp.type;
+                    if(classAttrProp.media) newProp.media = classAttrProp.media;
+                    if(classAttrProp.enum){
+                        if(attrProp.enum) newProp.enum = attrProp.enum; //TODO assert that the values are permitted
+                        else newProp.enum = classAttrProp.enum;
+                    }
+                    if(attrProp.pattern) newProp.pattern = attrProp.pattern;
+                    else if(classAttrProp.pattern) newProp.pattern = classAttrProp.pattern;
+                    if(attrProp.invalidMessage) newProp.invalidMessage = attrProp.invalidMessage;
+                    else if(classAttrProp.invalidMessage) newProp.invalidMessage = classAttrProp.invalidMessage;
+                    if(attrProp['$ref']) newProp['$ref'] = attrProp['$ref'];
+                    else if(classAttrProp['$ref']) newProp['$ref'] = classAttrProp['$ref'];
+
+                    newProp.required = attrProp.required?attrProp.required:classAttrProp.required?classAttrProp.required:false;
+                    newProp.readOnly = attrProp.readOnly?attrProp.readOnly:classAttrProp.readOnly?classAttrProp.readOnly:true;
+                    newProp.hidden = attrProp.hidden?attrProp.hidden:classAttrProp.hidden?classAttrProp.hidden:false;
+                    newProp.title = attrProp.title?attrProp.title:classAttrProp.title?classAttrProp.title:'[no title]';
+                    newProp.default = attrProp.default?attrProp.default:classAttrProp.default?classAttrProp.default:null;
+                    newProp.description = attrProp.description?attrProp.description:classAttrProp.description?classAttrProp.description:'[no description]';
+                    newProp.style = attrProp.style?attrProp.style:classAttrProp.style?classAttrProp.style:'width:100%';
+                    newProp.nullValue = null;
+                    newProp.columnWidth = '10em'
+                    if(classAttrProp.media && classAttrProp.media.mediaType == 'text/html'){
+                        newProp.nullValue = '<p>[no text]</p>';
+                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'100%';
+                        newProp.maxLength = attrProp.maxLength?attrProp.maxLength:classAttrProp.maxLength?classAttrProp.maxLength:1000000;
+                    }
+                    else if(classAttrProp.enum){
+                        newProp.nullValue = -1;
+                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'8em';
+                    }
+                    else if(classAttrProp.type == 'String'){
+                        newProp.nullValue = '[empty]';
+                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'10em';
+                        newProp.maxLength = attrProp.maxLength?attrProp.maxLength:classAttrProp.maxLength?classAttrProp.maxLength:1000000;
+                        if(attrProp.minLength) newProp.minLength = attrProp.minLength;
+                        else if(classAttrProp.minLength) newProp.minLength = classAttrProp.minLength;
+                    }
+                    else if(classAttrProp.type == 'Number'){
+                        newProp.nullValue = '[null]';
+                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'4em';
+                        newProp.maximum = attrProp.maximum?attrProp.maximum:classAttrProp.maximum?classAttrProp.maximum:Number.MAX_VALUE;
+                        newProp.minimum = attrProp.minimum?attrProp.minimum:classAttrProp.minimum?classAttrProp.minimum:Number.MIN_VALUE;
+                        newProp.places = attrProp.places?attrProp.places:classAttrProp.places?classAttrProp.places:0;
+                    }
+                    else if(classAttrProp.type == 'Date'){
+                        newProp.nullValue = null;
+                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'6em';
+                    }
+                    else if(classAttrProp.type == 'Boolean'){
+                        newProp.nullValue = false;
+                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'3em';
+                    }
+                    schema[attrPropName] = newProp;
+                }
+                return schema;
             });
-            return all(promises);
         },
-        XfollowAssocType: function (itemId, type) {
+        getAllowedAssocClassesForView: function(viewId){
             var self = this;
-            var query = self.normalizeAssocQuery(itemId, type);
-            console.log('query', query);
-            var collection = this.assocsColl.filter(query);
-            var promises = [];
-            collection.forEach(function(assoc){
-                return promises.push(self.followAssocType(assoc.dest, type).then(function(assocsArr){
-                    var itemPromises = [];
-                    assocsArr.forEach(function(assoc) {
-                        itemPromises.push(self.itemsColl.get(assoc.dest));
-                    });
-                    return itemPromises;
-                }));
-            });
-            return all(promises).then(function(arrs){
-                console.log('arrs',arrs);
-                var results = [];
-                arrs.forEach(function(itemPromise){
-                    results.push(itemPromise);
+            return this.getItemsByAssocTypeAndDestClass(viewId, 'manyToMany', VIEW_CLASS_TYPE).then(function (viewsArr) {
+                var permittedClassesObj = { parentViewId : viewId };
+                var promises = [];
+                viewsArr.forEach(function(subView){
+                    //TODO allowed classes for class model?
+                    if(subView.mapsTo) promises.push(self.collectAllByAssocType(subView.mapsTo, 'subClasses'));
                 });
-                return results;
+                return all(promises).then(function(subClassesArr){
+                    for(var i =0; i<subClassesArr.length;i++){
+                        var subClasses = subClassesArr[i];
+                        var view = viewsArr[i];
+                        permittedClassesObj[view._id] = {assocType: view.toMannyAssociations, allowedClasses:subClasses};
+                    }
+                    return permittedClassesObj;
+                });
+            });
+        },
+        getAttrPropertiesFromAncestors: function(classId){
+            var self = this;
+            var parentClassesPromises = [];
+            parentClassesPromises.push(self.get(classId));// Get the first one
+            return self.followAssocType(Number(classId), 'parent', parentClassesPromises).then(function(parentClassesArr){
+                return all(parentClassesArr).then(function(classesArr){
+                    var classAttrObj = {};
+                    classesArr.forEach(function(classItem) {
+                        for(classAttr in classItem){
+                            //console.log('classAttr', classAttr);
+                            if(classAttr.charAt(0)!='_') classAttrObj[classAttr] = classItem[classAttr];
+                        }
+                    });
+                    return classAttrObj;
+                });
+            });
+        },
+        collectAllByAssocType: function (itemId, assocType) {
+            var self = this;
+            return self.get(itemId).then(function(item){
+                var type = ASSOCPROPERTIES[assocType].type;
+                if(!type || item._type == type){
+                    var query  = self.normalizeAssocQuery(itemId, assocType);
+                    var collection = self.assocsColl.filter(query);
+                    var itemPromises = [];
+                    var count = 0;
+                    collection.forEach(function (assoc) {
+                        count ++;
+                        if(!ASSOCPROPERTIES[assocType].pseudo) itemPromises.push(self.itemsColl.get(assoc.dest));
+                        else itemPromises.push(self.itemsColl.get(assoc.source));
+                    });
+                    if(ASSOCPROPERTIES[assocType].cardinality == 'one' && count>1) console.warn('more than one found');
+                    return all(itemPromises).then(function(classesArr){
+                        //console.log('classesArr',classesArr);
+                        var subclassesPromises = [];
+                        classesArr.forEach(function(childItem){
+                            subclassesPromises.push(self.collectAllByAssocType(childItem._id, assocType));
+                        });
+                        return all(subclassesPromises).then(function(subclassesArr){
+                            var results = [];
+                            results.push(item);
+                            subclassesArr.forEach(function(subClass){
+                                if(subClass) results.push(subClass[0]);
+                            });
+                            console.log('subclassesArr', results);
+                            return results;
+                        });
+                    });
+                }
+                else return null;
             });
         },
         normalizeAssocQuery: function (itemId, type) {
-            var reveseAssoc = {
-                subClasses:'parent',
-                instantiations:'parent',
-                orderedParent:'ordered',
-                previous:'next',
-                manyToManyReverse:'manyToMany',
-                manyToOne:'oneToMany',
-                ownedBy:'owns'
-            };
-            if(reveseAssoc[type]) {
-                return {dest: itemId, type: reveseAssoc[type]};
+            var assocProps = ASSOCPROPERTIES[type];
+            if(assocProps.pseudo) {
+                return {dest: itemId, type: assocProps.inverse};
             }
             else return {source: itemId, type: type};
         },
@@ -292,33 +519,5 @@ function(declare, lang, array, when, all, Store, QueryResults,
 
 
     });
-    /*
 
-    var cardinality = {
-        //to many
-        subClasses:'many',
-        manyToMany:'many',
-        ordered:'many',
-        instantiations:'many',
-        oneToMany:'many',
-        manyToManyReverse:'many',
-        attributeOf:'many',
-        mappedToBy:'many',
-        owns:'many',
-        associations:'many',
-        defaultOf:'many',
-        byAssociationType:'many',
-        //to one
-        parent: 'one',
-        theUser: 'one',
-        attribute: 'one',
-        mapsTo: 'one',
-        default: 'one',
-        oneToOne: 'one',
-        next: 'one',
-        orderedParent: 'one',
-        ownedBy: 'one',
-        oneToOneReverse: 'one',
-        manyToOne: 'one'
-    };*/
 });

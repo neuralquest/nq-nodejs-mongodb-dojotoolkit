@@ -15,7 +15,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			this.inherited(arguments);
 			var self = this;
 			this.getWidgetProperties(this.widgetId).then(function(widgetProps){
-				console.log('widgetProp',widgetProps);
+				//console.log('widgetProp',widgetProps);
 				self.widgetProps = widgetProps;
 				self.createDeferred.resolve(self);//ready to be loaded with data
 			}, nq.errorDialog);
@@ -125,6 +125,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				getIconClass: function(item, opened){
 					if(!item) return 'icondefault';
                     if(item._type == 'object') return 'icon'+item._icon;
+					if(item._type == 'assoc') return 'icon'+item._icon;
 					return 'icon0';
 				},
 				getRowClass: function(item, opened){

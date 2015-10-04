@@ -2,7 +2,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
         'dijit/form/CheckBox', 'dijit/Editor', 'dijit/form/CurrencyTextBox', 'dijit/form/ValidationTextBox', 'dojo/dom-construct', "dojo/on", 
         "dojo/when", "dojo/query", 'dijit/registry', "app/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/_base/lang",
         "dojo/promise/all", "dojo/html", 'dojo/store/Memory', "dojo/dom-style","dojo/dom-attr",
-        
+
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, arrayUtil, Select, Toolbar, DateTextBox, NumberTextBox, 
@@ -18,7 +18,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			var tableNode = domConstruct.create('table', {style: 'border-spacing:5px;'}, this.pane.containerNode);
 			var self = this;
 			this.getWidgetProperties(this.widgetId).then(function(widgetProps){
-				console.log('widgetProp',widgetProps);
+				//console.log('widgetProp',widgetProps);
 				self.widgetProps = widgetProps;
 				widgetProps.views.forEach(function(view){
                     view.properties.forEach(function(property){
@@ -27,14 +27,16 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                         var row = domConstruct.create("tr", null, tableNode);
                         //the label
                         domConstruct.create("td", {innerHTML: (property.label), style: "padding: 3px"}, row);
-                        //the dijit
+                        if(property.dijitType == 'RichText'){//place the editor on a new row with colspan 2
+                            row = domConstruct.create("tr", null, tableNode);
+                        }
                         var tdDom = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row);
+                        //the dijit
                         var dijit = null;
                         if(property.dijitType == 'Select') {
                             dijit = new Select(property.editorArgs, domConstruct.create('div'));
                         }
                         else if(property.dijitType == 'RichText') {
-                            self.editorToolbarDivNode.appendChild(property.editorArgs.toolbar.domNode);
                             dijit = new Editor(property, domConstruct.create('div', {name: property.name}));/*setting the name wont be done autoamticly*/
                             //						dijit.addStyleSheet('css/editor.css');
                             dijit.on("NormalizedDisplayChanged", function(event){
@@ -49,14 +51,14 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                             //dijit.destroy = function(){console.log('destroyed editor')};
                             domAttr.set(tdDom, 'colspan', '2');
                         }
-                        else if(property.dijitType == 'String') {
-                            var dijit = new ValidationTextBox(property, domConstruct.create('input'));
-                        }
                         else if(property.dijitType == 'Number') {
                             dijit = new NumberTextBox(property, domConstruct.create('input'));
                         }
                         else if(property.dijitType == 'Date') {
                             dijit = new DateTextBox(property, domConstruct.create('input'));
+                        }
+                        else {//String
+                            var dijit = new ValidationTextBox(property, domConstruct.create('input'));
                         }
                         if(dijit){
                             self.own(dijit);
