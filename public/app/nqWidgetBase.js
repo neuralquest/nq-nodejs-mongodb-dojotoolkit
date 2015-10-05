@@ -74,7 +74,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		getWidgetProperties: function(widgetId){
 			var self = this;
 			return self.store.get(widgetId).then(function(widget){
-				//recursively get all of the views that belong to this widget
+				//TODO recursively get all of the views that belong to this widget
 				return self.store.getItemsByAssocTypeAndDestClass(widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(dbViewsArr) {
                     var viewsArr = JSON.parse(JSON.stringify(dbViewsArr));// mustn't update the the actual database dbViewsArr object.
 					viewsArr.forEach(function(view){

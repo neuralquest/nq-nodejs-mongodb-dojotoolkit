@@ -561,7 +561,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             pseudo : false,
             cardinality: 'many',
             icon: 12},
-        subClasses: {
+        subclasses: {
             inverse :'parent',
             pseudo : true,
             cardinality: 'many',
@@ -630,38 +630,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     };
 
 
-/*
-	CLASS_TYPE = 0;
-	OBJECT_TYPE = 1;	
-	// Primitive Assoc types (as used by the Assoc table)
-	PARENT_ASSOC = 3;			//TO ONE
-	ATTRIBUTE_ASSOC = 4;		//TO ONE
-	MAPSTO_ASSOC = 5;			//TO ONE
-	DEFAULT_ASSOC = 6;			//TO ONE
-	ONETOONE_ASSOC = 7;			//TO ONE
-	ORDERED_ASSOC = 8;			//TO MANY
-	NEXT_ASSOC = 9;				//TO ONE Only used internaly
-	MANYTOMANY_ASSOC = 10;		//TO MANY
-	ONETOMANY_ASSOC = 11;		//TO MANY
-	OWNS_ASSOC = 12;			//TO MANY
-	// Pseudo Assoc tppes (inverse of the real assocs)
-	SUBCLASSES_PASSOC = 15;		//TO MANY
-	ATTRIBUTE_OF_PASSOC = 16;	//TO MANY
-	MAPPED_TO_BY_PASSOC = 17;	//TO MANY
-	DEFAULT_OF_PASSOC = 18;		//TO MANY
-	ONETOONE_REVERSE_PASSOC = 19;//TO ONE
-	ORDERED_PARENT_PASSOC = 20;	//TO ONE
-	PREVIOUS_PASSOC = 21;		//TO ONE
-	MANYTOMANY_REVERSE_PASSOC = 22;//TO MANY
-	MANYTOONE_PASSOC = 23;		//TO ONE
-	OWNED_BY_PASSOC = 24;		//TO ONE
-	//Special
-	INSTANTIATIONS_PASSOC = 27;	//TO MANY
-	THE_USER_PASSOC = 28;		//TO ONE
-	BYASSOCTPE_PASSOC = 30; 	//TO MANY		
-	ASSOCS_PASSOC = 31; 		//TO MANY		
-
-*/
 
 
 

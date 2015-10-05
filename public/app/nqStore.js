@@ -102,7 +102,10 @@ function(declare, lang, array, when, all, Store, QueryResults,
             });
         },
         getItemsByAssocTypeAndDestClass: function (parentId, type, destClassId) {
-            if(!parentId || !type) throw new Error('invalid parms');
+            if(!parentId || !type) {
+                console.error('invalid parms');
+                return [];
+            }
             var self = this;
             return when(self.getItemsByAssocType(parentId, type), function(itemsArr){//use when here because getItemsByAssocType sometimes returns a completed array
                 if(!destClassId) return itemsArr;
@@ -119,110 +122,23 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     });
                     if(results.length == 1 && type == 'ordered') {
                         var itemsPromisesArr = [];
-                        itemsPromisesArr.push(results[0]);//add the first one
-                        return self.followAssocType(results[0]._id, 'next', itemsPromisesArr).then(function (itemsPromisesArrResults) {
+                        return self.collectAllByAssocType(results[0]._id, 'next').then(function (itemsPromisesArrResults) {
                             return all(itemsPromisesArrResults);
                         });
+                        /*itemsPromisesArr.push(results[0]);//add the first one
+                        return self.followAssocType(results[0]._id, 'next', itemsPromisesArr).then(function (itemsPromisesArrResults) {
+                            return all(itemsPromisesArrResults);
+                        });*/
                     }
                     return results;
                 });
             });
-            /*if (type == 'ordered') {
-                var query = {source: parentId, type: 'ordered'};
-                var collection = this.assocsColl.filter(query);
-                var isAPromises = [];
-                collection.forEach(function (assoc) {
-                    isAPromises.push(self.isA(assoc.dest, destClassId));
-                });
-                return all(isAPromises).then(function (isADestClassArr) {
-                    //console.log('isADestClassArr', isADestClassArr);
-                    var count = 0;
-                    var firstId = null;
-                    for (var i = 0; i < isADestClassArr.length; i++) {
-                        if (isADestClassArr[i]) {
-                            firstId = isADestClassArr[i];
-                            count += 1;
-                        }
-                    }
-                    if (count > 1) throw new Error(new Error("More than one 'ordered' found"));
-                    else if (count == 1) {
-                        var itemsPromisesArr = [];
-                        itemsPromisesArr.push(self.itemsColl.get(firstId));//add the first one
-                        return self.followAssocType(firstId, 'next', itemsPromisesArr).then(function (itemsPromisesArrResults) {
-                            return all(itemsPromisesArrResults);
-                        });
-                    }
-                    else return ([]);
-                });
-            }
-            else if (type == 'instantiations') {
-                var query = {dest: destClassId, type: 'parent'};
-                var collection = this.assocsColl.filter(query);
-                var itemPromises = [];
-                collection.forEach(function (assoc) {
-                    itemPromises.push(self.itemsColl.get(assoc.source));
-                });
-                return all(itemPromises);
-            }
-            else if (type == 'subclasses') {
-                var query = {dest: parentId, type: 'parent'};
-                var collection = this.assocsColl.filter(query);
-                var itemPromises = [];
-                collection.forEach(function (assoc) {
-                    itemPromises.push(self.itemsColl.get(assoc.source));
-                });
-                return all(itemPromises);
-            }
-            else if (type == 'associations') {
-                var query = {source: parentId};
-                var collection = this.assocsColl.filter(query);
-                var typesObj = {};
-                collection.forEach(function (assoc) {
-                    if(assoc.type != 'parent') typesObj[assoc.type] = true;
-                });
-                var query2 = {dest: parentId};
-                var collection2 = this.assocsColl.filter(query2);
-                collection2.forEach(function (assoc) {
-                    var assocProps = ASSOCPROPERTIES[assoc.type];
-                    typesObj[assocProps.inverse] = true;
-                });
-                var assocs = [];
-                for(type in typesObj){
-                    assocs.push({_id:parentId+':'+type, _name:type, _type:'assoc', _icon:11});
-                }
-                return assocs;
-            }
-            else if (type == 'by association type') {
-                var pars = _parentId.split(':');
-                var query = {source: Number(pars[0]), type: pars[1]};
-                var collection = this.assocsColl.filter(query);
-                var itemPromises = [];
-                collection.forEach(function (assoc) {
-                    itemPromises.push(self.itemsColl.get(assoc.dest));
-                });
-                return all(itemPromises);
-            }
-            else {
-                var query = {source: parentId, type: type};
-                var collection = this.assocsColl.filter(query);
-                var isAPromises = [];
-                collection.forEach(function (assoc) {
-                    isAPromises.push(self.isA(assoc.dest, destClassId));
-                });
-                return all(isAPromises).then(function (isADestClassArr) {
-                    var itemPromises = [];
-                    isADestClassArr.forEach(function (isA) {
-                        if (isA)itemPromises.push(self.get(isA));
-                    });
-                    return all(itemPromises);
-                });
-            }*/
         },
         getItemsByAssocType: function(_parentId, assocType){
             if(assocType == 'the user') return [];
             var parentId = Number(_parentId);
             var self = this;
-            if (assocType == 'subclasses' || assocType == 'instantiations') {
+            if (assocType == 'subclasses') {
                 var query = {dest: parentId, type: 'parent'};
                 var collection = this.assocsColl.filter(query);
                 var itemPromises = [];
@@ -232,10 +148,34 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return all(itemPromises).then(function(itemsArr){
                     var results = [];
                     itemsArr.forEach(function (item){
-                        if(assocType == 'subclasses' && item._type == 'class') results.push(item);
-                        else if(assocType == 'instantiations' && item._type == 'object') results.push(item);
+                        if(item._type == 'class') results.push(item);
                     });
                     return results;
+                });
+            }
+            else if (assocType == 'instantiations') {
+                var self = this;
+                return when(self.collectAllByAssocType(parentId, 'subclasses'), function (allClassesArr){
+                    var assocPromises = [];
+                    allClassesArr.forEach(function(classItem){
+                        var query = {dest: classItem._id, type: 'parent'};
+                        assocPromises.push(self.assocsColl.filter(query));
+                    });
+                    return all(assocPromises).then(function(classesArr){
+                        var objPromises = [];
+                        classesArr.forEach(function(assocsArr){
+                            assocsArr.forEach(function(assoc){
+                                objPromises.push(self.get(assoc.source));
+                            });
+                        });
+                        return all(objPromises).then(function(objArr){
+                            var results = [];
+                            objArr.forEach(function (obj){
+                                if(obj._type == 'object') results.push(obj);
+                            });
+                            return results;
+                        });
+                    });
                 });
             }
             else if (assocType == 'associations') {
@@ -338,7 +278,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return self.isA(assocsArr[0].dest, destClassId, originalId);
             });
         },
-        followAssocType: function (itemId, type, itemsPromisesArr) {
+/*        followAssocType: function (itemId, type, itemsPromisesArr) {
             var self = this;
             var collection = this.assocsColl.filter({source: itemId, type: type});
             return collection.fetch().then(function (assocsArr) {
@@ -349,7 +289,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 }
                 return itemsPromisesArr;//found the last one
             });
-        },
+        },*/
         getCombinedSchemaForView: function(view) {
             var self = this;
             return self.getAttrPropertiesFromAncestors(view.mapsTo).then(function(classAttrObj){
@@ -451,6 +391,23 @@ function(declare, lang, array, when, all, Store, QueryResults,
         },
         getAttrPropertiesFromAncestors: function(classId){
             var self = this;
+            //var parentClassesPromises = [];
+            //parentClassesPromises.push(self.get(classId));// Get the first one
+            return self.collectAllByAssocType(Number(classId), 'parent').then(function(parentClassesArr){
+                return all(parentClassesArr).then(function(classesArr){
+                    var classAttrObj = {};
+                    classesArr.forEach(function(classItem) {
+                        for(classAttr in classItem){
+                            //console.log('classAttr', classAttr);
+                            if(classAttr.charAt(0)!='_') classAttrObj[classAttr] = classItem[classAttr];
+                        }
+                    });
+                    return classAttrObj;
+                });
+            });
+        },
+        /*getAttrPropertiesFromAncestors: function(classId){
+            var self = this;
             var parentClassesPromises = [];
             parentClassesPromises.push(self.get(classId));// Get the first one
             return self.followAssocType(Number(classId), 'parent', parentClassesPromises).then(function(parentClassesArr){
@@ -465,12 +422,26 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     return classAttrObj;
                 });
             });
-        },
+        },*/
         collectAllByAssocType: function (itemId, assocType) {
+            // summary:
+            //		Use to navigate the data graph following the given association type, gathering all items along the way
+            //      If ASSOCPROPERTIES specifies that an association type should return one particular type, other types will be ignored.
+            //      Will write an error if it finds more than one occurrence when ASSOCPROPERTIES specifies that only one is allowed.
+            //		Returns an array of items, including the first one (itemId).
+            //      Examples: Get all objects in a linked list by 'next', get all ancestor classes by 'parent',
+            //          Get all subclasses by 'subclass'
+            // itemId: Number
+            //		The id of the item we're starting with.
+            // assocType: String
+            //		The association type to be followed.
+            // returns: Array
+            //		An array of all the items found along the way.
             var self = this;
             return self.get(itemId).then(function(item){
                 var type = ASSOCPROPERTIES[assocType].type;
                 if(!type || item._type == type){
+                    console.log('item', item);
                     var query  = self.normalizeAssocQuery(itemId, assocType);
                     var collection = self.assocsColl.filter(query);
                     var itemPromises = [];
@@ -480,9 +451,9 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         if(!ASSOCPROPERTIES[assocType].pseudo) itemPromises.push(self.itemsColl.get(assoc.dest));
                         else itemPromises.push(self.itemsColl.get(assoc.source));
                     });
-                    if(ASSOCPROPERTIES[assocType].cardinality == 'one' && count>1) console.warn('more than one found');
+                    if(ASSOCPROPERTIES[assocType].cardinality == 'one' && count>1) console.error('more than one found');
                     return all(itemPromises).then(function(classesArr){
-                        //console.log('classesArr',classesArr);
+                        console.log('classesArr',classesArr);
                         var subclassesPromises = [];
                         classesArr.forEach(function(childItem){
                             subclassesPromises.push(self.collectAllByAssocType(childItem._id, assocType));
@@ -490,15 +461,17 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         return all(subclassesPromises).then(function(subclassesArr){
                             var results = [];
                             results.push(item);
-                            subclassesArr.forEach(function(subClass){
-                                if(subClass) results.push(subClass[0]);
+                            subclassesArr.forEach(function(subArr){
+                                subArr.forEach(function(subClass){
+                                    results.push(subClass);
+                                });
                             });
-                            console.log('subclassesArr', results);
+                            console.log('results', results);
                             return results;
                         });
                     });
                 }
-                else return null;
+                else return [];
             });
         },
         normalizeAssocQuery: function (itemId, type) {
