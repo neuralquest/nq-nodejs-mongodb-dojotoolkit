@@ -25,13 +25,15 @@ function(declare, lang, array, when, all, Store, QueryResults,
             return this.itemsColl.remove(itemId);
         },
         getChildren: function (object, onComplete) {
-            var promise = this.getItemsByParentView(object._id, object._viewId);
+            if(!object._id || !object._viewId) throw new error('invalid parms');
             //var collection = this.filter({parentId: object.id, parentViewId: object.viewId });
+            //collection.fetch();
+            //return onComplete(collection);
+
+            var promise = this.getItemsByParentView(object._id, object._viewId);
             return promise.then(function (results) {
                 return onComplete(results);
             });
-            var results = new QueryResults(promise);
-            return onComplete(results);
         },
         /*mayHaveChildren: function(item){
          //return 'children' in item;
@@ -46,12 +48,23 @@ function(declare, lang, array, when, all, Store, QueryResults,
          return object.name;
          },*/
         getItemsByView: function (parentId, viewId) {
+            if(!parentId || !viewId) throw new error('invalid parms');
             var self = this;
             return self.get(viewId).then(function (view) {
                 return self.getItemsByAssocTypeAndDestClass(parentId, view.toMannyAssociations, view.mapsTo)
             });
         },
         getItemsByParentView: function (parentId, parentViewId) {
+             /* summary: Used to collect all items pertaining to all the child views of the parent view
+             //          Special case: sub-documents
+             // parentId: String
+             //          The id of the item we're starting with.
+             // parentViewId: Number
+             //          The id of the parent view.
+             // returns: Promise to an array
+             //          An array of all the items.
+             */
+            if(!parentId || !parentViewId) throw new error('invalid parms');
             var self = this;
             return self.getItemsByAssocTypeAndDestClass(parentViewId, 'manyToMany', VIEW_CLASS_TYPE).then(function (viewsArr) {
                 //console.log('viewsArr',viewsArr);
@@ -101,13 +114,21 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 });
             });
         },
-        getItemsByAssocTypeAndDestClass: function (parentId, type, destClassId) {
-            if(!parentId || !type) {
-                console.error('invalid parms');
-                return [];
-            }
+        getItemsByAssocTypeAndDestClass: function (parentId, assocType, destClassId) {
+             /* summary: Use to collect all items by association type ‘type’, that are of class type ‘destClassId’.
+             //          If no destClassId is provided then then all items are returned, regardless of their class type.
+             // parentId: String
+             //          The id of the item we're starting with.
+             // assocType: String
+             //          The association type to be followed.
+             // destClassId Number, Optional
+             //          Id of the (ancestor) class that the items must belong to
+             // returns: Promise
+             //          An array of all the items found
+             */
+            if(!parentId || !assocType) throw new error('invalid parms');
             var self = this;
-            return when(self.getItemsByAssocType(parentId, type), function(itemsArr){//use when here because getItemsByAssocType sometimes returns a completed array
+            return when(self.getItemsByAssocType(parentId, assocType), function(itemsArr){//use when here because getItemsByAssocType sometimes returns a completed array
                 if(!destClassId) return itemsArr;
                 var isAPromises = [];
                 itemsArr.forEach(function(item){
@@ -120,21 +141,25 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         if(isADestClass) results.push(itemsArr[count]);
                         count ++;
                     });
-                    if(results.length == 1 && type == 'ordered') {
-                        var itemsPromisesArr = [];
+                    if(results.length == 1 && assocType == 'ordered') {
                         return self.collectAllByAssocType(results[0]._id, 'next').then(function (itemsPromisesArrResults) {
                             return all(itemsPromisesArrResults);
                         });
-                        /*itemsPromisesArr.push(results[0]);//add the first one
-                        return self.followAssocType(results[0]._id, 'next', itemsPromisesArr).then(function (itemsPromisesArrResults) {
-                            return all(itemsPromisesArrResults);
-                        });*/
                     }
                     return results;
                 });
             });
         },
         getItemsByAssocType: function(_parentId, assocType){
+            /* summary: Use to gather all items on the next level according to association type.
+            //          It can deal with all types of associations and will automatically invert them according to ASSOCPROPERTIES.pseudo.
+            // _parentId: String
+            //          Usually contains a number. In the case of ‘by association type’ it will also contain ‘semicolon,  assocType’
+            // assocType: String
+            //          The association type to be followed.
+            // returns: Promise to an array (sometimes an Array)
+            //          An array of all the items.
+            */
             if(assocType == 'the user') return [];
             var parentId = Number(_parentId);
             var self = this;
@@ -291,9 +316,16 @@ function(declare, lang, array, when, all, Store, QueryResults,
             });
         },*/
         getCombinedSchemaForView: function(view) {
+            /* summary:  Used to create a JSON schema based on the view schema in combination with class attributes inherited through view.mapsTo.
+             //          The same method is used server side to validate updates.
+             // view: Object
+             //          The starting point for our schema
+             // returns: Object
+             //          The schema object.
+             */
             var self = this;
             return self.getAttrPropertiesFromAncestors(view.mapsTo).then(function(classAttrObj){
-                var schema = {_viewId: view._id};
+                var schema = {_viewId:view._id, _mapsTo:view.mapsTo};
                 for(var attrPropName in view.schema){
                     //if(attrPropName == 'description') debugger;
                     var newProp = {};
@@ -308,10 +340,12 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     };
                     if(!classAttrProp) {
                         //throw new Error('cant find classAttrProp');
-                        console.warn('classAttrProp not found',attrProp);
-                        continue;
+                        console.error('classAttrProp not found',attrProp);
+                        classAttrProp = {};
                     }
                     //set the defaults
+                    newProp.className = classAttrProp._name;
+                    newProp.classId = classAttrProp._id;
                     newProp.type = classAttrProp.type;
                     if(classAttrProp.media) newProp.media = classAttrProp.media;
                     if(classAttrProp.enum){
@@ -333,36 +367,30 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     newProp.description = attrProp.description?attrProp.description:classAttrProp.description?classAttrProp.description:'[no description]';
                     newProp.style = attrProp.style?attrProp.style:classAttrProp.style?classAttrProp.style:'width:100%';
                     newProp.nullValue = null;
-                    newProp.columnWidth = '10em'
+                    newProp.columnWidth = '10em';
                     if(classAttrProp.media && classAttrProp.media.mediaType == 'text/html'){
-                        newProp.nullValue = '<p>[no text]</p>';
                         newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'100%';
-                        newProp.maxLength = attrProp.maxLength?attrProp.maxLength:classAttrProp.maxLength?classAttrProp.maxLength:1000000;
+                        newProp.maxLength = attrProp.maxLength?attrProp.maxLength:classAttrProp.maxLength?classAttrProp.maxLength:100000;
                     }
                     else if(classAttrProp.enum){
-                        newProp.nullValue = -1;
                         newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'8em';
                     }
                     else if(classAttrProp.type == 'String'){
-                        newProp.nullValue = '[empty]';
                         newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'10em';
                         newProp.maxLength = attrProp.maxLength?attrProp.maxLength:classAttrProp.maxLength?classAttrProp.maxLength:1000000;
                         if(attrProp.minLength) newProp.minLength = attrProp.minLength;
                         else if(classAttrProp.minLength) newProp.minLength = classAttrProp.minLength;
                     }
                     else if(classAttrProp.type == 'Number'){
-                        newProp.nullValue = '[null]';
                         newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'4em';
                         newProp.maximum = attrProp.maximum?attrProp.maximum:classAttrProp.maximum?classAttrProp.maximum:Number.MAX_VALUE;
                         newProp.minimum = attrProp.minimum?attrProp.minimum:classAttrProp.minimum?classAttrProp.minimum:Number.MIN_VALUE;
                         newProp.places = attrProp.places?attrProp.places:classAttrProp.places?classAttrProp.places:0;
                     }
                     else if(classAttrProp.type == 'Date'){
-                        newProp.nullValue = null;
                         newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'6em';
                     }
                     else if(classAttrProp.type == 'Boolean'){
-                        newProp.nullValue = false;
                         newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'3em';
                     }
                     schema[attrPropName] = newProp;
@@ -399,7 +427,8 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     classesArr.forEach(function(classItem) {
                         for(classAttr in classItem){
                             //console.log('classAttr', classAttr);
-                            if(classAttr.charAt(0)!='_') classAttrObj[classAttr] = classItem[classAttr];
+                            //if(classAttr.charAt(0)!='_') classAttrObj[classAttr] = classItem[classAttr];
+                            classAttrObj[classAttr] = classItem[classAttr];
                         }
                     });
                     return classAttrObj;
@@ -424,19 +453,19 @@ function(declare, lang, array, when, all, Store, QueryResults,
             });
         },*/
         collectAllByAssocType: function (itemId, assocType) {
-            // summary:
-            //		Use to navigate the data graph following the given association type, gathering all items along the way
-            //      If ASSOCPROPERTIES specifies that an association type should return one particular type, other types will be ignored.
-            //      Will write an error if it finds more than one occurrence when ASSOCPROPERTIES specifies that only one is allowed.
-            //		Returns an array of items, including the first one (itemId).
-            //      Examples: Get all objects in a linked list by 'next', get all ancestor classes by 'parent',
-            //          Get all subclasses by 'subclass'
-            // itemId: Number
-            //		The id of the item we're starting with.
-            // assocType: String
-            //		The association type to be followed.
-            // returns: Array
-            //		An array of all the items found along the way.
+             /* summary: Use to navigate the data graph following the given association type, gathering all items along the way.
+             //          If ASSOCPROPERTIES specifies that an association type should return one particular item type, other types will be ignored.(e.g. subclasses, instantiations)
+             //          Will write an error if it finds more than one occurrence when ASSOCPROPERTIES specifies that only one is allowed.
+             //          Returns an array of items, starting with the first one (itemId).
+             //          Will preserve the order in the case of a linked list.
+             //          Examples: Get all objects in a linked list by 'next', get all ancestor classes by 'parent', get all subclasses by 'subclass'.
+             // itemId: Number
+             //          The id of the item we're starting with.
+             // assocType: String
+             //          The association type to be followed.
+             // returns: Array
+             //          An array of all the items found along the way.
+             */
             var self = this;
             return self.get(itemId).then(function(item){
                 var type = ASSOCPROPERTIES[assocType].type;

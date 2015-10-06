@@ -1,7 +1,7 @@
-define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry",
+define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/_base/lang",
         'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", "dojo/promise/all", "dojo/when", 'dijit/registry', 'dojo/store/Memory',
         'dijit/Toolbar', 'dijit/form/Select', 'dijit/form/DateTextBox',  'dijit/form/NumberTextBox', 'dijit/form/CheckBox', 'dijit/Editor', 'dijit/form/CurrencyTextBox', 'dijit/form/ValidationTextBox', ],
-	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, 
+	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, lang,
 			arrayUtil, domAttr, Deferred, all, when, registry, Memory,
 			Toolbar, Select, DateTextBox, NumberTextBox, CheckBox, Editor, CurrencyTextBox, ValidationTextBox){
 	return declare("nqWidgetBase", [_WidgetBase], {
@@ -74,11 +74,29 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		getWidgetProperties: function(widgetId){
 			var self = this;
 			return self.store.get(widgetId).then(function(widget){
-				//TODO recursively get all of the views that belong to this widget
-				return self.store.getItemsByAssocTypeAndDestClass(widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(dbViewsArr) {
+ 				//TODO recursively get all of the views that belong to this widget
+				return self.store.getItemsByAssocTypeAndDestClass(widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
+                    var widgetProps = {
+                        parentId : widget.parentId,
+                        name : widget.name,
+                        description : widget.description
+                    }
+                    var schemaPromises = [];
+                    viewsArr.forEach(function(view){
+                        schemaPromises.push(self.store.getCombinedSchemaForView(view));
+                    });
+                    return all(schemaPromises).then(function(schemasArr){
+                        var properties = [];
+                        schemasArr.forEach(function(schema){
+                            var propertiesArr = self.schemaToProperties(schema);
+                            properties.push(propertiesArr);
+                        });
+                        return widgetProps.properties = properties;
+                    });
+
                     var viewsArr = JSON.parse(JSON.stringify(dbViewsArr));// mustn't update the the actual database dbViewsArr object.
 					viewsArr.forEach(function(view){
-						view.properties = self.schemaToProperties(view.schema, view.mapsTo);
+						view.properties = self.schemaToProperties(view.schema);
 					});
 					widget.views = viewsArr;
 					//console.log('widget',widget);
@@ -86,34 +104,36 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				})
 			});
 		},
-        schemaToProperties: function(schema, mapsTo){
+        schemaToProperties: function(schema){
             var self = this;
             var properties = [];
             for(var attrName in schema){
                 var attrProp = schema[attrName];
                 if(attrProp.type == 'Document') continue;
+                if(attrName.charAt(0)=='_'){
+                    //properties.push(attrProp.attrName);
+                    continue;
+                }
                 var dijitType = attrProp.type;
                 if(attrProp.type == 'String'){
                     if(attrProp.enum) dijitType = 'Select';
                     else if(attrProp.media && attrProp.media.mediaType == 'text/html') dijitType = 'RichText';
                 }
                 var propObj = {
+                    viewId: attrProp.viewId,
+                    className: attrProp.className,
+                    classId: attrProp.classId,
                     dijitType: dijitType,
                     field: attrName, // for dgrid
                     name: attrName, //for input
                     assocType: '',
                     //attrClassType: attrName,
                     label: attrProp.title,
-                    helpText: attrProp.description,
-                    required: attrProp.required,
                     editable: attrProp.readOnly?false:true,
                     trim: true,
-                    default: attrProp.default,
-                    invalidMessage: attrProp.invalidMessage,
                     editOn: 'dblclick',  // for dgrid
                     autoSave: true, // for dgrid
                     sortable: true,
-                    style: 'width:100%'// for forms (grids will have a specific width)
                 };
                 if(dijitType == 'Select'){
                     //propObj.enum = attrProp.enum;
@@ -138,9 +158,6 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         if(!value) return -1;//dropdown will display [not selected]
                         return value;
                     };
-                    //width: attrRef[WIDTH_ATTR_ID]+'em',
-                    propObj.columnWidth = '8em';
-                    propObj.nullValue = -1;
                 }
                 else if(dijitType == 'RichText'){
                     var toolbar = new Toolbar({
@@ -158,24 +175,27 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         return value;
                     };
                     propObj.height = '';//auto-expand mode
-                    propObj.columnWidth = '100%';
-                    propObj.nullValue = '<p>[no text]</p>';
                 }
                 else if(dijitType == 'Date'){
-                    propObj.columnWidth = '6em';
-                    propObj.nullValue = null;
                 }
-                else if(dijitType == 'Number'){
+                else if(dijitType == 'Number') {
                     //property.editorArgs.constraints = {
                     //minimum: attrRef[MINIMUM_ATTR_ID],
                     //maximum: attrRef[MAXIMUM_ATTR_ID],
                     //places: 0
                     //}
-                    propObj.columnWidth = '5em';
-                    propObj.nullValue = null;                            }
+                    propObj.get = function (item) {
+                        var value = item[this.name];
+                        if (!value) return '[null]';
+                        return value;
+                    };
+                }
                 else if(dijitType == 'Boolean'){
-                    propObj.columnWidth = '3em';
-                    propObj.nullValue = null;
+                    propObj.get = function(item){
+                        var value = item[this.name];
+                        if(!value) return false;
+                        return value;
+                    };
                 }
                 else{ // String
                     propObj.dijitType = 'String';//default
@@ -184,8 +204,11 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         //minLength: attrRef[MINLENGTH_ATTR_ID],
                         //regRex: attrRef[REGEX_ATTR_ID], //e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
                     };
-                    propObj.columnWidth = '10em';
-                    propObj.nullValue = '[no value]';
+                    propObj.get = function(item){
+                        var value = item[this.name];
+                        if(!value) return '[empty]';
+                        return value;
+                    };
                 }
                 properties.push(propObj);
             }

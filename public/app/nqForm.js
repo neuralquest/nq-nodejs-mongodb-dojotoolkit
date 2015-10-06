@@ -20,8 +20,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			this.getWidgetProperties(this.widgetId).then(function(widgetProps){
 				//console.log('widgetProp',widgetProps);
 				self.widgetProps = widgetProps;
-				widgetProps.views.forEach(function(view){
-                    view.properties.forEach(function(property){
+				widgetProps.properties.forEach(function(property){
+                    if(property.name.charAt(0)!='_'){
                         //console.dir('property',property);
                         // var attr = view.schema[attrName];
                         var row = domConstruct.create("tr", null, tableNode);
@@ -71,7 +71,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                             //dijit.startup();will be call after add child and then from widget base
                         }
                         domConstruct.create("td", { innerHTML: (property.description), style: "padding: 3px", 'class': 'helpTextInvisable'}, row);
-                    });
+                    };
 				});
 				self.createDeferred.resolve(self);//ready to be loaded with data
 			}, nq.errorDialog);
