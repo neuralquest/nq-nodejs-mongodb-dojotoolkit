@@ -28,15 +28,14 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
-			this.headerDivNode = domConstruct.create('div', {}, this.domNode);//placeholder for header
 			this.pageToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.headerDivNode);//placeholder for the page toolbar
 			this.editorToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.headerDivNode);//placeholder for the editor toolbar
+            this.headerDivNode = domConstruct.create('div', {'style' : { 'padding': '10px'} }, this.domNode);//placeholder for header
 			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.headerDivNode);//placeholder for the helptext
-			this.pageHelpTextDiv.innerHTML = this.widgetDef.description;
 			this.pane = new ContentPane( {
 //				'class' : 'backgroundClass',
 				'doLayout' : 'true',
-//				'content': 'Some Conetent',
+//				'content': 'Some Content',
 //				'style' : { 'overflow': 'auto', 'padding': '0px', 'margin': '0px', width: '100%', height: '100%', background:'transparent'}
 			},  domConstruct.create('div'));
 			this.domNode.appendChild(this.pane.domNode);
@@ -96,7 +95,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
                     var viewsArr = JSON.parse(JSON.stringify(dbViewsArr));// mustn't update the the actual database dbViewsArr object.
 					viewsArr.forEach(function(view){
-						view.properties = self.schemaToProperties(view.schema);
+						view.properties = self.enrichSchema(view.schema);
 					});
 					widget.views = viewsArr;
 					//console.log('widget',widget);
@@ -104,16 +103,114 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 				})
 			});
 		},
+        enrichSchema: function(schema){
+            var self = this;
+            for(var attrName in schema){
+                var attrProp = schema[attrName];
+                if(attrProp.type == 'Document') continue;
+                var dijitType = attrProp.type;
+                if(attrProp.type == 'String'){
+                    if(attrProp.enum) dijitType = 'Select';
+                    else if(attrProp.media && attrProp.media.mediaType == 'text/html') dijitType = 'RichText';
+                }
+                attrProp.dijitType = dijitType;
+                attrProp.field = attrName; // for dgrid
+                attrProp.name = attrName; //for input
+                attrProp.assocType = '';
+                //attrClassType = attrName;
+                attrProp.label = attrProp.title;
+                attrProp.editable = attrProp.readOnly?false:true;
+                attrProp.trim = true;
+                attrProp.editOn = 'dblclick';  // for dgrid
+                attrProp.autoSave = true; // for dgrid
+                attrProp.sortable = true;
+                if(dijitType == 'Select'){
+                    //propObj.enum = attrProp.enum;
+                    var data = [];
+                    data.push({id:-1,label:'[not selected]'} );
+                    attrProp.enum.forEach(function(value){
+                        data.push({id:value,label:value});
+                    });
+                    var selectStore = new Memory({data: data});
+                    attrProp.editorArgs = {
+                        name: attrName,
+                        store: selectStore,
+                        style: "width:99%;",
+                        labelAttr: 'label',
+                        maxHeight: -1, // tells _HasDropDown to fit menu within viewport
+                        fetchProperties: { sort : [ { attribute : "name" }]},
+                        queryOptions: { ignoreCase: true }//doesnt work
+                        //value: 749
+                    };
+                    attrProp.get = function(item){
+                        var value = item[this.name];
+                        if(!value) return -1;//dropdown will display [not selected]
+                        return value;
+                    };
+                }
+                else if(dijitType == 'RichText'){
+                    var toolbar = new Toolbar({
+                        //'style': {'display': 'none'}
+                    });
+                    attrProp.editorArgs = {
+                        'toolbar': toolbar,
+                        'addStyleSheet': 'css/editor.css',
+                        'extraPlugins': self.extraPlugins,
+                        //'maxHeight': -1
+                    };
+                    attrProp.get = function(item){
+                        var value = item[attrName];
+                        if(!value) return '<p>[no text]</p>';//editor will crash if it does not have a value
+                        return value;
+                    };
+                    attrProp.height = '';//auto-expand mode
+                }
+                else if(dijitType == 'Date'){
+                }
+                else if(dijitType == 'Number') {
+                    //property.editorArgs.constraints = {
+                    //minimum: attrRef[MINIMUM_ATTR_ID],
+                    //maximum: attrRef[MAXIMUM_ATTR_ID],
+                    //places: 0
+                    //}
+                    attrProp.get = function (item) {
+                        var value = item[this.name];
+                        if (!value) return '[null]';
+                        return value;
+                    };
+                }
+                else if(dijitType == 'Boolean'){
+                    attrProp.get = function(item){
+                        var value = item[this.name];
+                        if(!value) return false;
+                        return value;
+                    };
+                }
+                else{ // String
+                    attrProp.dijitType = 'String';//default
+                    attrProp.editorArgs = {
+                        //maxLength: attrRef[MAXLENGTH_ATTR_ID],
+                        //minLength: attrRef[MINLENGTH_ATTR_ID],
+                        //regRex: attrRef[REGEX_ATTR_ID], //e.g. email "[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"
+                    };
+                    attrProp.get = function(item){
+                        var value = item[this.name];
+                        if(!value) return '[empty]';
+                        return value;
+                    };
+                }
+            }
+        },
         schemaToProperties: function(schema){
             var self = this;
             var properties = [];
             for(var attrName in schema){
                 var attrProp = schema[attrName];
                 if(attrProp.type == 'Document') continue;
-                if(attrName.charAt(0)=='_'){
-                    //properties.push(attrProp.attrName);
-                    continue;
-                }
+                /*if(attrName.charAt(0)=='_'){
+                 //properties.push(attrProp.attrName);
+                 continue;
+                 }*/
                 var dijitType = attrProp.type;
                 if(attrProp.type == 'String'){
                     if(attrProp.enum) dijitType = 'Select';

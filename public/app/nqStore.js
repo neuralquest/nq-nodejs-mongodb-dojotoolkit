@@ -325,7 +325,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              */
             var self = this;
             return self.getAttrPropertiesFromAncestors(view.mapsTo).then(function(classAttrObj){
-                var schema = {_viewId:view._id, _mapsTo:view.mapsTo};
+                var schema = {};
                 for(var attrPropName in view.schema){
                     //if(attrPropName == 'description') debugger;
                     var newProp = {};
@@ -344,8 +344,8 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         classAttrProp = {};
                     }
                     //set the defaults
-                    newProp.className = classAttrProp._name;
-                    newProp.classId = classAttrProp._id;
+                    newProp.className = classAttrObj._name;
+                    newProp.classId = classAttrObj._id;
                     newProp.type = classAttrProp.type;
                     if(classAttrProp.media) newProp.media = classAttrProp.media;
                     if(classAttrProp.enum){
@@ -364,7 +364,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     newProp.hidden = attrProp.hidden?attrProp.hidden:classAttrProp.hidden?classAttrProp.hidden:false;
                     newProp.title = attrProp.title?attrProp.title:classAttrProp.title?classAttrProp.title:'[no title]';
                     newProp.default = attrProp.default?attrProp.default:classAttrProp.default?classAttrProp.default:null;
-                    newProp.description = attrProp.description?attrProp.description:classAttrProp.description?classAttrProp.description:'[no description]';
+                    newProp.description = attrProp.description?attrProp.description:classAttrProp.description?classAttrProp.description:'<p>[no description]</p>';
                     newProp.style = attrProp.style?attrProp.style:classAttrProp.style?classAttrProp.style:'width:100%';
                     newProp.nullValue = null;
                     newProp.columnWidth = '10em';

@@ -14,17 +14,27 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 		postCreate: function(){
 			this.inherited(arguments);
 			var self = this;
-			this.getWidgetProperties(this.widgetId).then(function(widgetProps){
-				//console.log('widgetProp',widgetProps);
-				self.widgetProps = widgetProps;
-				self.createDeferred.resolve(self);//ready to be loaded with data
+			return self.store.get(self.widgetId).then(function(widget){
+				self.widget = widget;
+				self.headerDivNode.innerHTML = widget.name;
+				self.pageHelpTextDiv.innerHTML = widget.description;
+				return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
+					self.view = viewsArr[0]//for now assume only one view
+					return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
+						self.schema = self.enrichSchema(schema);
+						//return self.store.getAllowedAssocClassesForView(self.view._id).then(function(permittedClassesByViewArr) {
+						//	self.permittedClassesByViewArr = permittedClassesByViewArr;
+							self.createDeferred.resolve(self);//ready to be loaded with data
+						//});
+					});
+				});
 			}, nq.errorDialog);
 		},
 		setSelectedObjIdPreviousLevel: function(value){
             var self = this;
-            if(this.widgetProps.parentId) {
-                if(this.widgetProps.parentId == this.selectedObjIdPreviousLevel) return this;
-                else this.selectedObjIdPreviousLevel = Number(this.widgetProps.parentId);
+            if(self.widget.parentId) {
+                if(self.widget.parentId == this.selectedObjIdPreviousLevel) return this;
+                else this.selectedObjIdPreviousLevel = Number(self.widget.parentId);
             }
             else if(!value || value == this.selectedObjIdPreviousLevel) return this;
 			else this.selectedObjIdPreviousLevel = value;
@@ -46,7 +56,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			this.treeModel = new ObjectStoreModel({
 				childrenAttr: this.viewIdsArr,
 				store : this.store,
-				query : {itemId: this.selectedObjIdPreviousLevel, viewId: this.widgetProps.views[0]._id}
+				query : {itemId: this.selectedObjIdPreviousLevel, viewId: this.view._id}
 			});			
 			this.treeModel.getRoot = function(onItem, onError){
 				/*var collection = this.store.filter(this.query);
@@ -69,7 +79,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 self.store.get(self.selectedObjIdPreviousLevel).then(function(item) {
                     if(!item) onError('item not found');
                     else {
-                        item._viewId = self.widgetProps.views[0]._id;
+                        item._viewId = self.view._id;
                         onItem(item);
                     }
                 });

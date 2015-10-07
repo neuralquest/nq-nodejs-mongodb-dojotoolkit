@@ -12,9 +12,74 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
    
 	return declare("nqForm", [nqWidgetBase], {
 		postCreate: function(){
-			this.inherited(arguments);
-			
-			var item = null;
+            this.inherited(arguments);
+            var self = this;
+            var tableNode = domConstruct.create('table', {style: 'border-spacing:5px;'}, this.pane.containerNode);
+            return self.store.get(self.widgetId).then(function(widget){
+                self.widget = widget;
+                self.headerDivNode.innerHTML = '<h1>'+widget.name+'</h1>';
+                self.pageHelpTextDiv.innerHTML = widget.description;
+                return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
+                    self.view = viewsArr[0]//for now assume only one view
+                    return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
+                        self.enrichSchema(schema);
+                        for(var attrName in schema){
+                            var attribute = schema[attrName];
+                            var row = domConstruct.create("tr", null, tableNode);
+                            //the label
+                            domConstruct.create("td", {innerHTML: (attribute.label), style: "padding: 3px"}, row);
+                            if(attribute.dijitType == 'RichText'){//place the editor on a new row with colspan 2
+                                row = domConstruct.create("tr", null, tableNode);
+                            }
+                            var tdDom = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row);
+                            //the dijit
+                            var dijit = null;
+                            if(attribute.dijitType == 'Select') {
+                                dijit = new Select(attribute.editorArgs, domConstruct.create('div'));
+                            }
+                            else if(attribute.dijitType == 'RichText') {
+                                dijit = new Editor(attribute, domConstruct.create('div', {name: attribute.name}));/*setting the name wont be done autoamticly*/
+                                //						dijit.addStyleSheet('css/editor.css');
+                                dijit.on("NormalizedDisplayChanged", function(event){
+                                    var height = domGeometry.getMarginSize(this.editNode).h;
+                                    if(has("opera")){
+                                        height = this.editNode.scrollHeight;
+                                    }
+                                    //console.log('height',domGeometry.getMarginSize(this.editNode));
+                                    //this.resize({h: height});
+                                    domGeometry.setMarginBox(this.iframe, { h: height });
+                                });
+                                //dijit.destroy = function(){console.log('destroyed editor')};
+                                domAttr.set(tdDom, 'colspan', '2');
+                            }
+                            else if(attribute.dijitType == 'Number') {
+                                dijit = new NumberTextBox(attribute, domConstruct.create('input'));
+                            }
+                            else if(attribute.dijitType == 'Date') {
+                                dijit = new DateTextBox(attribute, domConstruct.create('input'));
+                            }
+                            else if(attribute.dijitType == 'String'){
+                                dijit = new ValidationTextBox(attribute, domConstruct.create('input'));
+                            }
+                            if(dijit){
+                                self.own(dijit);
+                                tdDom.appendChild(dijit.domNode);
+                                dijit.attributeReferenceId = attribute.name;
+                                self.pane.own(dijit.on('change', function(value){
+                                    //self.item[this.attributeReferenceId] = value;
+                                    //self.store.put(self.item);
+                                }));
+                                //dijit.startup();will be call after add child and then from widget base
+                            }
+                            domConstruct.create("td", { innerHTML: (attribute.description), style: "padding: 3px", 'class': 'helpTextInvisable'}, row);
+                        };
+                        self.createDeferred.resolve(self);//ready to be loaded with data
+                        return self;
+                    });
+                });
+            }, nq.errorDialog);
+
+			/*var item = null;
 			var tableNode = domConstruct.create('table', {style: 'border-spacing:5px;'}, this.pane.containerNode);
 			var self = this;
 			this.getWidgetProperties(this.widgetId).then(function(widgetProps){
@@ -37,7 +102,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                             dijit = new Select(property.editorArgs, domConstruct.create('div'));
                         }
                         else if(property.dijitType == 'RichText') {
-                            dijit = new Editor(property, domConstruct.create('div', {name: property.name}));/*setting the name wont be done autoamticly*/
+                            dijit = new Editor(property, domConstruct.create('div', {name: property.name}));/*setting the name wont be done autoamticly* /
                             //						dijit.addStyleSheet('css/editor.css');
                             dijit.on("NormalizedDisplayChanged", function(event){
                                 var height = domGeometry.getMarginSize(this.editNode).h;
@@ -74,7 +139,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     };
 				});
 				self.createDeferred.resolve(self);//ready to be loaded with data
-			}, nq.errorDialog);
+			}, nq.errorDialog);*/
 		},
 		setSelectedObjIdPreviousLevel: function(value){
 			//load the data
