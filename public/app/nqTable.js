@@ -66,21 +66,22 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
 
             var self = this;
-            return self.store.get(self.widgetId).then(function(widget){
+            var columnsPromise =  self.store.get(self.widgetId).then(function(widget){
                 self.widget = widget;
-                self.headerDivNode.innerHTML = widget.name;
+                self.headerDivNode.innerHTML = '<h1>'+widget.name+'</h1>';
                 self.pageHelpTextDiv.innerHTML = widget.description;
                 return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
                     self.view = viewsArr[0]//for now assume only one view
+                    var columns =[];
                     return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
                         self.schema = self.enrichSchema(schema);
                         self.createDeferred.resolve(self);//ready to be loaded with data
                         for(var attrName in schema) {
                             var attribute = schema[attrName];
-                            columns.push(property);
+                            columns.push(attribute);
                             //console.dir('property',property);
-                            if(property.dijitType == 'Select') {
-                                property.renderCell = function(object, value, node, options){
+                            if(attribute.dijitType == 'Select') {
+                                attribute.renderCell = function(object, value, node, options){
                                     if(!value) html.set(node, '[not selected]');
                                     //if(!value) node.appendChild(document.createTextNode('[not selected]'));
                                     else{
@@ -89,26 +90,26 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                                         else node.appendChild(document.createTextNode('id: '+value));
                                     }
                                 };
-                                property.editor = Select;
+                                attribute.editor = Select;
                             }
-                            else if(property.dijitType == 'RichText') {
-                                self.editorToolbarDivNode.appendChild(property.editorArgs.toolbar.domNode);
-                                property.renderCell = function(object, value, node, options) {
+                            else if(attribute.dijitType == 'RichText') {
+                                self.editorToolbarDivNode.appendChild(attribute.editorArgs.toolbar.domNode);
+                                attribute.renderCell = function(object, value, node, options) {
                                     html.set(node, value);
                                 };
-                                property.editor = RTFEditor;
+                                attribute.editor = RTFEditor;
                             }
-                            else if(property.dijitType == 'String') {
-                                property.editor == 'text';
+                            else if(attribute.dijitType == 'String') {
+                                attribute.editor == 'text';
                             }
-                            else if(property.dijitType == 'Number') {
-                                property.editor == 'number';
+                            else if(attribute.dijitType == 'Number') {
+                                attribute.editor == 'number';
                             }
-                            else if(property.dijitType == 'Boolean') {
-                                property.editor = 'radio';
+                            else if(attribute.dijitType == 'Boolean') {
+                                attribute.editor = 'radio';
                             }
-                            else if(property.dijitType == 'Date') {
-                                property.renderCell = function(object, value, node, options) {
+                            else if(attribute.dijitType == 'Date') {
+                                attribute.renderCell = function(object, value, node, options) {
                                     console.log('value', value);
                                     if(!value || value=='') html.set(node, '[no date selected]');
                                     else {
@@ -118,18 +119,21 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                                         html.set(node, date.toLocaleDateString());
                                     }
                                 };
-                                /*property.set = function(item) {
+                                /*attribute.set = function(item) {
                                  var value = item[this.field];
                                  if(!value) return;
                                  var date = dojo.date.stamp.fromISOString(value);
                                  return stamp.toISOString(date);
                                  };*/
-                                //property.autoSave = true;
-                                property.editor = DateTextBox;
+                                //attribute.autoSave = true;
+                                attribute.editor = DateTextBox;
                             }
                         }
+                        return columns;
                     });
                 });
+            }, nq.errorDialog);
+            columnsPromise.then(function(columns){
                 var collection = self.store.filter({parentId: self.selectedObjIdPreviousLevel, parentViewId: self.widgetId, join:true});
                 self.grid = new (declare([Grid, Selection, Keyboard, DijitRegistry, Dnd, Editor, ColumnResizer]))({
                     collection: collection,
@@ -145,8 +149,8 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                 }, domConstruct.create('div'));
 //					self.grid.startup();
                 for(var i=0;i<columns.length;i++){
-                    var property = columns[i];
-                    self.grid.styleColumn(i, property.style);
+                    var attribute = columns[i];
+                    self.grid.styleColumn(i, attribute.style);
                 }
 
                 self.pane.containerNode.appendChild(self.grid.domNode);
@@ -175,7 +179,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                 self.own(self.normalToolbar);
                 self.own(self.grid);
                 self.createDeferred.resolve(self);//ready to be loaded with data
-            }, nq.errorDialog);
+            });
             /*var self = this;
 			this.getWidgetProperties(this.widgetId).then(function(widgetProps){
 				console.log('widgetProp',widgetProps);

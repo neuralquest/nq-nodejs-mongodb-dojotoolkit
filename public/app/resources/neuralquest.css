@@ -47,8 +47,13 @@ code {border:none; font-size: 100%;}
 /*.nqGrid .dgrid-row-odd {background: #F2F5F9;}*/
 /*.dgrid-selected { background: #999; / * Make selected rows be gray * /}*/
 
+/*Make the child element the same size as to table cell*/
+table .last, td:last-child { padding: 2px 24px 2px 0px;}
+
+
 /*make dijits transparent*/
 .soria .dijitTextBox, .soria .dijitSelect, .soria .dijitSelect .dijitButtonContents {border: none; background: transparent;}
+input {border: none; background: transparent;}
 
 
 .helpTextInvisable {color:navy; display:none;}

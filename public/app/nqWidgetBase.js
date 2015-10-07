@@ -110,14 +110,14 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 if(attrProp.type == 'Document') continue;
                 var dijitType = attrProp.type;
                 if(attrProp.type == 'String'){
-                    if(attrProp.enum) dijitType = 'Select';
-                    else if(attrProp.media && attrProp.media.mediaType == 'text/html') dijitType = 'RichText';
                 }
+                if(attrProp.enum) dijitType = 'Select';
+                else if(attrProp['#ref']) dijitType = 'Select';
+                else if(attrProp.media && attrProp.media.mediaType == 'text/html') dijitType = 'RichText';
                 attrProp.dijitType = dijitType;
                 attrProp.field = attrName; // for dgrid
                 attrProp.name = attrName; //for input
                 attrProp.assocType = '';
-                //attrClassType = attrName;
                 attrProp.label = attrProp.title;
                 attrProp.editable = attrProp.readOnly?false:true;
                 attrProp.trim = true;
@@ -125,28 +125,58 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 attrProp.autoSave = true; // for dgrid
                 attrProp.sortable = true;
                 if(dijitType == 'Select'){
-                    //propObj.enum = attrProp.enum;
-                    var data = [];
-                    data.push({id:-1,label:'[not selected]'} );
-                    attrProp.enum.forEach(function(value){
-                        data.push({id:value,label:value});
-                    });
-                    var selectStore = new Memory({data: data});
-                    attrProp.editorArgs = {
-                        name: attrName,
-                        store: selectStore,
-                        style: "width:99%;",
-                        labelAttr: 'label',
-                        maxHeight: -1, // tells _HasDropDown to fit menu within viewport
-                        fetchProperties: { sort : [ { attribute : "name" }]},
-                        queryOptions: { ignoreCase: true }//doesnt work
-                        //value: 749
-                    };
-                    attrProp.get = function(item){
-                        var value = item[this.name];
-                        if(!value) return -1;//dropdown will display [not selected]
-                        return value;
-                    };
+                    if(attrProp.enum){
+                        var data = [];
+                        data.push({label:'[not selected]'} );
+                        attrProp.enum.forEach(function(value){
+                            data.push({label:value});
+                        });
+                        var selectStore = new Memory({data: data});
+                        attrProp.editorArgs = {
+                            name: attrName,
+                            store: selectStore,
+                            style: "width:99%;",
+                            labelAttr: 'label',
+                            maxHeight: -1, // tells _HasDropDown to fit menu within viewport
+                            fetchProperties: { sort : [ { attribute : "name" }]},
+                            queryOptions: { ignoreCase: true }//doesnt work
+                            //value: 749
+                        };
+                        attrProp.get = function(item){
+                            var value = item[this.name];
+                            if(!value) return '[not selected]';//dropdown will display [not selected]
+                            return value;
+                        };
+                    }
+                    if(attrProp['#ref']){
+                        var query = attrProp['#ref'];
+                        if(query.parentId = '$viewMapsTo') query.itemId = attrProp.viewMapsTo;
+                        var collection = this.store.filter(query);
+
+                        var data = collection.fetch();
+
+                        //collection.forEach(function(valueItem){
+                        //    console.log(valueItem);
+                        //});
+                        debugger;
+                        data.push({_id:-1,_name:'[invalid]'} );
+                        var selectStore = new Memory({data: data});
+                        attrProp.editorArgs = {
+                            name: attrName,
+                            store: selectStore,
+                            style: "width:99%;",
+                            labelAttr: '_name',
+                            maxHeight: -1, // tells _HasDropDown to fit menu within viewport
+                            fetchProperties: { sort : [ { attribute : "_name" }]},
+                            queryOptions: { ignoreCase: true }//doesnt work
+                            //value: 749
+                        };
+                        attrProp.get = function(item){
+                            var value = item[this.name];
+                            if(!value) return -1;//dropdown will display [not selected]
+                            return value;
+                        };
+                    }
                 }
                 else if(dijitType == 'RichText'){
                     var toolbar = new Toolbar({

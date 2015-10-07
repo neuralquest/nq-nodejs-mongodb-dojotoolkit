@@ -25,7 +25,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
             return this.itemsColl.remove(itemId);
         },
         getChildren: function (object, onComplete) {
-            if(!object._id || !object._viewId) throw new error('invalid parms');
+            if(!object._id || !object._viewId) throw new Error('invalid parms');
             //var collection = this.filter({parentId: object.id, parentViewId: object.viewId });
             //collection.fetch();
             //return onComplete(collection);
@@ -48,7 +48,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
          return object.name;
          },*/
         getItemsByView: function (parentId, viewId) {
-            if(!parentId || !viewId) throw new error('invalid parms');
+            if(!parentId || !viewId) throw new Error('invalid parms');
             var self = this;
             return self.get(viewId).then(function (view) {
                 return self.getItemsByAssocTypeAndDestClass(parentId, view.toMannyAssociations, view.mapsTo)
@@ -64,7 +64,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              // returns: Promise to an array
              //          An array of all the items.
              */
-            if(!parentId || !parentViewId) throw new error('invalid parms');
+            if(!parentId || !parentViewId) throw new Error('invalid parms');
             var self = this;
             return self.getItemsByAssocTypeAndDestClass(parentViewId, 'manyToMany', VIEW_CLASS_TYPE).then(function (viewsArr) {
                 //console.log('viewsArr',viewsArr);
@@ -126,7 +126,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              // returns: Promise
              //          An array of all the items found
              */
-            if(!parentId || !assocType) throw new error('invalid parms');
+            if(!parentId || !assocType) throw new Error('invalid parms');
             var self = this;
             return when(self.getItemsByAssocType(parentId, assocType), function(itemsArr){//use when here because getItemsByAssocType sometimes returns a completed array
                 if(!destClassId) return itemsArr;
@@ -177,6 +177,9 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     });
                     return results;
                 });
+            }
+            else if (assocType == 'allSubclasses') {
+                return self.collectAllByAssocType(parentId, 'subclasses');
             }
             else if (assocType == 'instantiations') {
                 var self = this;
@@ -334,19 +337,22 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     for(var classAttrName in classAttrObj){
                         //debugger;
                         if(attrPropName == classAttrName){
-                            classAttrProp = classAttrProp = classAttrObj[attrPropName];
+                            classAttrProp = classAttrObj[attrPropName];
                             break;
                         }
                     };
                     if(!classAttrProp) {
                         //throw new Error('cant find classAttrProp');
                         console.error('classAttrProp not found',attrProp);
-                        classAttrProp = {};
+                        classAttrProp = attrProp;
                     }
-                    //set the defaults
+                    //set the references
+                    newProp.type = classAttrProp.type;
                     newProp.className = classAttrObj._name;
                     newProp.classId = classAttrObj._id;
-                    newProp.type = classAttrProp.type;
+                    newProp.viewId = view._id;
+                    newProp.viewMapsTo = view.mapsTo;
+                    //set the defaults
                     if(classAttrProp.media) newProp.media = classAttrProp.media;
                     if(classAttrProp.enum){
                         if(attrProp.enum) newProp.enum = attrProp.enum; //TODO assert that the values are permitted
@@ -356,8 +362,8 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     else if(classAttrProp.pattern) newProp.pattern = classAttrProp.pattern;
                     if(attrProp.invalidMessage) newProp.invalidMessage = attrProp.invalidMessage;
                     else if(classAttrProp.invalidMessage) newProp.invalidMessage = classAttrProp.invalidMessage;
-                    if(attrProp['$ref']) newProp['$ref'] = attrProp['$ref'];
-                    else if(classAttrProp['$ref']) newProp['$ref'] = classAttrProp['$ref'];
+                    if(attrProp['#ref']) newProp['#ref'] = attrProp['#ref'];
+                    else if(classAttrProp['#ref']) newProp['#ref'] = classAttrProp['#ref'];
 
                     newProp.required = attrProp.required?attrProp.required:classAttrProp.required?classAttrProp.required:false;
                     newProp.readOnly = attrProp.readOnly?attrProp.readOnly:classAttrProp.readOnly?classAttrProp.readOnly:true;
@@ -456,7 +462,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              /* summary: Use to navigate the data graph following the given association type, gathering all items along the way.
              //          If ASSOCPROPERTIES specifies that an association type should return one particular item type, other types will be ignored.(e.g. subclasses, instantiations)
              //          Will write an error if it finds more than one occurrence when ASSOCPROPERTIES specifies that only one is allowed.
-             //          Returns an array of items, starting with the first one (itemId).
+             //          Returns an array of items, starting with the first one (get(itemId)).
              //          Will preserve the order in the case of a linked list.
              //          Examples: Get all objects in a linked list by 'next', get all ancestor classes by 'parent', get all subclasses by 'subclass'.
              // itemId: Number
@@ -469,38 +475,36 @@ function(declare, lang, array, when, all, Store, QueryResults,
             var self = this;
             return self.get(itemId).then(function(item){
                 var type = ASSOCPROPERTIES[assocType].type;
-                if(!type || item._type == type){
-                    console.log('item', item);
-                    var query  = self.normalizeAssocQuery(itemId, assocType);
-                    var collection = self.assocsColl.filter(query);
-                    var itemPromises = [];
-                    var count = 0;
-                    collection.forEach(function (assoc) {
-                        count ++;
-                        if(!ASSOCPROPERTIES[assocType].pseudo) itemPromises.push(self.itemsColl.get(assoc.dest));
-                        else itemPromises.push(self.itemsColl.get(assoc.source));
+                if(type && item._type != type) return [];
+                //console.log('item', item);
+                var query  = self.normalizeAssocQuery(itemId, assocType);
+                var collection = self.assocsColl.filter(query);
+                var itemPromises = [];
+                var count = 0;
+                collection.forEach(function (assoc) {
+                    count ++;
+                    if(!ASSOCPROPERTIES[assocType].pseudo) itemPromises.push(self.itemsColl.get(assoc.dest));
+                    else itemPromises.push(self.itemsColl.get(assoc.source));
+                });
+                if(ASSOCPROPERTIES[assocType].cardinality == 'one' && count>1) console.error('more than one found');
+                return all(itemPromises).then(function(classesArr){
+                    //console.log('classesArr',classesArr);
+                    var subclassesPromises = [];
+                    classesArr.forEach(function(childItem){
+                        subclassesPromises.push(self.collectAllByAssocType(childItem._id, assocType));
                     });
-                    if(ASSOCPROPERTIES[assocType].cardinality == 'one' && count>1) console.error('more than one found');
-                    return all(itemPromises).then(function(classesArr){
-                        console.log('classesArr',classesArr);
-                        var subclassesPromises = [];
-                        classesArr.forEach(function(childItem){
-                            subclassesPromises.push(self.collectAllByAssocType(childItem._id, assocType));
-                        });
-                        return all(subclassesPromises).then(function(subclassesArr){
-                            var results = [];
-                            results.push(item);
-                            subclassesArr.forEach(function(subArr){
-                                subArr.forEach(function(subClass){
-                                    results.push(subClass);
-                                });
+                    return all(subclassesPromises).then(function(subclassesArr){
+                        var results = [];
+                        results.push(item);
+                        subclassesArr.forEach(function(subArr){
+                            subArr.forEach(function(subClass){
+                                results.push(subClass);
                             });
-                            console.log('results', results);
-                            return results;
                         });
+                        //console.log('results', results);
+                        return results;
                     });
-                }
-                else return [];
+                });
             });
         },
         normalizeAssocQuery: function (itemId, type) {
