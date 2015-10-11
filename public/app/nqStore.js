@@ -77,7 +77,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     else{
                         var assocType = view.toMannyAssociations;
                         if(!assocType) assocType = view.toOneAssociations;
-                        if(parentId == 2016) debugger;
+                        //if(parentId == 2016) debugger;
                         if(view.onlyIfParentEquals){
                             var oipe = Number(view.onlyIfParentEquals);
                             if(parentId == oipe) promises.push(self.getItemsByAssocTypeAndDestClass(view.mapsTo, assocType));
@@ -128,27 +128,37 @@ function(declare, lang, array, when, all, Store, QueryResults,
              */
             if(!parentId || !assocType) throw new Error('invalid parms');
             var self = this;
-            return when(self.getItemsByAssocType(parentId, assocType), function(itemsArr){//use when here because getItemsByAssocType sometimes returns a completed array
-                if(!destClassId) return itemsArr;
-                var isAPromises = [];
-                itemsArr.forEach(function(item){
-                    isAPromises.push(self.isA(item._id, destClassId));
-                });
-                return all(isAPromises).then(function (isADestClassArr) {
-                    var results = [];
-                    var count = 0;
-                    isADestClassArr.forEach(function(isADestClass){
-                        if(isADestClass) results.push(itemsArr[count]);
-                        count ++;
+            if(assocType != 'orderedParent'){
+                return when(self.getItemsByAssocType(parentId, assocType), function(itemsArr){//use when here because getItemsByAssocType sometimes returns a completed array
+                    if(!destClassId) return itemsArr;
+                    var isAPromises = [];
+                    itemsArr.forEach(function(item){
+                        isAPromises.push(self.isA(item._id, destClassId));
                     });
-                    if(results.length == 1 && assocType == 'ordered') {
-                        return self.collectAllByAssocType(results[0]._id, 'next').then(function (itemsPromisesArrResults) {
-                            return all(itemsPromisesArrResults);
+                    return all(isAPromises).then(function (isADestClassArr) {
+                        var results = [];
+                        var count = 0;
+                        isADestClassArr.forEach(function(isADestClass){
+                            if(isADestClass) results.push(itemsArr[count]);
+                            count ++;
                         });
-                    }
-                    return results;
+                        if(results.length == 1 && assocType == 'ordered') {
+                            return self.collectAllByAssocType(results[0]._id, 'next').then(function (itemsPromisesArrResults) {
+                                return all(itemsPromisesArrResults);
+                            });
+                        }
+                        return results;
+                    });
                 });
-            });
+            }
+            else{
+                return self.getItemsByAssocType(parentId, 'previous').then(function (itemsPromisesArr) {
+                    var firstChildId = null;
+                    if(itemsPromisesArr.length == 0) firstChildId = parentId;
+                    else firstChildId = itemsPromisesArr[itemsPromisesArr.length-1]._id;
+                    return self.collectAllByAssocType(firstChildId, 'orderedParent');
+                });
+            }
         },
         getItemsByAssocType: function(_parentId, assocType){
             /* summary: Use to gather all items on the next level according to association type.
@@ -225,7 +235,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 }
                 return assocs;
             }
-            else if (assocType == 'by association type') {
+            else if (assocType == 'byAssociationType') {
                 var pars = _parentId.split(':');
                 return self.getItemsByAssocType(Number(pars[0]), pars[1]);
             }
@@ -343,11 +353,20 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     };
                     if(!classAttrProp) {
                         //throw new Error('cant find classAttrProp');
-                        console.error('classAttrProp not found',attrProp);
+                        console.warn('classAttrProp not found',attrProp);
                         classAttrProp = attrProp;
                     }
                     //set the references
                     newProp.type = classAttrProp.type;
+                    //Exception for class type, they will have no type so we improvise
+                    if(!newProp.type){
+                        if(attrPropName=='_id') newProp.type = 'Number';
+                        if(attrPropName=='_name') newProp.type = 'String';
+                        if(attrPropName=='_type') {
+                            newProp.type = 'String';
+                            newProp.enum = attrProp.enum;
+                        }
+                    }
                     newProp.className = classAttrObj._name;
                     newProp.classId = classAttrObj._id;
                     newProp.viewId = view._id;
@@ -355,7 +374,16 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     //set the defaults
                     if(classAttrProp.media) newProp.media = classAttrProp.media;
                     if(classAttrProp.enum){
-                        if(attrProp.enum) newProp.enum = attrProp.enum; //TODO assert that the values are permitted
+                        if(attrProp.enum) {
+                            var newEnum = [];
+                            //assert that the values are permitted
+                            attrProp.enum.forEach(function (enumValue){
+                                if(classAttrProp.enum[enumValue]) newEnum.push(enumValue);
+                                else console.warn('classAttrProp not found', attrProp, enumValue);
+                            });
+                            //newProp.enum = newEnum;
+                            newProp.enum = attrProp.enum;
+                        }
                         else newProp.enum = classAttrProp.enum;
                     }
                     if(attrProp.pattern) newProp.pattern = attrProp.pattern;
@@ -366,11 +394,11 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     else if(classAttrProp['#ref']) newProp['#ref'] = classAttrProp['#ref'];
 
                     newProp.required = attrProp.required?attrProp.required:classAttrProp.required?classAttrProp.required:false;
-                    newProp.readOnly = attrProp.readOnly?attrProp.readOnly:classAttrProp.readOnly?classAttrProp.readOnly:true;
+                    newProp.readOnly = attrProp.readOnly?attrProp.readOnly:classAttrProp.readOnly?classAttrProp.readOnly:false;
                     newProp.hidden = attrProp.hidden?attrProp.hidden:classAttrProp.hidden?classAttrProp.hidden:false;
                     newProp.title = attrProp.title?attrProp.title:classAttrProp.title?classAttrProp.title:'[no title]';
                     newProp.default = attrProp.default?attrProp.default:classAttrProp.default?classAttrProp.default:null;
-                    newProp.description = attrProp.description?attrProp.description:classAttrProp.description?classAttrProp.description:'<p>[no description]</p>';
+                    newProp.description = attrProp.description?attrProp.description:classAttrProp.description?classAttrProp.description:'<p>[no description <a href="#842.1787.'+view._id+'.538">provided</a>]</p>';
                     newProp.style = attrProp.style?attrProp.style:classAttrProp.style?classAttrProp.style:'width:100%';
                     newProp.nullValue = null;
                     newProp.columnWidth = '10em';
@@ -404,25 +432,6 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return schema;
             });
         },
-        getAllowedAssocClassesForView: function(viewId){
-            var self = this;
-            return this.getItemsByAssocTypeAndDestClass(viewId, 'manyToMany', VIEW_CLASS_TYPE).then(function (viewsArr) {
-                var permittedClassesObj = { parentViewId : viewId };
-                var promises = [];
-                viewsArr.forEach(function(subView){
-                    //TODO allowed classes for class model?
-                    if(subView.mapsTo) promises.push(self.collectAllByAssocType(subView.mapsTo, 'subClasses'));
-                });
-                return all(promises).then(function(subClassesArr){
-                    for(var i =0; i<subClassesArr.length;i++){
-                        var subClasses = subClassesArr[i];
-                        var view = viewsArr[i];
-                        permittedClassesObj[view._id] = {assocType: view.toMannyAssociations, allowedClasses:subClasses};
-                    }
-                    return permittedClassesObj;
-                });
-            });
-        },
         getAttrPropertiesFromAncestors: function(classId){
             var self = this;
             //var parentClassesPromises = [];
@@ -441,23 +450,6 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 });
             });
         },
-        /*getAttrPropertiesFromAncestors: function(classId){
-            var self = this;
-            var parentClassesPromises = [];
-            parentClassesPromises.push(self.get(classId));// Get the first one
-            return self.followAssocType(Number(classId), 'parent', parentClassesPromises).then(function(parentClassesArr){
-                return all(parentClassesArr).then(function(classesArr){
-                    var classAttrObj = {};
-                    classesArr.forEach(function(classItem) {
-                        for(classAttr in classItem){
-                            //console.log('classAttr', classAttr);
-                            if(classAttr.charAt(0)!='_') classAttrObj[classAttr] = classItem[classAttr];
-                        }
-                    });
-                    return classAttrObj;
-                });
-            });
-        },*/
         collectAllByAssocType: function (itemId, assocType) {
              /* summary: Use to navigate the data graph following the given association type, gathering all items along the way.
              //          If ASSOCPROPERTIES specifies that an association type should return one particular item type, other types will be ignored.(e.g. subclasses, instantiations)
@@ -472,6 +464,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              // returns: Array
              //          An array of all the items found along the way.
              */
+            //TODO loop protection
             var self = this;
             return self.get(itemId).then(function(item){
                 var type = ASSOCPROPERTIES[assocType].type;
@@ -503,6 +496,52 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         });
                         //console.log('results', results);
                         return results;
+                    });
+                });
+            });
+        },
+        getUniqueViewsForWidget: function(parentViewId, viewsArr){
+            var self = this;
+            return this.getItemsByAssocTypeAndDestClass(parentViewId, 'manyToMany', VIEW_CLASS_TYPE).then(function (subViewsArr) {
+                var promises = [];
+                subViewsArr.forEach(function(subView){
+                    var found = false;
+                    viewsArr.forEach(function(view){
+                        if(view._id == subView._id) found = true;
+                    });
+                    if(!found) {
+                        viewsArr.push(subView);
+                        promises.push(self.getUniqueViewsForWidget(subView._id, viewsArr));
+                    }
+                });
+                return all(promises);
+            });
+        },
+        getTreePath: function(view, itemId){
+            var self = this;
+            var reverseAssocType = ASSOCPROPERTIES[view.toMannyAssociations].inverse;
+            // Find the parent views, as seen from the current view
+            return self.getItemsByAssocTypeAndDestClass(view._id, 'manyToManyReverse', VIEW_CLASS_TYPE).then(function(parentViewsArr){
+                var parentItemsPromises = [];
+                // Find the parents of the current item, based on the reverse association of the current view and the mapsTo if the parent views.
+                parentViewsArr.forEach(function(parentView){
+                    parentItemsPromises.push(self.getItemsByAssocTypeAndDestClass(itemId, reverseAssocType, parentView.mapsTo));
+                });
+                return all(parentItemsPromises).then(function(parentItemsArrArr){
+                    var count = 0;
+                    var treePathPromises = [];
+                    // For each parent view.
+                    parentItemsArrArr.forEach(function(parentItemsArr){
+                        var parentView = parentViewsArr[count];
+                        // Fore each parent item
+                        parentItemsArr.forEach(function(parentItem){
+                            treePathPromises.push(self.getTreePath(parentView, parentItem._id));
+                        });
+                        count++;
+                    });
+                    return all(treePathPromises).then(function(resultsArr){
+                        resultsArr.unshift(itemId);
+                        return resultsArr;
                     });
                 });
             });

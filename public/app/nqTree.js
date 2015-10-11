@@ -16,7 +16,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			var self = this;
 			return self.store.get(self.widgetId).then(function(widget){
 				self.widget = widget;
-				self.headerDivNode.innerHTML = widget.name;
+				//self.headerDivNode.innerHTML = widget.name;
 				self.pageHelpTextDiv.innerHTML = widget.description;
 				return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
 					self.view = viewsArr[0]//for now assume only one view
@@ -45,7 +45,11 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
 		setSelectedObjIdThisLevel: function(value){
-			//select the node
+            var self = this;
+            /*if(value){
+            }*/
+
+            //select the node
 			//TODO expand tree
 			if(this.selectedObjIdThisLevel == value) return this;
 			this.selectedObjIdThisLevel = value;

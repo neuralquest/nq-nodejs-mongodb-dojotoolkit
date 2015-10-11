@@ -69,6 +69,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
             var columnsPromise =  self.store.get(self.widgetId).then(function(widget){
                 self.widget = widget;
                 self.headerDivNode.innerHTML = '<h1>'+widget.name+'</h1>';
+                domStyle.set(self.headerDivNode, 'display', 'block');
                 self.pageHelpTextDiv.innerHTML = widget.description;
                 return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
                     self.view = viewsArr[0]//for now assume only one view
@@ -77,11 +78,10 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                         self.schema = self.enrichSchema(schema);
                         self.createDeferred.resolve(self);//ready to be loaded with data
                         for(var attrName in schema) {
-                            var attribute = schema[attrName];
-                            columns.push(attribute);
-                            //console.dir('property',property);
-                            if(attribute.dijitType == 'Select') {
-                                attribute.renderCell = function(object, value, node, options){
+                            var attrProps = schema[attrName];
+                            columns.push(attrProps);
+                            if(attrProps.enum){
+                                attrProps.renderCell = function(object, value, node, options){
                                     if(!value) html.set(node, '[not selected]');
                                     //if(!value) node.appendChild(document.createTextNode('[not selected]'));
                                     else{
@@ -90,26 +90,51 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                                         else node.appendChild(document.createTextNode('id: '+value));
                                     }
                                 };
-                                attribute.editor = Select;
+                                attrProps.editor = Select;
                             }
-                            else if(attribute.dijitType == 'RichText') {
-                                self.editorToolbarDivNode.appendChild(attribute.editorArgs.toolbar.domNode);
-                                attribute.renderCell = function(object, value, node, options) {
-                                    html.set(node, value);
+                            else if(attrProps['#ref']){
+                                attrProps.renderCell = function(object, value, node, options){
+                                    if(!value) html.set(node, '[not selected]');
+                                    //if(!value) node.appendChild(document.createTextNode('[not selected]'));
+                                    else{
+                                        var selectedOption = this.editorArgs.store.get(value);
+                                        if(selectedOption) node.appendChild(document.createTextNode(selectedOption.label));
+                                        else node.appendChild(document.createTextNode('id: '+value));
+                                    }
                                 };
-                                attribute.editor = RTFEditor;
+                                attrProps.editor = Select;
                             }
-                            else if(attribute.dijitType == 'String') {
-                                attribute.editor == 'text';
+                            else if(attrProps.media && attrProps.media.mediaType == 'text/html'){
+                                self.editorToolbarDivNode.appendChild(attrProps.editorArgs.toolbar.domNode);
+                                attrProps.renderCell = function(object, value, node, options) {
+                                    if(!value) html.set(node, '<p>[no text]</p>');
+                                    else html.set(node, value);
+                                };
+                                attrProps.get = function(item){
+                                    var value = item[attrName];
+                                    if(!value) return '<p>[no text]</p>';//editor will crash if it does not have a value
+                                    return value;
+                                };
+                                attrProps.editor = RTFEditor;
                             }
-                            else if(attribute.dijitType == 'Number') {
-                                attribute.editor == 'number';
+                            else if(attrProps.media && attrProps.media.mediaType == 'text/json'){
                             }
-                            else if(attribute.dijitType == 'Boolean') {
-                                attribute.editor = 'radio';
+                            else if(attrProps.type == 'String'){
+                                attrProps.renderCell = function(object, value, node, options) {
+                                    if(!value) html.set(node, '[null]');
+                                    else html.set(node, value);
+                                };
+                                attrProps.editor == 'text';
                             }
-                            else if(attribute.dijitType == 'Date') {
-                                attribute.renderCell = function(object, value, node, options) {
+                            else if(attrProps.type == 'Number') {
+                                attrProps.renderCell = function(object, value, node, options) {
+                                    if(!value) html.set(node, '[null]');
+                                    else html.set(node, value);
+                                };
+                                attrProps.editor == 'number';
+                            }
+                            else if(attrProps.type == 'Date'){
+                                attrProps.renderCell = function(object, value, node, options) {
                                     console.log('value', value);
                                     if(!value || value=='') html.set(node, '[no date selected]');
                                     else {
@@ -119,14 +144,28 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                                         html.set(node, date.toLocaleDateString());
                                     }
                                 };
-                                /*attribute.set = function(item) {
+                                /*attrProps.set = function(item) {
                                  var value = item[this.field];
                                  if(!value) return;
                                  var date = dojo.date.stamp.fromISOString(value);
                                  return stamp.toISOString(date);
                                  };*/
-                                //attribute.autoSave = true;
-                                attribute.editor = DateTextBox;
+                                //attrProps.autoSave = true;
+                                attrProps.editor = DateTextBox;
+                            }
+                            else if(attrProps.type == 'Boolean'){
+                                attrProps.renderCell = function(object, value, node, options) {
+                                    if(!value) html.set(node, 'false');
+                                    else html.set(node, String(value));
+                                };
+                                attrProps.editor = 'radio';
+                            }
+                            else if(attrProps.type == 'Object'){
+                                attrProps.renderCell = function(object, value, node, options) {
+                                    if(!value) html.set(node, '{}');
+                                    else html.set(node, JSON.stringify(value, null, 4));
+                                };
+                                attrProps.editor == 'text';
                             }
                         }
                         return columns;
@@ -149,8 +188,8 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                 }, domConstruct.create('div'));
 //					self.grid.startup();
                 for(var i=0;i<columns.length;i++){
-                    var attribute = columns[i];
-                    self.grid.styleColumn(i, attribute.style);
+                    var attrProps = columns[i];
+                    self.grid.styleColumn(i, attrProps.style);
                 }
 
                 self.pane.containerNode.appendChild(self.grid.domNode);
@@ -166,7 +205,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                 self.grid.on("dgrid-error", function(event) {
                     //nq.errorDialog;
                     // Display an error message above the grid when an error occurs.
-                    new dijit.Dialog({title: "Get Error", extractContent: true, content: event.error.message}).show();
+                    new dijit.Dialog({title: "Error", extractContent: true, content: event.error.message}).show();
                 });
                 /*self.grid.on("dgrid-refresh-complete", function(event){
                  var row = grid.row(event);

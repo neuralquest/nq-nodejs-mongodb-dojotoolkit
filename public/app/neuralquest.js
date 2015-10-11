@@ -4,13 +4,13 @@ require([
 'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
 'app/nqStore', 'dstore/RequestMemory', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument',
-'dojox/html/styles', 'dojo/query!css2'],
+"dojo/json",'dojox/html/styles', 'dojo/query!css2'],
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct, declare,  
 		Deferred, when, all, query, BorderContainer,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
 		nqStore, RequestMemory, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
-		styles, css2) {
+		JSON, styles, css2) {
 
     nqStore = new nqStore();
     var self = this;
@@ -245,7 +245,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				container = new ContentPane( {
 					'id' : 'viewPane'+parentViewOrTabId,
 					'region' : 'center'
-				});
+                    });
 			}
 			else {
 				container = new TabContainer( {
@@ -266,7 +266,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					'title' : tab.name,
 					//'selected' : tab._id==state.tabId?true:false,
 					'class' : 'backgroundClass',
-					'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
+					'style' : {overflow: 'auto', padding: '0px', margin: '0px', width: '100%', height: '100%'}
 				});
 				container.addChild(tabPane);
 				container.watch("selectedChildWidget", function(name, oval, nval){
@@ -462,11 +462,43 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		cookie('neuralquestState', newHash);
 		hash(newHash);			
 	}
+    var breadcrums = {};
+    function mergeHashWithBreadcrumObj(i, crumPart){
+        var hashArr = hash().split('.');
+        if(i<hashArr.length-1) {
+            var hashPart = hashArr[i];
+            var crum = crumPart[hashPart];
+            if(!crum) {
+                crumPart[hashPart] = true;
+            }
+            mergeHashWithBreadcrumObj(i+1, crum);
+        }
+    }
+    function breadcrumsObjToAugmentedHash(i, crumPart){
+        var hashArr = hash().split('.');
+        if(i<hashArr.length-1) {
+            var hashPart = hashArr[i];
+            if(crumPart[hashPart]) {
+                var newHashArr = breadcrumsObjToAugmentedHash(i+1, crumPart[hashPart]);
+                newHashArr.unshift(hashPart);
+                return newHashArr;
+            }
+            else return [hashPart];
+        }
+        else {
+            for(hashPart in crumPart){
+                var newHashArr = breadcrumsObjToAugmentedHash(i+1, crumPart[hashPart]);
+                newHashArr.unshift(hashPart);
+                return newHashArr;//we only want the first one
+            }
+            return [];
+        }
+    }
 	lang.setObject("nq.errorDialog", errorDialog);//make the function globally accessable
 	function errorDialog(err){
 		var dlg = new dijit.Dialog({
 			title: 'Error',
-			extractContent: true,//important in the case of server response, it'll screw your css. 
+			extractContent: true,//important in the case of server response, it'll screw up your css.
 			onClick: function(evt){this.hide();},//click anywhere to close
 			content: err.message
 		});
@@ -481,13 +513,62 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 //    transaction.commit();	
 	lang.setObject("nq.test", test);//make the function globally accessable
     function test(){
+        //if(value == 824) this.tree.set('path', ['810', '2016', '2020', '824']);
+        var itemId = 846;
+        var promises = [];
+        var viewsArr = [];
+        //find the class of the current item
+        promises.push(nqStore.getItemsByAssocType(itemId, 'parent'));
+        promises.push(nqStore.getUniqueViewsForWidget(538, viewsArr));
+        var pathPromises = all(promises).then(function(promiseResults){
+            var itemClass = promiseResults[0][0];
+            var allowedClassesPromises = [];
+            viewsArr.forEach(function(view){
+                allowedClassesPromises.push(nqStore.collectAllByAssocType(view.mapsTo, 'subclasses'));
+            });
+            return all(allowedClassesPromises).then(function(allowedClassesArrArr){
+                var count = 0;
+                var treePathPromises = [];
+                allowedClassesArrArr.forEach(function(allowedClassesArr){
+                    var view = viewsArr[count];
+                    allowedClassesArr.forEach(function(allowedClass){
+                        if(itemClass._id == allowedClass._id){
+                            treePathPromises.push(nqStore.getTreePath(view, itemId));
+                        }
+                    });
+                    count++;
+                });
+                return all(treePathPromises);
+            });
+        });
+        pathPromises.then(function(treePaths){
+            console.log('treePaths',treePaths);
+        }, nq.errorDialog);
+/*
 
-		nqStore.get(1784).then(function(item){
+ */
+
+
+
+
+
+        /*
+        var cookieCrumsStr = cookie('neuralquestCrums');
+        var cookieCrumsObj = {};
+        if(undefined != cookieCrumsStr) cookieCrumsObj = JSON.parse(cookieCrumsStr);
+        mergeHashWithBreadcrumObj(0, cookieCrumsObj);
+        console.log('cookieCrumsObj', cookieCrumsObj);
+        cookie('neuralquestCrums', JSON.stringify(cookieCrumsObj));
+        */
+
+
+
+		/*nqStore.get(1784).then(function(item){
 			console.log('item', item);
 			item.name = 'xxxxx';
 			console.log('new', item);
 			nqStore.put(item);
-		});
+		});*/
     }
 	function testInitialize(){
         //var itemsColl = new RequestMemory({ target: '/items', idProperty: '_id'});
@@ -578,6 +659,11 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             pseudo : true,
             cardinality: 'many',
             icon: 15},
+        allSubclasses: {
+            inverse :'parent',
+            pseudo : true,
+            cardinality: 'many',
+            icon: 15},
         mappedToBy: {
             inverse :'mapsTo',
             pseudo : true,
@@ -628,34 +714,4 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             cardinality: 'many',
             icon: 24}
     };
-
-
-
-
-
-
-
-    // summary:
-    //		Initialize
-    //		Setup listerners, prefetch data which is often used, determine landing page
-    /*var transactionLogStore = new Memory();
-     var masterItemStore = new JsonRest({
-     target: '/item',
-     name: 'item',
-     getChildren: function(object, viewId, onComplete){
-     masterItemStore.query({parentId: object._id, parentViewId:object._viewId}).then(function(children) {
-     return onComplete(children || []);
-     });
-     },
-     getIdentity: function(object){
-     return object._id;
-     },
-     });
-     var localItemStore = new Memory();
-     nqStore = transaction({
-     masterStore: masterItemStore,
-     cachingStore: localItemStore,
-     transactionLogStore: transactionLogStore
-     });*/
-
 });

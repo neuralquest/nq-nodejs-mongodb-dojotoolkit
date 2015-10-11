@@ -137,13 +137,30 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
 
 			var self = this;
+			return self.store.get(self.widgetId).then(function(widget){
+				self.widget = widget;
+				//self.headerDivNode.innerHTML = widget.name;
+				self.pageHelpTextDiv.innerHTML = widget.description;
+				return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
+					self.view = viewsArr[0]//for now assume only one view
+					return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
+						self.schema = self.enrichSchema(schema);
+						//return self.store.getAllowedAssocClassesForView(self.view._id).then(function(permittedClassesByViewArr) {
+						//	self.permittedClassesByViewArr = permittedClassesByViewArr;
+						self.createDeferred.resolve(self);//ready to be loaded with data
+						//});
+					});
+				});
+			}, nq.errorDialog);
+
+			/*var self = this;
 			self.getWidgetProperties(this.widgetId).then(function(widgetProps){
 				//console.log('widgetProp',widgetProps);
 				self.widgetProps = widgetProps;
 				//self.HEADER_ATTRREF = attrRefArr[0].name;
 				//self.PARAGRAPH_ATTRREF = attrRefArr[1].name;
 				self.createDeferred.resolve(self);//ready to be loaded with data
-			}, nq.errorDialog);
+			}, nq.errorDialog);*/
 
 			//this.createDeferred.resolve(this);//ready to be loaded with data
 		},
@@ -156,7 +173,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			this.pane.destroyDescendants(false);//destroy all the widget but leave the pane intact
 
 			var self = this;
-			var viewId = this.widgetProps.views[0]._id;
+			var viewId = this.view._id;
 			/*var query = {itemId:this.selectedObjIdPreviousLevel, viewId:this.viewId};
 			var collection = this.store.filter(query);
 			collection.on('remove, add', function(event){
@@ -313,7 +330,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			if(item.classId==80) return; //folder
 
 			//Get the sub- headers/paragraphs
-			var viewId = this.widgetProps.views[0]._id;
+			var viewId = this.view._id;
 			/*var collection = this.store.getChildren(item, viewId);
 			// Setup observer in case children list changes, or the item(s) in the children list are updated.
 			collection.on('remove, add', function(event){
