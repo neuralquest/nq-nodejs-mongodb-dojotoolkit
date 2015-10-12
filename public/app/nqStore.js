@@ -126,7 +126,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              // returns: Promise
              //          An array of all the items found
              */
-            if(!parentId || !assocType) throw new Error('invalid parms');
+            if(!parentId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('invalid parms');
             var self = this;
             if(assocType != 'orderedParent'){
                 return when(self.getItemsByAssocType(parentId, assocType), function(itemsArr){//use when here because getItemsByAssocType sometimes returns a completed array
@@ -156,7 +156,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     var firstChildId = null;
                     if(itemsPromisesArr.length == 0) firstChildId = parentId;
                     else firstChildId = itemsPromisesArr[itemsPromisesArr.length-1]._id;
-                    return self.collectAllByAssocType(firstChildId, 'orderedParent');
+                    return self.getItemsByAssocType(firstChildId, 'orderedParent');
                 });
             }
         },
@@ -164,13 +164,13 @@ function(declare, lang, array, when, all, Store, QueryResults,
             /* summary: Use to gather all items on the next level according to association type.
             //          It can deal with all types of associations and will automatically invert them according to ASSOCPROPERTIES.pseudo.
             // _parentId: String
-            //          Usually contains a number. In the case of ‘by association type’ it will also contain ‘semicolon,  assocType’
+            //          Usually contains a number. In the case of ‘byAssociationType’ it will also contain ‘semicolon+assocType’
             // assocType: String
             //          The association type to be followed.
             // returns: Promise to an array (sometimes an Array)
             //          An array of all the items.
             */
-            if(assocType == 'the user') return [];
+            if(!_parentId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('invalid parms');
             var parentId = Number(_parentId);
             var self = this;
             if (assocType == 'subclasses') {
@@ -337,6 +337,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              //          The schema object.
              */
             var self = this;
+            if(!view.mapsTo) return view.schema; // hack for the class view
             return self.getAttrPropertiesFromAncestors(view.mapsTo).then(function(classAttrObj){
                 var schema = {};
                 for(var attrPropName in view.schema){
@@ -465,6 +466,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              //          An array of all the items found along the way.
              */
             //TODO loop protection
+            if(!itemId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('invalid parms');
             var self = this;
             return self.get(itemId).then(function(item){
                 var type = ASSOCPROPERTIES[assocType].type;
@@ -517,7 +519,13 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return all(promises);
             });
         },
-        getTreePath: function(view, itemId){
+        getTreePath: function(view, itemId, pathArr, level){
+            pathArr.unshift(itemId);
+            var str = "";
+            for(var i = 0; i<level;i++){
+                str = str+'  ';
+            }
+            console.log(str+'VIEW:', view._id, view.name, 'ITEMID:', itemId);
             var self = this;
             var reverseAssocType = ASSOCPROPERTIES[view.toMannyAssociations].inverse;
             // Find the parent views, as seen from the current view
@@ -533,14 +541,24 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     // For each parent view.
                     parentItemsArrArr.forEach(function(parentItemsArr){
                         var parentView = parentViewsArr[count];
-                        // Fore each parent item
+                        var str = "";
+                        for(var i = 0; i<=level;i++){
+                            str = str+'  ';
+                        }
+                        // For each parent item
                         parentItemsArr.forEach(function(parentItem){
-                            treePathPromises.push(self.getTreePath(parentView, parentItem._id));
+                            console.log(str+'Parent View:', parentView._id, parentView.name);
+                            console.log(str+'Parent Item:', parentItem._id, parentItem.name);
+                            var found = false;
+                            pathArr.forEach(function(pathArrItemId){
+                                if(parentItem._id == pathArrItemId) found = true;
+                            });
+                            if(!found) parentItemsArr.push(self.getTreePath(parentView, parentItem._id, pathArr, level+1));
                         });
                         count++;
                     });
                     return all(treePathPromises).then(function(resultsArr){
-                        resultsArr.unshift(itemId);
+                        resultsArr.push([itemId]);
                         return resultsArr;
                     });
                 });

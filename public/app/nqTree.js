@@ -7,7 +7,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 	return declare("nqTree", [nqWidgetBase], {
 		allowedClassesObj: {},//Check Item Acceptance needs this
 		labelAttrIdArr: [], //get Label needs this
-		permittedClassesByViewArr: [],
+		permittedClassesByViewObj: {},
 		attrRefByViewArr: [],
 		parentId: null,
 		
@@ -22,10 +22,25 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					self.view = viewsArr[0]//for now assume only one view
 					return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
 						self.schema = self.enrichSchema(schema);
-						//return self.store.getAllowedAssocClassesForView(self.view._id).then(function(permittedClassesByViewArr) {
-						//	self.permittedClassesByViewArr = permittedClassesByViewArr;
-							self.createDeferred.resolve(self);//ready to be loaded with data
-						//});
+                        var uViewsArr = [];
+                        return self.store.getUniqueViewsForWidget(self.widgetId, uViewsArr).then(function(uniqueViewsArr){
+                            var promises = [];
+                            uViewsArr.forEach(function(uView){
+                                if(uView.mapsTo) promises.push(self.store.collectAllByAssocType(uView.mapsTo, 'subclasses'));
+                            });
+                            return all(promises).then(function(permClassesArrArr){
+                                var count = 0;
+                                permClassesArrArr.forEach(function(permClassesArr){
+                                    var uView = uViewsArr[count];
+                                    var permObj = {view: uView, classes: permClassesArr};
+                                    self.permittedClassesByViewObj[uView._id] = permObj;
+                                    count ++;
+                                });
+                                self.createMenusForWidget()
+                                self.createDeferred.resolve(self);//ready to be loaded with data
+                                return permClassesArrArr;
+                            });
+                        });
 					});
 				});
 			}, nq.errorDialog);
@@ -44,16 +59,48 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
-		setSelectedObjIdThisLevel: function(value){
+		setSelectedObjIdThisLevel: function(itemId){
+            if(!itemId) return;
             var self = this;
-            /*if(value){
-            }*/
+            //var itemNode = this.tree.getNodesByItem[846];
+            //console.log('itemNode', itemNode);
+            //this.tree.set('path', [842, 1784, 2387, 846]);
 
-            //select the node
-			//TODO expand tree
-			if(this.selectedObjIdThisLevel == value) return this;
-			this.selectedObjIdThisLevel = value;
-			//if(value == 824) this.tree.set('path', ['810', '2016', '2020', '824']);
+
+
+            var promises = [];
+            var viewsArr = [];
+            //find the class of the current item
+            promises.push(self.store.getItemsByAssocType(itemId, 'parent'));
+            promises.push(self.store.getUniqueViewsForWidget(self.widgetId, viewsArr));
+            var pathPromises = all(promises).then(function(promiseResults){
+                var itemClass = promiseResults[0][0];
+                var allowedClassesPromises = [];
+                viewsArr.forEach(function(view){
+                    allowedClassesPromises.push(self.store.collectAllByAssocType(view.mapsTo, 'subclasses'));
+                });
+                return all(allowedClassesPromises).then(function(allowedClassesArrArr){
+                    var count = 0;
+                    var restultsArr = [];
+                    var treePathPromises = [];
+                    allowedClassesArrArr.forEach(function(allowedClassesArr){
+                        var view = viewsArr[count];
+                        allowedClassesArr.forEach(function(allowedClass){
+                            if(itemClass._id == allowedClass._id){
+                                treePathPromises.push(self.store.getTreePath(view, itemId, restultsArr, 0));
+                            }
+                        });
+                        count++;
+                    });
+                    return all(treePathPromises).then(function(tree){
+                        return restultsArr;
+                    });
+                });
+            });
+            pathPromises.then(function(treePaths){
+                self.tree.set('path', treePaths);
+                //console.log('treePaths',treePaths);
+            }, nq.errorDialog);
 		},
 		createTree: function(){
 			var self = this;
@@ -192,12 +239,12 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 		
 		createMenusForWidget: function(){
 			var self = this;
-			for(viewId in self.permittedClassesByViewArr) {
+			for(var viewId in self.permittedClassesByViewObj) {
 				var parentMenu = new Menu({targetNodeIds: [this.pane.containerNode], selector: ".css"+viewId});
 				//var parentMenu = new Menu({targetNodeIds: [self.tree.domNode], selector: ".css"+viewId});
 				var addMenu = new Menu({parentMenu: parentMenu});
 				parentMenu.addChild(new PopupMenuItem({
-					label:"New",
+					label:"Add New",
 					iconClass:"addIcon",
 					popup: addMenu
 				}));
@@ -210,15 +257,16 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 						self.store.remove(selectedItem.id,selectedItem.viewId, directives);
 					}
 				}));
-				var permittedClassesArr = self.permittedClassesByViewArr[viewId];
+				var permittedClassesArr = self.permittedClassesByViewObj[viewId].classes;
+                var permView = self.permittedClassesByViewObj[viewId].view;
 				for(var i=0;i<permittedClassesArr.length;i++){
-					classesObj = permittedClassesArr[i];
+					var classesObj = permittedClassesArr[i];
 
 					var menuItem = new MenuItem({
-						label: "View: "+classesObj.subViewName+" Object Type: <b>"+classesObj.subClassName+"</b> association: <span style='color:blue'>"+classesObj.assocName+"</span>",
-						iconClass: "icon"+classesObj.subClassId,
-						classId: classesObj.subClassId,
-						viewId: classesObj.subViewId
+						label: "<b>"+classesObj._name+"</b> by <span style='color:blue'>"+permView.toMannyAssociations+"</span>",
+						iconClass: "icon"+classesObj._id,
+						classId: classesObj._id,
+						viewId: classesObj.permView_id
 					});
 					menuItem.on("click", function(evt){
 						var addObj = {

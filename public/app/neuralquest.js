@@ -31,13 +31,21 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 
 		}, errorDialog);*/
 		//domStyle.set('loadingOverlay', 'display', 'none');
-        //return;
-		if(hash() == "") {
-			var neuralquestState = cookie('neuralquestState');
-			if(neuralquestState) hash(neuralquestState, true);
-			else hash("842.1784.702.2485", true);
-		}
-		else interpretHash();
+        if(hash() == "") {
+            var neuralquestState = cookie('neuralquestState');
+            if(neuralquestState) hash(neuralquestState, true);
+            else hash("842.1784.702.2485", true);
+        }
+        else interpretHash();       return;
+        setTimeout(function(){
+            if(hash() == "") {
+                var neuralquestState = cookie('neuralquestState');
+                if(neuralquestState) hash(neuralquestState, true);
+                else hash("842.1784.702.2485", true);
+            }
+            else interpretHash();
+            },0);//allow the browser to redraw the page.
+
 	});
 	function interpretHash(_hash){
 		// summary:
@@ -52,22 +60,36 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		//		All of the page elements of the underlaying levels are completed 
 		//var currentHash = hash();		
 		//console.log('hash', _hash);
-		when(processHashLevelRecursive(0), function(result){
+		when(drawFramesRecursive(0), function(result){
 			var hashArr = hash().split('.');
 			var levels = Math.ceil(hashArr.length/3);//determine the number of levels, rounded to the highest integer
 			for(var level = levels-1; level>=0; level--){
 				//setTimeout(drawWidgets(level),0);//allow the browser to redraw the page. Does this really work?
-				drawWidgets(level);
+                var state = getState(level);
+                if(!state.viewId) continue;
+                drawWidgets(level);
+                continue;
+                var selectedTabId = getSelectedTabRecursive(state.viewId);
+                return nqStore.getItemsByAssocTypeAndDestClass(selectedTabId, 'ordered', WIDGETS_ATTRCLASS).then(function(widgetsArr){
+                    //when we've got all the child widgets that belong to this tab, create them
+                    widgetsArr.forEach(function(widget){
+                        when(createNqWidget(widget, selectedTabId, state.viewId, level), function(widgetObj){
+                            when(widgetObj.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel), function(wid){
+                                wid.setSelectedObjIdThisLevel(state.selectedObjId);
+                            }, errorDialog);
+                        }, errorDialog);
+                    });
+                    return widgetsArr;
+                });
 			}
 		}, errorDialog);
-		
 	}	
-	function processHashLevelRecursive(level){
+	function drawFramesRecursive(level){
 		var state = getState(level);
 		//console.log('state', state);
 		if(!state.viewId) return false;//nothing left to display
 		// if the view pane already exists we can simply go on to the next level
-		if(registry.byId('viewPane'+state.viewId)) return processHashLevelRecursive(level+1);		
+		if(registry.byId('viewPane'+state.viewId)) return drawFramesRecursive(level+1);		
 		// We're filling a slave, clean it first. It may have been used by another view before
 		var parentContentPane; 
 		if(!state.viewIdPreviousLevel) parentContentPane = registry.byId('placeholder');
@@ -83,11 +105,11 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			else viewPaneCreated = createTabs(state.viewId, parentContentPane, level);
 			return when(viewPaneCreated, function(newParentContentPane){
 				parentContentPane.resize();//this is a must
-				return processHashLevelRecursive(level+1);//try the next level
+				return drawFramesRecursive(level+1);//try the next level
 			});
 		});
 	}
-	function drawWidgets(level){		
+	function drawWidgets(level){
 		var state = getState(level);
 		if(!state.viewId) return true;
 		var selectedTabId = getSelectedTabRecursive(state.viewId);
@@ -528,17 +550,20 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             });
             return all(allowedClassesPromises).then(function(allowedClassesArrArr){
                 var count = 0;
+                restultsArr = [];
                 var treePathPromises = [];
                 allowedClassesArrArr.forEach(function(allowedClassesArr){
                     var view = viewsArr[count];
                     allowedClassesArr.forEach(function(allowedClass){
                         if(itemClass._id == allowedClass._id){
-                            treePathPromises.push(nqStore.getTreePath(view, itemId));
+                            treePathPromises.push(nqStore.getTreePath(view, itemId, restultsArr, 0));
                         }
                     });
                     count++;
                 });
-                return all(treePathPromises);
+                return all(treePathPromises).then(function(tree){
+                    return restultsArr;
+                });
             });
         });
         pathPromises.then(function(treePaths){
