@@ -34,18 +34,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         if(hash() == "") {
             var neuralquestState = cookie('neuralquestState');
             if(neuralquestState) hash(neuralquestState, true);
-            else hash("842.1784.702.2485", true);
+            else hash(".842.1784.702.2485", true);
         }
-        else interpretHash();       return;
-        setTimeout(function(){
-            if(hash() == "") {
-                var neuralquestState = cookie('neuralquestState');
-                if(neuralquestState) hash(neuralquestState, true);
-                else hash("842.1784.702.2485", true);
-            }
-            else interpretHash();
-            },0);//allow the browser to redraw the page.
-
+        else interpretHash();
 	});
 	function interpretHash(_hash){
 		// summary:
@@ -61,29 +52,29 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		//var currentHash = hash();		
 		//console.log('hash', _hash);
 		when(drawFramesRecursive(0), function(result){
-			var hashArr = hash().split('.');
-			var levels = Math.ceil(hashArr.length/3);//determine the number of levels, rounded to the highest integer
-			for(var level = levels-1; level>=0; level--){
-				//setTimeout(drawWidgets(level),0);//allow the browser to redraw the page. Does this really work?
-                var state = getState(level);
-                if(!state.viewId) continue;
-                drawWidgets(level);
-                continue;
-                var selectedTabId = getSelectedTabRecursive(state.viewId);
-                return nqStore.getItemsByAssocTypeAndDestClass(selectedTabId, 'ordered', WIDGETS_ATTRCLASS).then(function(widgetsArr){
-                    //when we've got all the child widgets that belong to this tab, create them
-                    widgetsArr.forEach(function(widget){
-                        when(createNqWidget(widget, selectedTabId, state.viewId, level), function(widgetObj){
-                            when(widgetObj.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel), function(wid){
-                                wid.setSelectedObjIdThisLevel(state.selectedObjId);
-                            }, errorDialog);
-                        }, errorDialog);
-                    });
-                    return widgetsArr;
-                });
-			}
+            setTimeout(function(){// Let the browser display thread catchup.
+                var hashArr = hash().split('.');
+                var levels = Math.ceil(hashArr.length/3);//determine the number of levels, rounded to the highest integer
+                var widgetPromises = [];
+                for(var level = levels-1; level>=0; level--){//we start at the highest level and work our way down (user experience)
+                    widgetPromises.push(drawWidgets(level));
+                }
+                return all(widgetPromises).then(function(widgetsArrArr){
+                    setTimeout(function(){// Let the browser display thread catchup.
+                        var level = levels-1;
+                        widgetsArrArr.forEach(function(widgetsArr){
+                            var state = getState(level);
+                            widgetsArr.forEach(function(widget){
+                                widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel);
+                                widget.setSelectedObjIdThisLevel(state.selectedObjId);
+                            });
+                            level = level -1;
+                        });
+                    },10);
+                }, errorDialog);
+            },50);
 		}, errorDialog);
-	}	
+	}
 	function drawFramesRecursive(level){
 		var state = getState(level);
 		//console.log('state', state);
@@ -109,25 +100,17 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			});
 		});
 	}
-	function drawWidgets(level){
-		var state = getState(level);
-		if(!state.viewId) return true;
-		var selectedTabId = getSelectedTabRecursive(state.viewId);
+    function drawWidgets(level){
+        var state = getState(level);
+        var selectedTabId = getSelectedTabRecursive(state.viewId);
         return nqStore.getItemsByAssocTypeAndDestClass(selectedTabId, 'ordered', WIDGETS_ATTRCLASS).then(function(widgetsArr){
-			//when we've got all the child widgets that belong to this tab, create them
-			for(var i=0;i<widgetsArr.length;i++){
-				var widget = widgetsArr[i];
-				when(createNqWidget(widget, selectedTabId, state.viewId, level), function(widgetObj){
-					//when the widget is created tell it which object was selected on the previous level
-					//widget types will respond diferently: fill the form, set the query for the table, recreate the tree, fly to the object in 3D, etc.
-					when(widgetObj.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel), function(wid){
-						wid.setSelectedObjIdThisLevel(state.selectedObjId);
-					}, errorDialog);
-				}, errorDialog);
-			}
-			return widgetsArr;
-		});
-	}
+            var widgetPromises = [];
+            widgetsArr.forEach(function(widget){
+                widgetPromises.push(createNqWidget(widget, selectedTabId, state.viewId, level));
+            });
+            return all(widgetPromises);
+        });
+    }
 	function getSelectedTabRecursive(paneId){
 		var tabContainer = registry.byId('viewPane'+paneId);
 		if(!tabContainer) return false;
@@ -278,6 +261,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			}
 			parentContentPane.addChild(container);
 			container.startup();
+            var selectedFound = false;
 			var subTabPromisses = [];
 			for(var i=0;i<tabsArr.length;i++){
 				var tab = tabsArr[i];
@@ -293,23 +277,29 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				container.addChild(tabPane);
 				container.watch("selectedChildWidget", function(name, oval, nval){
 					//console.log("selected child changed from ", oval.title, " to ", nval.title);
-					var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
+					var tabId = (nval.id).substring(3);//why is this called so often? probably cant hurt
 					setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
 				});
-				/*subTabPromisses.push(
-					//are we creating an accordion container in a border container or a tab container?
-					if(tab.accordionOrTab=='Accordion in Border Container')  return(createAccordionInBorderContainer(tab._id, tabPane, level));
-					else return(createTabs(tab._id, tabPane, level));
-				);*/
+                //are we creating an accordion container in a border container or a tab container?
+                var subTabPromise;
+                if(tab.accordionOrTab=='Accordion in Border Container')  subTabPromise = createAccordionInBorderContainer(tab._id, tabPane, level);
+                else subTabPromise = when(createTabs(tab._id, tabPane, level), function(subTabIsSelected){
+                    if(subTabIsSelected){
+                        container.selectChild(registry.byId('tab'+subTabIsSelected));
+                        return parentViewOrTabId;
+                    }
+                    return false;//not selected or there are no subTabs
+                });
+				subTabPromisses.push(subTabPromise);
 			};
-			/*if(selectedFound && container.selectChild) container.selectChild(registry.byId('tab'+selectedFound));//must be set programmatically
+            if(selectedFound && container.selectChild) container.selectChild(registry.byId('tab'+selectedFound));//must be set programaticaly
 			return when(all(subTabPromisses), function(result){
-				//tell the super tabPane that it should select our superTab because its subtab is also selected
+				//tell the super tabPane that it should select itsself because its subtab is also selected
 				if(selectedFound) return parentViewOrTabId;
 				else return false;
-			});*/
-            return container;
-			//return when(all(subTabPromisses));
+			});
+            //return container;
+			return when(all(subTabPromisses));
 		});
 	}
 	function createNqWidget(widget, tabId, viewId, level) {
@@ -422,34 +412,29 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	function getState(level){
 		var hashArr = hash().split('.');
 		return {
-			viewId: parseInt(hashArr[level*3+0]),
+            /*viewIdPreviousLevel: parseInt(hashArr[level*3-3]),
+            tabIdPreviousLevel: parseInt(hashArr[level*3-2]),
+            selectedObjectIdPreviousLevel: hashArr[level*3-1],
+            viewId: parseInt(hashArr[level*3+0]),
 			tabId: parseInt(hashArr[level*3+1]),
-			selectedObjId: parseInt(hashArr[level*3+2]),
-			//selectedObjectIdPreviousLevel: parseInt(hashArr[level*3-1]),
-			selectedObjectIdPreviousLevel: hashArr[level*3-1],
-			viewIdPreviousLevel: parseInt(hashArr[level*3-3]),
-			tabIdPreviousLevel: parseInt(hashArr[level*3-2])
-			/*viewId: hashArr[level*3+0],
-			tabId: hashArr[level*3+1],
-			selectedObjId: hashArr[level*3+2],
-			selectedObjectIdPreviousLevel: hashArr[level*3-1],
-			viewIdPreviousLevel: hashArr[level*3-3]*/
+			selectedObjId: parseInt(hashArr[level*3+2])*/
+            viewIdPreviousLevel: parseInt(hashArr[level*3-2]),
+            tabIdPreviousLevel: parseInt(hashArr[level*3-1]),
+            selectedObjectIdPreviousLevel: hashArr[level*3-0],
+            viewId: parseInt(hashArr[level*3+1]),
+            tabId: parseInt(hashArr[level*3+2]),
+            selectedObjId: parseInt(hashArr[level*3+3])
 		};
 	}
 	function setHashTabId(level, tabId, viewId){
 		var hashArr = hash().split('.');
-		if(hashArr[level*3+1] == tabId) return;//same
-		cookie('viewPane'+viewId+'_selectedChild', tabId);//set the cookie
-		
-		hashArr[level*3+1] = tabId;
-		
-		//var viewsArr = _nqSchemaMemoryStore.query({parentTabId: tabId, entity: 'view'});//get the views		 
-		//if(viewsArr.length>0) hashArr[(level+1)*3+0] = viewsArr[0].id;
-		//else hashArr = hashArr.slice(0,level*3+2);
-		hashArr = hashArr.slice(0,level*3+2);
+		if(hashArr[level*3+2] == tabId) return;//same
+		hashArr[level*3+2] = tabId;
 
-		//remove anything following this tab in the hash since it is nolonger valid
-		hashArr = hashArr.slice(0,level*3+2);
+		//remove anything following this tab in the hash since it is no longer valid
+		hashArr = hashArr.slice(0,level*3+3);
+        var tabCookieStr = cookie('tabId'+tabId);
+        if(tabCookieStr) hashArr = hashArr.concat(JSON.parse(tabCookieStr));
 		var newHash = hashArr.join('.');
 		//newHash = newHash.replace(/,/g,'.');
 		hash(newHash, true);// update history, instead of adding a new record			
@@ -459,25 +444,28 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		//var tabPane = registry.byId('tab'+tabId);
 		//document.title = 'NQ - '+(tabPane?tabPane.title+' - ':'')+this.getLabel(item);
 
+        var hashArr = hash().split('.');
+        var arrFromTab = hashArr.slice(level*3+3);
+        console.log('hash',JSON.stringify(arrFromTab));
+        cookie('tabId'+tabId, JSON.stringify(arrFromTab));
 		
-		var hashArr = hash().split('.');
-//		hashArr[level*3+1] = tabId;//it may have changed
-		hashArr[level*3+2] = selectedObjId;//it will have changed
-		if(hashArr[(level+1)*3+0] != viewId){//if its changed
-			//remove anything following this level in the hash since it is nolonger valid
-			hashArr = hashArr.slice(0,(level+1)*3+0);
+//		hashArr[level*3+2] = tabId;//it may have changed
+		hashArr[level*3+3] = selectedObjId;//it will have changed
+		if(hashArr[(level+1)*3+1] != viewId){//if its changed
+			//remove anything following this level in the hash since it is no longer valid
+			hashArr = hashArr.slice(0,(level+1)*3+1);
 			
-			hashArr[(level+1)*3+0] = viewId;
+			hashArr[(level+1)*3+1] = viewId;
 			
 			//if there is a cookie for this acctab, use if to set the hash tabId (we can prevent unnessasary interperitHash())//FIXME remove set tabId
 			var cookieValue = cookie('viewPane'+viewId+'_selectedChild');
-			if(cookieValue) hashArr[(level+1)*3+1] = cookieValue.substr(3);
+			if(cookieValue) hashArr[(level+1)*3+2] = cookieValue.substr(3);
 			/*else{//find the first tab and use it
 				var tabsArr = _nqSchemaMemoryStore.query({parentViewId: viewId, entity: 'tab'});//get the tabs		 
-				if(tabsArr.length>0) hashArr[(level+1)*3+1] = tabsArr[0].id;
+				if(tabsArr.length>0) hashArr[(level+1)*3+2] = tabsArr[0].id;
 			}
 			var tabsArr = _nqSchemaMemoryStore.query({parentViewId: viewId, entity: 'tab'});//get the tabs		 
-			if(tabsArr.length>0) hashArr[(level+1)*3+1] = tabsArr[0].id;*/
+			if(tabsArr.length>0) hashArr[(level+1)*3+2] = tabsArr[0].id;*/
 		}
 
 		var newHash = hashArr.join('.');
