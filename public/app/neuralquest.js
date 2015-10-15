@@ -317,7 +317,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         // returns: Deferred
         //		The deferred will result in the widget after it has been created, or immediately if it is already there
 
-        // if the widget already exists we can simply return widgets
+        // if the widget already exists we can simply it
         var widgetObj = registry.byId('nqWidget' + widget._id);
         if (widgetObj) return widgetObj;
         var tab = registry.byId('tab' + tabId);
@@ -352,7 +352,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 store: nqStore,
                 createDeferred: createDeferred, //tell us when your done by returning the widgetObj
                 widgetId: widget._id,
-                selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//dgrid needs an initial query
+                //selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//dgrid needs an initial query
                 level: level, // used by onClick
                 tabId: tabId, // used by onClick
                 query: query
@@ -365,7 +365,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 store: nqStore,
                 createDeferred: createDeferred, //tell us when your done by returning the widgetObj
                 widgetId: widget._id,
-                selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//tree needs an initial query
+                //selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//tree needs an initial query
                 level: level, // used by onClick
                 tabId: tabId, // used by onClick
             }, domConstruct.create('div'));
@@ -412,12 +412,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	function getState(level){
 		var hashArr = hash().split('.');
 		return {
-            /*viewIdPreviousLevel: parseInt(hashArr[level*3-3]),
-            tabIdPreviousLevel: parseInt(hashArr[level*3-2]),
-            selectedObjectIdPreviousLevel: hashArr[level*3-1],
-            viewId: parseInt(hashArr[level*3+0]),
-			tabId: parseInt(hashArr[level*3+1]),
-			selectedObjId: parseInt(hashArr[level*3+2])*/
             viewIdPreviousLevel: parseInt(hashArr[level*3-2]),
             tabIdPreviousLevel: parseInt(hashArr[level*3-1]),
             selectedObjectIdPreviousLevel: hashArr[level*3-0],
@@ -429,11 +423,13 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	function setHashTabId(level, tabId, viewId){
 		var hashArr = hash().split('.');
 		if(hashArr[level*3+2] == tabId) return;//same
+        //set our tabId in the hash array
 		hashArr[level*3+2] = tabId;
-
 		//remove anything following this tab in the hash since it is no longer valid
 		hashArr = hashArr.slice(0,level*3+3);
+        //see if there is a cookie for our tab
         var tabCookieStr = cookie('tabId'+tabId);
+        //if, append it to our hash array
         if(tabCookieStr) hashArr = hashArr.concat(JSON.parse(tabCookieStr));
 		var newHash = hashArr.join('.');
 		//newHash = newHash.replace(/,/g,'.');
@@ -445,21 +441,25 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		//document.title = 'NQ - '+(tabPane?tabPane.title+' - ':'')+this.getLabel(item);
 
         var hashArr = hash().split('.');
+        //get everything in the hash array fom the tabId onwards
         var arrFromTab = hashArr.slice(level*3+3);
+        //store it as a cookie, setHashTabId to use later on
         console.log('hash',JSON.stringify(arrFromTab));
         cookie('tabId'+tabId, JSON.stringify(arrFromTab));
 		
 //		hashArr[level*3+2] = tabId;//it may have changed
+        //set our selectedObjId in the hash array
 		hashArr[level*3+3] = selectedObjId;//it will have changed
 		if(hashArr[(level+1)*3+1] != viewId){//if its changed
 			//remove anything following this level in the hash since it is no longer valid
 			hashArr = hashArr.slice(0,(level+1)*3+1);
-			
+            //set our viewId in the hash array
 			hashArr[(level+1)*3+1] = viewId;
-			
-			//if there is a cookie for this acctab, use if to set the hash tabId (we can prevent unnessasary interperitHash())//FIXME remove set tabId
-			var cookieValue = cookie('viewPane'+viewId+'_selectedChild');
-			if(cookieValue) hashArr[(level+1)*3+2] = cookieValue.substr(3);
+
+            //see if there is a cookie for our view
+			//var viewVookieStr = cookie(viewId);
+            //if
+			//if(cookieValue) hashArr[(level+1)*3+2] = cookieValue.substr(3);
 			/*else{//find the first tab and use it
 				var tabsArr = _nqSchemaMemoryStore.query({parentViewId: viewId, entity: 'tab'});//get the tabs		 
 				if(tabsArr.length>0) hashArr[(level+1)*3+2] = tabsArr[0].id;
