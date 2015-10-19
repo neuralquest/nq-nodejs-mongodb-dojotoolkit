@@ -5,10 +5,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			arrayUtil, domAttr, Deferred, all, when, registry, Memory,
 			Toolbar, Select, DateTextBox, NumberTextBox, CheckBox, Editor, CurrencyTextBox, ValidationTextBox){
 	return declare("nqWidgetBase", [_WidgetBase], {
-		readOnly: false,
 		store: null,
-		widgetDef: {},
-		viewDef: {},
 		parentId: null,
 		viewId: null,
 		selectedObjIdPreviousLevel: null,
@@ -28,10 +25,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
-			this.pageToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.headerDivNode);//placeholder for the page toolbar
-			this.editorToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.headerDivNode);//placeholder for the editor toolbar
+			this.pageToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.domNode);//placeholder for the page toolbar
+			this.editorToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.domNode);//placeholder for the editor toolbar
             this.headerDivNode = domConstruct.create('div', {'style' : {  'display': 'none', 'padding': '10px'} }, this.domNode);//placeholder for header
-			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.headerDivNode);//placeholder for the helptext
+			this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
 			this.pane = new ContentPane( {
 //				'class' : 'backgroundClass',
 				'doLayout' : 'true',
@@ -70,7 +67,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			});
 			this.pane.resize();
 		},
-		getWidgetProperties: function(widgetId){
+		/*getWidgetProperties: function(widgetId){
 			var self = this;
 			return self.store.get(widgetId).then(function(widget){
  				//TODO recursively get all of the views that belong to this widget
@@ -102,7 +99,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 					return widget;
 				})
 			});
-		},
+		},*/
         enrichSchema: function(schema){
             var self = this;
             for(var attrName in schema){
@@ -194,7 +191,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 }
             }
         },
-        schemaToProperties: function(schema){
+        /*schemaToProperties: function(schema){
             var self = this;
             var properties = [];
             for(var attrName in schema){
@@ -203,7 +200,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 /*if(attrName.charAt(0)=='_'){
                  //properties.push(attrProps.attrName);
                  continue;
-                 }*/
+                 }* /
                 var dijitType = attrProps.type;
                 if(attrProps.type == 'String'){
                     if(attrProps.enum) dijitType = 'Select';
@@ -303,7 +300,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 properties.push(propObj);
             }
             return properties;
-        },
+        },*/
 		extraPlugins:[
      		'|',
      		'foreColor','hiliteColor',

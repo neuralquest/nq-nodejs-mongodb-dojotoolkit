@@ -15,22 +15,27 @@ function(declare, lang, array, when, all, Store, QueryResults,
         },
         add: function (item, directives) {
             this.enableTransactionButtons();
-            return this.itemsColl.add(item);
+            var newItem =  this.itemsColl.add(item);
+            if(directives) this.processDirectives(newItem, directives);
+            return newItem;
         },
         put: function (item, directives) {
             this.enableTransactionButtons();
-            return this.itemsColl.put(item);
+            var updatedItem =  this.itemsColl.put(item);
+            if(directives) this.processDirectives(updatedItem, directives);
+            return updatedItem;
         },
         remove: function (itemId, directives) {
+            if(directives) this.processDirectives(itemId, directives);
             return this.itemsColl.remove(itemId);
         },
         getChildren: function (object, onComplete) {
-            if(!object._id || !object._viewId) throw new Error('invalid parms');
+            if(!object._id || !object._viewId) throw new Error('Invalid paramters');
             //var collection = this.filter({parentId: object.id, parentViewId: object.viewId });
             //collection.fetch();
             //return onComplete(collection);
 
-            var promise = this.getItemsByParentView(object._id, object._viewId);
+            var promise = this.getItemsByParentIdParentViewId(object._id, object._viewId);
             return promise.then(function (results) {
                 return onComplete(results);
             });
@@ -47,14 +52,152 @@ function(declare, lang, array, when, all, Store, QueryResults,
          getLabel: function(object){
          return object.name;
          },*/
-        getItemsByView: function (parentId, viewId) {
-            if(!parentId || !viewId) throw new Error('invalid parms');
+        processDirectives: function(object, directives){
             var self = this;
-            return self.get(viewId).then(function (view) {
-                return self.getItemsByAssocTypeAndDestClass(parentId, view.toMannyAssociations, view.mapsTo)
+            var viewId = object.viewId;
+            var movingObjectId = object.id;
+            var oldParentId = directives.oldParent?directives.oldParent.id:undefined;
+            var newParentId = directives.parent?directives.parent.id:undefined;
+            //var newParentId = directives.parent.id;
+            var beforeId = directives.before?directives.before.id:undefined;
+
+            return this.get(viewId).then(function(view){
+                //TODO must merge
+                var assocType = view.toMannyAssociations;
+                if(!assocType) assocType = view.toOneAssociations;
+                var destClassId = view.mapsTo;
+                if(assocType == 'ordered'){
+                    if(oldParentId){
+                        // The leading Assoc will remain attached to the Object that's being moved
+                        // First make sure the old parent/preceding object is attached to the object that comes after the moving object
+                        // get the ordered children as seen from the old parent
+                        when(self.getManyByAssocTypeAndDestClass(oldParentId, 'ordered', destClassId), function(oldParentChildren){
+                            // get the ordered children as seen from the new parent (could be the same)
+                            when(self.getManyByAssocTypeAndDestClass(newParentId, 'ordered', destClassId), function(newParentChildren){
+                                var leadingAssocSourceFk = 0;
+                                var leadingAssoctype = 0;
+                                var idx = oldParentChildren.indexOf(movingObjectId);
+                                if(idx==0){//the object we're moving is the first of the old parent children
+                                    leadingAssocSourceFk = oldParentId;
+                                    leadingAssoctype = 'ordered';
+                                    if(oldParentChildren.length>1){//there is at least one other object following the moving object, find it's assoc
+                                        when(self.assocsColl.query({source: movingObjectId, type: 'next', dest: oldParentChildren[1]}), function(assocArr){
+                                            // update it so that it has the old parent as source
+                                            if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                            var assoc = assocArr[0];
+                                            assoc.source = oldParentId;
+                                            assoc.type = 'ordered';
+                                            assoc.parentId = oldParentId;//needed for server side validation
+                                            self.assocsColl.put(assoc);
+                                        });
+                                    }
+                                }
+                                else{//the object we're moving is NOT the first of the old parent children
+                                    leadingAssocSourceFk = oldParentChildren[idx-1];
+                                    leadingAssoctype = 'next';
+                                    if(idx < oldParentChildren.length-1){//there is at least one other object following the moving object, find it's assoc
+                                        when(self.assocsColl.query({source: movingObjectId, type: 'next', dest: oldParentChildren[idx+1]}), function(assocArr){
+                                            //update it so that it has the previous object as source
+                                            if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                            var assoc = assocArr[0];
+                                            assoc.source = oldParentChildren[idx-1];
+                                            assoc.parentId = oldParentId;//needed for server side validation
+                                            self.assocsColl.put(assoc);
+                                        });
+                                    }
+                                }
+
+                                //Next make sure the new parent/following object is attached to the moving object
+                                var newParentFollowingAssocSourceFk = 0;
+                                var newParentFollowingAssoctype = 0;
+                                if(beforeId){
+                                    var idx = newParentChildren.indexOf(beforeId);
+                                    if(idx==0){//the to be following object is the first one of the new parent children
+                                        newParentFollowingAssocSourceFk = newParentId;
+                                        newParentFollowingAssoctype = 'ordered';
+                                    }
+                                    else{//the to be following object is NOT the first one of the new parent children
+                                        newParentFollowingAssocSourceFk = newParentChildren[idx-1];
+                                        newParentFollowingAssoctype = 'next';
+                                    }
+                                    //get the following assoc and update it so that it has the moving object as source
+                                    when(self.assocsColl.query({source: newParentFollowingAssocSourceFk, type: newParentFollowingAssoctype, dest: beforeId}), function(assocArr){
+                                        if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                        var newParentFollowingAssoc = assocArr[0];
+                                        newParentFollowingAssoc.source = movingObjectId;
+                                        newParentFollowingAssoc.type = 'next';
+                                        newParentFollowingAssoc.parentId = newParentId;//needed for serverside validation
+                                        self.assocsColl.put(newParentFollowingAssoc);
+                                    });
+                                }
+                                else{// No before: add it to the last one or the parent if the new parent has no children
+                                    if(newParentChildren.length==0){//ours will be the only one
+                                        newParentFollowingAssocSourceFk = newParentId;
+                                        newParentFollowingAssoctype = 'ordered';
+                                    }
+                                    else{//ours will be the last one
+                                        newParentFollowingAssocSourceFk = newParentChildren[newParentChildren.length-1];
+                                        newParentFollowingAssoctype = 'next';
+                                    }
+                                }
+                                //Fianly attach the new parent/preceding object to the moving object
+                                when(self.assocsColl.query({source: leadingAssocSourceFk, type: leadingAssoctype, dest: movingObjectId}), function(assocArr){
+                                    if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                    var leadingAssoc = assocArr[0];
+                                    leadingAssoc.source = newParentFollowingAssocSourceFk;
+                                    leadingAssoc.type = newParentFollowingAssoctype;
+                                    leadingAssoc.parentId = newParentId;//needed for serverside validation
+                                    self.assocsColl.put(leadingAssoc);
+                                });
+                            });
+                        });
+                    }
+                    else{//no oldParent means we're creating a new cell with a new association
+                        if(newParentId) {
+                            // get the ordered children as seen from the new parent
+                            when(self.getManyByAssocTypeAndDestClass(newParentId, 'ordered', destClassId), function(newParentChildren){
+                                if(newParentChildren.length>0){
+                                    self.addAssoc({source: newParentChildren[newParentChildren.length-1], type: 'next', dest: movingObjectId, parentId:newParentId});
+                                }
+                                else{
+                                    self.addAssoc({source: newParentId, type: 'ordered', dest: movingObjectId});
+                                }
+                            });
+                        }
+                    }
+                }
+                else{
+                    if(oldParentId == newParentId) return;
+                    if(oldParentId){
+                        if(assocType<SUBCLASSES_PASSOC){
+                            when(self.assocsColl.query({source: oldParentId, type: assocType, dest: movingObjectId}), function(assocArr){
+                                if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                var assoc = assocArr[0];
+                                assoc.source = newParentId;
+                                self.assocsColl.put(assoc);
+                            });
+                        }
+                        else {
+                            when(self.assocsColl.query({source:movingObjectId , type: assocType-12, dest: oldParentId}), function(assocArr){
+                                if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                var assoc = assocArr[0];
+                                assoc.dest = newParentId;
+                                self.assocsColl.put(assoc);
+                            });
+                        }
+                    }
+                    else{//new assoc
+                        if(assocType<SUBCLASSES_PASSOC){
+                            self.addAssoc({source: newParentId, type: assocType, dest: movingObjectId});
+                        }
+                        else {
+                            self.addAssoc({source: movingObjectId, type: assocType-12, dest: newParentId});
+                        }
+                    }
+                }
             });
         },
-        getItemsByParentView: function (parentId, parentViewId) {
+        getItemsByParentIdParentViewId: function (parentId, parentViewId) {
              /* summary: Used to collect all items pertaining to all the child views of the parent view
              //          Special case: sub-documents
              // parentId: String
@@ -64,54 +207,69 @@ function(declare, lang, array, when, all, Store, QueryResults,
              // returns: Promise to an array
              //          An array of all the items.
              */
-            if(!parentId || !parentViewId) throw new Error('invalid parms');
+            if(!parentId || !parentViewId) throw new Error('Invalid paramters');
             var self = this;
             return self.getItemsByAssocTypeAndDestClass(parentViewId, 'manyToMany', VIEW_CLASS_TYPE).then(function (viewsArr) {
-                //console.log('viewsArr',viewsArr);
                 var promises = [];
                 viewsArr.forEach(function (view) {
-                    /*self.getAllowedAssocClassesForView(view._id).then(function(schema){
-                        console.dir(schema);
-                    });*/
-                    if(view.subDocument) promises.push(self.get(parentId));
-                    else{
-                        var assocType = view.toMannyAssociations;
-                        if(!assocType) assocType = view.toOneAssociations;
-                        //if(parentId == 2016) debugger;
-                        if(view.onlyIfParentEquals){
-                            var oipe = Number(view.onlyIfParentEquals);
-                            if(parentId == oipe) promises.push(self.getItemsByAssocTypeAndDestClass(view.mapsTo, assocType));
-                            else promises.push([]);
-                        }
-                        else promises.push(self.getItemsByAssocTypeAndDestClass(parentId, assocType, view.mapsTo));
-                    }
+                    promises.push(self.getItemsByParentIdViewId(parentId, view._id));
                 });
-                return when(all(promises), function (viewResArr) {
+                return when(all(promises), function(itemsArrArr){
                     var results = [];
-                    var count = 0;
-
-                    //console.log('viewResArr', viewResArr);
-                    viewResArr.forEach(function (itemsArr) {
-                        var subDocument = viewsArr[count].subDocument;
-                        if(subDocument){
-                            var doc = itemsArr[subDocument];
-                            for(var attrName in doc) {
-                                var subDocItem = doc[attrName];
-                                subDocItem.name = attrName;
-                                subDocItem._viewId = viewsArr[count]._id;
-                                results.push(subDocItem);
-                            };
-                        }
-                        else{
-                            itemsArr.forEach(function (item) {
-                                item._viewId = viewsArr[count]._id;
-                                results.push(item);
-                            });
-                        }
-                        count++;
+                    itemsArrArr.forEach(function (itemsArr) {
+                        itemsArr.forEach(function (item) {
+                            results.push(item);
+                        });
                     });
                     return results;
                 });
+            });
+        },
+        getItemsByParentIdViewId: function (parentId, viewId) {
+            if(!parentId || !viewId) throw new Error('Invalid paramters');
+            var self = this;
+            return self.get(viewId).then(function (view) {
+                var promise = null;
+                if(view.subDocument) return self.get(parentId).then(function (item) {
+                    var results = [];
+                    var doc = item[view.subDocument];
+                    for(var attrName in doc) {
+                        var subDocItem = doc[attrName];
+                        subDocItem.name = attrName;
+                        subDocItem.id = parentId+':'+attrName;
+                        results.push(subDocItem);
+                    };
+                    return results;
+                });
+                else if(view.onlyIfParentEquals){
+                    //TODO must merge
+                    var assocType = view.toMannyAssociations;
+                    if(!assocType) assocType = view.toOneAssociations;
+                    if(parentId == Number(view.onlyIfParentEquals)) promise = self.getItemsByAssocTypeAndDestClass(view.mapsTo, assocType);
+                    else promise = [];
+                }
+                else promise = self.getItemsByAssocTypeAndDestClass(parentId, view.toMannyAssociations, view.mapsTo);
+                return when(promise, function(itemsArr){
+                    var results = [];
+                    itemsArr.forEach(function (item) {
+                        item._viewId = viewId;
+                        results.push(item);
+                    });
+                    return results;
+                });
+            });
+        },
+        getItemByItemIdViewId: function (itemId, viewId) {
+            if(!itemId || !viewId) throw new Error('Invalid paramters');
+            var self = this;
+            return self.get(viewId).then(function (view) {
+                if(view.subDocument) {
+                    var itemIdArr = itemId.split(':');
+                    return self.get(itemIdArr[0]).then(function (item) {
+                        return item[view.subDocument][itemIdArr[1]];
+                    });
+                }
+                else return self.get(itemId);
             });
         },
         getItemsByAssocTypeAndDestClass: function (parentId, assocType, destClassId) {
@@ -126,7 +284,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              // returns: Promise
              //          An array of all the items found
              */
-            if(!parentId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('invalid parms');
+            if(!parentId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('Invalid paramters');
             var self = this;
             if(assocType != 'orderedParent'){
                 return when(self.getItemsByAssocType(parentId, assocType), function(itemsArr){//use when here because getItemsByAssocType sometimes returns a completed array
@@ -170,10 +328,11 @@ function(declare, lang, array, when, all, Store, QueryResults,
             // returns: Promise to an array (sometimes an Array)
             //          An array of all the items.
             */
-            if(!_parentId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('invalid parms');
+            if(!_parentId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('Invalid paramters');
             var parentId = Number(_parentId);
             var self = this;
             if (assocType == 'subclasses') {
+                //TODO replace with default behaviour after we take item type into account
                 var query = {dest: parentId, type: 'parent'};
                 var collection = this.assocsColl.filter(query);
                 var itemPromises = [];
@@ -203,6 +362,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         var objPromises = [];
                         classesArr.forEach(function(assocsArr){
                             assocsArr.forEach(function(assoc){
+                                //TODO replace with default behaviour after we take item type into account
                                 objPromises.push(self.get(assoc.source));
                             });
                         });
@@ -217,6 +377,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 });
             }
             else if (assocType == 'associations') {
+                // Special case for class model details tree
                 var query = {source: parentId};
                 var collection = this.assocsColl.filter(query);
                 var typesObj = {};
@@ -236,6 +397,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return assocs;
             }
             else if (assocType == 'byAssociationType') {
+                // Special case for class model details tree
                 var pars = _parentId.split(':');
                 return self.getItemsByAssocType(Number(pars[0]), pars[1]);
             }
@@ -247,6 +409,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     if(query.source) itemPromises.push(self.itemsColl.get(assoc.dest));
                     else itemPromises.push(self.itemsColl.get(assoc.source));
                 });
+                //TODO take item type into account
                 return all(itemPromises);
             }
         },
@@ -263,28 +426,44 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     if(queryLog[i].type == 'filter'){
                         var query = queryLog[i].arguments[0];
                         if(query.itemId && query.assocType) {
+                            //Not used anymore
+                            //still use by enrich schema, should be replaced
+                            //debugger;
                             var promise = this.getItemsByAssocType(query.itemId, query.assocType);
                             promise.then(function (res) {
                                 data = res;
                             });
                         }
-                        else if(query.itemId) {
-                            this.get(query.itemId).then(function(res){
-                                data = [res];
-                            });
-                        }
-                        else if (query.viewId && query.parentId) {
-                            var promise = this.getItemsByView(query.parentId, query.viewId);
+                        else if(query.itemId && query.viewId) {
+                            // used by form to get an array with a single object
+                            // used by tree and document to get the root
+                            var promise = this.getItemByItemIdViewId(query.itemId, query.viewId);
                             promise.then(function (res) {
                                 data = res;
                             });
                         }
-                        else if(query.parentViewId && query.parentId) {
-                            this.getItemsByParentView(query.parentId, query.parentViewId).then(function(res){
+                        else if(query.itemId) {
+                            //Not used anymore
+                            debugger;
+                            this.get(query.itemId).then(function(res){
+                                data = [res];
+                            });
+                        }
+                        else if (query.parentId && query.viewId) {
+                            var promise = this.getItemsByParentIdViewId(query.parentId, query.viewId);
+                            promise.then(function (res) {
+                                data = res;
+                            });
+                        }
+                        else if(query.parentId && query.parentViewId) {
+                            // used by table to populate the grid
+                            this.getItemsByParentIdParentViewId(query.parentId, query.parentViewId).then(function(res){
                                 data = res;
                             });
                         }
                         else if(query.parentId && query.type && query.destClassId) {
+                            //Not used anymore
+                            debugger;
                             this.getItemsByAssocTypeAndDestClass(query.parentId, query.type, query.destClassId).then(function(res){
                                 data = res;
                             });
@@ -306,6 +485,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
             });
         },
         isA: function (itemId, destClassId, originalId) {
+            // TODO replace with collectAllByAssocType
             var self = this;
             if (!originalId) originalId = itemId;
             if (itemId == destClassId) return originalId;
@@ -316,18 +496,6 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return self.isA(assocsArr[0].dest, destClassId, originalId);
             });
         },
-/*        followAssocType: function (itemId, type, itemsPromisesArr) {
-            var self = this;
-            var collection = this.assocsColl.filter({source: itemId, type: type});
-            return collection.fetch().then(function (assocsArr) {
-                if (assocsArr.length > 1) throw new Error('More than one next found');
-                else if (assocsArr.length == 1) {
-                    itemsPromisesArr.push(self.itemsColl.get(assocsArr[0].dest));
-                    return self.followAssocType(assocsArr[0].dest, type, itemsPromisesArr)
-                }
-                return itemsPromisesArr;//found the last one
-            });
-        },*/
         getCombinedSchemaForView: function(view) {
             /* summary:  Used to create a JSON schema based on the view schema in combination with class attributes inherited through view.mapsTo.
              //          The same method is used server side to validate updates.
@@ -466,7 +634,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              //          An array of all the items found along the way.
              */
             //TODO loop protection
-            if(!itemId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('invalid parms');
+            if(!itemId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('Invalid paramters');
             var self = this;
             return self.get(itemId).then(function(item){
                 var type = ASSOCPROPERTIES[assocType].type;

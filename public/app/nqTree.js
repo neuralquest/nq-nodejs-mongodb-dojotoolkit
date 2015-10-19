@@ -14,13 +14,14 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 		postCreate: function(){
 			this.inherited(arguments);
 			var self = this;
-			return self.store.get(self.widgetId).then(function(widget){
+			var initialized = self.store.get(self.widgetId).then(function(widget){
 				self.widget = widget;
 				//self.headerDivNode.innerHTML = widget.name;
 				self.pageHelpTextDiv.innerHTML = widget.description;
 				return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
 					self.view = viewsArr[0]//for now assume only one view
-					return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
+                    return when(self.store.getCombinedSchemaForView(self.view),function(schema) {
+					//return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
 						self.schema = self.enrichSchema(schema);
                         var uViewsArr = [];
                         return self.store.getUniqueViewsForWidget(self.widgetId, uViewsArr).then(function(uniqueViewsArr){
@@ -36,14 +37,16 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                                     self.permittedClassesByViewObj[uView._id] = permObj;
                                     count ++;
                                 });
-                                self.createMenusForWidget()
-                                self.createDeferred.resolve(self);//ready to be loaded with data
                                 return permClassesArrArr;
                             });
                         });
 					});
 				});
 			}, nq.errorDialog);
+            when(initialized, function(result){
+                self.createMenusForWidget()
+                self.createDeferred.resolve(self);//ready to be loaded with data
+            })
 		},
 		setSelectedObjIdPreviousLevel: function(value){
             var self = this;
@@ -77,7 +80,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 var itemClass = promiseResults[0][0];
                 var allowedClassesPromises = [];
                 viewsArr.forEach(function(view){
-                    allowedClassesPromises.push(self.store.collectAllByAssocType(view.mapsTo, 'subclasses'));
+                    if(view.mapsTo) allowedClassesPromises.push(self.store.collectAllByAssocType(view.mapsTo, 'subclasses'));
                 });
                 return all(allowedClassesPromises).then(function(allowedClassesArrArr){
                     var count = 0;
@@ -177,7 +180,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 
 				dndController: dndSource,
 				betweenThreshold: 5, 
-				persist: 'true',
+				persist: false,//doesnt deal well with recursion. Tends to expand everything
                 getLabel: function(item){
                     if(!item) return 'no item';
                     if(item._type == 'object') return item.name;
