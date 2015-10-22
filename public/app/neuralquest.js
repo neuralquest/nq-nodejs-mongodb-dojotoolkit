@@ -513,7 +513,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			content: err.message
 		});
 		dlg.show();
-		if(!err.responseText) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
+		throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
+		//if(!err.responseText) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
 	};
 	
 	

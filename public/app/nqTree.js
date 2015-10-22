@@ -1,5 +1,5 @@
 define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang', "dijit/registry",/* 'app/nqObjectStoreModel',*/"dijit/tree/ObjectStoreModel", "dojo/hash","dojo/when", "dojo/promise/all",
-        'dojo/dom-construct', 'dijit/tree/dndSource', 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', "dojo/_base/array", 
+        'dojo/dom-construct', 'dijit/tree/dndSource', 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', "dojo/_base/array",
         'dojo/query!css2'],
 	function(declare, nqWidgetBase, Tree, lang, registry, ObjectStoreModel, hash, when, all,
 			domConstruct, dndSource, Menu, MenuItem, PopupMenuItem, array){
@@ -22,32 +22,47 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					self.view = viewsArr[0]//for now assume only one view
                     return when(self.store.getCombinedSchemaForView(self.view),function(schema) {
 					//return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
-						self.schema = self.enrichSchema(schema);
+                        self.enrichSchema(schema);
+                        self.schema = schema;
                         var uViewsArr = [];
                         return self.store.getUniqueViewsForWidget(self.widgetId, uViewsArr).then(function(uniqueViewsArr){
-                            var promises = [];
+							//console.log('uViewsArr',uViewsArr);
+                            var viewPromises = [];
                             uViewsArr.forEach(function(uView){
-                                if(uView.mapsTo) promises.push(self.store.collectAllByAssocType(uView.mapsTo, 'subclasses'));
+                                viewPromises.push(self.permittedClassesForUniqueView(uView));
                             });
-                            return all(promises).then(function(permClassesArrArr){
-                                var count = 0;
-                                permClassesArrArr.forEach(function(permClassesArr){
-                                    var uView = uViewsArr[count];
-                                    var permObj = {view: uView, classes: permClassesArr};
-                                    self.permittedClassesByViewObj[uView._id] = permObj;
-                                    count ++;
-                                });
-                                return permClassesArrArr;
-                            });
+                            return all(viewPromises);
                         });
 					});
 				});
-			}, nq.errorDialog);
+			});
             when(initialized, function(result){
-                self.createMenusForWidget()
-                self.createDeferred.resolve(self);//ready to be loaded with data
-            })
+                self.createMenusForWidget();
+				self.createDeferred.resolve(self);//ready to be loaded with data
+			}, function(err){self.createDeferred.reject(err)});
 		},
+        permittedClassesForUniqueView: function(uView){
+            var self = this;
+            self.store.getItemsByAssocTypeAndDestClass(uView._id, 'manyToMany', VIEW_CLASS_TYPE).then(function(manyViewsArr){
+                var permClassesPromises = [];
+                manyViewsArr.forEach(function(manyView){
+                    if(manyView.mapsTo) permClassesPromises.push(self.store.collectAllByAssocType(manyView.mapsTo, 'subclasses'));
+                });
+                return all(permClassesPromises).then(function(permClassesArrArr){
+                    //console.log('permClassesArrArr',permClassesArrArr);
+                    var permObj = {};
+                    var count = 0;
+                    permClassesArrArr.forEach(function(permClassesArr){
+                        var manyView = manyViewsArr[count];
+                        permObj[manyView._id] = {view: manyView, classes: permClassesArr};
+                        count++;
+                    });
+                    self.permittedClassesByViewObj[uView._id] = permObj;
+                    //console.log('permObj',uView._id,permObj);
+                    return true;
+                });
+            });
+        },
 		setSelectedObjIdPreviousLevel: function(value){
             var self = this;
             if(self.widget.parentId) {
@@ -101,8 +116,12 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 });
             });
             pathPromises.then(function(treePaths){
-                self.tree.set('path', treePaths);
-                //console.log('treePaths',treePaths);
+                console.log('treePaths',treePaths);
+                if(treePaths[0] == 702) treePaths = [846,2016,702];
+                self.tree.set('path', treePaths).then(function(results){
+                    console.log('results',results);
+                    //self.tree.set('selectedItem', result[results.length-1]);
+                });
             }, nq.errorDialog);
 		},
 		createTree: function(){
@@ -111,7 +130,11 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				childrenAttr: this.viewIdsArr,
 				store : this.store,
 				query : {itemId: this.selectedObjIdPreviousLevel, viewId: this.view._id}
-			});			
+			});
+            this.treeModel.getIdentity = function(item){
+                if(lang.isObject(item)) return item._id;
+                return item; //hack to get Tree to respect numeric ids
+            },
 			this.treeModel.getRoot = function(onItem, onError){
 				/*var collection = this.store.filter(this.query);
 				collection.on('remove, add', function(event){
@@ -139,12 +162,12 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 });
 			},
 			this.treeModel.getChildren = function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
-                this.store.getChildren(parentItem, onComplete);
-                return;
+                var self = this;
+                //this.store.getChildren(parentItem, onComplete);
+                //return;
 
-//				var self = this;
 				var id = this.store.getIdentity(parentItem);
-
+/*
 				if(this.childrenCache[id]){
 					// If this.childrenCache[id] is defined, then it always has the latest list of children
 					// (like a live collection), so just return it.
@@ -154,23 +177,30 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				}
 				var children = this.childrenCache[id] = this.store.getChildren(parentItem, onComplete);
                 return;
-				/*var collection = this.childrenCache[id];
-				if(!collection) collection = this.childrenCache[id] = this.store.getChildren(parentItem);
-				// Setup observer in case children list changes, or the item(s) in the children list are updated.
-				collection.on('remove, add', function(event){
-					var parent = event.parent;
-					var collection = self.childrenCache[parent.id];
-					if(collection){
-						var children = collection.fetch();
-						self.onChildrenChange(parent, children);
-					}
-				});	
-				collection.on('update', function(event){
-					var obj = event.target;
-					self.onChange(obj);
-				});	
+                */
+				var collection = this.childrenCache[parentItem._id];
+				if(!collection) {
+                    var query = {parentId: parentItem._id, parentViewId:parentItem._viewId};
+                    collection = this.childrenCache[parentItem._id] = this.store.filter(query);
+                    //collection = this.childrenCache[id] = this.store.getChildren(parentItem);
+                    // Setup observer in case children list changes, or the item(s) in the children list are updated.
+                    collection.on('remove, add', function(event){
+                        var parent = event.directives.parent;
+                        var collection = self.childrenCache[parent._id];
+                        var query = {parentId: parent._id, parentViewId:parent._viewId};
+                        collection = self.store.filter(query);
+                        if(collection){
+                            var children = collection.fetch();
+                            self.onChildrenChange(parent, children);
+                        }
+                    });
+                    collection.on('update', function(event){
+                        var obj = event.target;
+                        self.onChange(obj);
+                    });
+                }
 				var children = collection.fetch();
-				return onComplete(children);*/
+				return onComplete(children);
 			},
 			this.tree = new Tree({
 				id: 'tree'+this.widgetId,
@@ -230,16 +260,14 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				onLoad: function(){
 					fullPage.resize();//need this for lazy loaded trees, some how the first tree lags behind
 					//console.dir(self.createDeferred.resolve(self));
-					self.createDeferred.resolve(self);//ready to be loaded with data/
+//					self.createDeferred.resolve(self);//ready to be loaded with data/
 //					self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
 				}
 			}, domConstruct.create('div'));
 			this.pane.containerNode.appendChild(this.tree.domNode);
-			this.tree.startup();
-			this.createDeferred.resolve(this);//ready to be loaded with data
+//			this.tree.startup();
 
 		},
-		
 		createMenusForWidget: function(){
 			var self = this;
 			for(var viewId in self.permittedClassesByViewObj) {
@@ -256,240 +284,44 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					iconClass:"removeIcon",
 					onClick: function(){
 						var selectedItem = self.tree.get("selectedItem");
-						var directives = {parent:{id:self.selectedObjIdPreviousLevel}};
+						var directives = {parent:selectedItem};
 						self.store.remove(selectedItem.id,selectedItem.viewId, directives);
 					}
 				}));
-				var permittedClassesArr = self.permittedClassesByViewObj[viewId].classes;
-                var permView = self.permittedClassesByViewObj[viewId].view;
-				for(var i=0;i<permittedClassesArr.length;i++){
-					var classesObj = permittedClassesArr[i];
+                var uViewObj = self.permittedClassesByViewObj[viewId];
+                for(uViewId in uViewObj){
+                    var manyViewObj = uViewObj[uViewId];
+                    var manyView = manyViewObj.view;
+                    var permittedClassesArr = manyViewObj.classes;
+                    for(var i=0;i<permittedClassesArr.length;i++){
+                        var classesObj = permittedClassesArr[i];
 
-					var menuItem = new MenuItem({
-						label: "<b>"+classesObj._name+"</b> by <span style='color:blue'>"+permView.toMannyAssociations+"</span>",
-						iconClass: "icon"+classesObj._id,
-						classId: classesObj._id,
-						viewId: classesObj.permView_id
-					});
-					menuItem.on("click", function(evt){
-						var addObj = {
-								'type': 1,
-								'viewId': this.viewId, 
-								'classId': this.classId
-							};
-						var selectedItem = self.tree.get("selectedItem");
-						var directives = {parent:{id: selectedItem.id}};
-						var newItem = self.store.add(addObj, directives);
-						
-						var selectedNodes = self.tree.getNodesByItem(selectedItem);
-						if(!selectedNodes[0].isExpanded){
-							self.tree._expandNode(selectedNodes[0]);
-						}
-						self.tree.set('selectedItem', newItem.id);
-					});
-					addMenu.addChild(menuItem);	
-				}
-			};
-		},
-/*		createMenus: function(){
-			var OBJECT_TYPE = 1;
-			var ASSOCS_ATTR_ID = 1613;
-			var SUBCLASSES_PASSOC = 15;
-			var ASSOCS_CLASS_TYPE = 94;
-			var CLASS_TYPE = 0;
-			var CELNAME_ATTR = 852;
-			
-			var self = this;
-			when(self.store.getManyByAssocType(this.widgetId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewIdArr){
-				//console.log('getManyByAssocType', viewIdArr);					
-				for(var i=0;i<viewIdArr.length;i++){
-					viewId = viewIdArr[i];
-					self.createMenuforView(viewId);
-				}
-			}, nq.errorDialog);		
-		},
-		createMenuforView: function(viewId){
-			var CLASSMODEL_VIEWID = 844;
-			var CLASSMODEL_ATTRTREFID = 852;
-			var CLASSES_VIEWID = 733;
-			var ASSOCIATIONS_VIEWID = 1934 ;
-			var CLASSES_ATTRTREFID = 756;
-			var SUBCLASSES_PASSOC = 15;
-			var ASSOCS_CLASS_TYPE = 94;
-			var CLASS_TYPE = 0;
-			var CELNAME_ATTR = 852;
-			var CLASSMODEL_VIEWID = 844;
-			var CLASSMODEL_ATTRTREFID = 852;
-			var CLASSES_VIEWID = 733;
-			var ASSOCIATIONS_VIEWID = 1934 ;
-			var CLASSES_ATTRTREFID = 756;
-			var SUBCLASSES_PASSOC = 15;
-			var ASSOCS_CLASS_TYPE = 94;
-			var CLASS_TYPE = 0;
-			var CELNAME_ATTR = 852;
-			
-			var self = this;
+                        var menuItem = new MenuItem({
+                            label: "<b>"+classesObj._name+"</b> by <span style='color:blue'>"+manyView.toMannyAssociations+"</span>",
+                            iconClass: "icon"+classesObj._id,
+                            classId: classesObj._id,
+                            viewId: manyView._id
+                        });
+                        menuItem.on("click", function(evt){
+                            var addObj = {
+                                '_type': 'object',
+                                '_viewId': this.viewId,
+                                '_icon': this.classId
+                            };
+                            var selectedItem = self.tree.get("selectedItem");
+                            var directives = {parent: selectedItem};
+                            var newItem = self.store.add(addObj, directives);
 
-			//console.log('viewId', viewId);
-			var parentMenu = new Menu({targetNodeIds: [self.tree.domNode], selector: ".css"+viewId});
-			var addMenu = new Menu({parentMenu: parentMenu});
-			parentMenu.addChild(new PopupMenuItem({
-				label:"New",
-				iconClass:"addIcon",
-				popup: addMenu
-			}));
-			parentMenu.addChild(new MenuItem({
-				label:"Delete",
-				iconClass:"removeIcon",
-				onClick: function(){
-					var selectedItem = self.tree.get("selectedItem");
-					self.store.remove(selectedItem.id,selectedItem.viewId);
-				}
-			}));
-			if(viewId == CLASSMODEL_VIEWID){
-				var menuItem = new MenuItem({
-					label: "<b>Class</b> by <span style='color:blue'>child</span> association",
-					iconClass: "icon0",
-					viewId: viewId
-				});
-				menuItem.on("click", function(evt){
-					var selectedItem = self.tree.get("selectedItem");
-					//console.log('menu item on', dijit.byNode(this.getParent().currentTarget));
-					var viewId = this.viewId;
-					var item = self.store.add({type: 0, attrRefId: CLASSMODEL_ATTRTREFID, viewId: viewId, classId:CLASS_TYPE, name: 'New Class'}, {parent:{id: selectedItem.id}});
-					var selectedNodes = self.tree.getNodesByItem(selectedItem);
-					if(!selectedNodes[0].isExpanded) self.tree._expandNode(selectedItem);
-					self.tree.set('selectedItem', item.id);
-				});
-				addMenu.addChild(menuItem);	
-				var menuItem = new MenuItem({
-					label: "<b>Oject</b> by <span style='color:blue'>child</span> association",
-					iconClass: "icon1",
-					viewId: viewId
-				});
-				menuItem.on("click", function(evt){
-					var selectedItem = self.tree.get("selectedItem");
-					//console.log('menu item on', evt);
-					var viewId = this.viewId;
-					var item = self.store.add({type: 1, attrRefId: CLASSMODEL_ATTRTREFID, viewId: viewId, classId:OBJECT_TYPE }, {parent:{id: selectedItem.id}});
-					var selectedNodes = self.tree.getNodesByItem(selectedItem);
-					if(!selectedNodes[0].isExpanded) self.tree._expandNode(selectedItem);
-					self.tree.set('selectedItem', item.id);
-				});
-				addMenu.addChild(menuItem);	
+                            var selectedNodes = self.tree.getNodesByItem(selectedItem);
+                            if(!selectedNodes[0].isExpanded){
+                                self.tree._expandNode(selectedNodes[0]);
+                            }
+                            self.tree.set('selectedItem', addObj._id);
+                        });
+                        addMenu.addChild(menuItem);
+                    }
+                }
 			}
-			else if(viewId == CLASSES_VIEWID){
-				
-			}
-			else if(viewId == ASSOCIATIONS_VIEWID){
-				
-			}
-			else{
-				when(self.store.getManyByAssocType(viewId, MANYTOMANY_ASSOC, OBJECT_TYPE, true), function(viewIdArr){
-					//console.log('related views getManyByAssocType', viewIdArr);					
-					for(var i=0;i<viewIdArr.length;i++){
-						subViewId = viewIdArr[i];
-						/*var addSubMenu = new Menu({parentMenu: addMenu});
-						parentMenu.addChild(new PopupMenuItem({
-							label:"View",
-							//iconClass:"addIcon",
-							popup: addSubMenu
-						}));* /
-						self.createMenuforSubView(subViewId, addMenu);
-					}
-				}, nq.errorDialog);				
-			}
-		},	
-		createMenuforSubView: function(viewId, addMenu){
-			var CLASSMODEL_VIEWID = 844;
-			var CLASSMODEL_ATTRTREFID = 852;
-			var CLASSES_VIEWID = 733;
-			var ASSOCIATIONS_VIEWID = 1934 ;
-			var CLASSES_ATTRTREFID = 756;
-			var SUBCLASSES_PASSOC = 15;
-			var ASSOCS_CLASS_TYPE = 94;
-			var CLASS_TYPE = 0;
-			var CELNAME_ATTR = 852;
-			
-			var self = this;
-
-			var attrPromises = [];
-			//get the assocication type that this view has as an attribute
-			attrPromises[0] = self.store.getOneByAssocTypeAndDestClass(viewId, ATTRIBUTE_ASSOC, ASSOCS_CLASS_TYPE);
-			//get the class that this view maps to
-			//attrPromises[1] = self.store.query({sourceFk: viewId, type: MAPSTO_ASSOC});
-			attrPromises[1] = self.store.getOneByAssocType(viewId, MAPSTO_ASSOC, CLASS_TYPE, false);
-			when(all(attrPromises), function(arr){
-				if(!arr[0]) throw new Error('View '+viewId+' must have an association type as an attribute ');
-				var assocType = arr[0];
-				var assocName = self.store.getCell(assocType).name;//TODO will fail if it is asysnc
-				if(!arr[1]) throw new Error('View '+viewId+' must map to one class ');
-				//if(arr[1].length!=1) console.log('View '+viewId+' should map to one class ');
-				var destClassId = arr[1];
-				//get the subclasses as seen from the destClass
-				when(self.store.getManyCellsByAssocType(destClassId, SUBCLASSES_PASSOC, CLASS_TYPE, true), function(subClassArr){
-					subClassArr.push(self.store.getCell(destClassId));//TODO should getManyByAssocType also return destClassId?
-					//console.log('subClassArr', subClassArr);
-					self.allowedClassesObj[viewId] = subClassArr;//Check Item Acceptance needs this
-					//var addMenu = new Menu({parentMenu: parentMenu});
-					for(var j=0;j<subClassArr.length;j++){
-						var subClassCell = subClassArr[j];
-						var subClassId = subClassCell.id;
-						//console.log(subClass);
-
-						var tree = this.tree;
-						var menuItem = new MenuItem({
-							label: "viewId: "+viewId+" <b>"+subClassCell.name+"</b> object by <span style='color:blue'>"+assocName+"</span>"+' association',
-							iconClass: "icon"+subClassId,
-							subClassId: subClassId,
-							viewId: viewId
-						});
-						menuItem.on("click", function(evt){
-							//console.log('menu item on', this.subClassId);
-							var viewId = this.viewId;
-							var classId = this.subClassId;
-							var addObj = {
-									'type': 1,
-									'viewId': this.viewId, 
-									'classId': this.subClassId
-								};
-							var selectedItem = self.tree.get("selectedItem");
-							var directives = {parent:{id: selectedItem.id}};
-//									addObj[viewDefToCreate.label] = '[new '+subClassId+']';;
-							var newItem = self.store.add(addObj, directives);
-							
-							//var selectedItem = self.tree.get("selectedItem");
-							//if(!selectedItem[viewId]) selectedItem[viewId] = [];
-							//selectedItem[viewId].push(newItem.id);
-							//_nqDataStore.put(selectedItem);
-
-							//TODO this should be done automaticly some where
-							//var x = self.tree.model.getChildren(selectedItem, viewsArr);//we need this to create an observer on the newly created item
-							
-							var selectedNodes = self.tree.getNodesByItem(selectedItem);
-							if(!selectedNodes[0].isExpanded){
-								self.tree._expandNode(selectedNodes[0]);
-							}
-							self.tree.set('selectedItem', newItem.id);
-						});
-						addMenu.addChild(menuItem);	
-					}
-					addMenu.startup();
-					/*parentMenu.addChild(new PopupMenuItem({
-						label:"To",
-						iconClass:"icon"+assocType,
-						popup: addMenu
-					}));* /
-				}, nq.errorDialog);
-			}, nq.errorDialog);			
-		},*/
-		getNodePathRecursive: function(nodesArr, selectedTabId){
-			nodesArr.unshift(selectedTabId);//add at the first postion
-			return null;
-			return when(nqDataStore.getOneByAssocTypeAndDestClass(selectedTabId, ORDERED_PARENT_ASSOC, ACCORDIONTABS_ATTRCLASS), function(parentTab){
-				if(parentTab) return getTabsPathRecursive(parentTab);
-				else return null;
-			});
-		}	
+		}
 	});
 });

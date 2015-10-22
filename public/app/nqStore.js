@@ -1,36 +1,47 @@
 define(['dojo/_base/declare', "dojo/_base/lang", "dojo/_base/array", "dojo/when", "dojo/promise/all", 'dstore/Store', 'dstore/QueryResults',
-		'dstore/RequestMemory', 'dijit/registry'],
+		'dstore/RequestMemory', 'dijit/registry', 'dojo/aspect','dstore/SimpleQuery', 'dstore/Trackable'],
 function(declare, lang, array, when, all, Store, QueryResults,
-		 RequestMemory, registry){
+		 RequestMemory, registry, aspect, SimpleQuery, Trackable){
 
-    return declare("nqStore", [Store], {
+    return declare("nqStore", [Store, SimpleQuery, Trackable], {
+        constructor: function (options) {
+            // perform the mixin
+            options && declare.safeMixin(this, options);
+            //aspect.after(itemsColl, 'add', console.log('aspect after'));
+
+        },
+    //return declare("nqStore", [Store], {
+        autoEmitEvents: false,
         assocsColl: new RequestMemory({target: '/assocs', idProperty: '_id'}),
         itemsColl: new RequestMemory({target: '/items', idProperty: '_id'}),
 
+
         get: function (_itemId) {
             var itemId = Number(_itemId);
-            //return this.itemsColl.fetch({itemId:itemId});
             this.enableTransactionButtons();
             return this.itemsColl.get(itemId);
         },
         add: function (item, directives) {
             this.enableTransactionButtons();
-            var newItem =  this.itemsColl.add(item);
-            if(directives) this.processDirectives(newItem, directives);
-            return newItem;
+            var id = Math.floor((Math.random()*1000000)+1);
+            //item._id = id;
+            this.itemsColl.add(item);// not async??
+            if(directives) this.processDirectives(item, directives);
+            this.emit('add', {target:item, directives:directives});
         },
         put: function (item, directives) {
             this.enableTransactionButtons();
             var updatedItem =  this.itemsColl.put(item);
             if(directives) this.processDirectives(updatedItem, directives);
-            return updatedItem;
+            this.emit('update', {target:item, directives:directives});
         },
         remove: function (itemId, directives) {
             if(directives) this.processDirectives(itemId, directives);
-            return this.itemsColl.remove(itemId);
+            this.itemsColl.remove(itemId);
+            this.emit('delete', {target:itemId, directives:directives});
         },
         getChildren: function (object, onComplete) {
-            if(!object._id || !object._viewId) throw new Error('Invalid paramters');
+            if(!object._id || !object._viewId) throw (new Error('Invalid parameters'));
             //var collection = this.filter({parentId: object.id, parentViewId: object.viewId });
             //collection.fetch();
             //return onComplete(collection);
@@ -54,12 +65,12 @@ function(declare, lang, array, when, all, Store, QueryResults,
          },*/
         processDirectives: function(object, directives){
             var self = this;
-            var viewId = object.viewId;
-            var movingObjectId = object.id;
-            var oldParentId = directives.oldParent?directives.oldParent.id:undefined;
-            var newParentId = directives.parent?directives.parent.id:undefined;
+            var viewId = object._viewId;
+            var movingObjectId = object._id;
+            var oldParentId = directives.oldParent?directives.oldParent._id:undefined;
+            var newParentId = directives.parent?directives.parent._id:undefined;
             //var newParentId = directives.parent.id;
-            var beforeId = directives.before?directives.before.id:undefined;
+            var beforeId = directives.before?directives.before._id:undefined;
 
             return this.get(viewId).then(function(view){
                 //TODO must merge
@@ -71,11 +82,11 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         // The leading Assoc will remain attached to the Object that's being moved
                         // First make sure the old parent/preceding object is attached to the object that comes after the moving object
                         // get the ordered children as seen from the old parent
-                        when(self.getManyByAssocTypeAndDestClass(oldParentId, 'ordered', destClassId), function(oldParentChildren){
+                        when(self.getItemsByAssocTypeAndDestClass(oldParentId, 'ordered', destClassId), function(oldParentChildren){
                             // get the ordered children as seen from the new parent (could be the same)
-                            when(self.getManyByAssocTypeAndDestClass(newParentId, 'ordered', destClassId), function(newParentChildren){
+                            when(self.getItemsByAssocTypeAndDestClass(newParentId, 'ordered', destClassId), function(newParentChildren){
                                 var leadingAssocSourceFk = 0;
-                                var leadingAssoctype = 0;
+                                var leadingAssoctype = '';
                                 var idx = oldParentChildren.indexOf(movingObjectId);
                                 if(idx==0){//the object we're moving is the first of the old parent children
                                     leadingAssocSourceFk = oldParentId;
@@ -83,7 +94,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                     if(oldParentChildren.length>1){//there is at least one other object following the moving object, find it's assoc
                                         when(self.assocsColl.query({source: movingObjectId, type: 'next', dest: oldParentChildren[1]}), function(assocArr){
                                             // update it so that it has the old parent as source
-                                            if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                            if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                             var assoc = assocArr[0];
                                             assoc.source = oldParentId;
                                             assoc.type = 'ordered';
@@ -98,7 +109,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                     if(idx < oldParentChildren.length-1){//there is at least one other object following the moving object, find it's assoc
                                         when(self.assocsColl.query({source: movingObjectId, type: 'next', dest: oldParentChildren[idx+1]}), function(assocArr){
                                             //update it so that it has the previous object as source
-                                            if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                            if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                             var assoc = assocArr[0];
                                             assoc.source = oldParentChildren[idx-1];
                                             assoc.parentId = oldParentId;//needed for server side validation
@@ -122,7 +133,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                     }
                                     //get the following assoc and update it so that it has the moving object as source
                                     when(self.assocsColl.query({source: newParentFollowingAssocSourceFk, type: newParentFollowingAssoctype, dest: beforeId}), function(assocArr){
-                                        if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                        if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                         var newParentFollowingAssoc = assocArr[0];
                                         newParentFollowingAssoc.source = movingObjectId;
                                         newParentFollowingAssoc.type = 'next';
@@ -142,7 +153,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                 }
                                 //Fianly attach the new parent/preceding object to the moving object
                                 when(self.assocsColl.query({source: leadingAssocSourceFk, type: leadingAssoctype, dest: movingObjectId}), function(assocArr){
-                                    if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                    if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                     var leadingAssoc = assocArr[0];
                                     leadingAssoc.source = newParentFollowingAssocSourceFk;
                                     leadingAssoc.type = newParentFollowingAssoctype;
@@ -155,12 +166,12 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     else{//no oldParent means we're creating a new cell with a new association
                         if(newParentId) {
                             // get the ordered children as seen from the new parent
-                            when(self.getManyByAssocTypeAndDestClass(newParentId, 'ordered', destClassId), function(newParentChildren){
+                            when(self.getItemsByAssocTypeAndDestClass(newParentId, 'ordered', destClassId), function(newParentChildren){
                                 if(newParentChildren.length>0){
-                                    self.addAssoc({source: newParentChildren[newParentChildren.length-1], type: 'next', dest: movingObjectId, parentId:newParentId});
+                                    self.assocsColl.add({source: newParentChildren[newParentChildren.length-1]._id, type: 'next', dest: movingObjectId, parentId:newParentId});
                                 }
                                 else{
-                                    self.addAssoc({source: newParentId, type: 'ordered', dest: movingObjectId});
+                                    self.assocsColl.add({source: newParentId, type: 'ordered', dest: movingObjectId});
                                 }
                             });
                         }
@@ -171,7 +182,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     if(oldParentId){
                         if(assocType<SUBCLASSES_PASSOC){
                             when(self.assocsColl.query({source: oldParentId, type: assocType, dest: movingObjectId}), function(assocArr){
-                                if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                 var assoc = assocArr[0];
                                 assoc.source = newParentId;
                                 self.assocsColl.put(assoc);
@@ -179,7 +190,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         }
                         else {
                             when(self.assocsColl.query({source:movingObjectId , type: assocType-12, dest: oldParentId}), function(assocArr){
-                                if(assocArr.length!=1) throw new Error('Expected to find one association');
+                                if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                 var assoc = assocArr[0];
                                 assoc.dest = newParentId;
                                 self.assocsColl.put(assoc);
@@ -188,10 +199,10 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     }
                     else{//new assoc
                         if(assocType<SUBCLASSES_PASSOC){
-                            self.addAssoc({source: newParentId, type: assocType, dest: movingObjectId});
+                            self.assocsColl.add({source: newParentId, type: assocType, dest: movingObjectId});
                         }
                         else {
-                            self.addAssoc({source: movingObjectId, type: assocType-12, dest: newParentId});
+                            self.assocsColl.add({source: movingObjectId, type: assocType-12, dest: newParentId});
                         }
                     }
                 }
@@ -207,7 +218,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              // returns: Promise to an array
              //          An array of all the items.
              */
-            if(!parentId || !parentViewId) throw new Error('Invalid paramters');
+            if(!parentId || !parentViewId) throw (new Error('Invalid parameters'));
             var self = this;
             return self.getItemsByAssocTypeAndDestClass(parentViewId, 'manyToMany', VIEW_CLASS_TYPE).then(function (viewsArr) {
                 var promises = [];
@@ -226,7 +237,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
             });
         },
         getItemsByParentIdViewId: function (parentId, viewId) {
-            if(!parentId || !viewId) throw new Error('Invalid paramters');
+            if(!parentId || !viewId) throw (new Error('Invalid parameters'));
             var self = this;
             return self.get(viewId).then(function (view) {
                 var promise = null;
@@ -260,7 +271,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
             });
         },
         getItemByItemIdViewId: function (itemId, viewId) {
-            if(!itemId || !viewId) throw new Error('Invalid paramters');
+            if(!itemId || !viewId) throw (new Error('Invalid parameters'));
             var self = this;
             return self.get(viewId).then(function (view) {
                 if(view.subDocument) {
@@ -284,7 +295,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              // returns: Promise
              //          An array of all the items found
              */
-            if(!parentId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('Invalid paramters');
+            if(!parentId || !assocType || !ASSOCPROPERTIES[assocType]) throw (new Error('Invalid parameters'));
             var self = this;
             if(assocType != 'orderedParent'){
                 return when(self.getItemsByAssocType(parentId, assocType), function(itemsArr){//use when here because getItemsByAssocType sometimes returns a completed array
@@ -328,7 +339,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
             // returns: Promise to an array (sometimes an Array)
             //          An array of all the items.
             */
-            if(!_parentId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('Invalid paramters');
+            if(!_parentId || !assocType || !ASSOCPROPERTIES[assocType]) throw (new Error('Invalid parameters'));
             var parentId = Number(_parentId);
             var self = this;
             if (assocType == 'subclasses') {
@@ -491,7 +502,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
             if (itemId == destClassId) return originalId;
             var collection = this.assocsColl.filter({source: itemId, type: 'parent'});
             return collection.fetch().then(function (assocsArr) {
-                if (assocsArr.length > 1) throw new Error('More than one parent found');
+                if (assocsArr.length > 1) throw (new Error('More than one parent found'));
                 if (assocsArr.length == 0) return null;//we're at the root
                 return self.isA(assocsArr[0].dest, destClassId, originalId);
             });
@@ -634,7 +645,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              //          An array of all the items found along the way.
              */
             //TODO loop protection
-            if(!itemId || !assocType || !ASSOCPROPERTIES[assocType]) throw new Error('Invalid paramters');
+            if(!itemId || !assocType || !ASSOCPROPERTIES[assocType]) throw (new Error('Invalid parameters'));
             var self = this;
             return self.get(itemId).then(function(item){
                 var type = ASSOCPROPERTIES[assocType].type;
@@ -687,13 +698,13 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return all(promises);
             });
         },
-        getTreePath: function(view, itemId, pathArr, level){
+        getTreePath: function(view, itemId, pathArr, level){//TODO level is only used for debugging
             pathArr.unshift(itemId);
             var str = "";
             for(var i = 0; i<level;i++){
                 str = str+'  ';
             }
-            console.log(str+'VIEW:', view._id, view.name, 'ITEMID:', itemId);
+            //console.log(str+'VIEW:', view._id, view.name, 'ITEMID:', itemId);
             var self = this;
             var reverseAssocType = ASSOCPROPERTIES[view.toMannyAssociations].inverse;
             // Find the parent views, as seen from the current view
@@ -715,8 +726,8 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         }
                         // For each parent item
                         parentItemsArr.forEach(function(parentItem){
-                            console.log(str+'Parent View:', parentView._id, parentView.name);
-                            console.log(str+'Parent Item:', parentItem._id, parentItem.name);
+                            //console.log(str+'Parent View:', parentView._id, parentView.name);
+                            //console.log(str+'Parent Item:', parentItem._id, parentItem.name);
                             var found = false;
                             pathArr.forEach(function(pathArrItemId){
                                 if(parentItem._id == pathArrItemId) found = true;

@@ -137,32 +137,23 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
 
 			var self = this;
-			return self.store.get(self.widgetId).then(function(widget){
+			var initialized = self.store.get(self.widgetId).then(function(widget){
 				self.widget = widget;
-				//self.headerDivNode.innerHTML = widget.name;
+				self.headerDivNode.innerHTML = '<h1>'+widget.name+'</h1>';
+				//domStyle.set(self.headerDivNode, 'display', 'block');
 				self.pageHelpTextDiv.innerHTML = widget.description;
 				return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
-					self.view = viewsArr[0]//for now assume only one view
+					self.view = viewsArr[0];//for now assume only one view
 					return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
-						self.schema = self.enrichSchema(schema);
-						//return self.store.getAllowedAssocClassesForView(self.view._id).then(function(permittedClassesByViewArr) {
-						//	self.permittedClassesByViewArr = permittedClassesByViewArr;
-						self.createDeferred.resolve(self);//ready to be loaded with data
-						//});
+						self.enrichSchema(schema);
+						self.schema = schema;
+						return true;
 					});
 				});
-			}, nq.errorDialog);
-
-			/*var self = this;
-			self.getWidgetProperties(this.widgetId).then(function(widgetProps){
-				//console.log('widgetProp',widgetProps);
-				self.widgetProps = widgetProps;
-				//self.HEADER_ATTRREF = attrRefArr[0].name;
-				//self.PARAGRAPH_ATTRREF = attrRefArr[1].name;
+			});
+			when(initialized, function(result){
 				self.createDeferred.resolve(self);//ready to be loaded with data
-			}, nq.errorDialog);*/
-
-			//this.createDeferred.resolve(this);//ready to be loaded with data
+			}, function(err){self.createDeferred.reject(err)});
 		},
 		setSelectedObjIdPreviousLevel: function(value){
 			//load the data

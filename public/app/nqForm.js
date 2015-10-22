@@ -21,15 +21,15 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                 domStyle.set(self.headerDivNode, 'display', 'block');
                 self.pageHelpTextDiv.innerHTML = widget.description;
                 return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
-                    self.view = viewsArr[0]//for now assume only one view
+                    self.view = viewsArr[0];//for now assume only one view
                     return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
                         self.schema = schema;
-                        return self;
+                        self.enrichSchema(self.schema);
+                        return true;
                     });
                 });
-            }, nq.errorDialog);
+            });
             when(initialized, function(result){
-                self.enrichSchema(self.schema);
                 for(var attrName in self.schema){
                     var attrProps = self.schema[attrName];
                     attrProps.id = 'dijit:'+self.view._id+':'+attrName;
@@ -106,8 +106,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     console.log('self.item', self.item);
                 });
                 self.createDeferred.resolve(self);//ready to be loaded with data
-            })
-
+            }, function(err){self.createDeferred.reject(err)});
         },
 		setSelectedObjIdPreviousLevel: function(value){
 			//load the data
