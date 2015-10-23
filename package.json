@@ -29,6 +29,7 @@
     "morgan": "~1.6.1",
     "mysql": "^2.8.0",
     "promise": "^7.0.4",
+    "promised-io": "^0.3.5",
     "serve-favicon": "~2.3.0",
     "stylus": "0.42.3"
   },
