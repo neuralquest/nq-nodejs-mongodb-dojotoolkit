@@ -1,24 +1,61 @@
 define(['dojo/_base/declare', "dojo/_base/lang", "dojo/_base/array", "dojo/when", "dojo/promise/all", 'dstore/Store', 'dstore/QueryResults',
-		'dstore/RequestMemory', 'dijit/registry', 'dojo/aspect','dstore/SimpleQuery', 'dstore/Trackable'],
+		'dstore/RequestMemory', 'dijit/registry', 'dojo/aspect','dstore/SimpleQuery', 'dojo/request'],
 function(declare, lang, array, when, all, Store, QueryResults,
-		 RequestMemory, registry, aspect, SimpleQuery, Trackable){
+		 RequestMemory, registry, aspect, SimpleQuery, request){
 
-    return declare("nqStore", [Store, SimpleQuery, Trackable], {
+    return declare("nqStore", [Store, SimpleQuery], {
+        autoEmitEvents: false,
+        transactionIds: {assocsColl:{add:{}, update:{}, delete:{}}, itemsColl:{add:{}, update:{}, delete:{}}},
         constructor: function (options) {
+            var self = this;
             // perform the mixin
             options && declare.safeMixin(this, options);
-            //aspect.after(itemsColl, 'add', console.log('aspect after'));
+            this.assocsColl = new RequestMemory({target: '/assocs', idProperty: '_id'});
+            this.itemsColl = new RequestMemory({target: '/items', idProperty: '_id'});
 
+            aspect.after(this.itemsColl, 'add', function (result, args) {
+                var itemId = args[0]._id;
+                self.transactionIds.itemsColl.add[itemId] = true;
+                return result;
+            });
+            aspect.after(this.itemsColl, 'put', function (result, args) {
+                var itemId = args[0]._id;
+                if(!self.transactionIds.itemsColl.add[itemId])
+                    self.transactionIds.itemsColl.update[itemId] = true;
+                return result;
+            });
+            aspect.after(this.itemsColl, 'delete', function (result, args) {
+                var itemId = args[0]._id;
+                if(self.transactionIds.itemsColl.add[itemId]){
+                    delete self.transactionIds.itemsColl.add[itemId];
+                }
+                else self.transactionIds.itemsColl.delete[itemId] = true;
+                delete self.transactionIds.itemsColl.update[itemId];
+                return result;
+            });
+            aspect.after(this.assocsColl, 'add', function (result, args) {
+                var itemId = args[0]._id;
+                self.transactionIds.assocsColl.add[itemId] = true;
+                return result;
+            });
+            aspect.after(this.assocsColl, 'put', function (result, args) {
+                var itemId = args[0]._id;
+                if(!self.transactionIds.assocsColl.add[itemId])
+                    self.transactionIds.assocsColl.update[itemId] = true;
+                return result;
+            });
+            aspect.after(this.assocsColl, 'delete', function (result, args) {
+                var itemId = args[0]._id;
+                if(self.transactionIds.assocsColl.add[itemId]){
+                    delete self.transactionIds.assocsColl.add[itemId];
+                }
+                else self.transactionIds.assocsColl.delete[itemId] = true;
+                delete self.transactionIds.assocsColl.update[itemId];
+                return result;
+            });
         },
-    //return declare("nqStore", [Store], {
-        autoEmitEvents: false,
-        assocsColl: new RequestMemory({target: '/assocs', idProperty: '_id'}),
-        itemsColl: new RequestMemory({target: '/items', idProperty: '_id'}),
-
-
         get: function (_itemId) {
             var itemId = Number(_itemId);
-            this.enableTransactionButtons();
             return this.itemsColl.get(itemId);
         },
         add: function (item, directives) {
@@ -26,6 +63,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
             var id = Math.floor((Math.random()*1000000)+1);
             //item._id = id;
             this.itemsColl.add(item);// not async??
+            this.assocsColl.add({source: item._id, type: 'parent', dest: item._icon});
             if(directives) this.processDirectives(item, directives);
             this.emit('add', {target:item, directives:directives});
         },
@@ -750,16 +788,52 @@ function(declare, lang, array, when, all, Store, QueryResults,
             }
             else return {source: itemId, type: type};
         },
-
-
         enableTransactionButtons: function () {
             registry.byId('cancelButtonId').set('disabled', false);
             registry.byId('saveButtonId').set('disabled', false);
         },
+        commit: function(){
+            var self = this;
+            registry.byId('cancelButtonId').set('disabled',true);
+            registry.byId('saveButtonId').set('disabled',true);
 
+            //var transactionIds = {assocsColl:{add:{}, update:{}, delete:{}}, itemsColl:{add:{}, update:{}, delete:{}}},
 
-
-
+            var tansactionObj = {assocsColl:{},itemsColl:{}};
+            for(var coll in self.transactionIds){
+                var actionObj = self.transactionIds[coll];
+                for(var action in actionObj){
+                    var idsObj = actionObj[action];
+                    var transObjArr = [];
+                    for(var id in idsObj){
+                        if(coll == 'itemsColl') self.itemsColl.get(id).then(function(obj){
+                            transObjArr.push(obj);
+                        });
+                        if(coll == 'assocsColl') self.assocsColl.get(id).then(function(obj){
+                            transObjArr.push(obj);
+                        });
+                    }
+                    if(transObjArr.length>0) tansactionObj[coll][action] = transObjArr;
+                }
+            }
+            request.post('/', {
+                // send all the operations in the body
+                headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
+                data: JSON.stringify(tansactionObj)
+            }).then(function(data){
+                    console.log('data', data);
+                    dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
+                    self.transactionIds = {};
+                },function(error){
+                    self.transactionIds = {};
+                    nq.errorDialog(error);
+            });
+        },
+        abort: function(){
+            registry.byId('cancelButtonId').set('disabled',true);
+            registry.byId('saveButtonId').set('disabled',true);
+            self.transactionIds = {};
+        }
     });
 
 });

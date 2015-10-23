@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var expressMongoDb = require('express-mongo-db');
 var app = express();
+var postData = require('./postData');
 var getData = require('./getData');
 var mysql2Mango = require('./mysql2Mango');
 app.config = config;
@@ -32,6 +33,15 @@ app.get("/assocs", function (req, res) {
         else res.json(assocsArr);
     });
 });
+app.post("/", function (req, res) {
+    postData.update(req, function(err, items){
+        if(err) res.status(500).send(err);
+        else res.json(items);
+    });
+});
+
+
+
 app.get("/item/*/*", function (req, res) {
     var reqs = req.path.split('/');
     var viewId = Number(reqs[reqs.length-2]);

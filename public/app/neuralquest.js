@@ -19,8 +19,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         //testInitialize();
         //return;
 		topic.subscribe("/dojo/hashchange", interpretHash);
-		on(registry.byId('cancelButtonId'), 'click', function(event){nqDataStore.abort();});
-		on(registry.byId('saveButtonId'), 'click', function(event){nqDataStore.commit();});
+		on(registry.byId('cancelButtonId'), 'click', function(event){nqStore.abort();});
+		on(registry.byId('saveButtonId'), 'click', function(event){nqStore.commit();});
 		on(registry.byId('helpButtonId'), 'change', function(value){
 			if(value) dojox.html.insertCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
 			else dojox.html.removeCssRule('.helpTextInvisable', 'display:block;', 'nq.css');

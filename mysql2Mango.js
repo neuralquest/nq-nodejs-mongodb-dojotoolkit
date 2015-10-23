@@ -17,7 +17,7 @@ function transform(req, res){
             res.json({"code" : 100, "status" : "Error in connection database"});
             return;
         }
-
+return;
         console.log('connected as id ' + connection.threadId);
 
         var assocsColl = req.db.collection("assocs");
