@@ -8,7 +8,8 @@ var expressMongoDb = require('express-mongo-db');
 var app = express();
 var postData = require('./postData');
 var getData = require('./getData');
-var mysql2Mango = require('./mysql2Mango');
+var consistency = require('./consistency');
+//var mysql2Mango = require('./mysql2Mango');
 app.config = config;
 
 
@@ -33,16 +34,31 @@ app.get("/assocs", function (req, res) {
         else res.json(assocsArr);
     });
 });
-app.post("/", function (req, res) {
-    postData.update(req, function(err, items){
-        if(err) res.status(500).send(err);
-        else res.json(items);
+app.get("/consistency", function (req, res, next) {
+    consistency.check(req).then(function(items){
+        res.json(items);
+    }, function(err){
+        next(err);
+    });
+});
+app.get("/", function (req, res, next) {
+    getData.get(req).then(function(items){
+        res.json(items);
+    }, function(err){
+        next(err);
+    });
+});
+app.post("/", function (req, res, next) {
+    postData.update(req).then(function(items){
+        res.json(items);
+    }, function(err){
+        next(err);
     });
 });
 
 
-
-app.get("/item/*/*", function (req, res) {
+/*
+app.get("/item/* /*", function (req, res) {
     var reqs = req.path.split('/');
     var viewId = Number(reqs[reqs.length-2]);
     var itemId = Number(reqs[reqs.length-1]);
@@ -92,6 +108,9 @@ app.get("/prefetch", function (req, res) {
 app.get("/transform", function (req, res) {
     mysql2Mango.transform(req, res);
 });
+*/
+
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     var err = new Error('Not Found');
@@ -105,20 +124,20 @@ app.use(function (req, res, next) {
 // will print stacktrace
 if (app.get('env') === 'development') {
     app.use(function (err, req, res, next) {
-        console.log(err);
+        console.log(err.stack);
         res.status(err.status || 500);
         res.type('html');
-        res.send('<h3>'+err.message+'</h3><p>'+err+'</p>');
+        res.send('<b>'+err.message+'</b><pre>'+err.stack+'</pre>');
     });
 }
 
 // production error handler
 // no stacktraces leaked to user
 app.use(function (err, req, res, next) {
-    console.log(err);
+    console.log(err.stack);
     res.status(err.status || 500);
     res.type('html');
-    res.send('<h3>'+err.message+'</h3>');
+    res.send('<b>'+err.message+'</b>');
 });
 
 

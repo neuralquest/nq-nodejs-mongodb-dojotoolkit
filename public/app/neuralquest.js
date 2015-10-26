@@ -472,7 +472,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		cookie('neuralquestState', newHash);
 		hash(newHash);			
 	}
-    var breadcrums = {};
+    /*var breadcrums = {};
     function mergeHashWithBreadcrumObj(i, crumPart){
         var hashArr = hash().split('.');
         if(i<hashArr.length-1) {
@@ -503,18 +503,30 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             }
             return [];
         }
-    }
+    }*/
 	lang.setObject("nq.errorDialog", errorDialog);//make the function globally accessable
-	function errorDialog(err){
-		var dlg = new dijit.Dialog({
-			title: 'Error',
-			extractContent: true,//important in the case of server response, it'll screw up your css.
-			onClick: function(evt){this.hide();},//click anywhere to close
-			content: err.message
-		});
-		dlg.show();
-		throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
-		//if(!err.responseText) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
+	function errorDialog(err) {
+        var content, title;
+        if(err.response){
+            title = err.message;
+            if(err.response.text)content = err.response.text;
+            else content = err.response;
+        }
+        else{
+            title = 'Client Error';
+            content = err.message;
+        }
+        var dlg = new dijit.Dialog({
+            title: title,
+            extractContent: true,//important in the case of server response, it'll screw up your css.
+            onClick: function (evt) {
+                this.hide();
+            },//click anywhere to close
+            content: content
+        });
+        dlg.show();
+		//throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
+		if(!err.response) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
 	};
 	
 	
@@ -524,43 +536,14 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 //    transaction.commit();	
 	lang.setObject("nq.test", test);//make the function globally accessable
     function test(){
-        //if(value == 824) this.tree.set('path', ['810', '2016', '2020', '824']);
-        var itemId = 846;
-        var promises = [];
-        var viewsArr = [];
-        //find the class of the current item
-        promises.push(nqStore.getItemsByAssocType(itemId, 'parent'));
-        promises.push(nqStore.getUniqueViewsForWidget(538, viewsArr));
-        var pathPromises = all(promises).then(function(promiseResults){
-            var itemClass = promiseResults[0][0];
-            var allowedClassesPromises = [];
-            viewsArr.forEach(function(view){
-                allowedClassesPromises.push(nqStore.collectAllByAssocType(view.mapsTo, 'subclasses'));
-            });
-            return all(allowedClassesPromises).then(function(allowedClassesArrArr){
-                var count = 0;
-                restultsArr = [];
-                var treePathPromises = [];
-                allowedClassesArrArr.forEach(function(allowedClassesArr){
-                    var view = viewsArr[count];
-                    allowedClassesArr.forEach(function(allowedClass){
-                        if(itemClass._id == allowedClass._id){
-                            treePathPromises.push(nqStore.getTreePath(view, itemId, restultsArr, 0));
-                        }
-                    });
-                    count++;
-                });
-                return all(treePathPromises).then(function(tree){
-                    return restultsArr;
-                });
-            });
-        });
-        pathPromises.then(function(treePaths){
-            console.log('treePaths',treePaths);
-        }, nq.errorDialog);
-/*
 
- */
+        nqStore.get(1784).then(function(item){
+            console.log('item', item);
+            item.name = 'xxxxx';
+            console.log('new', item);
+            nqStore.put(item);
+        });
+
 
 
 

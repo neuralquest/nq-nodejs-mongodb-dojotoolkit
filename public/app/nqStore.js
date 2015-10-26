@@ -554,8 +554,27 @@ function(declare, lang, array, when, all, Store, QueryResults,
              //          The schema object.
              */
             var self = this;
-            if(!view.mapsTo) return view.schema; // hack for the class view
-            return self.getAttrPropertiesFromAncestors(view.mapsTo).then(function(classAttrObj){
+            var classSchemaPromise = null;
+            if(view.mapsTo) classSchemaPromise = self.getAttrPropertiesFromAncestors(view.mapsTo);
+            else classSchemaPromise = {//No mapsTo means we're asking for a class
+                _id : {
+                    type: "Number",
+                    required : true,
+                    readOnly : true,
+                    minimum : 0,
+                    places : 0},
+                _name : {
+                    type: "String",
+                    required : true,
+                    readOnly : false},
+                _type : {
+                    type : "String",
+                    required : true,
+                    readOnly : false,
+                    enum : ['class','object']//TODO only class?
+                }
+            }
+            return when(classSchemaPromise, function(classAttrObj){
                 var schema = {};
                 for(var attrPropName in view.schema){
                     //if(attrPropName == 'description') debugger;
@@ -616,7 +635,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     newProp.hidden = attrProp.hidden?attrProp.hidden:classAttrProp.hidden?classAttrProp.hidden:false;
                     newProp.title = attrProp.title?attrProp.title:classAttrProp.title?classAttrProp.title:'[no title]';
                     newProp.default = attrProp.default?attrProp.default:classAttrProp.default?classAttrProp.default:null;
-                    newProp.description = attrProp.description?attrProp.description:classAttrProp.description?classAttrProp.description:'<p>[no description <a href="#842.1787.'+view._id+'.538">provided</a>]</p>';
+                    newProp.description = attrProp.description?attrProp.description:classAttrProp.description?classAttrProp.description:'<p>[no description <a href="#.842.1787.'+view._id+'.538">provided</a>]</p>';
                     newProp.style = attrProp.style?attrProp.style:classAttrProp.style?classAttrProp.style:'width:100%';
                     newProp.nullValue = null;
                     newProp.columnWidth = '10em';
@@ -658,7 +677,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return all(parentClassesArr).then(function(classesArr){
                     var classAttrObj = {};
                     classesArr.forEach(function(classItem) {
-                        for(classAttr in classItem){
+                        for(var classAttr in classItem){
                             //console.log('classAttr', classAttr);
                             //if(classAttr.charAt(0)!='_') classAttrObj[classAttr] = classItem[classAttr];
                             classAttrObj[classAttr] = classItem[classAttr];
