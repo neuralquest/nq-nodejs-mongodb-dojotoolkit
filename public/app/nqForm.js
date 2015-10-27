@@ -22,7 +22,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                 self.pageHelpTextDiv.innerHTML = widget.description;
                 return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
                     self.view = viewsArr[0];//for now assume only one view
-                    return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
+                    return when(self.store.getCombinedSchemaForView(self.view),function(schema) {
                         self.schema = schema;
                         self.enrichSchema(self.schema);
                         return true;

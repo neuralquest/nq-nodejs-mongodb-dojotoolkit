@@ -27,9 +27,9 @@ function update(doc, collection) {
         });
     return deferred.promise;
 }
-function remove(doc, collection) {
+function remove(id, collection) {
     var deferred = new Deferred();
-    collection.remove({_id: doc._id}, doc,{},
+    collection.remove({_id: id},
         function(err, value) {
             if (err) deferred.reject(err);
             else deferred.resolve(value);
