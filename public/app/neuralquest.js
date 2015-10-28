@@ -380,13 +380,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 createDeferred: createDeferred, //tell us when your done by returning the widgetObj
                 //viewObj: viewObj,
                 tabId: tabId, // used by resize
-                //orgUnitRootId: '850/494', // Process Classes
-                //orgUnitViewId: '1868',
-                //orgUnitNameAttrId: '1926',
-                //stateRootId: '2077/443',
-                //stateViewId: '2077',
-                //stateNameAttrId: '2081'
-                //skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
             }, domConstruct.create('div'));
             tab.addChild(widgetObj);
             //widgetObj.startup();
@@ -705,8 +698,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             pseudo : true,
             cardinality: 'many',
             icon: 11},
-        'by association type': {
-            inverse :'by association type',
+        byAssociationType: {
+            inverse :'byAssociationType',
             pseudo : true,
             cardinality: 'many',
             icon: 24}

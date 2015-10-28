@@ -18,7 +18,8 @@ function check(req){
     checkPromises.push(findOrphans());
     checkPromises.push(validateAssocs());
     checkPromises.push(assocsUnique());
-    //checkPromises.push(validateObjectAssoc());
+    checkPromises.push(validateObjectAssoc());
+    checkPromises.push(validateObjectAttributes());
     return all(checkPromises).then(function(checkArr){
         return {consistencyCheck:checkArr};
     });
@@ -162,7 +163,7 @@ function validateAssocByClassModel(assoc){
             classAssocPromises.push(dbAccessors.find({source: sourceAncestor._id, type: assoc.type}, assocsColl));
         }
         return all(classAssocPromises).then(function(classAssocPromisesArr){
-            if(assoc.source == 1784){
+            if(assoc.source == 494 && assoc.type == 'oneToMany' && assoc.dest == 1531){
                 var i = 0;
             }
             var foundClassAssocArr = [];
@@ -171,8 +172,8 @@ function validateAssocByClassModel(assoc){
                     var classAssocDestId = classAssoc.dest;
                     for(var i = 1;i<destAncestors.length;i++){
                         var destClassId = destAncestors[i]._id;
-                        if(classAssocDestId == destClassId) {
-                            foundClassAssocArr.push = classAssoc;
+                        if(classAssocDestId === destClassId) {
+                            foundClassAssocArr.push(classAssoc);
                         }
                     }
                 });
@@ -196,5 +197,85 @@ function validateAssocByClassModel(assoc){
             return null;
         });
     });
+}
+function validateObjectAttributes(){
+    return dbAccessors.find({_type:'object'},itemsColl).then(function(itemsArr){
+        var assocPromises = [];
+        itemsArr.forEach(function(item) {
+            assocPromises.push(dbAccessors.find({source: item._id, type:'parent'}, assocsColl));
+        });
+        return all(assocPromises).then(function(assocsArrArr){
+            var attrPropertiesPromises = [];
+            assocsArrArr.forEach(function(assocsArr){
+                assocsArr.forEach(function(assoc){
+                    attrPropertiesPromises.push(utils.getAttrPropertiesFromAncestors(assoc.dest, db));
+                });
+            });
+            return all(attrPropertiesPromises).then(function(attrPropertiesArr){
+                var results = [];
+                var index = 0;
+                attrPropertiesArr.forEach(function(attrProperties){
+                    var obj = itemsArr[index];
+                    if(typeof obj._id!=='number' || (obj._id%1)!==0) results.push({idIsNotAnInteger:obj});
+                    if(obj._type != 'object' && obj._type != 'class') results.push({invalidItemType:obj});
+                    for(var attrName in obj){
+                        if(attrName.charAt(0) == '_') continue;
+                        var classProp = attrProperties[attrName];
+                        var objProp = obj[attrName];
+                        if(!classProp) results.push({noclassAttrFor:{attribute:attrName, object:obj}});
+                        else{
+                            //TODO
+                            if(classProp.media && classProp.media.mediaType == 'text/html'){
+                            }
+                            else if(classProp.enum){
+                            }
+                            else if(classProp.type == 'String'){
+                                //maxLength
+                                //minLength
+                            }
+                            else if(classProp.type == 'Number'){
+                                //maximum
+                                //minimum
+                                //places
+                            }
+                            else if(classProp.type == 'Date'){
+                            }
+                            else if(classProp.type == 'Boolean'){
+                            }
+                        }
+                    }
+                    index++;
+                });
+                return {
+                    id: 6,
+                    name: 'Validate Object Attributes',
+                    rule: 'All object attributes must have a corresponding class attribute',
+                    exceptions: 'Does not apply to:',
+                    count: results.length,
+                    invalid: results};
+            });
+        });
+    });
+}
+function cleanup(){
+    var removeArr = [59,60,66,69,77,91,94,100,101,102,106,107,109,63];
+    var collectedPromises = [];
+    removeArr.forEach(function(itemId){
+        collectedPromises.push(utils.collectAllByAssocType(itemId, 'children', db));
+    });
+    return all(collectedPromises).then(function(collectedPromisesArrArr){
+        var results = [];
+        collectedPromisesArrArr.forEach(function(collectedPromisesArr) {
+            collectedPromisesArr.forEach(function(item){
+                results.push(item);
+                var itemId = item._id;
+                assocsColl.remove({source: itemId});
+                assocsColl.remove({dest: itemId});
+                itemsColl.remove({_id: itemId});
+            });
+        });
+        return results
+    });
+
 }
 module.exports.check = check;

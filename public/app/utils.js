@@ -128,21 +128,15 @@ function getCombinedSchemaForView(view, db) {
     });
 }
 function getAttrPropertiesFromAncestors(classId, db){
-//    var self = this;
-    //var parentClassesPromises = [];
-    //parentClassesPromises.push(dbAccessors.findOne(classId));// Get the first one
+//    var self = this
     return collectAllByAssocType(Number(classId), 'parent', db).then(function(parentClassesArr){
-        return all(parentClassesArr).then(function(classesArr){
-            var classAttrObj = {};
-            classesArr.forEach(function(classItem) {
-                for(var classAttr in classItem){
-                    //console.log('classAttr', classAttr);
-                    //if(classAttr.charAt(0)!='_') classAttrObj[classAttr] = classItem[classAttr];
-                    classAttrObj[classAttr] = classItem[classAttr];
-                }
-            });
-            return classAttrObj;
+        var classAttrObj = {};
+        parentClassesArr.forEach(function(classItem) {
+            for(var classAttr in classItem){
+                if(classAttr.charAt(0)!='_') classAttrObj[classAttr] = classItem[classAttr];
+            }
         });
+        return classAttrObj;
     });
 }
 function collectAllByAssocType(itemId, assocType, db) {
@@ -321,12 +315,13 @@ ASSOCPROPERTIES = {
         pseudo : true,
         cardinality: 'many',
         icon: 11},
-    'by association type': {
-        inverse :'by association type',
+    byAssociationType: {
+        inverse :'byAssociationType',
         pseudo : true,
         cardinality: 'many',
         icon: 24}
 };
 
 module.exports.getCombinedSchemaForView = getCombinedSchemaForView;
+module.exports.getAttrPropertiesFromAncestors = getAttrPropertiesFromAncestors;
 module.exports.collectAllByAssocType = collectAllByAssocType;

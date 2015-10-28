@@ -96,6 +96,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 var allowedClassesPromises = [];
                 viewsArr.forEach(function(view){
                     if(view.mapsTo) allowedClassesPromises.push(self.store.collectAllByAssocType(view.mapsTo, 'subclasses'));
+                    else allowedClassesPromises.push([]);
                 });
                 return all(allowedClassesPromises).then(function(allowedClassesArrArr){
                     var count = 0;

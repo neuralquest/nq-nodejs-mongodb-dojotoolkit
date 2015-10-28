@@ -112,7 +112,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
 
             return this.get(viewId).then(function(view){
                 //TODO must merge
-                var assocType = view.toMannyAssociations;
+                var assocType = view.toManyAssociations;
                 if(!assocType) assocType = view.toOneAssociations;
                 var destClassId = view.mapsTo;
                 if(assocType == 'ordered'){
@@ -292,12 +292,12 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 });
                 else if(view.onlyIfParentEquals){
                     //TODO must merge
-                    var assocType = view.toMannyAssociations;
+                    var assocType = view.toManyAssociations;
                     if(!assocType) assocType = view.toOneAssociations;
-                    if(parentId == Number(view.onlyIfParentEquals)) promise = self.getItemsByAssocTypeAndDestClass(view.mapsTo, assocType);
+                    if(view.mapsTo && parentId == Number(view.onlyIfParentEquals)) promise = self.getItemsByAssocTypeAndDestClass(view.mapsTo, assocType);
                     else promise = [];
                 }
-                else promise = self.getItemsByAssocTypeAndDestClass(parentId, view.toMannyAssociations, view.mapsTo);
+                else promise = self.getItemsByAssocTypeAndDestClass(parentId, view.toManyAssociations, view.mapsTo);
                 return when(promise, function(itemsArr){
                     var results = [];
                     itemsArr.forEach(function (item) {
@@ -596,6 +596,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     //set the references
                     newProp.type = classAttrProp.type;
                     //Exception for class type, they will have no type so we improvise
+                    //TODO nolonger needed? see abouve
                     if(!newProp.type){
                         if(attrPropName=='_id') newProp.type = 'Number';
                         if(attrPropName=='_name') newProp.type = 'String';
@@ -671,20 +672,14 @@ function(declare, lang, array, when, all, Store, QueryResults,
         },
         getAttrPropertiesFromAncestors: function(classId){
             var self = this;
-            //var parentClassesPromises = [];
-            //parentClassesPromises.push(self.get(classId));// Get the first one
             return self.collectAllByAssocType(Number(classId), 'parent').then(function(parentClassesArr){
-                return all(parentClassesArr).then(function(classesArr){
-                    var classAttrObj = {};
-                    classesArr.forEach(function(classItem) {
-                        for(var classAttr in classItem){
-                            //console.log('classAttr', classAttr);
-                            //if(classAttr.charAt(0)!='_') classAttrObj[classAttr] = classItem[classAttr];
-                            classAttrObj[classAttr] = classItem[classAttr];
-                        }
-                    });
-                    return classAttrObj;
+                var classAttrObj = {};
+                parentClassesArr.forEach(function(classItem) {
+                    for(var classAttr in classItem){
+                        if(classAttr.charAt(0)!='_') classAttrObj[classAttr] = classItem[classAttr];
+                    }
                 });
+                return classAttrObj;
             });
         },
         collectAllByAssocType: function (itemId, assocType) {
@@ -763,7 +758,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
             }
             //console.log(str+'VIEW:', view._id, view.name, 'ITEMID:', itemId);
             var self = this;
-            var reverseAssocType = ASSOCPROPERTIES[view.toMannyAssociations].inverse;
+            var reverseAssocType = ASSOCPROPERTIES[view.toManyAssociations].inverse;
             // Find the parent views, as seen from the current view
             return self.getItemsByAssocTypeAndDestClass(view._id, 'manyToManyReverse', VIEW_CLASS_TYPE).then(function(parentViewsArr){
                 var parentItemsPromises = [];

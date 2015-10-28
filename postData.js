@@ -113,7 +113,7 @@ function itemIsValid(item, action) {
                 for(var attrName in schema) {
                     var attrProps = schema[attrName];
                     var value = item[attrName];
-                    if(attrProps.readOnly && action == 'update') continue;
+                    if(attrProps.readOnly && action == 'update') continue;//TODO delete attr
                     if(attrProps.required) {
                         if(!value && attrProps.default) value = attrProps.default;
                         else if(!value) throw (new Error("Mandatory value missing"));
