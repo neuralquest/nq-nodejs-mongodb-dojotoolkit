@@ -4,13 +4,13 @@ require([
 'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
 'app/nqStore', 'dstore/RequestMemory', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument',
-"dojo/json",'dojox/html/styles', 'dojo/query!css2'],
+"dojo/json","dijit/Dialog","dijit/form/Form","dijit/form/TextBox","dijit/form/Button","dojo/dom-attr",'dojox/html/styles', 'dojo/query!css2'],
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct, declare,  
 		Deferred, when, all, query, BorderContainer,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
 		nqStore, RequestMemory, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
-		JSON, styles, css2) {
+		JSON, Dialog,Form,TextBox,Button,domattr,styles, css2) {
 
     nqStore = new nqStore();
     var self = this;
@@ -521,7 +521,101 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		//throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
 		if(!err.response) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
 	};
-	
+    lang.setObject("nq.login", login);//make the function globally accessable
+    function login(err) {
+        var form = new Form();
+        var tableNode = domConstruct.create('table', {style: 'border-spacing:5px;'}, form.containerNode);
+
+        var row1 = domConstruct.create("tr", {style:"display:none"}, tableNode);
+        var tdDom0 = domConstruct.create("td", {innerHTML: ('Error'), colspan:2, style: "padding: 3px; background-color:yellow" }, row1);
+
+        var row2 = domConstruct.create("tr", null, tableNode);
+        domConstruct.create("td", {innerHTML: ('User Name'), style: "padding: 3px"}, row2);
+        var tdDom1 = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row2);
+        new TextBox({name:'username', placeHolder: "Name" }).placeAt(tdDom1);
+
+        var row3 = domConstruct.create("tr", null, tableNode);
+        domConstruct.create("td", {innerHTML: ('Password'), style: "padding: 3px"}, row3);
+        var tdDom2 = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row3);
+        new TextBox({name:'password', type:'password',placeHolder: "Password" }).placeAt(tdDom2);
+
+        var row4 = domConstruct.create("tr", {style:"display:none"}, tableNode);
+        domConstruct.create("td", {innerHTML: ('Password'), style: "padding: 3px"}, row4);
+        var tdDom3 = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row4);
+        new TextBox({name:'password2', placeHolder: "Again, for verification" }).placeAt(tdDom3);
+
+        var row5 = domConstruct.create("tr", {style:"display:none"}, tableNode);
+        domConstruct.create("td", {innerHTML: ('Email'), style: "padding: 3px"}, row5);
+        var tdDom4 = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row5);
+        new TextBox({name:'email',placeHolder: "In case you forget your password" }).placeAt(tdDom4);
+
+        var row6 = domConstruct.create("tr", null, tableNode);
+        domConstruct.create("td", {innerHTML: ('Social Media Login'), style: "padding: 3px"}, row6);
+        var tdDom5 = domConstruct.create("td", {}, row6);
+        new Button({label: "Google Login"}).placeAt(tdDom5);
+
+        var row7 = domConstruct.create("tr", null, tableNode);
+        domConstruct.create("td", {}, row7);
+        var tdDom6 = domConstruct.create("td", {}, row7);
+        new Button({label: "Facebook Login"}).placeAt(tdDom6);
+
+        var row8 = domConstruct.create("tr", null, tableNode);
+        domConstruct.create("td", {}, row8);
+        var tdDom8 = domConstruct.create("td", {}, row8);
+        new Button({label: "Twitter Login"}).placeAt(tdDom8);
+
+        var row9 = domConstruct.create("tr", null, tableNode);
+        domConstruct.create("td", {innerHTML: ('New to Neuralquest'), style: "padding: 3px"}, row9);
+        var tdDom9 = domConstruct.create("td", {}, row9);
+        var createAccount = new Button({label: "Sign-up" }).placeAt(tdDom9);
+
+        var row10 = domConstruct.create("tr", null, tableNode);
+        domConstruct.create("td", {innerHTML: ("I'm Getting Old"), style: "padding: 3px"}, row10);
+        var tdDom10 = domConstruct.create("td", {}, row10);
+        var sendMeANewOne = new Button({label: "Send me a new password" }).placeAt(tdDom10);
+
+        var row11 = domConstruct.create("tr", null, tableNode);
+        var tdDom11 = domConstruct.create("td", {colspan:2, style:"float: right;"}, row11);
+        var loginButton = new Button({label: "Login", iconClass:'saveIcon'}).placeAt(tdDom11);
+        var cancelButton = new Button({label: "Cancel", iconClass:'cancelIcon'}).placeAt(tdDom11);
+        domConstruct.create("img", {src:"app/resources/img/Neuralquest/neuralquest.png", align:"middle", width:"160px", height:"24px"}, row11);
+
+        createAccount.on("click", function(){
+            domStyle.set(row4, 'display', '');
+            domStyle.set(row5, 'display', '');
+        });
+        loginButton.on("click", function(){
+            request.post('/login', {
+                headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
+                data: JSON.stringify(form.get('value'))
+            }).then(function(data){
+                dia.hide();
+            },function(error){
+                domStyle.set(row1, 'display', '');
+                domattr.set(tdDom0, 'innerHTML','<b>'+error.message+'</b>' );
+            });
+        });
+        sendMeANewOne.on("click", function(){
+            request.post('/newPassword', {
+                headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
+                data: JSON.stringify(form.get('value'))
+            }).then(function(data){
+                dia.hide();
+            },function(error){
+                domStyle.set(row1, 'display', '');
+                domattr.set(tdDom0, 'innerHTML','<b>'+error.message+'</b>' );
+            });
+        });
+        cancelButton.on("click", function(){dia.hide();});
+
+        var dia = new Dialog({
+            content: form,
+            title: "Neuralquest Login"
+            //style: "width: 300px; height: 300px;"
+        });
+        form.startup();
+        dia.show();
+    }
 	
 //    var transaction = transactionalCellStore.transaction();
 //    transactionalCellStore.put(someUpdatedProduct);

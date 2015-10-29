@@ -28,10 +28,14 @@
     "mongodb": "2.0.34",
     "morgan": "~1.6.1",
     "mysql": "^2.8.0",
+    "passport": "^0.3.0",
+    "passport-google": "^0.3.0",
+    "passport-local": "^1.0.0",
     "promise": "^7.0.4",
     "promised-io": "^0.3.5",
     "serve-favicon": "~2.3.0",
-    "stylus": "0.42.3"
+    "stylus": "0.42.3",
+    "tv4": "^1.2.7"
   },
   "devDependencies": {
     "intern": "~2.0.0",

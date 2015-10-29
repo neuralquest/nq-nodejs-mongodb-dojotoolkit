@@ -70,17 +70,7 @@
 		<div  id="fullPage" data-dojo-id="fullPage" data-dojo-type="dijit.layout.BorderContainer" data-dojo-props="design:'headline', gutters:'false'" persist="true">	
 			<div class="noOverFlow" style="padding: 0px;" id="placeholder" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center'" class="backgroundClass" > <p>Loading...</p> </div>
 			<div data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'bottom'" class="backgroundClass">
-				<select name="select1"  style="width: 100px;" data-dojo-type="dijit/form/Select">
-				    <option value=460 selected="selected">Plato's Cave</option>
-				    <option value=2463>Emile Esperanza</option>
-				    <option value=2464>Whitney Winrow</option>
-				    <option value=2465>Jazmine Jeffery</option>
-				    <option value=2466>Rosario Reinhart</option>
-				    <option value=2467>Jayne Jeansonne</option>
-				    <option value=2468>Dione Defoor</option>
-				    <option value=2469>Susy Shippy</option>
-				    <option value=2462>Tyrone Trembath</option>
-				</select>
+				<button data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){nq.login();}">Login</button>
 				<button data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){fullPage.resize();}">Resize</button>
 				<button data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){nq.test();}">Test</button>
 				<div style="float: right;">

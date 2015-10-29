@@ -1,17 +1,18 @@
 var config = require('./config');
 var express = require('express');
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var expressMongoDb = require('express-mongo-db');
-var app = express();
 var postData = require('./postData');
 var getData = require('./getData');
 var consistency = require('./consistency');
 //var mysql2Mango = require('./mysql2Mango');
+var app = express();
 app.config = config;
-
 
 app.use(expressMongoDb(config.mongodb.uri));// Get database
 app.use(bodyParser.json());
@@ -19,6 +20,32 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 //app.use(logger('dev'));//Disable logging for static content requests by loading the logger middleware after the static middleware:
+
+
+passport.use(new LocalStrategy({
+        passReqToCallback : true
+    },
+    function(req, username, password, done) {
+        var usersColl = req.db.collection('users');
+        usersColl.findOne({ username: username }, function(err, user) {
+            if (err) { return done(err); }
+            if (!user) {
+                return done(null, false, { message: 'Incorrect username.' });
+            }
+            if (!user.validPassword(password)) {
+                return done(null, false, { message: 'Incorrect password.' });
+            }
+            return done(null, user);
+        });
+    }
+));
+
+app.post('/login',
+    passport.authenticate('local', { successRedirect: '/',
+        failureRedirect: '/login',
+        failureFlash: true })
+);
+
 
 app.get("/items", function (req, res) {
     var itemsColl = req.db.collection('items');
