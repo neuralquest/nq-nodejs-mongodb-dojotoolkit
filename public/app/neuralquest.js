@@ -522,8 +522,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		if(!err.response) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
 	};
     lang.setObject("nq.login", login);//make the function globally accessable
-    function login(err) {
+    function login() {
         var form = new Form();
+
         var tableNode = domConstruct.create('table', {style: 'border-spacing:5px;'}, form.containerNode);
 
         var row1 = domConstruct.create("tr", {style:"display:none"}, tableNode);
@@ -574,11 +575,11 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         var tdDom10 = domConstruct.create("td", {}, row10);
         var sendMeANewOne = new Button({label: "Send me a new password" }).placeAt(tdDom10);
 
-        var row11 = domConstruct.create("tr", null, tableNode);
-        var tdDom11 = domConstruct.create("td", {colspan:2, style:"float: right;"}, row11);
+        var row11 = domConstruct.create("tr", {style:"float: right;"}, tableNode);
+        var tdDom11 = domConstruct.create("td", {colspan:2}, row11);
         var loginButton = new Button({label: "Login", iconClass:'saveIcon'}).placeAt(tdDom11);
         var cancelButton = new Button({label: "Cancel", iconClass:'cancelIcon'}).placeAt(tdDom11);
-        domConstruct.create("img", {src:"app/resources/img/Neuralquest/neuralquest.png", align:"middle", width:"160px", height:"24px"}, row11);
+        //domConstruct.create("img", {src:"app/resources/img/Neuralquest/neuralquest.png", align:"middle", width:"160px", height:"24px"}, row11);
 
         createAccount.on("click", function(){
             domStyle.set(row4, 'display', '');
@@ -592,7 +593,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 dia.hide();
             },function(error){
                 domStyle.set(row1, 'display', '');
-                domattr.set(tdDom0, 'innerHTML','<b>'+error.message+'</b>' );
+                domattr.set(tdDom0, 'innerHTML',error.response.text );
             });
         });
         sendMeANewOne.on("click", function(){
@@ -603,7 +604,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 dia.hide();
             },function(error){
                 domStyle.set(row1, 'display', '');
-                domattr.set(tdDom0, 'innerHTML','<b>'+error.message+'</b>' );
+                domattr.set(tdDom0, 'innerHTML',error.response.text );
             });
         });
         cancelButton.on("click", function(){dia.hide();});

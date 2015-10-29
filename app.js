@@ -1,7 +1,5 @@
 var config = require('./config');
 var express = require('express');
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
 var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -21,29 +19,44 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 //app.use(logger('dev'));//Disable logging for static content requests by loading the logger middleware after the static middleware:
 
+// Configuring Passport
+var passport = require('passport');
+var expressSession = require('express-session');
+var LocalStrategy = require('passport-local').Strategy;
+app.use(expressSession({secret: 'mySecretKey'}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 passport.use(new LocalStrategy({
         passReqToCallback : true
-    },
-    function(req, username, password, done) {
+    },function(req, username, password, done) {
         var usersColl = req.db.collection('users');
-        usersColl.findOne({ username: username }, function(err, user) {
-            if (err) { return done(err); }
+        usersColl.findOne({ username: username }).then(function(user){
             if (!user) {
-                return done(null, false, { message: 'Incorrect username.' });
+                return done(null, false, { message: 'User name not found' });
             }
-            if (!user.validPassword(password)) {
-                return done(null, false, { message: 'Incorrect password.' });
+            if (user.password != password) {
+                return done(null, false, { message: 'Incorrect password' });
             }
-            return done(null, user);
+            return done(null, user, { message: 'Login Successful' });
+        },function(err){
+            return done(err);
         });
     }
 ));
+passport.serializeUser(function(user, done) {
+    done(null, user);
+    //done(null, user._id);
+});
+passport.deserializeUser(function(id, done) {
+    done(null, user);
+    //User.findById(id, function(err, user) {
+    //    done(err, user);
+    //});
+});
 
 app.post('/login',
-    passport.authenticate('local', { successRedirect: '/',
-        failureRedirect: '/login',
-        failureFlash: true })
+    passport.authenticate('local', {successMessage: true, failureMessage: true})
 );
 
 
@@ -68,7 +81,12 @@ app.get("/consistency", function (req, res, next) {
         next(err);
     });
 });
-app.get("/", function (req, res, next) {
+app.get("/failedLogin", function (req, res, next) {
+    var err = new Error('Failed to Login');
+    err.status = 404;
+    next(err);
+});
+app.get("/data", function (req, res, next) {
     getData.get(req).then(function(items){
         res.json(items);
     }, function(err){
