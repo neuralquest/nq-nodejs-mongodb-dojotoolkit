@@ -1,24 +1,25 @@
 require([
 'dojo/_base/array', 'dojo/dom-style', 'dojo/_base/fx', 'dojo/ready', 'dojo/topic', "dojo/on", 'dojo/hash', 'dijit/registry', 
-'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct', 'dojo/_base/declare',
+'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct',
 'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
 'app/nqStore', 'dstore/RequestMemory', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument',
 "dojo/json","dijit/Dialog","dijit/form/Form","dijit/form/TextBox","dijit/form/Button","dojo/dom-attr",'dojox/html/styles', 'dojo/query!css2'],
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
-		dom, dojo, lang, declare, array, domConstruct, declare,  
+		dom, dojo, lang, declare, array, domConstruct,
 		Deferred, when, all, query, BorderContainer,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
 		nqStore, RequestMemory, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
 		JSON, Dialog,Form,TextBox,Button,domattr,styles, css2) {
 
     nqStore = new nqStore();
-    var self = this;
+    var userName = null;
 
 	ready( function() {
         //testInitialize();
         //return;
 		topic.subscribe("/dojo/hashchange", interpretHash);
+		on(registry.byId('loginButtonId'), 'click', function(event){login();});
 		on(registry.byId('cancelButtonId'), 'click', function(event){nqStore.abort();});
 		on(registry.byId('saveButtonId'), 'click', function(event){nqStore.commit();});
 		on(registry.byId('helpButtonId'), 'change', function(value){
@@ -533,7 +534,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         var row2 = domConstruct.create("tr", null, tableNode);
         domConstruct.create("td", {innerHTML: ('User Name'), style: "padding: 3px"}, row2);
         var tdDom1 = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row2);
-        new TextBox({name:'username', placeHolder: "Name" }).placeAt(tdDom1);
+        var userNameTextBox = new TextBox({name:'username', placeHolder: "Name" }).placeAt(tdDom1);
 
         var row3 = domConstruct.create("tr", null, tableNode);
         domConstruct.create("td", {innerHTML: ('Password'), style: "padding: 3px"}, row3);
@@ -566,7 +567,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         new Button({label: "Twitter Login"}).placeAt(tdDom8);
 
         var row9 = domConstruct.create("tr", null, tableNode);
-        domConstruct.create("td", {innerHTML: ('New to Neuralquest'), style: "padding: 3px"}, row9);
+        domConstruct.create("td", {innerHTML: ('New to Neuralquest?'), style: "padding: 3px"}, row9);
         var tdDom9 = domConstruct.create("td", {}, row9);
         var createAccount = new Button({label: "Sign-up" }).placeAt(tdDom9);
 
@@ -584,27 +585,46 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         createAccount.on("click", function(){
             domStyle.set(row4, 'display', '');
             domStyle.set(row5, 'display', '');
-        });
+			domStyle.set(row6, 'display', 'none');
+			domStyle.set(row7, 'display', 'none');
+			domStyle.set(row8, 'display', 'none');
+			domStyle.set(row9, 'display', 'none');
+			domStyle.set(row10, 'display', 'none');
+		});
         loginButton.on("click", function(){
             request.post('/login', {
                 headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
                 data: JSON.stringify(form.get('value'))
             }).then(function(data){
-                dia.hide();
+				var result = JSON.parse(data);
+				userName = result.username;
+				domattr.set("userNameDiv", 'innerHTML',result.username );
+				//TODO refresh the page
+				dia.hide();
             },function(error){
+				var msg = '';
+				if(error.response.status == 400) msg = 'Invalid user name/password';
+				else msg = error.response.text;
                 domStyle.set(row1, 'display', '');
-                domattr.set(tdDom0, 'innerHTML',error.response.text );
+                domattr.set(tdDom0, 'innerHTML', msg);
             });
         });
-        sendMeANewOne.on("click", function(){
-            request.post('/newPassword', {
+		createAccount.on("click", function(){
+            request.post('/signup', {
                 headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
                 data: JSON.stringify(form.get('value'))
             }).then(function(data){
-                dia.hide();
+				var result = JSON.parse(data);
+				userName = result.username;
+				domattr.set("userNameDiv", 'innerHTML',result.username );
+				//TODO refresh the page
+				dia.hide();
             },function(error){
-                domStyle.set(row1, 'display', '');
-                domattr.set(tdDom0, 'innerHTML',error.response.text );
+				var msg = '';
+				if(error.response.status == 400) msg = 'Invalid user name/password';
+				else msg = error.response.text;
+				domStyle.set(row1, 'display', '');
+				domattr.set(tdDom0, 'innerHTML', msg);
             });
         });
         cancelButton.on("click", function(){dia.hide();});

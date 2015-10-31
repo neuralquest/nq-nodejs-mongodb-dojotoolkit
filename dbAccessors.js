@@ -38,7 +38,6 @@ function remove(id, collection) {
 }
 function find(query, collection) {
     var deferred = new Deferred();
-    //{$and:[{type:'parent'}, {dest: 74},]}
     collection.find(query).toArray(
         function(err, value) {
             if (err) deferred.reject(err);
