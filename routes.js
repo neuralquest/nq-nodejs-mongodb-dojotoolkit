@@ -52,13 +52,13 @@ exports = module.exports = function(app, passport) {
         passport.authenticate('local'),
         function(req, res) {
             // If this function gets called, authentication was successful.
-            res.json({username:req.user.username});
+            res.json({username: req.user.username});
         });
     app.get('/login',
         passport.authenticate('local'),
         function(req, res) {
             // If this function gets called, authentication was successful.
-            res.json({username:req.user.username});
+            res.json({username: req.user.username});
         });
     app.get('/logout', function(req, res) {
         req.logout();
