@@ -539,14 +539,14 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         var row3 = domConstruct.create("tr", null, tableNode);
         domConstruct.create("td", {innerHTML: ('Password'), style: "padding: 3px"}, row3);
         var tdDom2 = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row3);
-        new TextBox({name:'password', type:'password',placeHolder: "Password" }).placeAt(tdDom2);
+        new TextBox({name:'password', type:'password' ,placeHolder: "Password" }).placeAt(tdDom2);
 
-        var row4 = domConstruct.create("tr", {style:"display:none"}, tableNode);
+        var row4 = domConstruct.create("tr", {}, tableNode);
         domConstruct.create("td", {innerHTML: ('Password'), style: "padding: 3px"}, row4);
         var tdDom3 = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row4);
-        new TextBox({name:'password2', placeHolder: "Again, for verification" }).placeAt(tdDom3);
+        new TextBox({name:'password2', type:'password', placeHolder: "Again, for verification" }).placeAt(tdDom3);
 
-        var row5 = domConstruct.create("tr", {style:"display:none"}, tableNode);
+        var row5 = domConstruct.create("tr", {}, tableNode);
         domConstruct.create("td", {innerHTML: ('Email'), style: "padding: 3px"}, row5);
         var tdDom4 = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row5);
         new TextBox({name:'email',placeHolder: "In case you forget your password" }).placeAt(tdDom4);
@@ -554,17 +554,17 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         var row6 = domConstruct.create("tr", null, tableNode);
         domConstruct.create("td", {innerHTML: ('Social Media Login'), style: "padding: 3px"}, row6);
         var tdDom5 = domConstruct.create("td", {}, row6);
-        new Button({label: "Google Login"}).placeAt(tdDom5);
+        var googleLogin = new Button({label: "Google Login"}).placeAt(tdDom5);
 
         var row7 = domConstruct.create("tr", null, tableNode);
         domConstruct.create("td", {}, row7);
         var tdDom6 = domConstruct.create("td", {}, row7);
-        new Button({label: "Facebook Login"}).placeAt(tdDom6);
+        var facebookLogin = new Button({label: "Facebook Login", disabled:true}).placeAt(tdDom6);
 
         var row8 = domConstruct.create("tr", null, tableNode);
         domConstruct.create("td", {}, row8);
         var tdDom8 = domConstruct.create("td", {}, row8);
-        new Button({label: "Twitter Login"}).placeAt(tdDom8);
+        var twitterLogin = new Button({label: "Twitter Login", disabled: true}).placeAt(tdDom8);
 
         var row9 = domConstruct.create("tr", null, tableNode);
         domConstruct.create("td", {innerHTML: ('New to Neuralquest?'), style: "padding: 3px"}, row9);
@@ -588,7 +588,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			domStyle.set(row6, 'display', 'none');
 			domStyle.set(row7, 'display', 'none');
 			domStyle.set(row8, 'display', 'none');
-			domStyle.set(row9, 'display', 'none');
+			//domStyle.set(row9, 'display', 'none');
 			domStyle.set(row10, 'display', 'none');
 		});
         loginButton.on("click", function(){
@@ -603,12 +603,27 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				dia.hide();
             },function(error){
 				var msg = '';
-				if(error.response.status == 400) msg = 'Invalid user name/password';
+				if(error.response.status == 401) msg = 'Invalid user name/password';
 				else msg = error.response.text;
                 domStyle.set(row1, 'display', '');
                 domattr.set(tdDom0, 'innerHTML', msg);
             });
         });
+		googleLogin.on("click", function(){
+			request.get('/auth/google').then(function(data){
+				var result = JSON.parse(data);
+				userName = result.username;
+				domattr.set("userNameDiv", 'innerHTML',result.username );
+				//TODO refresh the page
+				dia.hide();
+			},function(error){
+				var msg = '';
+				if(error.response.status == 400) msg = 'Google login failed';
+				else msg = error.response.text;
+				domStyle.set(row1, 'display', '');
+				domattr.set(tdDom0, 'innerHTML', msg);
+			});
+		});
 		createAccount.on("click", function(){
             request.post('/signup', {
                 headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
@@ -621,7 +636,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				dia.hide();
             },function(error){
 				var msg = '';
-				if(error.response.status == 400) msg = 'Invalid user name/password';
+				if(error.response.status == 401) msg = 'Invalid user name/password';
 				else msg = error.response.text;
 				domStyle.set(row1, 'display', '');
 				domattr.set(tdDom0, 'innerHTML', msg);
