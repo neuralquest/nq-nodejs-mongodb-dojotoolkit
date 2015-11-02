@@ -6,11 +6,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var expressMongoDb = require('express-mongo-db');
 var db = require('./db');
-var postData = require('./postData');
-var getData = require('./getData');
-var consistency = require('./consistency');
-var credentials = require('./credentials');
-//var mysql2Mango = require('./mysql2Mango');
 var app = express();
 app.config = config;
 app.db = db;
@@ -20,7 +15,7 @@ app.db = db;
 db.connect(config.mongodb.uri, function(err) {
     if(err) {
         console.log('Unable to connect to Mongo.');
-        //process.exit(1);
+        process.exit(1);
     }
     else {
         //app.listen(3000, function() {
@@ -62,46 +57,6 @@ require('./passport')(app, passport);
 //setup routes
 require('./routes')(app, passport);
 
-/*
-passport.use(new LocalStrategy({
-        passReqToCallback : true
-    },function(req, username, password, done) {
-        credentials.validate(req, username, password).then(function(result){
-            if (result.failed) return done(null, false);
-            return done(null, username);
-        },function(err){
-            return done(err);
-        });
-    }
-));
-passport.use(new GoogleStrategy({
-        returnURL: 'http://neuralquest.org/auth/google/return',
-        realm: 'http://neuralquest.org/',
-        passReqToCallback : true
-    },
-    function(req, identifier, profile, done) {
-        credentials.validate(req, username, password).then(function(result){
-            if (result.failed) return done(null, false);
-            return done(null, username);
-        },function(err){
-            return done(err);
-        });
-        User.findOrCreate({ openId: identifier }, function(err, user) {
-            done(err, user);
-        });
-    }
-));
-passport.serializeUser(function(user, done) {
-    done(null, user);
-    //done(null, user._id);
-});
-passport.deserializeUser(function(id, done) {
-    done(null, {username:'username', password:'password'});
-    //User.findById(id, function(err, user) {
-    //    done(err, user);
-    //});
-});
-*/
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

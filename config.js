@@ -48,6 +48,7 @@ exports.oauth = {
     secret: process.env.TUMBLR_OAUTH_SECRET || ''
   }
 };
+/*
 exports.constants = {
   VIEW_CLASS: 74,
   ATTRREF_CLASS: 63
@@ -87,4 +88,4 @@ exports.cardinality = {
   ownedBy: 'one',
   oneToOneReverse: 'one',
   manyToOne: 'one'
-};
+};*/

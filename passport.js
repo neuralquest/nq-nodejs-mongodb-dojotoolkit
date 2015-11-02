@@ -20,11 +20,11 @@ exports = module.exports = function(app, passport) {
         }
         Users.findOne(conditions).then(function(user){
           if(!user) return done(null, false, { message: 'Invalid user name/password' });
-          var isValid = Users.isValidPassword(password, user.password);
-          if(!isValid) return done(null, false, { message: 'Invalid user name/password' });
-          return done(null, user);
-        },function(err){
-          return done(err);
+              var isValid = Users.isValidPassword(password, user.password);
+              if(!isValid) return done(null, false, { message: 'Invalid user name/password' });
+              return done(null, user);
+            },function(err){
+              return done(err);
         });
       }
   ));
@@ -110,8 +110,10 @@ exports = module.exports = function(app, passport) {
   });
 
   passport.deserializeUser(function(id, done) {
-    Users.findOne({ _id: id }).then(function(err, user) {
-      done(err, user);
+    Users.findOne({ _id: id }).then(function(user) {
+      done(null, user);
+    },function(err){
+        done(err)
     });
     /*User.findOne({ _id: id }).populate('roles.admin').populate('roles.account').exec(function(err, user) {
       if (user && user.roles && user.roles.admin) {

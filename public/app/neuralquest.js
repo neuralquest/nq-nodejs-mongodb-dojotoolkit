@@ -630,10 +630,16 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 data: JSON.stringify(form.get('value'))
             }).then(function(data){
 				var result = JSON.parse(data);
-				userName = result.username;
-				domattr.set("userNameDiv", 'innerHTML',result.username );
-				//TODO refresh the page
-				dia.hide();
+				if(result.failed){
+					domStyle.set(row1, 'display', '');
+					domattr.set(tdDom0, 'innerHTML', result.failed.reason);
+				}
+				else{
+					userName = result.username;
+					domattr.set("userNameDiv", 'innerHTML',result.username );
+					//TODO refresh the page
+					dia.hide();
+				}
             },function(error){
 				var msg = '';
 				if(error.response.status == 401) msg = 'Invalid user name/password';

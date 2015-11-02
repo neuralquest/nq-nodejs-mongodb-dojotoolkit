@@ -1,5 +1,7 @@
 'use strict';
-
+var postData = require('./postData');
+var getData = require('./getData');
+var consistency = require('./consistency');
 
 exports = module.exports = function(app, passport) {
 
@@ -43,7 +45,16 @@ exports = module.exports = function(app, passport) {
         var Users = require('./models/users');
         Users.signup(req).then(function (result) {
             if(result.failed) res.json(result);
-            else res.redirect('/login');
+            //else res.redirect('/login');
+            else{
+                var _req = req;
+                passport.authenticate('local'), function(err, user) {
+                    if (err) { return next(err) }
+                    // If this function gets called, authentication was successful.
+                    //req.session.user = req.user.username;
+                    res.json({username: _req.user.username});
+                };
+            }
         }, function (err) {
             next(err);
         });
@@ -52,6 +63,7 @@ exports = module.exports = function(app, passport) {
         passport.authenticate('local'),
         function(req, res) {
             // If this function gets called, authentication was successful.
+            //req.session.user = req.user.username;
             res.json({username: req.user.username});
         });
     app.get('/login',
