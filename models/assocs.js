@@ -53,4 +53,16 @@ exports.find = function(query) {
         });
     return deferred.promise;
 };
+exports.aggregate = function(query) {
+    var deferred = new Deferred();
+    var collection = db.get().collection('assocs');
+    collection.aggregate(query,
+//        function(resultArr, err) {
+        function(err, resultArr) {
+            if (err) deferred.reject(err);
+            else deferred.resolve(resultArr);
+        }
+    );
+    return deferred.promise;
+};
 

@@ -2,18 +2,11 @@ var Deferred = require("promised-io/promise").Deferred;
 var all = require("promised-io/promise").all;
 var when = require("promised-io/promise").when;
 var utils = require('./public/app/utils');
-var dbAccessors = require('./dbAccessors');
-var itemsColl;
-var assocsColl;
-var countersColl;
-var db;
+var Items = require('./models/items');
+var Assocs = require('./models/assocs');
+var tv4 = require("tv4");
 
-function check(req){
-    db = req.db;
-    itemsColl = req.db.collection('items');
-    assocsColl = req.db.collection('assocs');
-    countersColl = req.db.collection('counters');
-
+function check(){
     var checkPromises = [];
     checkPromises.push(findOrphans());
     checkPromises.push(validateAssocs());
@@ -25,10 +18,10 @@ function check(req){
     });
 }
 function findOrphans(){
-    return dbAccessors.find({},itemsColl).then(function(itemsArr){
+    return Items.find({}).then(function(itemsArr){
         var assocsPromises = [];
         itemsArr.forEach(function(item) {
-             assocsPromises.push(dbAccessors.find({source: item._id, type: 'parent'}, assocsColl));
+             assocsPromises.push(Assocs.find({source: item._id, type: 'parent'}));
         });
         return all(assocsPromises).then(function(assocsArrArr){
             var results = [];
@@ -39,8 +32,8 @@ function findOrphans(){
                 if(item._id != 67){//do not check 'Problem Domain'
                     if(assocsArr.length > 1) results.push({moreThanOneParentAssoc:item});
                     if(assocsArr.length == 0) results.push({noParentAssoc:item});
-                    if(assocsArr.length == 1) parentPromises.push(dbAccessors.findOne(assocsArr[0].dest,itemsColl));
-                    //if(assocsArr.length == 0) dbAccessors.remove(item._id, itemsColl);
+                    if(assocsArr.length == 1) parentPromises.push(Items.findById(assocsArr[0].dest));
+                    //if(assocsArr.length == 0) Items.remove(item._id);
                 }
                 if(item._id == 99){
                     var i = 1;
@@ -53,7 +46,7 @@ function findOrphans(){
                     else if(parent._type !== 'class') results.push({parentIsNotAClass:parent});
                 });
                 return {
-                    id: 001,
+                    id: 1,
                     name: 'Find Orphans',
                     rule: 'All objects and classes must have a parent association that points to a class',
                     exceptions: 'Does not apply to the root class: Problem Domain',
@@ -64,11 +57,11 @@ function findOrphans(){
     });
 }
 function validateAssocs(){
-    return dbAccessors.find({},assocsColl).then(function(assocsArr){
+    return Assocs.find({}).then(function(assocsArr){
         var itemsPromises = [];
         assocsArr.forEach(function(assoc) {
-            itemsPromises.push(dbAccessors.findOne(assoc.source,itemsColl));
-            itemsPromises.push(dbAccessors.findOne(assoc.dest,itemsColl));
+            itemsPromises.push(Items.findById(assoc.source));
+            itemsPromises.push(Items.findById(assoc.dest));
         });
         return all(itemsPromises).then(function(itemsArr){
             var results = [];
@@ -80,10 +73,10 @@ function validateAssocs(){
                 var destItem = itemsArr[i+1];
                 if(!sourceItem) results.push({assocSourceNotFound:assoc});
                 if(!destItem) results.push({assocDestNotFound:assoc});
-                //if(!destItem) dbAccessors.remove(assoc._id, assocsColl);
+                //if(!destItem) Assocs.remove(assoc._id);
             }
             return {
-                id: 002,
+                id: 2,
                 name: 'Validate Associations',
                 rule: 'The source and dest of associations must point to existing items. The type must be valid',
                 exceptions: false,
@@ -93,37 +86,30 @@ function validateAssocs(){
     });
 }
 function assocsUnique(){
-    var deferred = new Deferred();
-    assocsColl.aggregate([
+    var query = [
         {$group:{
             _id: {source: '$source', type: '$type', dest: '$dest'},
             count: { $sum : 1}
-        }}],
-        function(err, resultArr) {
-            if (err) deferred.reject(err);
-            else {
-                var results = [];
-                resultArr.forEach(function(assocCount) {
-                    if(assocCount.count > 1) results.push(assocCount);
-                });
-                var obj = {
-                    id: 3,
-                    name: 'Unique Associations',
-                    rule: 'The combination of source, dest and type of associations must be unique',
-                    exceptions: false,
-                    count: results.length,
-                    invalid: results};
-
-                deferred.resolve(obj);}
-        }
-    );
-    return deferred;
+        }}];
+    return Assocs.aggregate(query).then(function(resultArr){
+        var results = [];
+        resultArr.forEach(function(assocCount) {
+            if(assocCount.count > 1) results.push(assocCount);
+        });
+        return {
+            id: 3,
+            name: 'Unique Associations',
+            rule: 'The combination of source, dest and type of associations must be unique',
+            exceptions: false,
+            count: results.length,
+            invalid: results};
+    });
 }
 function validateObjectAssoc(){
-    return dbAccessors.find({_type:'object'},itemsColl).then(function(itemsArr){
+    return Items.find({_type:'object'}).then(function(itemsArr){
         var assocPromises = [];
         itemsArr.forEach(function(item) {
-            assocPromises.push(dbAccessors.find({source: item._id}, assocsColl));
+            assocPromises.push(Assocs.find({source: item._id}));
         });
         return all(assocPromises).then(function(assocPromisesArrArr){
             var validateAssocPronises = [];
@@ -152,15 +138,15 @@ function validateAssocByClassModel(assoc){
     if(assoc.type == 'parent' || assoc.type == 'next') return null;
 
     var ancestorPromises = [];
-    ancestorPromises[0] = utils.collectAllByAssocType(assoc.source, 'parent', db);
-    ancestorPromises[1] = utils.collectAllByAssocType(assoc.dest, 'parent', db);
+    ancestorPromises[0] = utils.collectAllByAssocType(assoc.source, 'parent');
+    ancestorPromises[1] = utils.collectAllByAssocType(assoc.dest, 'parent');
     return all(ancestorPromises).then(function(ancestorPromisesArr){
         var sourceAncestors = ancestorPromisesArr[0];
         var destAncestors = ancestorPromisesArr[1];
         var classAssocPromises = [];
         for(var i = 1;i<sourceAncestors.length;i++){
             var sourceAncestor = sourceAncestors[i];
-            classAssocPromises.push(dbAccessors.find({source: sourceAncestor._id, type: assoc.type}, assocsColl));
+            classAssocPromises.push(Assocs.find({source: sourceAncestor._id, type: assoc.type}));
         }
         return all(classAssocPromises).then(function(classAssocPromisesArr){
             if(assoc.source == 494 && assoc.type == 'oneToMany' && assoc.dest == 1531){
@@ -199,50 +185,41 @@ function validateAssocByClassModel(assoc){
     });
 }
 function validateObjectAttributes(){
-    return dbAccessors.find({_type:'object'},itemsColl).then(function(itemsArr){
+    return Items.find({_type:'object'}).then(function(itemsArr){
         var assocPromises = [];
         itemsArr.forEach(function(item) {
-            assocPromises.push(dbAccessors.find({source: item._id, type:'parent'}, assocsColl));
+            assocPromises.push(Assocs.find({source: item._id, type:'parent'}));
         });
         return all(assocPromises).then(function(assocsArrArr){
             var attrPropertiesPromises = [];
             assocsArrArr.forEach(function(assocsArr){
                 assocsArr.forEach(function(assoc){
-                    attrPropertiesPromises.push(utils.getAttrPropertiesFromAncestors(assoc.dest, db));
+                    attrPropertiesPromises.push(utils.getAttrPropertiesFromAncestors(assoc.dest));
                 });
             });
             return all(attrPropertiesPromises).then(function(attrPropertiesArr){
                 var results = [];
                 var index = 0;
-                attrPropertiesArr.forEach(function(attrProperties){
+                attrPropertiesArr.forEach(function(xschema){
+                    var schema = {
+                        $schema: "http://json-schema.org/draft-04/schema#",
+                        type: 'object',
+                        properties:xschema,
+                        required: ['name', 'description'],
+                        additionalProperties: false
+                    };
                     var obj = itemsArr[index];
-                    if(typeof obj._id!=='number' || (obj._id%1)!==0) results.push({idIsNotAnInteger:obj});
-                    if(obj._type != 'object' && obj._type != 'class') results.push({invalidItemType:obj});
-                    for(var attrName in obj){
-                        if(attrName.charAt(0) == '_') continue;
-                        var classProp = attrProperties[attrName];
-                        var objProp = obj[attrName];
-                        if(!classProp) results.push({noclassAttrFor:{attribute:attrName, object:obj}});
-                        else{
-                            //TODO
-                            if(classProp.media && classProp.media.mediaType == 'text/html'){
-                            }
-                            else if(classProp.enum){
-                            }
-                            else if(classProp.type == 'String'){
-                                //maxLength
-                                //minLength
-                            }
-                            else if(classProp.type == 'Number'){
-                                //maximum
-                                //minimum
-                                //places
-                            }
-                            else if(classProp.type == 'Date'){
-                            }
-                            else if(classProp.type == 'Boolean'){
-                            }
-                        }
+                    var validations = tv4.validateMultiple(obj, schema);
+                    if(!validations.valid){
+                        var errors = [];
+                        validations.errors.forEach(function(error){
+                            errors.push({
+                                message:error.message,
+                                dataPath:error.dataPath
+                            });
+                        });
+                        delete validations.stack;
+                        results.push({object:obj, schema:schema, results:errors});
                     }
                     index++;
                 });
@@ -261,7 +238,7 @@ function cleanup(){
     var removeArr = [59,60,66,69,77,91,94,100,101,102,106,107,109,63];
     var collectedPromises = [];
     removeArr.forEach(function(itemId){
-        collectedPromises.push(utils.collectAllByAssocType(itemId, 'children', db));
+        collectedPromises.push(utils.collectAllByAssocType(itemId, 'children'));
     });
     return all(collectedPromises).then(function(collectedPromisesArrArr){
         var results = [];

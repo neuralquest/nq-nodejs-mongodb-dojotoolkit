@@ -3,20 +3,11 @@ var Deferred = require("promised-io/promise").Deferred;
 var all = require("promised-io/promise").all;
 var when = require("promised-io/promise").when;
 var utils = require('./public/app/utils');
-var dbAccessors = require('./dbAccessors');
-var itemsColl;
-var assocsColl;
-var countersColl;
-var db;
+var Items = require('./models/items');
+var Assocs = require('./models/assocs');
 var idMap = {};
 
-function update(req){
-    db = req.db;
-    itemsColl = req.db.collection('items');
-    assocsColl = req.db.collection('assocs');
-    countersColl = req.db.collection('counters');
-    var body = req.body;
-
+function update(body){
     var itemValidationPromises = [];
     if(body.itemsColl){
         for(var action in body.itemsColl){
@@ -43,19 +34,19 @@ function update(req){
                 if(body.itemsColl.add) {
                     var newItems = body.itemsColl.add;
                     newItems.forEach(function (item) {
-                        writePromises.push(dbAccessors.insert(item, itemsColl));
+                        writePromises.push(Items.insert(item));
                     });
                 }
                 if(body.itemsColl.update) {
                     var updateItems = body.itemsColl.update;
                     updateItems.forEach(function (item) {
-                        writePromises.push(dbAccessors.update(item, itemsColl));
+                        writePromises.push(Items.update(item));
                     });
                 }
                 if(body.itemsColl.delete) {
                     var deleteItems = body.itemsColl.delete;
                     deleteItems.forEach(function (id) {
-                        writePromises.push(dbAccessors.remove(id, itemsColl));
+                        writePromises.push(Items.remove(id));
                     });
                 }
             }
@@ -63,19 +54,19 @@ function update(req){
                 if(body.assocsColl.add) {
                     var newAssocs = body.assocsColl.add;
                     newAssocs.forEach(function (assoc) {
-                        writePromises.push(dbAccessors.insert(assoc, assocsColl));
+                        writePromises.push(Items.insert(assoc, assocsColl));
                     });
                 }
                 if(body.assocsColl.update) {
                     var updateAssocs = body.assocsColl.update;
                     updateAssocs.forEach(function (assoc) {
-                        writePromises.push(dbAccessors.update(assoc, assocsColl));
+                        writePromises.push(Items.update(assoc, assocsColl));
                     });
                 }
                 if(body.assocsColl.delete) {
                     var deleteAssocs = body.assocsColl.delete;
                     deleteAssocs.forEach(function (id) {
-                        writePromises.push(dbAccessors.remove(id, assocsColl));
+                        writePromises.push(Items.remove(id, assocsColl));
                     });
                 }
             }
@@ -85,7 +76,7 @@ function update(req){
 }
 function itemIsValid(item, action) {
     //Get the view
-    return dbAccessors.findOne(item._viewId, itemsColl).then(function(view){
+    return Items.findOne(item._viewId).then(function(view){
         //If add, update, delete, is allowed?
 
         //TODO
@@ -100,7 +91,7 @@ function itemIsValid(item, action) {
             var schema = viewPromisesArr[2];
 
             var idPromise = [];
-            if(action == 'add') idPromise = dbAccessors.getNextSequence('itemsColl', countersColl);
+            if(action == 'add') idPromise = Items.getNextSequence('itemsColl');
             else idPromise = false;
             return when(idPromise, function(newId){
 
@@ -182,12 +173,12 @@ function assocIsAllowed(assoc, action) {
         itemsPromises[0]  = idMap[sourceId];
         assoc.source = idMap[sourceId]._id;
     }
-    else itemsPromises[0] = dbAccessors.findOne(sourceId, itemsColl);
+    else itemsPromises[0] = Items.findOne(sourceId);
     if(idMap[destId]) {
         itemsPromises[1]  = idMap[destId];
         assoc.dest = idMap[destId]._id;
     }
-    else itemsPromises[1] = dbAccessors.findOne(destId, itemsColl);
+    else itemsPromises[1] = Items.findOne(destId);
 
     return all(itemsPromises).then(function(ancestorPromisesArr){
         var sourceItem = ancestorPromisesArr[0];

@@ -610,7 +610,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             });
         });
 		googleLogin.on("click", function(){
-			request.get('/auth/google').then(function(data){
+			request.get('/login/google').then(function(data){
 				var result = JSON.parse(data);
 				userName = result.username;
 				domattr.set("userNameDiv", 'innerHTML',result.username );

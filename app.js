@@ -7,8 +7,22 @@ var bodyParser = require('body-parser');
 var expressMongoDb = require('express-mongo-db');
 var db = require('./db');
 var app = express();
+//var cors = require("./enable-cors.js")(app);
 app.config = config;
 app.db = db;
+
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+    if ('OPTIONS' == req.method) {
+        res.send(200);
+    } else {
+        next();
+    }
+});
+
 // Connect to Mongo on start
 //db.connect(config.mongodb.uri);
 
@@ -60,7 +74,7 @@ require('./routes')(app, passport);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-    var err = new Error('Not Found');
+    var err = new Error('Not Found: '+req.url);
     err.status = 404;
     next(err);
 });

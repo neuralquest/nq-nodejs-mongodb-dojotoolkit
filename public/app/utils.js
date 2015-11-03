@@ -1,9 +1,10 @@
 var all = require("promised-io/promise").all;
 var when = require("promised-io/promise").when;
-var dbAccessors = require('../../dbAccessors');
+var Items = require('../../models/items');
+var Assocs = require('../../models/assocs');
 
 
-function getCombinedSchemaForView(view, db) {
+function getCombinedSchemaForView(view) {
     /* summary:  Used to create a JSON schema based on the view schema in combination with class attributes inherited through view.mapsTo.
      //          The same method is used server side to validate updates.
      // view: Object
@@ -13,7 +14,7 @@ function getCombinedSchemaForView(view, db) {
      */
 //    var self = this;
     var classSchemaPromise = null;
-    if(view.mapsTo) classSchemaPromise = getAttrPropertiesFromAncestors(view.mapsTo, db);
+    if(view.mapsTo) classSchemaPromise = getAttrPropertiesFromAncestors(view.mapsTo);
     else classSchemaPromise = {//No mapsTo means we're asking for a class (meta schema)
         _id : {
             type: "Number",
@@ -127,9 +128,9 @@ function getCombinedSchemaForView(view, db) {
         return schema;
     });
 }
-function getAttrPropertiesFromAncestors(classId, db){
+function getAttrPropertiesFromAncestors(classId){
 //    var self = this
-    return collectAllByAssocType(Number(classId), 'parent', db).then(function(parentClassesArr){
+    return collectAllByAssocType(Number(classId), 'parent').then(function(parentClassesArr){
         var classAttrObj = {};
         parentClassesArr.forEach(function(classItem) {
             for(var classAttr in classItem){
@@ -139,7 +140,7 @@ function getAttrPropertiesFromAncestors(classId, db){
         return classAttrObj;
     });
 }
-function collectAllByAssocType(itemId, assocType, db) {
+function collectAllByAssocType(itemId, assocType) {
     /* summary: Use to navigate the data graph following the given association type, gathering all items along the way.
      //          If ASSOCPROPERTIES specifies that an association type should return one particular item type, other types will be ignored.(e.g. subclasses, instantiations)
      //          Will write an error if it finds more than one occurrence when ASSOCPROPERTIES specifies that only one is allowed.
@@ -155,28 +156,26 @@ function collectAllByAssocType(itemId, assocType, db) {
      */
     //TODO loop protection
     if(!itemId || !assocType || !ASSOCPROPERTIES[assocType]) throw (new Error('Invalid parameters'));
-    var itemsColl = db.collection('items');
-    var assocsColl = db.collection('assocs');
 //    var self = this;
-    return dbAccessors.findOne(itemId, itemsColl).then(function(item){
+    return Items.findById(itemId).then(function(item){
         var type = ASSOCPROPERTIES[assocType].type;
         if(type && item._type != type) return [];
         //console.log('item', item);
         var query  = normalizeAssocQuery(itemId, assocType);
-        return dbAccessors.find(query, assocsColl).then(function(collection){
+        return Assocs.find(query).then(function(collection){
             var itemPromises = [];
             var count = 0;
             collection.forEach(function (assoc) {
                 count ++;
-                if(!ASSOCPROPERTIES[assocType].pseudo) itemPromises.push(dbAccessors.findOne(assoc.dest, itemsColl));
-                else itemPromises.push(dbAccessors.findOne(assoc.source, itemsColl));
+                if(!ASSOCPROPERTIES[assocType].pseudo) itemPromises.push(Items.findById(assoc.dest));
+                else itemPromises.push(Items.findById(assoc.source));
             });
             if(ASSOCPROPERTIES[assocType].cardinality == 'one' && count>1) console.error('more than one found');
             return all(itemPromises).then(function(classesArr){
                 //console.log('classesArr',classesArr);
                 var subclassesPromises = [];
                 classesArr.forEach(function(childItem){
-                    subclassesPromises.push(collectAllByAssocType(childItem._id, assocType, db));
+                    subclassesPromises.push(collectAllByAssocType(childItem._id, assocType));
                 });
                 return all(subclassesPromises).then(function(subclassesArr){
                     var results = [];

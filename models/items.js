@@ -10,6 +10,19 @@ exports.findById = function(id) {
     });
     return deferred.promise;
 };
+exports.findOne = function(query){
+    var deferred = new Deferred();
+    var collection = db.get().collection('items');
+    collection.find(query).toArray(function(err, usersArr) {
+        if (err) deferred.reject(err);
+        else {
+            if(!usersArr || usersArr.length == 0) deferred.resolve(null);
+            else if(usersArr.length == 1) deferred.resolve(usersArr[0]);
+            else throw (new Error("Duplicate found in collection"));
+        }
+    });
+    return deferred.promise;
+};
 exports.insert = function(doc) {
     var deferred = new Deferred();
     var collection = db.get().collection('items');
