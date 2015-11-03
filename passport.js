@@ -113,7 +113,7 @@ exports = module.exports = function(app, passport) {
     Users.findOne({ _id: id }).then(function(user) {
       done(null, user);
     },function(err){
-        done(err)
+        done(err, user)
     });
     /*User.findOne({ _id: id }).populate('roles.admin').populate('roles.account').exec(function(err, user) {
       if (user && user.roles && user.roles.admin) {

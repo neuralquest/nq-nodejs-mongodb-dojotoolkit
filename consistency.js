@@ -8,11 +8,12 @@ var tv4 = require("tv4");
 
 function check(){
     var checkPromises = [];
-    checkPromises.push(findOrphans());
+    checkPromises.push(cleanup());
+    /*checkPromises.push(findOrphans());
     checkPromises.push(validateAssocs());
     checkPromises.push(assocsUnique());
     checkPromises.push(validateObjectAssoc());
-    checkPromises.push(validateObjectAttributes());
+    checkPromises.push(validateObjectAttributes());*/
     return all(checkPromises).then(function(checkArr){
         return {consistencyCheck:checkArr};
     });
@@ -200,14 +201,7 @@ function validateObjectAttributes(){
             return all(attrPropertiesPromises).then(function(attrPropertiesArr){
                 var results = [];
                 var index = 0;
-                attrPropertiesArr.forEach(function(xschema){
-                    var schema = {
-                        $schema: "http://json-schema.org/draft-04/schema#",
-                        type: 'object',
-                        properties:xschema,
-                        required: ['name', 'description'],
-                        additionalProperties: false
-                    };
+                attrPropertiesArr.forEach(function(schema){
                     var obj = itemsArr[index];
                     var validations = tv4.validateMultiple(obj, schema);
                     if(!validations.valid){
@@ -235,6 +229,36 @@ function validateObjectAttributes(){
     });
 }
 function cleanup(){
+    return Items.find({_type:'class'}).then(function(itemsArr){
+        itemsArr.forEach(function(item) {
+            var newClass = {_id: item._id, type:'class', name:item._name};
+            var properties = JSON.parse(JSON.stringify(item));
+            var required = [];
+            var propsFound = false;
+            for(var attrName in properties){
+                if(attrName.charAt(0) == '_') delete properties[attrName];
+                else {
+                    propsFound = true;
+                    var itemProp = properties[attrName];
+                    itemProp.type = itemProp.type.toLowerCase();
+                    if (itemProp.required) {
+                        required.push(attrName);
+                        delete itemProp.attrName;
+                    }
+                }
+            }
+            var schema = {};
+            if(propsFound){
+                schema.properties = properties;
+                if(required.length>0) schema.required = required;
+            }
+            if(propsFound) newClass.schema = schema;
+            console.log(newClass);
+        });
+    });
+
+}
+/*function cleanup(){
     var removeArr = [59,60,66,69,77,91,94,100,101,102,106,107,109,63];
     var collectedPromises = [];
     removeArr.forEach(function(itemId){
@@ -254,5 +278,5 @@ function cleanup(){
         return results
     });
 
-}
+}*/
 module.exports.check = check;

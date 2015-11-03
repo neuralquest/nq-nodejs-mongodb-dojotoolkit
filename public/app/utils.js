@@ -15,35 +15,28 @@ function getCombinedSchemaForView(view) {
 //    var self = this;
     var classSchemaPromise = null;
     if(view.mapsTo) classSchemaPromise = getAttrPropertiesFromAncestors(view.mapsTo);
-    else classSchemaPromise = {//No mapsTo means we're asking for a class (meta schema)
-        _id : {
-            type: "Number",
-            required : true,
-            readOnly : true,
-            minimum : 0,
-            places : 0},
-        _name : {
-            type: "String",
-            required : true,
-            readOnly : false},
-        _type : {
-            type : "String",
-            required : true,
-            readOnly : false,
-            enum : ['class','object']//TODO only class?
+    else classSchemaPromise = METASCHEMA;//No mapsTo means we're asking for a class (meta schema)
+
+    return when(classSchemaPromise, function(classSchema){
+        //remove properties not in the view's schema
+        for(var attrName in classSchema.properties) {
+            if(!view.schema[attrName]) delete classSchema.properties[attrName];
+            if(classSchema.required){
+                var index = classSchema.required.indexOf(attrName);
+                if(index!=-1)array.splice(index, 1);
+            }
         }
-    };
-    return when(classSchemaPromise, function(classAttrObj){
+
         var schema = {};
         for(var attrPropName in view.schema){
             //if(attrPropName == 'description') debugger;
             var newProp = {};
             var attrProp = view.schema[attrPropName];
             var classAttrProp = null;
-            for(var classAttrName in classAttrObj){
+            for(var classAttrName in classSchema){
                 //debugger;
                 if(attrPropName == classAttrName){
-                    classAttrProp = classAttrObj[attrPropName];
+                    classAttrProp = classSchema[attrPropName];
                     break;
                 }
             };
@@ -63,8 +56,8 @@ function getCombinedSchemaForView(view) {
                     newProp.enum = attrProp.enum;
                 }
             }
-            newProp.className = classAttrObj._name;
-            newProp.classId = classAttrObj._id;
+            newProp.className = classSchema._name;
+            newProp.classId = classSchema._id;
             newProp.viewId = view._id;
             newProp.viewMapsTo = view.mapsTo;
             //set the defaults
@@ -129,15 +122,26 @@ function getCombinedSchemaForView(view) {
     });
 }
 function getAttrPropertiesFromAncestors(classId){
-//    var self = this
     return collectAllByAssocType(Number(classId), 'parent').then(function(parentClassesArr){
-        var classAttrObj = {};
+        var schema = {
+            $schema: "http://json-schema.org/draft-04/schema#",
+            type: 'object',
+            properties: {},
+            additionalProperties: false
+        };
+        var required = [];
         parentClassesArr.forEach(function(classItem) {
-            for(var classAttr in classItem){
-                if(classAttr.charAt(0)!='_') classAttrObj[classAttr] = classItem[classAttr];
+            if(classItem.schema){
+                if(classItem.schema.properties){
+                    for(var classAttr in classItem.schema.properties){
+                        schema.properties[classAttr] = classItem.schema.properties[classAttr];
+                    }
+                }
+                if(classItem.schema.required) required = required.concat(classItem.schema.required)
             }
         });
-        return classAttrObj;
+        if(required.length>0) schema.required = required;
+        return schema;
     });
 }
 function collectAllByAssocType(itemId, assocType) {
@@ -319,6 +323,29 @@ ASSOCPROPERTIES = {
         pseudo : true,
         cardinality: 'many',
         icon: 24}
+};
+METASCHEMA = {
+    $schema: "http://json-schema.org/draft-04/schema#",
+    type: 'object',
+    properties: {
+        _id : {
+            type: "number",
+            readOnly : true,
+            minimum : 0,
+            places : 0},
+        name : {
+            type: "string",
+            readOnly : false},
+        type : {
+            type : "string",
+            readOnly : true,
+            enum : ['class']},
+        schema : {
+            type : "object",
+            readOnly : false}
+    },
+    required: ['_id', 'name', 'type'],
+    additionalProperties: false
 };
 
 module.exports.getCombinedSchemaForView = getCombinedSchemaForView;

@@ -2,6 +2,7 @@ var config = require('./config');
 var Deferred = require("promised-io/promise").Deferred;
 var all = require("promised-io/promise").all;
 var when = require("promised-io/promise").when;
+var consistency = require('./consistency');
 var utils = require('./public/app/utils');
 var Items = require('./models/items');
 var Assocs = require('./models/assocs');
@@ -98,9 +99,18 @@ function itemIsValid(item, action) {
                 if(action == 'add') {
                     idMap[item._id] = item;
                     item._id = newId;
-                    if((item._type != 'object') && (item._type != 'class')) throw (new Error("Invalid type for new item"));
+                    //if((item._type != 'object') && (item._type != 'class')) throw (new Error("Invalid type for new item"));
+                }
+                //remove properties not in the schema
+                for(var attrName in item) {
+                    //if(attrName == '_id') continue;
+                   // if(action == 'add' && attrName == '_type') continue;
+                    if(!schema.properties[attrName]) delete item[attrName];
                 }
                 //Validate the value against the schema
+                var valid = tv4.validate(item, schema);
+                if(!valid) throw (new Error("Invalid attribute in item: "+tv4.error));
+/*
                 for(var attrName in schema) {
                     var attrProps = schema[attrName];
                     var value = item[attrName];
@@ -125,7 +135,7 @@ function itemIsValid(item, action) {
                     else if(attrProps.media && attrProps.media.mediaType == 'text/html'){
                         /*html5Lint(value, function(err, results){
                          if(err) throw (new Error(err));
-                         });*/
+                         });* /
                     }
                     else if(attrProps.type == 'String'){
                         if(value.length > attrProps.maxLength) throw (new Error("String too long"));
@@ -147,12 +157,7 @@ function itemIsValid(item, action) {
                     else if(attrProps.type == 'Object'){
                         throw (new Error("TODO"));
                     }
-                }
-                for(var attrName in item) {
-                    if(attrName == '_id') continue;
-                    if(action == 'add' && attrName == '_type') continue;
-                    if(!schema[attrName]) delete item[attrName];
-                }
+                }*/
                 return item;
             });
         });
@@ -189,7 +194,9 @@ function assocIsAllowed(assoc, action) {
             if(assoc.type === 'next') throw (new Error("'next' not allowed for Class to Class association"));
         }
         if(sourceItem._type === 'object' && destItem._type === 'object'){
-            if(assoc.type === 'next') return assoc;
+            var valid = consistency.validateAssocByClassModel(assoc);
+            if(valid) throw (new Error("Object to Object association not allowed"));
+            /*if(assoc.type === 'next') return assoc;
             if(assoc.type === 'ordered') return assoc;
             var ancestorPromises = [];
             //Get the ancestors of the assoc source
@@ -201,6 +208,7 @@ function assocIsAllowed(assoc, action) {
             //For each of the source ancestors, see if there is an assoc of the same type that has a dest in dest ancestors
             var sourceAncestorsArr = ancestorPromisesArr[0];
             throw (new Error("Object to Object association not allowed"));
+            */
         }
         if(sourceItem._type === 'class' && destItem._type === 'object'){
             if(assoc.type != 'default') throw (new Error("Only 'default' is allowed as Class to Object association"));
