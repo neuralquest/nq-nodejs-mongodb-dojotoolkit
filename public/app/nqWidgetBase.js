@@ -141,7 +141,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     var data = [];
                     data.push({id:-1,label:'[not selected]'} );
                     collection.forEach(function(valueItem){
-                        data.push({id:valueItem._id,label:valueItem._name});
+                        data.push({id:valueItem._id,label:valueItem.name});
                     });
                     var selectStore = new Memory({data: data});
                     attrProps.editorArgs = {

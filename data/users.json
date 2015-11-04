@@ -1,0 +1,15 @@
+{ 
+    "_id" : ObjectId("55bd55c0fdb3eac8249506a8"), 
+    "isActive" : "yes", 
+    "username" : "caveman", 
+    "email" : "platoscave60@gmail.com", 
+    "google" : {
+        "id" : "102547318191367290378"
+    }, 
+    "search" : [
+        "caveman", 
+        "platoscave60@gmail.com"
+    ], 
+    "timeCreated" : ISODate("2015-08-01T23:26:56.060+0000"), 
+    "__v" : NumberInt(0)
+}

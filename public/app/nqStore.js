@@ -391,7 +391,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return all(itemPromises).then(function(itemsArr){
                     var results = [];
                     itemsArr.forEach(function (item){
-                        if(item._type == 'class') results.push(item);
+                        if(item.type == 'class') results.push(item);
                     });
                     return results;
                 });
@@ -418,7 +418,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         return all(objPromises).then(function(objArr){
                             var results = [];
                             objArr.forEach(function (obj){
-                                if(obj._type == 'object') results.push(obj);
+                                if(obj.type == 'object') results.push(obj);
                             });
                             return results;
                         });
@@ -441,7 +441,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 });
                 var assocs = [];
                 for(var type in typesObj){
-                    assocs.push({_id:parentId+':'+type, _name:type, _type:'assoc', _icon:ASSOCPROPERTIES[type].icon});
+                    assocs.push({_id:parentId+':'+type, name:type, type:'assoc', _icon:ASSOCPROPERTIES[type].icon});
                 }
                 return assocs;
             }
@@ -563,11 +563,11 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     readOnly : true,
                     minimum : 0,
                     places : 0},
-                _name : {
+                name : {
                     type: "String",
                     required : true,
                     readOnly : false},
-                _type : {
+                type : {
                     type : "String",
                     required : true,
                     readOnly : false,
@@ -599,13 +599,13 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     //TODO nolonger needed? see abouve
                     if(!newProp.type){
                         if(attrPropName=='_id') newProp.type = 'Number';
-                        if(attrPropName=='_name') newProp.type = 'String';
-                        if(attrPropName=='_type') {
+                        if(attrPropName=='name') newProp.type = 'String';
+                        if(attrPropName=='type') {
                             newProp.type = 'String';
                             newProp.enum = attrProp.enum;
                         }
                     }
-                    newProp.className = classAttrObj._name;
+                    newProp.className = classAttrObj.name;
                     newProp.classId = classAttrObj._id;
                     newProp.viewId = view._id;
                     newProp.viewMapsTo = view.mapsTo;
@@ -701,7 +701,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
             var self = this;
             return self.get(itemId).then(function(item){
                 var type = ASSOCPROPERTIES[assocType].type;
-                if(type && item._type != type) return [];
+                if(type && item.type != type) return [];
                 //console.log('item', item);
                 var query  = self.normalizeAssocQuery(itemId, assocType);
                 var collection = self.assocsColl.filter(query);
@@ -830,7 +830,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     if(transObjArr.length>0) tansactionObj[coll][action] = transObjArr;
                 }
             }
-            request.post('/', {
+            request.post('/data', {
                 // send all the operations in the body
                 headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
                 data: JSON.stringify(tansactionObj)

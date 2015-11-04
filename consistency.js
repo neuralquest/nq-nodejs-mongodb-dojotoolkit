@@ -8,12 +8,12 @@ var tv4 = require("tv4");
 
 function check(){
     var checkPromises = [];
-    checkPromises.push(cleanup());
-    /*checkPromises.push(findOrphans());
+    //checkPromises.push(cleanup());
+    checkPromises.push(findOrphans());
     checkPromises.push(validateAssocs());
     checkPromises.push(assocsUnique());
     checkPromises.push(validateObjectAssoc());
-    checkPromises.push(validateObjectAttributes());*/
+    checkPromises.push(validateObjectAttributes());
     return all(checkPromises).then(function(checkArr){
         return {consistencyCheck:checkArr};
     });
@@ -44,7 +44,7 @@ function findOrphans(){
             return all(parentPromises).then(function(parentsArr){
                 parentsArr.forEach(function(parent) {
                     if(!parent) results.push({parentNotFound:parent});
-                    else if(parent._type !== 'class') results.push({parentIsNotAClass:parent});
+                    else if(parent.type !== 'class') results.push({parentIsNotAClass:parent});
                 });
                 return {
                     id: 1,
@@ -107,7 +107,7 @@ function assocsUnique(){
     });
 }
 function validateObjectAssoc(){
-    return Items.find({_type:'object'}).then(function(itemsArr){
+    return Items.find({type:'object'}).then(function(itemsArr){
         var assocPromises = [];
         itemsArr.forEach(function(item) {
             assocPromises.push(Assocs.find({source: item._id}));
@@ -169,12 +169,12 @@ function validateAssocByClassModel(assoc){
                 //make the output smaller
                 var sourcesArr = [];
                 sourceAncestors.forEach(function(ancestor){
-                    if(ancestor._type == 'object') sourcesArr.push('O '+ancestor._id+' - '+ancestor.name);
+                    if(ancestor.type == 'object') sourcesArr.push('O '+ancestor._id+' - '+ancestor.name);
                     else sourcesArr.push('C '+ancestor._id+' - '+ancestor._name);
                 });
                 var destsArr = [];
                 destAncestors.forEach(function(ancestor){
-                    if(ancestor._type == 'object') destsArr.push('O '+ancestor._id+' - '+ancestor.name);
+                    if(ancestor.type == 'object') destsArr.push('O '+ancestor._id+' - '+ancestor.name);
                     else destsArr.push('C '+ancestor._id+' - '+ancestor._name);
                 });
                 var assocText = assoc.source+' '+assoc.type+' '+assoc.dest;
@@ -186,7 +186,7 @@ function validateAssocByClassModel(assoc){
     });
 }
 function validateObjectAttributes(){
-    return Items.find({_type:'object'}).then(function(itemsArr){
+    return Items.find({type:'object'}).then(function(itemsArr){
         var assocPromises = [];
         itemsArr.forEach(function(item) {
             assocPromises.push(Assocs.find({source: item._id, type:'parent'}));
@@ -229,7 +229,9 @@ function validateObjectAttributes(){
     });
 }
 function cleanup(){
-    return Items.find({_type:'class'}).then(function(itemsArr){
+    //var db = require('./db');
+    //var newitems = db.get().collection('newitems');
+    return Items.find({type:'class'}).then(function(itemsArr){
         itemsArr.forEach(function(item) {
             var newClass = {_id: item._id, type:'class', name:item._name};
             var properties = JSON.parse(JSON.stringify(item));
@@ -254,7 +256,14 @@ function cleanup(){
             }
             if(propsFound) newClass.schema = schema;
             console.log(newClass);
+            //Items.remove({_id: newClass._id});
+            //Items.insert(newClass);
+            var id = newClass._id;
+            delete newClass._id;
+            Items.update({_id: id}, newClass);
+
         });
+        return {success:true};
     });
 
 }

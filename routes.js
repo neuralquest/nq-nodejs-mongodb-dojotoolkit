@@ -4,8 +4,6 @@ var getData = require('./getData');
 var consistency = require('./consistency');
 
 exports = module.exports = function(app, passport) {
-
-
     app.get("/data", function (req, res, next) {
         getData.get().then(function(items){
             res.json(items);
@@ -14,7 +12,7 @@ exports = module.exports = function(app, passport) {
         });
     });
     app.post("/data", function (req, res, next) {
-        postData.update(req.body).then(function(items){
+        postData.update(req).then(function(items){
             res.json(items);
         }, function(err){
             next(err);

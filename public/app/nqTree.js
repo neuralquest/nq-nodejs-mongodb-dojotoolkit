@@ -214,13 +214,12 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				persist: false,//doesnt deal well with recursion. Tends to expand everything
                 getLabel: function(item){
                     if(!item) return 'no item';
-                    if(item._type == 'object') return item.name;
-                    return item._name;
+                    return item.name;
                 },
 				getIconClass: function(item, opened){
 					if(!item) return 'icondefault';
-                    if(item._type == 'object') return 'icon'+item._icon;
-					if(item._type == 'assoc') return 'icon'+item._icon;
+                    if(item.type == 'object') return 'icon'+item._icon;
+					if(item.type == 'assoc') return 'icon'+item._icon;
 					return 'icon0';
 				},
 				getRowClass: function(item, opened){

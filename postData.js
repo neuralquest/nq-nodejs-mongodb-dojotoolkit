@@ -6,9 +6,17 @@ var consistency = require('./consistency');
 var utils = require('./public/app/utils');
 var Items = require('./models/items');
 var Assocs = require('./models/assocs');
+var tv4 = require("tv4");
 var idMap = {};
 
-function update(body){
+function update(req){
+    var user = req.session.user;
+    if(!user || user.username != 'cjong') {
+        var err = new Error('Not authorized for update');
+        err.status = 401;
+        throw err;
+    }
+    var body = req.body;
     var itemValidationPromises = [];
     if(body.itemsColl){
         for(var action in body.itemsColl){
@@ -77,87 +85,38 @@ function update(body){
 }
 function itemIsValid(item, action) {
     //Get the view
-    return Items.findOne(item._viewId).then(function(view){
-        //If add, update, delete, is allowed?
-
+    return Items.findById(item._viewId).then(function(view){
         //TODO
+        // If add, update, delete, is allowed?
         var viewPromises = [];
         //Assert that the user is allowed to use the view
         viewPromises.push(true);
         //Validate item against view mapsTo
         viewPromises.push(true);
         //Get the schema for the view
-        viewPromises.push(utils.getCombinedSchemaForView(view, db));
+        viewPromises.push(utils.getCombinedSchemaForView(view));
         return all(viewPromises).then(function(viewPromisesArr){
             var schema = viewPromisesArr[2];
-
             var idPromise = [];
             if(action == 'add') idPromise = Items.getNextSequence('itemsColl');
             else idPromise = false;
             return when(idPromise, function(newId){
-
+                //remove properties not in the schema
+                for(var attrName in item) {
+                    if(action == 'update' && attrName == '_id') continue;
+                    if(action == 'add' && attrName == 'type') continue;
+                    if(!schema.properties[attrName]) delete item[attrName];
+                }
                 if(action == 'add') {
                     idMap[item._id] = item;
                     item._id = newId;
-                    //if((item._type != 'object') && (item._type != 'class')) throw (new Error("Invalid type for new item"));
                 }
-                //remove properties not in the schema
-                for(var attrName in item) {
-                    //if(attrName == '_id') continue;
-                   // if(action == 'add' && attrName == '_type') continue;
-                    if(!schema.properties[attrName]) delete item[attrName];
+                if(action == 'update') {
+                    delete schema.required;
                 }
                 //Validate the value against the schema
                 var valid = tv4.validate(item, schema);
                 if(!valid) throw (new Error("Invalid attribute in item: "+tv4.error));
-/*
-                for(var attrName in schema) {
-                    var attrProps = schema[attrName];
-                    var value = item[attrName];
-                    if(attrProps.readOnly && action == 'update') continue;//TODO delete attr
-                    if(attrProps.required) {
-                        if(!value && attrProps.default) value = attrProps.default;
-                        else if(!value) throw (new Error("Mandatory value missing"));
-                    }
-                    if(!value) continue;
-                    if(attrProps.enum){
-                        var values = attrProps.enum;
-                        var index = values.indexOf(value);
-                        if(index == -1) throw (new Error("Value not in enumeration"));
-                    }
-                    else if(attrProps['#ref']){
-                        throw (new Error("TODO"));
-                        var query = attrProps['#ref'];
-                        var collection = this.store.filter(query);
-                        var index = collection.indexOf(value);
-                        if(index == -1) throw (new Error("Value not in collection"));
-                    }
-                    else if(attrProps.media && attrProps.media.mediaType == 'text/html'){
-                        /*html5Lint(value, function(err, results){
-                         if(err) throw (new Error(err));
-                         });* /
-                    }
-                    else if(attrProps.type == 'String'){
-                        if(value.length > attrProps.maxLength) throw (new Error("String too long"));
-                        if(attrProps.minLength && value.length < attrProps.minLength) throw (new Error("String too short"));
-                    }
-                    else if(attrProps.type == 'Number') {
-                        value = Number(value);
-                        if(value > attrProps.maximum) throw (new Error("Value too great"));
-                        if(attrProps.minimum && value < attrProps.minimum) throw (new Error("Value too small"));
-                        //if(attrProps.places && ) throw (new Error("Too many decimal places"));
-                    }
-                    else if(attrProps.type == 'Date'){
-                        throw (new Error("TODO"));
-                    }
-                    else if(attrProps.type == 'Boolean'){
-                        if(value == 'true') newItem[attrName] = true;
-                        else newItem[attrName] = false;
-                    }
-                    else if(attrProps.type == 'Object'){
-                        throw (new Error("TODO"));
-                    }
-                }*/
                 return item;
             });
         });
@@ -178,12 +137,12 @@ function assocIsAllowed(assoc, action) {
         itemsPromises[0]  = idMap[sourceId];
         assoc.source = idMap[sourceId]._id;
     }
-    else itemsPromises[0] = Items.findOne(sourceId);
+    else itemsPromises[0] = Items.findById(sourceId);
     if(idMap[destId]) {
         itemsPromises[1]  = idMap[destId];
         assoc.dest = idMap[destId]._id;
     }
-    else itemsPromises[1] = Items.findOne(destId);
+    else itemsPromises[1] = Items.findById(destId);
 
     return all(itemsPromises).then(function(ancestorPromisesArr){
         var sourceItem = ancestorPromisesArr[0];
@@ -200,9 +159,9 @@ function assocIsAllowed(assoc, action) {
             if(assoc.type === 'ordered') return assoc;
             var ancestorPromises = [];
             //Get the ancestors of the assoc source
-            ancestorPromises.push(utils.collectAllByAssocType(sourceId, 'parent', db));
+            ancestorPromises.push(utils.collectAllByAssocType(sourceId, 'parent'));
             //Get the ancestors of the assoc dest
-            ancestorPromises.push(utils.collectAllByAssocType(destId, 'parent', db));
+            ancestorPromises.push(utils.collectAllByAssocType(destId, 'parent'));
 
             // if we're doing an add, the association must not exist
             //For each of the source ancestors, see if there is an assoc of the same type that has a dest in dest ancestors
