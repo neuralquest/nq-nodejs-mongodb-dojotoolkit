@@ -240,15 +240,18 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					var targetItem = dijit.getEnclosingWidget(target).item;
 					var uViewObj = self.permittedClassesByViewObj[targetItem._viewId];
 					var sourceItemClassId = source.current.item._icon;
+                    var found = false;
                     for(var uViewId in uViewObj) {
                         var permClassesArr = uViewObj[uViewId].classes;
                         permClassesArr.forEach(function(permClass){
                             var permClassId = permClass._id;
-                            if(permClassId == sourceItemClassId) return true;
-                            return true;
+                            // Why the f doesnt this work?
+                            //if(permClassId == sourceItemClassId) return true;
+                            //if(permClassId == sourceItemClassId) console.log('sourceItemClassId', sourceItemClassId);
+                            if(permClassId == sourceItemClassId) found = true;
                         });
                     }
- 					return false;
+ 					return found;
 				},
 				getRoot: function(onItem, onError){
                     self.store.get(self.selectedObjIdPreviousLevel).then(function(item) {

@@ -1,4 +1,3 @@
-var config = require('./config');
 var all = require("promised-io/promise").all;
 var when = require("promised-io/promise").when;
 var consistency = require('./consistency');
@@ -10,7 +9,7 @@ var idMap = {};
 
 function update(req){
     var user = req.user;
-    if(!user || user.username != 'cjong') {
+    if(!user || (user.username != 'cjong')) {
         var err = new Error('Not authorized for update');
         err.status = 401;
         throw err;
