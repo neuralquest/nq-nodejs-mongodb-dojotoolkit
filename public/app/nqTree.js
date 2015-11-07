@@ -5,8 +5,6 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			domConstruct, dndSource, Menu, MenuItem, PopupMenuItem, array){
 
 	return declare("nqTree", [nqWidgetBase], {
-		allowedClassesObj: {},//Check Item Acceptance needs this
-		labelAttrIdArr: [], //get Label needs this
 		permittedClassesByViewObj: {},
 		attrRefByViewArr: [],
 		parentId: null,
@@ -21,7 +19,6 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
 					self.view = viewsArr[0]//for now assume only one view
                     return when(self.store.getCombinedSchemaForView(self.view),function(schema) {
-					//return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
                         self.enrichSchema(schema);
                         self.schema = schema;
                         var uViewsArr = [];
@@ -240,17 +237,18 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     return true;
                 },
                 checkItemAcceptance: function(target, source, position){
-					return true;
 					var targetItem = dijit.getEnclosingWidget(target).item;
-					var subClassIdArr = self.allowedClassesObj[targetItem._viewId];
-					var sourceItemClassId = source.current.item._iconId;
-					//console.log('sourceItemClassId', sourceItemClassId);
-					for(var i = 0;i<subClassArr.length;i++){
-						var mapsToClassId = subClassArr[i].id;
-						//console.log('mapsToClassId', mapsToClassId);
-						if(mapsToClassId === sourceItemClassId) return true;
-					}
-					return false;
+					var uViewObj = self.permittedClassesByViewObj[targetItem._viewId];
+					var sourceItemClassId = source.current.item._icon;
+                    for(var uViewId in uViewObj) {
+                        var permClassesArr = uViewObj[uViewId].classes;
+                        permClassesArr.forEach(function(permClass){
+                            var permClassId = permClass._id;
+                            if(permClassId == sourceItemClassId) return true;
+                            return true;
+                        });
+                    }
+ 					return false;
 				},
 				getRoot: function(onItem, onError){
                     self.store.get(self.selectedObjIdPreviousLevel).then(function(item) {
@@ -289,7 +287,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					}
 				}));
                 var uViewObj = self.permittedClassesByViewObj[viewId];
-                for(uViewId in uViewObj){
+                for(var uViewId in uViewObj){
                     var manyViewObj = uViewObj[uViewId];
                     var manyView = manyViewObj.view;
                     var permittedClassesArr = manyViewObj.classes;
@@ -297,14 +295,14 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                         var classesObj = permittedClassesArr[i];
 
                         var menuItem = new MenuItem({
-                            label: "<b>"+classesObj._name+"</b> by <span style='color:blue'>"+manyView.toMannyAssociations+"</span>",
+                            label: "<b>"+classesObj.name+"</b> by <span style='color:blue'>"+manyView.toManyAssociations+"</span>",
                             iconClass: "icon"+classesObj._id,
                             classId: classesObj._id,
                             viewId: manyView._id
                         });
                         menuItem.on("click", function(evt){
                             var addObj = {
-                                '_type': 'object',
+                                'type': 'object',
                                 '_viewId': this.viewId,
                                 '_icon': this.classId
                             };

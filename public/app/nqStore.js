@@ -130,7 +130,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                     leadingAssocSourceFk = oldParentId;
                                     leadingAssoctype = 'ordered';
                                     if(oldParentChildren.length>1){//there is at least one other object following the moving object, find it's assoc
-                                        when(self.assocsColl.query({source: movingObjectId, type: 'next', dest: oldParentChildren[1]}), function(assocArr){
+                                        when(self.assocsColl.filter({source: movingObjectId, type: 'next', dest: oldParentChildren[1]}), function(assocArr){
                                             // update it so that it has the old parent as source
                                             if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                             var assoc = assocArr[0];
@@ -145,7 +145,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                     leadingAssocSourceFk = oldParentChildren[idx-1];
                                     leadingAssoctype = 'next';
                                     if(idx < oldParentChildren.length-1){//there is at least one other object following the moving object, find it's assoc
-                                        when(self.assocsColl.query({source: movingObjectId, type: 'next', dest: oldParentChildren[idx+1]}), function(assocArr){
+                                        when(self.assocsColl.filter({source: movingObjectId, type: 'next', dest: oldParentChildren[idx+1]}), function(assocArr){
                                             //update it so that it has the previous object as source
                                             if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                             var assoc = assocArr[0];
@@ -170,7 +170,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                         newParentFollowingAssoctype = 'next';
                                     }
                                     //get the following assoc and update it so that it has the moving object as source
-                                    when(self.assocsColl.query({source: newParentFollowingAssocSourceFk, type: newParentFollowingAssoctype, dest: beforeId}), function(assocArr){
+                                    when(self.assocsColl.filter({source: newParentFollowingAssocSourceFk, type: newParentFollowingAssoctype, dest: beforeId}), function(assocArr){
                                         if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                         var newParentFollowingAssoc = assocArr[0];
                                         newParentFollowingAssoc.source = movingObjectId;
@@ -190,7 +190,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                     }
                                 }
                                 //Fianly attach the new parent/preceding object to the moving object
-                                when(self.assocsColl.query({source: leadingAssocSourceFk, type: leadingAssoctype, dest: movingObjectId}), function(assocArr){
+                                when(self.assocsColl.filter({source: leadingAssocSourceFk, type: leadingAssoctype, dest: movingObjectId}), function(assocArr){
                                     if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                     var leadingAssoc = assocArr[0];
                                     leadingAssoc.source = newParentFollowingAssocSourceFk;
@@ -218,29 +218,29 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 else{
                     if(oldParentId == newParentId) return;
                     if(oldParentId){
-                        if(assocType<SUBCLASSES_PASSOC){
-                            when(self.assocsColl.query({source: oldParentId, type: assocType, dest: movingObjectId}), function(assocArr){
-                                if(assocArr.length!=1) throw (new Error('Expected to find one association'));
-                                var assoc = assocArr[0];
-                                assoc.source = newParentId;
-                                self.assocsColl.put(assoc);
-                            });
-                        }
-                        else {
-                            when(self.assocsColl.query({source:movingObjectId , type: assocType-12, dest: oldParentId}), function(assocArr){
+                        if(ASSOCPROPERTIES[assocType].pseudo){
+                            when(self.assocsColl.filter({source:movingObjectId , type: ASSOCPROPERTIES[type].inverse, dest: oldParentId}), function(assocArr){
                                 if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                 var assoc = assocArr[0];
                                 assoc.dest = newParentId;
                                 self.assocsColl.put(assoc);
                             });
                         }
+                        else {
+                            when(self.assocsColl.filter({source: oldParentId, type: assocType, dest: movingObjectId}), function(assocArr){
+                                if(assocArr.length!=1) throw (new Error('Expected to find one association'));
+                                var assoc = assocArr[0];
+                                assoc.source = newParentId;
+                                self.assocsColl.put(assoc);
+                            });
+                        }
                     }
                     else{//new assoc
-                        if(assocType<SUBCLASSES_PASSOC){
-                            self.assocsColl.add({source: newParentId, type: assocType, dest: movingObjectId});
+                        if(ASSOCPROPERTIES[assocType].pseudo){
+                            self.assocsColl.add({source: movingObjectId, type: ASSOCPROPERTIES[type].inverse, dest: newParentId});
                         }
                         else {
-                            self.assocsColl.add({source: movingObjectId, type: assocType-12, dest: newParentId});
+                            self.assocsColl.add({source: newParentId, type: assocType, dest: movingObjectId});
                         }
                     }
                 }
@@ -263,7 +263,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 viewsArr.forEach(function (view) {
                     promises.push(self.getItemsByParentIdViewId(parentId, view._id));
                 });
-                return when(all(promises), function(itemsArrArr){
+                return all(promises).then(function(itemsArrArr){
                     var results = [];
                     itemsArrArr.forEach(function (itemsArr) {
                         itemsArr.forEach(function (item) {
@@ -287,8 +287,9 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         subDocItem.name = attrName;
                         subDocItem.id = parentId+':'+attrName;
                         results.push(subDocItem);
-                    };
+                    }
                     return results;
+                    //TODO promise = [item];
                 });
                 else if(view.onlyIfParentEquals){
                     //TODO must merge
@@ -299,12 +300,27 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 }
                 else promise = self.getItemsByAssocTypeAndDestClass(parentId, view.toManyAssociations, view.mapsTo);
                 return when(promise, function(itemsArr){
-                    var results = [];
+                    // Here we add and _icon to the item by searching for the parent
+                    // _icon is user by the tree to display icons, and by DnD checkItemAcceptance.
+                    var iconPromises = [];
                     itemsArr.forEach(function (item) {
-                        item._viewId = viewId;
-                        results.push(item);
+                        var query = {source: item._id, type: 'parent'};
+                        iconPromises.push(self.assocsColl.filter(query));
                     });
-                    return results;
+                    return all(iconPromises).then(function(itemParentAssocArrArr){
+                        var results = [];
+                        var counter = 0;
+                        itemParentAssocArrArr.forEach(function(itemParentAssocArr) {
+                            var item = itemsArr[counter];
+                            item._viewId = viewId;
+                            itemParentAssocArr.forEach(function(itemParentAssoc) {
+                                item._icon = itemParentAssoc.dest;//assume only one
+                            });
+                            results.push(item);
+                            counter ++;
+                        });
+                        return results;
+                    });
                 });
             });
         },
@@ -553,124 +569,101 @@ function(declare, lang, array, when, all, Store, QueryResults,
              // returns: Object
              //          The schema object.
              */
-            var self = this;
             var classSchemaPromise = null;
-            if(view.mapsTo) classSchemaPromise = self.getAttrPropertiesFromAncestors(view.mapsTo);
-            else classSchemaPromise = {//No mapsTo means we're asking for a class
-                _id : {
-                    type: "Number",
-                    required : true,
-                    readOnly : true,
-                    minimum : 0,
-                    places : 0},
-                name : {
-                    type: "String",
-                    required : true,
-                    readOnly : false},
-                type : {
-                    type : "String",
-                    required : true,
-                    readOnly : false,
-                    enum : ['class','object']//TODO only class?
-                }
-            }
-            return when(classSchemaPromise, function(classAttrObj){
-                var schema = {};
-                for(var attrPropName in view.schema){
-                    //if(attrPropName == 'description') debugger;
-                    var newProp = {};
-                    var attrProp = view.schema[attrPropName];
-                    var classAttrProp = null;
-                    for(var classAttrName in classAttrObj){
-                        //debugger;
-                        if(attrPropName == classAttrName){
-                            classAttrProp = classAttrObj[attrPropName];
-                            break;
-                        }
-                    };
-                    if(!classAttrProp) {
-                        //throw new Error('cant find classAttrProp');
-                        console.warn('classAttrProp not found',attrProp);
-                        classAttrProp = attrProp;
-                    }
-                    //set the references
-                    newProp.type = classAttrProp.type;
-                    //Exception for class type, they will have no type so we improvise
-                    //TODO nolonger needed? see abouve
-                    if(!newProp.type){
-                        if(attrPropName=='_id') newProp.type = 'Number';
-                        if(attrPropName=='name') newProp.type = 'String';
-                        if(attrPropName=='type') {
-                            newProp.type = 'String';
-                            newProp.enum = attrProp.enum;
-                        }
-                    }
-                    newProp.className = classAttrObj.name;
-                    newProp.classId = classAttrObj._id;
-                    newProp.viewId = view._id;
-                    newProp.viewMapsTo = view.mapsTo;
-                    //set the defaults
-                    if(classAttrProp.media) newProp.media = classAttrProp.media;
-                    if(classAttrProp.enum){
-                        if(attrProp.enum) {
-                            var newEnum = [];
-                            //assert that the values are permitted
-                            attrProp.enum.forEach(function (enumValue){
-                                if(classAttrProp.enum[enumValue]) newEnum.push(enumValue);
-                                else console.warn('classAttrProp not found', attrProp, enumValue);
-                            });
-                            //newProp.enum = newEnum;
-                            newProp.enum = attrProp.enum;
-                        }
-                        else newProp.enum = classAttrProp.enum;
-                    }
-                    if(attrProp.pattern) newProp.pattern = attrProp.pattern;
-                    else if(classAttrProp.pattern) newProp.pattern = classAttrProp.pattern;
-                    if(attrProp.invalidMessage) newProp.invalidMessage = attrProp.invalidMessage;
-                    else if(classAttrProp.invalidMessage) newProp.invalidMessage = classAttrProp.invalidMessage;
-                    if(attrProp['#ref']) newProp['#ref'] = attrProp['#ref'];
-                    else if(classAttrProp['#ref']) newProp['#ref'] = classAttrProp['#ref'];
+            if(view.mapsTo) classSchemaPromise = this.getAttrPropertiesFromAncestors(view.mapsTo);
+            else classSchemaPromise = CLASSSCHEMA;//No mapsTo means we're asking for a class (meta schema)
 
-                    newProp.required = attrProp.required?attrProp.required:classAttrProp.required?classAttrProp.required:false;
-                    newProp.readOnly = attrProp.readOnly?attrProp.readOnly:classAttrProp.readOnly?classAttrProp.readOnly:false;
-                    newProp.hidden = attrProp.hidden?attrProp.hidden:classAttrProp.hidden?classAttrProp.hidden:false;
-                    newProp.title = attrProp.title?attrProp.title:classAttrProp.title?classAttrProp.title:'[no title]';
-                    newProp.default = attrProp.default?attrProp.default:classAttrProp.default?classAttrProp.default:null;
-                    newProp.description = attrProp.description?attrProp.description:classAttrProp.description?classAttrProp.description:'<p>[no description <a href="#.842.1787.'+view._id+'.538">provided</a>]</p>';
-                    newProp.style = attrProp.style?attrProp.style:classAttrProp.style?classAttrProp.style:'width:100%';
-                    newProp.nullValue = null;
-                    newProp.columnWidth = '10em';
-                    if(classAttrProp.media && classAttrProp.media.mediaType == 'text/html'){
-                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'100%';
-                        newProp.maxLength = attrProp.maxLength?attrProp.maxLength:classAttrProp.maxLength?classAttrProp.maxLength:100000;
+            return when(classSchemaPromise, function(classSchema){
+                var schema = {
+                    $schema: "http://json-schema.org/draft-04/schema#",
+                    type: 'object',
+                    properties: {
+                        //Only for server side schemas
+                        //_id: classSchema.properties._id,
+                        //type: classSchema.properties.type
+                    },
+                    required: classSchema.required,
+                    additionalProperties: false,
+                    id: view._id,
+                    mapsTo: view.mapsTo,
+                    title: view.name
+                };
+                for(var attrPropName in view.schema){
+                    var viewAttrProp = view.schema[attrPropName];
+                    var newProp = classSchema.properties[attrPropName];
+                    if(!newProp) {
+                        //throw new Error('cant find classAttrProp');
+                        console.warn('classAttrProp not found',viewAttrProp);
+                        newProp = viewAttrProp;
                     }
-                    else if(classAttrProp.enum){
-                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'8em';
+
+                    //assert that the values are permitted
+                    if(newProp.enum && viewAttrProp.enum){
+                        var newEnum = [];
+                        viewAttrProp.enum.forEach(function (enumValue){
+                            var index = newProp.enum.indexOf(enumValue);
+                            if(index != -1) newEnum.push(enumValue)
+                        });
+                        newProp.enum = newEnum;
                     }
-                    else if(classAttrProp.type == 'String'){
-                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'10em';
-                        newProp.maxLength = attrProp.maxLength?attrProp.maxLength:classAttrProp.maxLength?classAttrProp.maxLength:1000000;
-                        if(attrProp.minLength) newProp.minLength = attrProp.minLength;
-                        else if(classAttrProp.minLength) newProp.minLength = classAttrProp.minLength;
-                    }
-                    else if(classAttrProp.type == 'Number'){
-                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'4em';
-                        newProp.maximum = attrProp.maximum?attrProp.maximum:classAttrProp.maximum?classAttrProp.maximum:Number.MAX_VALUE;
-                        newProp.minimum = attrProp.minimum?attrProp.minimum:classAttrProp.minimum?classAttrProp.minimum:Number.MIN_VALUE;
-                        newProp.places = attrProp.places?attrProp.places:classAttrProp.places?classAttrProp.places:0;
-                    }
-                    else if(classAttrProp.type == 'Date'){
-                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'6em';
-                    }
-                    else if(classAttrProp.type == 'Boolean'){
-                        newProp.columnWidth = attrProp.columnWidth?attrProp.columnWidth:classAttrProp.columnWidth?classAttrProp.columnWidth:'3em';
-                    }
-                    schema[attrPropName] = newProp;
+
+                    //Only for client side schemas
+                    if(viewAttrProp.invalidMessage) newProp.invalidMessage = viewAttrProp.invalidMessage;
+                    if(viewAttrProp.hidden) newProp.hidden = true;
+                    if(viewAttrProp.title) newProp.title = viewAttrProp.title;
+                    if(viewAttrProp.description) newProp.description = viewAttrProp.description;
+                    if(viewAttrProp.style) newProp.default = viewAttrProp.style;
+                    if(viewAttrProp.columnWidth) newProp.columnWidth = viewAttrProp.columnWidth;
+
+                    // Provide string representation for null value
+                    if(newProp.media && newProp.media.mediaType == 'text/html') newProp.nullValue = '<p>[no text]</p>';
+                    else if(newProp.enum) newProp.nullValue = '[not selected]';
+                    else if(newProp['#ref']) newProp.nullValue = '[not selected]';
+                    else if(newProp.type == 'string') newProp.nullValue = '[null]';
+                    else if(newProp.type == 'number') newProp.nullValue = '[null]';
+                    else if(newProp.type == 'date') newProp.nullValue = '[no date selected]';
+                    else if(newProp.type == 'boolean') newProp.nullValue = 'false';
+                    else if(newProp.type == 'object') newProp.nullValue = '{}';
+                    else newProp.nullValue = '[null]';
+
+                    schema.properties[attrPropName] = newProp;
+
+                    //TODO
+                    /*
+                    if(view.schema.required){
+                        view.schema.required.forEach(function(requiredAttr){
+                            var index = schema.required.indexOf(requiredAttr);
+                            if(index == -1) schema.required.push(requiredAttr);
+                        });
+                    }*/
                 }
                 return schema;
             });
         },
-        getAttrPropertiesFromAncestors: function(classId){
+        getAttrPropertiesFromAncestors: function (classId) {
+            return this.collectAllByAssocType(Number(classId), 'parent').then(function (parentClassesArr) {
+                var schema = {
+                    $schema: "http://json-schema.org/draft-04/schema#",
+                    type: 'object',
+                    properties: {},
+                    additionalProperties: false
+                };
+                var required = [];
+                parentClassesArr.forEach(function (classItem) {
+                    if (classItem.schema) {
+                        if (classItem.schema.properties) {
+                            for (var classAttr in classItem.schema.properties) {
+                                schema.properties[classAttr] = classItem.schema.properties[classAttr];
+                            }
+                        }
+                        if (classItem.schema.required) required = required.concat(classItem.schema.required)
+                    }
+                });
+                if (required.length > 0) schema.required = required;
+                return schema;
+            });
+        },
+        /*getAttrPropertiesFromAncestors: function(classId){
             var self = this;
             return self.collectAllByAssocType(Number(classId), 'parent').then(function(parentClassesArr){
                 var classAttrObj = {};
@@ -681,7 +674,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 });
                 return classAttrObj;
             });
-        },
+        },*/
         collectAllByAssocType: function (itemId, assocType) {
              /* summary: Use to navigate the data graph following the given association type, gathering all items along the way.
              //          If ASSOCPROPERTIES specifies that an association type should return one particular item type, other types will be ignored.(e.g. subclasses, instantiations)

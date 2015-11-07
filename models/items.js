@@ -33,12 +33,13 @@ exports.insert = function(doc) {
         });
     return deferred.promise;
 };
-exports.update = function(doc) {
+exports.update = function(doc, unset) {
     var deferred = new Deferred();
+    if(!unset) unset = {};
     var collection = db.get().collection('items');
     var id = doc._id;
     delete doc._id;
-    collection.update({_id: id}, {$set:doc},
+    collection.update({_id: id}, {$set:doc, $unset: unset},
         function(err, value) {
             if (err) deferred.reject(err);
             else deferred.resolve(value);

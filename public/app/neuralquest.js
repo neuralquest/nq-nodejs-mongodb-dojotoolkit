@@ -16,9 +16,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     var userName = null;
 
 	ready( function() {
-        //testInitialize();
-        //return;
-		topic.subscribe("/dojo/hashchange", interpretHash);
+        topic.subscribe("/dojo/hashchange", interpretHash);
 		on(registry.byId('loginButtonId'), 'click', function(event){login();});
 		on(registry.byId('cancelButtonId'), 'click', function(event){nqStore.abort();});
 		on(registry.byId('saveButtonId'), 'click', function(event){nqStore.commit();});
@@ -534,12 +532,12 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         var row2 = domConstruct.create("tr", null, tableNode);
         domConstruct.create("td", {innerHTML: ('User Name'), style: "padding: 3px"}, row2);
         var tdDom1 = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row2);
-        var userNameTextBox = new TextBox({name:'username', placeHolder: "Name" }).placeAt(tdDom1);
+        var userNameTextBox = new TextBox({name:'username', placeHolder: "Name", regExp:"\w{4,20}"}).placeAt(tdDom1);
 
         var row3 = domConstruct.create("tr", null, tableNode);
         domConstruct.create("td", {innerHTML: ('Password'), style: "padding: 3px"}, row3);
         var tdDom2 = domConstruct.create("td", {style: "padding: 3px; border-width:1px; border-color:lightgray; border-style:solid;"}, row3);
-        new TextBox({name:'password', type:'password' ,placeHolder: "Password" }).placeAt(tdDom2);
+        new TextBox({name:'password', type:'password' ,placeHolder: "Password" , minlength:4, maxlength:40 }).placeAt(tdDom2);
 
         var row4 = domConstruct.create("tr", {}, tableNode);
         domConstruct.create("td", {innerHTML: ('Password'), style: "padding: 3px"}, row4);
@@ -596,9 +594,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
                 data: JSON.stringify(form.get('value'))
             }).then(function(data){
-				var result = JSON.parse(data);
-				userName = result.username;
-				domattr.set("userNameDiv", 'innerHTML',result.username );
+				userName = JSON.parse(data).username;
+				domattr.set('userNameDiv', 'innerHTML', userName);
+				//domattr.set('userNameDiv', 'innerHTML', cookie('username')?cookie('username'):'');
 				//TODO refresh the page
 				dia.hide();
             },function(error){
@@ -611,9 +609,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         });
 		googleLogin.on("click", function(){
 			request.get('/login/google').then(function(data){
-				var result = JSON.parse(data);
-				userName = result.username;
-				domattr.set("userNameDiv", 'innerHTML',result.username );
+				userName = JSON.parse(data).username;
+				domattr.set('userNameDiv', 'innerHTML', userName);
 				//TODO refresh the page
 				dia.hide();
 			},function(error){
@@ -635,8 +632,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					domattr.set(tdDom0, 'innerHTML', result.failed.reason);
 				}
 				else{
-					userName = result.username;
-					domattr.set("userNameDiv", 'innerHTML',result.username );
+					userName = JSON.parse(data).username;
+					domattr.set('userNameDiv', 'innerHTML', userName);
 					//TODO refresh the page
 					dia.hide();
 				}
@@ -696,33 +693,12 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			nqStore.put(item);
 		});*/
     }
-	function testInitialize(){
-        //var itemsColl = new RequestMemory({ target: '/items', idProperty: '_id'});
-        var assocsColl = new RequestMemory({ target: '/assocs', idProperty: '_id'});
-        //console.dir(itemsColl);
-        //var promise = itemsColl.get(810);
-        //promise.then(function(result){
-            //console.log(result)
-        //});
-        var query = {source: 810, type:'ordered'};
-        var collection = assocsColl.filter(query);
-        // Setup observer in case children list changes, or the item(s) in the children list are updated.
-        collection.on('remove, add', function(event){
-            console.log('remove, add',event);
-        });
-        collection.on('update', function(event){
-            console.log('update',event);
-        });
-        //var children = collection.fetch();
-        collection.forEach(function(child){
-            console.log('child', child);
-        });
 
-	};
 
 	WIDGETS_ATTRCLASS = 99;
 	ACCORDIONTABS_ATTRCLASS = 90;
 	VIEW_CLASS_TYPE = 74;
+	USERS_CLASS_TYPE = 51;
 	ASSOCPROPERTIES = {
         parent: {
             inverse :'children',
@@ -839,5 +815,34 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             pseudo : true,
             cardinality: 'many',
             icon: 24}
+    };
+    CLASSSCHEMA = {
+        $schema: "http://json-schema.org/draft-04/schema#",
+        type: 'object',
+        properties: {
+            _id : {
+                type: "number",
+                readOnly : true,
+                minimum : 0,
+                places : 0},
+            name : {
+                type: "string",
+                readOnly : false},
+            type : {
+                type : "string",
+                readOnly : true,
+                enum : ['class']},
+            description : {
+                type : "string",
+                readOnly : false,
+                media : {
+                    mediaType : "text/html"
+                }},
+            schema : {
+                type : "object",
+                readOnly : false}
+        },
+        required: ['_id', 'name', 'type'],
+        additionalProperties: false
     };
 });

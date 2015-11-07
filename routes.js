@@ -41,13 +41,16 @@ exports = module.exports = function(app, passport) {
     });
 
     app.post('/login',
-        passport.authenticate('local'),
-        function(req, res) {
+        passport.authenticate('local'), function(req, res, next) {
             // If this function gets called, authentication was successful.
+            //res.cookie('username', req.user.username);
+            //res.send('logged in');
             res.json({username: req.user.username});
         });
     app.get('/logout', function(req, res) {
         req.logout();
+        //res.cookie('username', '');
+        //res.send('logged out');
         res.json({username:null});
     });
     app.post('/signup', function(req, res, next) {
@@ -60,6 +63,8 @@ exports = module.exports = function(app, passport) {
                     if (err) { return next(err) }
                     req.logIn(user, function(err) {
                         if (err) { return next(err); }
+                        //res.cookie('username', req.user.username);
+                        //res.send('logged in');
                         res.json({username: req.user.username});
                     });
                 })(req, res, next);
@@ -94,9 +99,10 @@ exports = module.exports = function(app, passport) {
                         if (err) {
                             return next(err);
                         }
+                        res.cookie('username', req.user.username);
 
                         //res.redirect('/account/settings/');
-                        res.json({username:req.user.username});
+                        //res.json({username:req.user.username});
                     });
                 }
             });

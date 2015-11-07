@@ -12,7 +12,6 @@ function getCombinedSchemaForView(view) {
      // returns: Object
      //          The schema object.
      */
-//    var self = this;
     var classSchemaPromise = null;
     if(view.mapsTo) classSchemaPromise = getAttrPropertiesFromAncestors(view.mapsTo);
     else classSchemaPromise = CLASSSCHEMA;//No mapsTo means we're asking for a class (meta schema)
@@ -22,57 +21,67 @@ function getCombinedSchemaForView(view) {
             $schema: "http://json-schema.org/draft-04/schema#",
             type: 'object',
             properties: {
+                //Only for server side schemas
                 _id: classSchema.properties._id,
                 type: classSchema.properties.type
             },
             required: classSchema.required,
-            additionalProperties: false
+            additionalProperties: false,
+            id: view._id,
+            mapsTo: view.mapsTo,
+            title: view.name
         };
         for(var attrPropName in view.schema){
             var viewAttrProp = view.schema[attrPropName];
             var newProp = classSchema.properties[attrPropName];
             if(!newProp) {
-                //throw new Error('cant find classAttrProp');
-                console.warn('classAttrProp not found',viewAttrProp);
-                newProp = viewAttrProp;
-                continue;
+                throw new Error('cant find classAttrProp');
+                //console.warn('classAttrProp not found',viewAttrProp);
+                //newProp = viewAttrProp;
             }
             //set the references
-            newProp.viewId = view._id;
-            newProp.viewMapsTo = view.mapsTo;
             //set the defaults
             if(newProp.enum && viewAttrProp.enum){
                 var newEnum = [];
                 //assert that the values are permitted
-                viewAttrProp.enum.forEach(function (enumValue){
-                    if(newProp.enum[enumValue]) newEnum.push(enumValue);
+                viewAttrProp.enum.forEach(function(enumValue){
+                    var index = newProp.enum.indexOf(enumValue);
+                    if(index > -1) newEnum.push(enumValue);
                     else console.warn('classAttrProp not found', viewAttrProp, enumValue);
                 });
                 newProp.enum = newEnum;
             }
             if(viewAttrProp.pattern) newProp.pattern = viewAttrProp.pattern;
-            if(viewAttrProp.invalidMessage) newProp.invalidMessage = viewAttrProp.invalidMessage;
             if(viewAttrProp['#ref']) newProp['#ref'] = viewAttrProp['#ref'];
             if(viewAttrProp.readOnly) newProp.readOnly = true;
-            if(viewAttrProp.hidden) newProp.hidden = true;
-            if(viewAttrProp.title) newProp.title = viewAttrProp.title;
             if(viewAttrProp.default) newProp.default = viewAttrProp.default;
-            if(viewAttrProp.description) newProp.description = viewAttrProp.description;
-            if(viewAttrProp.style) newProp.default = viewAttrProp.style;
-            if(viewAttrProp.columnWidth) newProp.columnWidth = viewAttrProp.columnWidth;
             if(viewAttrProp.maxLength && newProp.maxLength && viewAttrProp.maxLength < newProp.maxLength) newProp.maxLength = viewAttrProp.maxLength;
             if(viewAttrProp.minLength && newProp.minLength && viewAttrProp.minLength > newProp.minLength) newProp.minLength = viewAttrProp.minLength;
             if(viewAttrProp.maximum && newProp.maximum && viewAttrProp.maximum < newProp.maximum) newProp.maximum = viewAttrProp.maximum;
             if(viewAttrProp.minimum && newProp.minimum && viewAttrProp.minimum > newProp.minimum) newProp.minimum = viewAttrProp.minimum;
             if(viewAttrProp.places && newProp.places && viewAttrProp.places < newProp.places) newProp.places = viewAttrProp.places;
 
+            /*
+            //Only for client side schemas
+            if(viewAttrProp.invalidMessage) newProp.invalidMessage = viewAttrProp.invalidMessage;
+            if(viewAttrProp.hidden) newProp.hidden = true;
+            if(viewAttrProp.title) newProp.title = viewAttrProp.title;
+            if(viewAttrProp.description) newProp.description = viewAttrProp.description;
+            if(viewAttrProp.style) newProp.default = viewAttrProp.style;
+            if(viewAttrProp.columnWidth) newProp.columnWidth = viewAttrProp.columnWidth;
+
+            // Provide string representation for null value
             if(newProp.media && newProp.media.mediaType == 'text/html') newProp.nullValue = '<p>[no text]</p>';
             else if(newProp.enum) newProp.nullValue = '[not selected]';
-            else if(newProp.type == 'String') newProp.nullValue = '[null]';
-            else if(newProp.type == 'Number') newProp.nullValue = '[null]';
-            else if(newProp.type == 'Date') newProp.nullValue = '[no date selected]';
-            else if(newProp.type == 'Boolean') newProp.nullValue = 'false';
-            else newProp.nullValue = '[null]';
+            else if(newProp['#ref']) newProp.nullValue = '[not selected]';
+            else if(newProp.type == 'string') newProp.nullValue = '[null]';
+            else if(newProp.type == 'number') newProp.nullValue = '[null]';
+            else if(newProp.type == 'date') newProp.nullValue = '[no date selected]';
+            else if(newProp.type == 'boolean') newProp.nullValue = 'false';
+            else if(newProp.type == 'object') newProp.nullValue = '{}';
+
+            else newProp.nullValue = '[null]';*/
+
             schema.properties[attrPropName] = newProp;
 
             if(view.schema.required){
@@ -171,6 +180,7 @@ function normalizeAssocQuery(itemId, type) {
 WIDGETS_ATTRCLASS = 99;
 ACCORDIONTABS_ATTRCLASS = 90;
 VIEW_CLASS_TYPE = 74;
+USERS_CLASS_TYPE = 51;
 ASSOCPROPERTIES = {
     parent: {
         inverse :'children',

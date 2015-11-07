@@ -13,7 +13,8 @@ app.db = db;
 
 app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Credentials', true);
-    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    //res.header('Access-Control-Allow-Origin', req.headers.origin);
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
     if ('OPTIONS' == req.method) {
@@ -24,19 +25,13 @@ app.use(function(req, res, next) {
 });
 
 // Connect to Mongo on start
-//db.connect(config.mongodb.uri);
-
 db.connect(config.mongodb.uri, function(err) {
     if(err) {
         console.log('Unable to connect to Mongo.');
         process.exit(1);
     }
-    else {
-        //app.listen(3000, function() {
-            console.log('Listening on port 3000...')
-        //})
-    }
-});/**/
+    else console.log('Listening on port 3000...');
+});
 app.use(expressMongoDb(config.mongodb.uri));// Get database//TODO get rid of
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -50,15 +45,16 @@ app.use(logger('dev'));//Disable logging for static content requests by loading 
 var passport = require('passport');
 var expressSession = require('express-session');
 //var mongoStore = require('connect-mongo')(session);
-//var LocalStrategy = require('passport-local').Strategy;
-//var GoogleStrategy = require('passport-google').Strategy;
+
+
 app.use(expressSession({secret: config.cryptoKey}));
 /*
 app.use(expressSession({
-    resave: true,
+    //resave: true,
     saveUninitialized: true,
     secret: config.cryptoKey,
-    store: new mongoStore({ url: config.mongodb.uri })
+    store: db
+    //store: new mongoStore({ url: config.mongodb.uri })
 }));
 */
 app.use(passport.initialize());

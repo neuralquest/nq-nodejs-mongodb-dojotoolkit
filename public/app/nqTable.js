@@ -67,7 +67,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                 self.pageHelpTextDiv.innerHTML = widget.description;
                 return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
                     self.view = viewsArr[0];//for now assume only one view
-                    return self.store.getCombinedSchemaForView(self.view).then(function(schema) {
+                    return when(self.store.getCombinedSchemaForView(self.view),function(schema) {
                         self.enrichSchema(schema);
                         self.schema = schema;
                         return true;
@@ -76,8 +76,8 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
             });
             when(initialized, function(result) {
                 var columns = [];
-                for(var attrName in self.schema) {
-                    var attrProps = self.schema[attrName];
+                for(var attrName in self.schema.properties) {
+                    var attrProps = self.schema.properties[attrName];
                     columns.push(attrProps);
                     if(attrProps.enum){
                         attrProps.renderCell = function(object, value, node, options){
@@ -118,21 +118,21 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                     }
                     else if(attrProps.media && attrProps.media.mediaType == 'text/json'){
                     }
-                    else if(attrProps.type == 'String'){
+                    else if(attrProps.type == 'string'){
                         attrProps.renderCell = function(object, value, node, options) {
                             if(!value) html.set(node, '[null]');
                             else html.set(node, value);
                         };
                         attrProps.editor == 'text';
                     }
-                    else if(attrProps.type == 'Number') {
+                    else if(attrProps.type == 'number') {
                         attrProps.renderCell = function(object, value, node, options) {
                             if(!value) html.set(node, '[null]');
-                            else html.set(node, value);
+                            else html.set(node, String(value));
                         };
                         attrProps.editor == 'number';
                     }
-                    else if(attrProps.type == 'Date'){
+                    else if(attrProps.type == 'date'){
                         attrProps.renderCell = function(object, value, node, options) {
                             console.log('value', value);
                             if(!value || value=='') html.set(node, '[no date selected]');
@@ -152,14 +152,14 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                         //attrProps.autoSave = true;
                         attrProps.editor = DateTextBox;
                     }
-                    else if(attrProps.type == 'Boolean'){
+                    else if(attrProps.type == 'boolean'){
                         attrProps.renderCell = function(object, value, node, options) {
                             if(!value) html.set(node, 'false');
                             else html.set(node, String(value));
                         };
                         attrProps.editor = 'radio';
                     }
-                    else if(attrProps.type == 'Object'){
+                    else if(attrProps.type == 'object'){
                         attrProps.renderCell = function(object, value, node, options) {
                             if(!value) html.set(node, '{}');
                             else html.set(node, JSON.stringify(value, null, 4));
