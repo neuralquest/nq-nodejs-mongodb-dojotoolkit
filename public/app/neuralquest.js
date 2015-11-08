@@ -16,6 +16,10 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     var userName = null;
 
 	ready( function() {
+		request.get('/hello').then(function(data){
+			userName = data==''?null:data;
+			domattr.set('userNameDiv', 'innerHTML', data);
+		},errorDialog);
         topic.subscribe("/dojo/hashchange", interpretHash);
 		on(registry.byId('loginButtonId'), 'click', function(event){login();});
 		on(registry.byId('cancelButtonId'), 'click', function(event){nqStore.abort();});
@@ -594,9 +598,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
                 data: JSON.stringify(form.get('value'))
             }).then(function(data){
-				userName = JSON.parse(data).username;
-				domattr.set('userNameDiv', 'innerHTML', userName);
-				//domattr.set('userNameDiv', 'innerHTML', cookie('username')?cookie('username'):'');
+                userName = data==''?null:data;
+                domattr.set('userNameDiv', 'innerHTML', data);
 				//TODO refresh the page
 				dia.hide();
             },function(error){
@@ -605,12 +608,14 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				else msg = error.response.text;
                 domStyle.set(row1, 'display', '');
                 domattr.set(tdDom0, 'innerHTML', msg);
+				userName = null;
+				domattr.set('userNameDiv', 'innerHTML', '');
             });
         });
 		googleLogin.on("click", function(){
 			request.get('/login/google').then(function(data){
-				userName = JSON.parse(data).username;
-				domattr.set('userNameDiv', 'innerHTML', userName);
+                userName = data==''?null:data;
+                domattr.set('userNameDiv', 'innerHTML', data);
 				//TODO refresh the page
 				dia.hide();
 			},function(error){

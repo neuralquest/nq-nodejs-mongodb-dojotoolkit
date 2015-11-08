@@ -1044,7 +1044,7 @@
     "_id" : NumberInt(2556), 
     "type" : "object", 
     "_icon" : NumberInt(90), 
-    "name" : "User Tab", 
+    "name" : "Blog", 
     "accordionOrTab" : "Accordion in Border Container"
 }
 { 
@@ -1134,7 +1134,6 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "State"
         }
@@ -1151,7 +1150,6 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Role"
         }
@@ -1172,7 +1170,6 @@
         }, 
         "_name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Item Name"
         }, 
@@ -1199,7 +1196,6 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Label"
         }
@@ -1215,7 +1211,6 @@
     "schema" : {
         "startDates" : {
             "type" : "Date", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Date Modified"
         }
@@ -1232,7 +1227,6 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Unit Name"
         }
@@ -1250,7 +1244,6 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Label"
         }
@@ -1267,13 +1260,11 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Hearder"
         }, 
         "description" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Paragraph"
         }
@@ -1288,19 +1279,16 @@
     "schema" : {
         "startDates" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Date"
         }, 
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Header"
         }, 
         "description" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Description"
         }
@@ -1316,7 +1304,6 @@
     "schema" : {
         "cellName" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Cell Name"
         }
@@ -1332,13 +1319,11 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Doc Tree Contents Header"
         }, 
         "description" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Doc Tree Content Paragraph"
         }
@@ -1355,7 +1340,6 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Request"
         }
@@ -1369,11 +1353,10 @@
     "toManyAssociations" : "instantiations", 
     "mapsTo" : NumberInt(51), 
     "onlyIfParentEquals" : NumberInt(2018), 
-    "accordionOrTab" : "Accordion in Border Container", 
+    "accordionOrTab" : "Tab Container", 
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "User Name"
         }
@@ -1390,7 +1373,6 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Paragraph Header"
         }
@@ -1407,13 +1389,11 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Header"
         }, 
         "description" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Paragraph Contents"
         }
@@ -1444,7 +1424,6 @@
         }, 
         "description" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Page Description"
         }
@@ -1461,7 +1440,6 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Tab Name"
         }
@@ -1477,7 +1455,6 @@
     "schema" : {
         "cellName" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Cell Name"
         }
@@ -1494,7 +1471,6 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Header"
         }
@@ -1511,7 +1487,6 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Widget Name"
         }
@@ -1528,19 +1503,16 @@
     "schema" : {
         "states" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "State"
         }, 
         "startDates" : {
             "type" : "Date", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Date Modified"
         }, 
         "description" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Comment"
         }
@@ -1555,19 +1527,16 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Widget Name"
         }, 
         "parentId" : {
             "type" : "number", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "ParentId"
         }, 
         "displayTypes" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Widget Type", 
             "enum" : [
@@ -1585,7 +1554,6 @@
         }, 
         "description" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Description"
         }
@@ -1602,25 +1570,21 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "nqWidget"
         }, 
         "description" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Paragraph"
         }, 
         "paragraphSVG" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "SVG"
         }, 
         "paragraphAnnotation" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Annotation"
         }
@@ -1639,20 +1603,17 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Name"
         }, 
         "title" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Title", 
             "description" : "attribute description"
         }, 
         "type" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Type", 
             "enum" : [
@@ -1665,7 +1626,6 @@
         }, 
         "media" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Media Type", 
             "enum" : [
@@ -1691,7 +1651,6 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "View Name"
         }
@@ -1706,13 +1665,11 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "View Name"
         }, 
         "toManyAssociations" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Relationship from Previous", 
             "enum" : [
@@ -1743,7 +1700,6 @@
         }, 
         "onlyIfParentEquals" : {
             "type" : "number", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Only if Parent"
         }, 
@@ -1753,13 +1709,11 @@
                 "itemId" : NumberInt(67), 
                 "assocType" : "allSubclasses"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Maps To"
         }, 
         "subDocument" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "subDocument"
         }, 
@@ -1768,7 +1722,6 @@
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Description"
         }, 
@@ -1777,7 +1730,6 @@
             "media" : {
                 "mediaType" : "text/json"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Schema"
         }
@@ -1802,7 +1754,6 @@
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Paragraph"
         }, 
@@ -1811,7 +1762,6 @@
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "What"
         }, 
@@ -1820,7 +1770,6 @@
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "How"
         }, 
@@ -1829,7 +1778,6 @@
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Why"
         }
@@ -1852,18 +1800,6 @@
     "_id" : NumberInt(50), 
     "type" : "class", 
     "name" : "Resources"
-}
-{ 
-    "_id" : NumberInt(51), 
-    "type" : "class", 
-    "name" : "Persons", 
-    "schema" : {
-        "properties" : {
-            "userId" : {
-                "type" : "string"
-            }
-        }
-    }
 }
 { 
     "_id" : NumberInt(62), 
@@ -2034,7 +1970,11 @@
                 ]
             }, 
             "mapsTo" : {
-                "type" : "number"
+                "type" : "number", 
+                "#ref" : {
+                    "itemId" : NumberInt(67), 
+                    "assocType" : "allSubclasses"
+                }
             }, 
             "onlyIfParentEquals" : {
                 "type" : "number"
@@ -2181,20 +2121,17 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Name"
         }, 
         "title" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Title", 
             "description" : "attribute description"
         }, 
         "type" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Type", 
             "enum" : [
@@ -2207,7 +2144,6 @@
         }, 
         "media" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Media Type", 
             "enum" : [
@@ -2222,57 +2158,171 @@
         }, 
         "readOnly" : {
             "type" : "boolean", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "ReadOnly"
         }, 
         "required" : {
             "type" : "boolean", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Required"
         }, 
         "maxLength" : {
             "type" : "number", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Maximum Length"
         }, 
         "minLength" : {
             "type" : "number", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Minimum Length"
         }, 
         "maximum" : {
             "type" : "number", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Maximum"
         }, 
         "minimum" : {
             "type" : "number", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Minimum"
         }, 
         "places" : {
             "type" : "number", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Decimal Places"
         }, 
         "columnWidth" : {
             "type" : "number", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Column Width"
         }, 
         "description" : {
             "type" : "string", 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Description"
         }
     }
+}
+{ 
+    "_id" : NumberInt(2656), 
+    "type" : "object", 
+    "name" : "Products Widget", 
+    "displayTypes" : "Table"
+}
+{ 
+    "_id" : NumberInt(2658), 
+    "type" : "object", 
+    "name" : "Bicycle", 
+    "description" : "", 
+    "value" : 50.25, 
+    "currency" : "EUR"
+}
+{ 
+    "_id" : NumberInt(2657), 
+    "type" : "object", 
+    "name" : "Products View", 
+    "toManyAssociations" : "owns", 
+    "mapsTo" : NumberInt(111), 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "title" : "Product"
+        }, 
+        "description" : {
+            "type" : "string", 
+            "title" : "Description"
+        }, 
+        "value" : {
+            "type" : "number", 
+            "title" : "Price", 
+            "minimum" : NumberInt(0), 
+            "maximum" : NumberInt(100000), 
+            "places" : NumberInt(2)
+        }, 
+        "currency" : {
+            "type" : "number", 
+            "title" : "Currency", 
+            "enum" : [
+                "EUR", 
+                "USD"
+            ]
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(111), 
+    "type" : "class", 
+    "name" : "Iventory", 
+    "schema" : {
+        "properties" : {
+            "value" : {
+                "type" : "number", 
+                "title" : "Price", 
+                "minimum" : NumberInt(0), 
+                "maximum" : NumberInt(100000), 
+                "places" : NumberInt(2)
+            }, 
+            "currency" : {
+                "type" : "number", 
+                "title" : "Currency", 
+                "enum" : [
+                    "EUR", 
+                    "USD"
+                ]
+            }
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(2655), 
+    "type" : "object", 
+    "name" : "Products and Services", 
+    "accordionOrTab" : "Accordion in Border Container"
+}
+{ 
+    "_id" : NumberInt(2663), 
+    "type" : "object", 
+    "name" : "cjong", 
+    "isActive" : true, 
+    "password" : "$2a$10$5A74wmdtEVN2szH/ENXGwOU5rAaI0BNvQ8xlFBiyZrNfKK8xLb8cS", 
+    "email" : "chris@flash.a2000.nl"
+}
+{ 
+    "_id" : NumberInt(51), 
+    "type" : "class", 
+    "name" : "Persons", 
+    "schema" : {
+        "properties" : {
+            "email" : {
+                "type" : "string"
+            }, 
+            "isActive" : {
+                "type" : "boolean"
+            }, 
+            "password" : {
+                "type" : "string"
+            }
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(2664), 
+    "type" : "object", 
+    "name" : "testuser01", 
+    "isActive" : true, 
+    "password" : "$2a$10$R8metvhU0ka1jWSCpUCEQughuib7XcJGf89IEzwVk1mN4IknTz1Ii", 
+    "email" : "testuser01"
+}
+{ 
+    "_id" : NumberInt(2665), 
+    "type" : "object", 
+    "name" : "testuser02", 
+    "isActive" : true, 
+    "password" : "$2a$10$OBO31h6jqfjMBpJH6U8GBuLgF8vBv9VrW7a30WTvM81bNbl2x2gpi", 
+    "email" : "testuser02"
+}
+{ 
+    "_id" : NumberInt(2659), 
+    "type" : "object", 
+    "name" : "Blog Tab"
 }

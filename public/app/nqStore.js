@@ -69,8 +69,8 @@ function(declare, lang, array, when, all, Store, QueryResults,
         },
         put: function (item, directives) {
             this.enableTransactionButtons();
-            var updatedItem =  this.itemsColl.put(item);
-            if(directives) this.processDirectives(updatedItem, directives);
+            this.itemsColl.put(item);
+            if(directives) this.processDirectives(item, directives);
             this.emit('update', {target:item, directives:directives});
         },
         remove: function (itemId, directives) {
@@ -120,9 +120,11 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         // The leading Assoc will remain attached to the Object that's being moved
                         // First make sure the old parent/preceding object is attached to the object that comes after the moving object
                         // get the ordered children as seen from the old parent
-                        when(self.getItemsByAssocTypeAndDestClass(oldParentId, 'ordered', destClassId), function(oldParentChildren){
+                        when(self.getItemsByAssocTypeAndDestClass(oldParentId, 'ordered', destClassId), function(oldParentChildrenObjects){
+                            var oldParentChildren = array.map(oldParentChildrenObjects, function(item){return item._id;});
                             // get the ordered children as seen from the new parent (could be the same)
-                            when(self.getItemsByAssocTypeAndDestClass(newParentId, 'ordered', destClassId), function(newParentChildren){
+                            when(self.getItemsByAssocTypeAndDestClass(newParentId, 'ordered', destClassId), function(newParentChildrenObjects){
+                                var newParentChildren = array.map(newParentChildrenObjects, function(item){return item._id;});
                                 var leadingAssocSourceFk = 0;
                                 var leadingAssoctype = '';
                                 var idx = oldParentChildren.indexOf(movingObjectId);
@@ -130,7 +132,8 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                     leadingAssocSourceFk = oldParentId;
                                     leadingAssoctype = 'ordered';
                                     if(oldParentChildren.length>1){//there is at least one other object following the moving object, find it's assoc
-                                        when(self.assocsColl.filter({source: movingObjectId, type: 'next', dest: oldParentChildren[1]}), function(assocArr){
+                                        var query = {source: movingObjectId, type: 'next', dest: oldParentChildren[1]};
+                                        self.assocsColl.filter(query).fetch().then(function(assocArr){
                                             // update it so that it has the old parent as source
                                             if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                             var assoc = assocArr[0];
@@ -145,7 +148,9 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                     leadingAssocSourceFk = oldParentChildren[idx-1];
                                     leadingAssoctype = 'next';
                                     if(idx < oldParentChildren.length-1){//there is at least one other object following the moving object, find it's assoc
-                                        when(self.assocsColl.filter({source: movingObjectId, type: 'next', dest: oldParentChildren[idx+1]}), function(assocArr){
+                                        var query = {source: movingObjectId, type: 'next', dest: oldParentChildren[idx+1]};
+                                        self.assocsColl.filter(query).fetch().then(function(assocArr){
+                                            var assocArr = assocCol.fetch();
                                             //update it so that it has the previous object as source
                                             if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                             var assoc = assocArr[0];
@@ -170,7 +175,8 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                         newParentFollowingAssoctype = 'next';
                                     }
                                     //get the following assoc and update it so that it has the moving object as source
-                                    when(self.assocsColl.filter({source: newParentFollowingAssocSourceFk, type: newParentFollowingAssoctype, dest: beforeId}), function(assocArr){
+                                    var query = {source: newParentFollowingAssocSourceFk, type: newParentFollowingAssoctype, dest: beforeId};
+                                    self.assocsColl.filter(query).fetch().then(function(assocArr){
                                         if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                         var newParentFollowingAssoc = assocArr[0];
                                         newParentFollowingAssoc.source = movingObjectId;
@@ -190,7 +196,8 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                     }
                                 }
                                 //Fianly attach the new parent/preceding object to the moving object
-                                when(self.assocsColl.filter({source: leadingAssocSourceFk, type: leadingAssoctype, dest: movingObjectId}), function(assocArr){
+                                var query = {source: leadingAssocSourceFk, type: leadingAssoctype, dest: movingObjectId};
+                                self.assocsColl.filter(query).fetch().then(function(assocArr){
                                     if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                     var leadingAssoc = assocArr[0];
                                     leadingAssoc.source = newParentFollowingAssocSourceFk;
@@ -219,7 +226,8 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     if(oldParentId == newParentId) return;
                     if(oldParentId){
                         if(ASSOCPROPERTIES[assocType].pseudo){
-                            when(self.assocsColl.filter({source:movingObjectId , type: ASSOCPROPERTIES[type].inverse, dest: oldParentId}), function(assocArr){
+                            var query = {source:movingObjectId , type: ASSOCPROPERTIES[type].inverse, dest: oldParentId};
+                            self.assocsColl.filter(query).fetch().then(function(assocArr){
                                 if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                 var assoc = assocArr[0];
                                 assoc.dest = newParentId;
@@ -227,6 +235,10 @@ function(declare, lang, array, when, all, Store, QueryResults,
                             });
                         }
                         else {
+                            var query = {source: oldParentId, type: assocType, dest: movingObjectId};
+                            self.assocsColl.filter(query).fetch().then(function(assocArr){
+
+                            });
                             when(self.assocsColl.filter({source: oldParentId, type: assocType, dest: movingObjectId}), function(assocArr){
                                 if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                 var assoc = assocArr[0];
@@ -801,8 +813,6 @@ function(declare, lang, array, when, all, Store, QueryResults,
         },
         commit: function(){
             var self = this;
-            registry.byId('cancelButtonId').set('disabled',true);
-            registry.byId('saveButtonId').set('disabled',true);
 
             //var transactionIds = {assocsColl:{add:{}, update:{}, delete:{}}, itemsColl:{add:{}, update:{}, delete:{}}},
 
@@ -828,12 +838,13 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
                 data: JSON.stringify(tansactionObj)
             }).then(function(data){
-                    console.log('data', data);
-                    dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
-                    self.transactionIds = {};
-                },function(error){
-                    self.transactionIds = {};
-                    nq.errorDialog(error);
+                console.log('data', data);
+                dojo.fadeIn({ node:"savedDlg", duration: 300, onEnd: function(){dojo.fadeOut({ node:"savedDlg", duration: 300, delay:300 }).play();}}).play();
+                self.transactionIds = {assocsColl:{add:{}, update:{}, delete:{}}, itemsColl:{add:{}, update:{}, delete:{}}},
+                    registry.byId('cancelButtonId').set('disabled',true);
+                registry.byId('saveButtonId').set('disabled',true);
+            },function(error){
+                nq.errorDialog(error);
             });
         },
         abort: function(){

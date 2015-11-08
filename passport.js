@@ -1,7 +1,6 @@
 'use strict';
 var Users = require('./models/users');
 var Items = require('./models/items');
-//var ObjectID = require('mongodb').ObjectID;
 
 exports = module.exports = function(app, passport) {
     var LocalStrategy = require('passport-local').Strategy,

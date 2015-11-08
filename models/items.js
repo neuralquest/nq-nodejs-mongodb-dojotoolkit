@@ -39,7 +39,10 @@ exports.update = function(doc, unset) {
     var collection = db.get().collection('items');
     var id = doc._id;
     delete doc._id;
-    collection.update({_id: id}, {$set:doc, $unset: unset},
+    var updateObj = {};
+    if(unset) updateObj = {$set:doc, $unset: unset};
+    updateObj = {$set:doc};
+    collection.update({_id: id}, updateObj,
         function(err, value) {
             if (err) deferred.reject(err);
             else deferred.resolve(value);

@@ -112,7 +112,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 			var collection = this.store.filter({itemId:this.selectedObjIdPreviousLevel, viewId:self.view._id});
 			collection.on('update', function(event){
 				var obj = event.target;
-                debugger;
+                //debugger;
                 //self.setSelectedObjIdPreviousLevel();
 				//self.onChange(obj);
 			});	

@@ -44,8 +44,9 @@ exports = module.exports = function(app, passport) {
         passport.authenticate('local'), function(req, res, next) {
             // If this function gets called, authentication was successful.
             //res.cookie('username', req.user.username);
-            //res.send('logged in');
-            res.json({username: req.user.username});
+            res.send(req.user.name);
+            //var result = {username: req.user.username};
+            //res.json(result);
         });
     app.get('/logout', function(req, res) {
         req.logout();
@@ -65,7 +66,7 @@ exports = module.exports = function(app, passport) {
                         if (err) { return next(err); }
                         //res.cookie('username', req.user.username);
                         //res.send('logged in');
-                        res.json({username: req.user.username});
+                        res.json({username: req.user.name});
                     });
                 })(req, res, next);
             }
@@ -73,7 +74,11 @@ exports = module.exports = function(app, passport) {
             next(err);
         });
     });
-
+    app.get('/hello', function(req, res) {
+        var auth = req.isAuthenticated();
+        if(auth) res.send(req.user.name);
+        else res.send('');
+    });
 
     app.get('/login/google',
         passport.authenticate('google',{
