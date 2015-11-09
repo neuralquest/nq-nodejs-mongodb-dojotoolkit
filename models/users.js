@@ -48,7 +48,7 @@ exports.signup = function(req){
                     user = usersArr[i];
                 }
             }
-            if(numberFound == 1) return {failed:{reason:'Sorry, the user name is already in use'}};
+            if(numberFound == 1) return 'Sorry, the user name is already in use';
             else if(numberFound > 1) throw (new Error("Duplicate user name found"));
             else {
                 return Items.getNextSequence('itemsColl').then(function(newId){
@@ -57,7 +57,7 @@ exports.signup = function(req){
                         //Add association to class: Persons
                         var newAssoc = {source:newId, type:'parent', dest:USERS_CLASS_TYPE};
                         return Assocs.insert(newAssoc).then(function(results2){
-                            return({success: body.username});
+                            return('Success');
                         });
                     });
                 });

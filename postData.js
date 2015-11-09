@@ -9,16 +9,7 @@ var idMap = {};
 
 function update(req){
     var user = req.user;
-    if(!user) {
-        var err = new Error('Not authorized for update');
-        err.status = 401;
-        throw err;
-    }
-    /*if(user.name !== "cjong") {
-        var err = new Error('Not authorized for update');
-        err.status = 401;
-        throw err;
-    }*/
+
     var body = req.body;
     var itemValidationPromises = [];
     //Validate the items, will also issue new id's in case of add

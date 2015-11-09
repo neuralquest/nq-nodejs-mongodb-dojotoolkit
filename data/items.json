@@ -1160,7 +1160,6 @@
     "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Cell Details View", 
-    "mapsTo" : NumberInt(101), 
     "schema" : {
         "_id" : {
             "type" : "number", 
@@ -1168,12 +1167,12 @@
             "readOnly" : true, 
             "title" : "id"
         }, 
-        "_name" : {
+        "name" : {
             "type" : "string", 
             "readOnly" : false, 
             "title" : "Item Name"
         }, 
-        "_type" : {
+        "type" : {
             "type" : "string", 
             "required" : true, 
             "readOnly" : false, 
@@ -1182,6 +1181,16 @@
                 "object", 
                 "class"
             ]
+        }, 
+        "description" : {
+            "type" : "string", 
+            "readOnly" : false, 
+            "title" : "Description"
+        }, 
+        "schema" : {
+            "type" : "object", 
+            "readOnly" : false, 
+            "title" : "Class Schema"
         }
     }
 }
@@ -2228,10 +2237,6 @@
             "type" : "string", 
             "title" : "Product"
         }, 
-        "description" : {
-            "type" : "string", 
-            "title" : "Description"
-        }, 
         "value" : {
             "type" : "number", 
             "title" : "Price", 
@@ -2325,4 +2330,89 @@
     "_id" : NumberInt(2659), 
     "type" : "object", 
     "name" : "Blog Tab"
+}
+{ 
+    "_id" : NumberInt(2667), 
+    "type" : "object", 
+    "name" : "Messaging", 
+    "accordionOrTab" : "Accordion in Border Container"
+}
+{ 
+    "_id" : NumberInt(2666), 
+    "type" : "object", 
+    "name" : "Balance Sheet"
+}
+{ 
+    "_id" : NumberInt(2668), 
+    "type" : "object", 
+    "name" : "Messaging Tab"
+}
+{ 
+    "_id" : NumberInt(2669), 
+    "type" : "object", 
+    "name" : "Messaging Table Widget", 
+    "displayTypes" : "Table"
+}
+{ 
+    "_id" : NumberInt(2670), 
+    "type" : "object", 
+    "name" : "Balance Sheet", 
+    "displayTypes" : "Tree"
+}
+{ 
+    "_id" : NumberInt(2671), 
+    "type" : "object", 
+    "mapsTo" : NumberInt(84)
+}
+{ 
+    "_id" : NumberInt(2672), 
+    "type" : "object", 
+    "name" : "Messaging View", 
+    "mapsTo" : NumberInt(86), 
+    "toManyAssociations" : "owns", 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "title" : "From"
+        }, 
+        "description" : {
+            "type" : "string", 
+            "title" : "Description"
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(2673), 
+    "type" : "object", 
+    "name" : "Message Content"
+}
+{ 
+    "_id" : NumberInt(2674), 
+    "type" : "object", 
+    "name" : "Message Details", 
+    "displayTypes" : "Form"
+}
+{ 
+    "_id" : NumberInt(2675), 
+    "type" : "object", 
+    "name" : "Profile"
+}
+{ 
+    "_id" : NumberInt(2676), 
+    "type" : "object", 
+    "name" : "Profile Widget", 
+    "displayTypes" : "Form"
+}
+{ 
+    "_id" : NumberInt(2677), 
+    "type" : "object", 
+    "name" : "Profile View", 
+    "toManyAssociations" : "owns", 
+    "accordionOrTab" : "Tab Container", 
+    "mapsTo" : NumberInt(51)
+}
+{ 
+    "_id" : NumberInt(2678), 
+    "type" : "object", 
+    "name" : "Associations"
 }

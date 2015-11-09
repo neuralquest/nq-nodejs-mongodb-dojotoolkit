@@ -30,10 +30,10 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		});
 
 		/*when(nqDataStore.preFetch(), function(results){
-			//fx.fadeOut({node: 'loadingOverlay',	onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();	
-
 		}, errorDialog);*/
-		//domStyle.set('loadingOverlay', 'display', 'none');
+        fx.fadeOut({node: 'loadingOverlay', onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();
+        //domStyle.set('loadingOverlay', 'display', 'none');
+
         if(hash() == "") {
             var neuralquestState = cookie('neuralquestState');
             if(neuralquestState) hash(neuralquestState, true);
@@ -94,6 +94,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		
 		//are we creating an accordion container in a border container or a tab container?
 		return nqStore.get(state.viewId).then(function(view){
+            console.log('level', level, view);
 			var viewPaneCreated;
 			if(view.accordionOrTab=='Accordion in Border Container') viewPaneCreated = createAccordionInBorderContainer(state.viewId, parentContentPane, level);
 			else viewPaneCreated = createTabs(state.viewId, parentContentPane, level);
@@ -631,17 +632,10 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
                 data: JSON.stringify(form.get('value'))
             }).then(function(data){
-				var result = JSON.parse(data);
-				if(result.failed){
-					domStyle.set(row1, 'display', '');
-					domattr.set(tdDom0, 'innerHTML', result.failed.reason);
-				}
-				else{
-					userName = JSON.parse(data).username;
-					domattr.set('userNameDiv', 'innerHTML', userName);
-					//TODO refresh the page
-					dia.hide();
-				}
+                userName = data==''?null:data;
+                domattr.set('userNameDiv', 'innerHTML', data);
+                //TODO refresh the page
+                dia.hide();
             },function(error){
 				var msg = '';
 				if(error.response.status == 401) msg = 'Invalid user name/password';

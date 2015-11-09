@@ -12,11 +12,18 @@ exports = module.exports = function(app, passport) {
         });
     });
     app.post("/data", function (req, res, next) {
-        postData.update(req).then(function(items){
-            res.json(items);
-        }, function(err){
+        if(!req.isAuthenticated()) {
+            var err = new Error('Must be signed in to update');
+            err.status = 404;
             next(err);
-        });
+        }
+        else{
+            postData.update(req).then(function(items){
+                res.json(items);
+            }, function(err){
+                next(err);
+            });
+        }
     });
     app.get("/items", function (req, res) {
         var itemsColl = req.db.collection('items');
@@ -43,30 +50,23 @@ exports = module.exports = function(app, passport) {
     app.post('/login',
         passport.authenticate('local'), function(req, res, next) {
             // If this function gets called, authentication was successful.
-            //res.cookie('username', req.user.username);
             res.send(req.user.name);
-            //var result = {username: req.user.username};
-            //res.json(result);
         });
     app.get('/logout', function(req, res) {
         req.logout();
-        //res.cookie('username', '');
-        //res.send('logged out');
-        res.json({username:null});
+        res.send('');
     });
     app.post('/signup', function(req, res, next) {
         var Users = require('./models/users');
         Users.signup(req).then(function (result) {
-            if(result.failed) res.json(result);
+            if(result != 'Success') res.status(400).send(result);
             else{
                 req._passport.instance.authenticate('local', function(err, user, info) {
                     // If this function gets called, authentication was successful.
                     if (err) { return next(err) }
                     req.logIn(user, function(err) {
                         if (err) { return next(err); }
-                        //res.cookie('username', req.user.username);
-                        //res.send('logged in');
-                        res.json({username: req.user.name});
+                        res.status(201).send(req.user.name);
                     });
                 })(req, res, next);
             }

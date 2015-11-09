@@ -6,12 +6,16 @@ function(declare, lang, array, when, all, Store, QueryResults,
     return declare("nqStore", [Store, SimpleQuery], {
         autoEmitEvents: false,
         transactionIds: {assocsColl:{add:{}, update:{}, delete:{}}, itemsColl:{add:{}, update:{}, delete:{}}},
+        assocsColl: new RequestMemory({target: '/assocs', idProperty: '_id'}),
+        itemsColl: new RequestMemory({target: '/items', idProperty: '_id'}),
+
         constructor: function (options) {
             var self = this;
             // perform the mixin
             options && declare.safeMixin(this, options);
-            this.assocsColl = new RequestMemory({target: '/assocs', idProperty: '_id'});
-            this.itemsColl = new RequestMemory({target: '/items', idProperty: '_id'});
+            //This is too late, sometimes the data hasn't been retreived yet when processing starts
+            //this.assocsColl = new RequestMemory({target: '/assocs', idProperty: '_id'});
+            //this.itemsColl = new RequestMemory({target: '/items', idProperty: '_id'});
 
             aspect.after(this.itemsColl, 'add', function (result, args) {
                 var itemId = args[0]._id;
@@ -24,7 +28,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     self.transactionIds.itemsColl.update[itemId] = true;
                 return result;
             });
-            aspect.after(this.itemsColl, 'delete', function (result, args) {
+            aspect.after(this.itemsColl, 'remove', function (result, args) {
                 var itemId = args[0]._id;
                 if(self.transactionIds.itemsColl.add[itemId]){
                     delete self.transactionIds.itemsColl.add[itemId];
@@ -44,7 +48,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                     self.transactionIds.assocsColl.update[itemId] = true;
                 return result;
             });
-            aspect.after(this.assocsColl, 'delete', function (result, args) {
+            aspect.after(this.assocsColl, 'remove', function (result, args) {
                 var itemId = args[0]._id;
                 if(self.transactionIds.assocsColl.add[itemId]){
                     delete self.transactionIds.assocsColl.add[itemId];
@@ -73,10 +77,10 @@ function(declare, lang, array, when, all, Store, QueryResults,
             if(directives) this.processDirectives(item, directives);
             this.emit('update', {target:item, directives:directives});
         },
-        remove: function (itemId, directives) {
-            if(directives) this.processDirectives(itemId, directives);
-            this.itemsColl.remove(itemId);
-            this.emit('delete', {target:itemId, directives:directives});
+        remove: function (item, directives) {
+            if(directives) this.processDirectives(item, directives);
+            this.itemsColl.remove(item._id);
+            this.emit('delete', {target:item, directives:directives});
         },
         getChildren: function (object, onComplete) {
             if(!object._id || !object._viewId) throw (new Error('Invalid parameters'));
@@ -333,6 +337,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         });
                         return results;
                     });
+                    //TODO hasChildren?
                 });
             });
         },

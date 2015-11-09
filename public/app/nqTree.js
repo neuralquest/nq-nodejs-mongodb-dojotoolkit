@@ -285,8 +285,9 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					iconClass:"removeIcon",
 					onClick: function(){
 						var selectedItem = self.tree.get("selectedItem");
-						var directives = {parent:selectedItem};
-						self.store.remove(selectedItem.id,selectedItem.viewId, directives);
+						//var directives = {parent:selectedItem};//TODO find parent of selected item
+						//self.store.remove(selectedItem, directives);
+                        self.store.remove(selectedItem);
 					}
 				}));
                 var uViewObj = self.permittedClassesByViewObj[viewId];

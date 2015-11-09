@@ -86,6 +86,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                         self.own(dijit);
                         tdDom.appendChild(dijit.domNode);
                         dijit.on('change', function(newValue){
+                            var attrProps = self.schema.properties[this.name];
                             if(newValue == attrProps.nullValue) newValue=null;
                             else{
                                 if(attrProps.type == 'object') newValue = JSON.parse(newValue);
