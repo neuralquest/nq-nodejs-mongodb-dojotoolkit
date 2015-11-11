@@ -9,89 +9,94 @@ var idMap = {};
 
 function update(req){
     var user = req.user;
-
     var body = req.body;
+
+    //Validate the items, will also issue new id's in case of add. That's why we have to validate items before assocs
     var itemValidationPromises = [];
-    //Validate the items, will also issue new id's in case of add
-    if(body.itemsColl){
-        for(var action in body.itemsColl){
-            var items = body.itemsColl[action];
-            items.forEach(function(item) {
-                itemValidationPromises.push(itemIsValid(item, action));
-            });
+    body.forEach(function(updateObj){
+        if(updateObj.collection == 'items'){
+            itemValidationPromises.push(itemIsValid(updateObj));
         }
-    }
+    });
     return all(itemValidationPromises).then(function(resultsArr1){
-        //Validate teh associations
+        //Validate the associations
         var assocValidationPromises = [];
-        if(body.assocsColl){
-            for(var action in body.assocsColl){
-                var items = body.assocsColl[action];
-                items.forEach(function(item) {
-                    assocValidationPromises.push(assocIsAllowed(item, action));
-                });
+        body.forEach(function(updateObj){
+            if(updateObj.collection == 'assocs'){
+                assocValidationPromises.push(itemIsValid(updateObj));
             }
-        }
+        });
         return all(assocValidationPromises).then(function(resultsArr2){
             //return resultsArr2; //return after validation
             //All is well, start updating
-            //TODO collect updates in arrays fro group update
             var writePromises = [];
-            if(body.itemsColl){
-                //Update the items
-                if(body.itemsColl.add) {
-                    var newItems = body.itemsColl.add;
-                    newItems.forEach(function (item) {
-                        writePromises.push(Items.insert(item));
-                        //associate with the user
-                        writePromises.push(Assocs.insert({source:user._id, type:'owns', dest:item._id}));
-                    });
+            body.forEach(function(updateObj){
+                if(updateObj.collection == 'items' && updateObj.action == 'add') {
+                    writePromises.push(Items.insert(updateObj.item));
+                    //associate with the user
+                    writePromises.push(Assocs.insert({source:user._id, type:'owns', dest:updateObj.item._id}));
                 }
-                if(body.itemsColl.update) {
-                    var updateItems = body.itemsColl.update;
-                    updateItems.forEach(function (item) {
-                        //TODO determine unset if value null
-                        var unset = {};
-                        writePromises.push(Items.update(item, unset));
-                    });
+                if(updateObj.collection == 'items' && updateObj.action == 'update') {
+                    //TODO $unset
+                    writePromises.push(Items.update(updateObj.item));
                 }
-                if(body.itemsColl.delete) {
-                    var deleteItems = body.itemsColl.delete;
-                    deleteItems.forEach(function (id) {
-                        writePromises.push(Items.remove(id));
-                        writePromises.push(Assocs.removeReferences(id));
-                    });
+                if(updateObj.collection == 'items' && updateObj.action == 'delete') {
+                    writePromises.push(Items.remove(updateObj.id));
+                    //will also disassociate the user
+                    writePromises.push(Assocs.removeReferences(updateObj.id));
                 }
-            }
-            if(body.assocsColl){
-                //Update the associations
-                if(body.assocsColl.add) {
-                    var newAssocs = body.assocsColl.add;
-                    newAssocs.forEach(function (assoc) {
-                        writePromises.push(Assocs.insert(assoc));
-                    });
+                if(updateObj.collection == 'assocs' && updateObj.action == 'add') {
+                    writePromises.push(Assocs.insert(updateObj.assoc));
                 }
-                if(body.assocsColl.update) {
-                    var updateAssocs = body.assocsColl.update;
-                    updateAssocs.forEach(function (assoc) {
-                        //TODO should not update owner?
-                        writePromises.push(Assocs.update(assoc));
-                    });
+                if(updateObj.collection == 'assocs' && updateObj.action == 'update') {
+                    writePromises.push(Assocs.update(updateObj.assoc));
                 }
-                if(body.assocsColl.delete) {
-                    var deleteAssocs = body.assocsColl.delete;
-                    deleteAssocs.forEach(function (id) {
-                        writePromises.push(Assocs.remove(id));
-                    });
+                if(updateObj.collection == 'assocs' && updateObj.action == 'delete') {
+                    writePromises.push(Assocs.remove(updateObj.id));
                 }
-            }
+            });
+
+/*
+            //collect updates in arrays for group update
+            var addItemsArr = [];
+            var updateItemsArr = [];
+            var deleteItemsArr = [];
+            var addAssocsArr = [];
+            var updateAssocsArr = [];
+            var deleteAssocsArr = [];
+            body.forEach(function(updateObj){
+                if(updateObj.collection == 'items' && updateObj.action == 'add') {
+                    addItemsArr.push(updateObj.item);
+                    //associate with the user
+                    addAssocsArr.push({source:user._id, type:'owns', dest:updateObj.item._id});
+                }
+                if(updateObj.collection == 'items' && updateObj.action == 'update') updateItemsArr.push(updateObj.item);
+                if(updateObj.collection == 'items' && updateObj.action == 'delete') deleteItemsArr.push(updateObj.id);
+                if(updateObj.collection == 'assocs' && updateObj.action == 'add') addAssocsArr.push(updateObj.assoc);
+                if(updateObj.collection == 'assocs' && updateObj.action == 'update') updateAssocsArr.push(updateObj.assoc);
+                if(updateObj.collection == 'assocs' && updateObj.action == 'delete') deleteAssocsArr.push(updateObj.id);
+            });
+
+            var writePromises = [];
+            if(addItemsArr.length>0) writePromises.push(Items.insert(addItemsArr));
+            if(updateItemsArr.length>0) writePromises.push(Items.update(updateItemsArr));//, unset
+            if(deleteItemsArr.length>0) writePromises.push(Items.remove(deleteItemsArr));
+            if(addAssocsArr.length>0) writePromises.push(Items.insert(addAssocsArr));
+            if(updateAssocsArr.length>0) writePromises.push(Items.update(updateAssocsArr));
+            if(deleteAssocsArr.length>0) writePromises.push(Items.insert(deleteAssocsArr));
+*/
             return all(writePromises);
         });
     });
 }
-function itemIsValid(item, action) {
+function itemIsValid(updateObj) {
+    if(updateObj.action == 'delete') return true;
+    var item = updateObj.item;
+    var id = updateObj.id;
+    var viewId = updateObj.viewId;
+    var action = updateObj.action;
     //Get the view
-    return Items.findById(item._viewId).then(function(view){
+    return Items.findById(viewId).then(function(view){
         //TODO
         // If add, update, delete, is allowed?
         var viewPromises = [];
@@ -113,7 +118,7 @@ function itemIsValid(item, action) {
                 if(!schema.properties[attrName]) delete item[attrName];
             }
             if(action == 'add') {
-                idMap[item._id] = item;
+                idMap[id] = item;
                 item._id = viewPromisesArr[0];
             }
             if(action == 'update') {
@@ -128,8 +133,9 @@ function itemIsValid(item, action) {
     });
 
 }
-function assocIsAllowed(assoc, action) {
-    //Possibly invert assoc type
+function assocIsAllowed(updateObj) {
+    var assoc = updateObj.assoc;
+    var action = updateObj.action;
 
     if(!ASSOCPROPERTIES[assoc.type]) throw (new Error("Association type is invalid"));
     if(action === 'add') delete assoc._id;

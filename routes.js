@@ -12,17 +12,17 @@ exports = module.exports = function(app, passport) {
         });
     });
     app.post("/data", function (req, res, next) {
-        if(!req.isAuthenticated()) {
-            var err = new Error('Must be signed in to update');
-            err.status = 404;
-            next(err);
-        }
-        else{
+        if(req.isAuthenticated()) {
             postData.update(req).then(function(items){
                 res.json(items);
             }, function(err){
                 next(err);
             });
+        }
+        else{
+            var err = new Error('Must be signed in to update');
+            err.status = 404;
+            next(err);
         }
     });
     app.get("/items", function (req, res) {

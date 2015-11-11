@@ -2,8 +2,8 @@ var db = require('../db');
 var Deferred = require("promised-io/promise").Deferred;
 
 exports.findById = function(id) {
-    var deferred = new Deferred();
     var collection = db.get().collection('items');
+    var deferred = new Deferred();
     collection.findOne({_id: id}, function(err, doc) {
         if (err) deferred.reject(err);
         else deferred.resolve(doc);
@@ -11,8 +11,8 @@ exports.findById = function(id) {
     return deferred.promise;
 };
 exports.findOne = function(query){
-    var deferred = new Deferred();
     var collection = db.get().collection('items');
+    var deferred = new Deferred();
     collection.find(query).toArray(function(err, usersArr) {
         if (err) deferred.reject(err);
         else {
@@ -24,8 +24,8 @@ exports.findOne = function(query){
     return deferred.promise;
 };
 exports.insert = function(doc) {
-    var deferred = new Deferred();
     var collection = db.get().collection('items');
+    var deferred = new Deferred();
     collection.insert([doc],{},
         function(err, value) {
             if (err) deferred.reject(err);
@@ -34,9 +34,8 @@ exports.insert = function(doc) {
     return deferred.promise;
 };
 exports.update = function(doc, unset) {
-    var deferred = new Deferred();
-    if(!unset) unset = {};
     var collection = db.get().collection('items');
+    var deferred = new Deferred();
     var id = doc._id;
     delete doc._id;
     var updateObj = {};
@@ -50,8 +49,8 @@ exports.update = function(doc, unset) {
     return deferred.promise;
 };
 exports.remove = function(id) {
-    var deferred = new Deferred();
     var collection = db.get().collection('items');
+    var deferred = new Deferred();
     collection.remove({_id: id},
         function(err, value) {
             if (err) deferred.reject(err);
@@ -60,8 +59,8 @@ exports.remove = function(id) {
     return deferred.promise;
 };
 exports.find = function(query) {
-    var deferred = new Deferred();
     var collection = db.get().collection('items');
+    var deferred = new Deferred();
     collection.find(query).toArray(
         function(err, value) {
             if (err) deferred.reject(err);
@@ -70,8 +69,8 @@ exports.find = function(query) {
     return deferred.promise;
 };
 exports.getNextSequence = function(name) {
-    var deferred = new Deferred();
     var collection = db.get().collection('counters');
+    var deferred = new Deferred();
     collection.findAndModify(
         {_id: name},
         [],

@@ -324,7 +324,7 @@ CLASSSCHEMA = {
             type : "object",
             readOnly : false}
     },
-    required: ['_id', 'name', 'type'],
+    required: ['_id', 'type'],
     additionalProperties: false
 };
 
