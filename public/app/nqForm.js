@@ -93,7 +93,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                             }
                             self.item._viewId = self.view._id;
                             self.item[this.name] = newValue;
-                            self.store.put(self.item);
+                            self.store.put(self.item, {viewId: self.view._id});
                             console.log('self.item', self.item);
                         });
                     }

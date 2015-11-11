@@ -23,7 +23,7 @@ function update(req){
         var assocValidationPromises = [];
         body.forEach(function(updateObj){
             if(updateObj.collection == 'assocs'){
-                assocValidationPromises.push(itemIsValid(updateObj));
+                assocValidationPromises.push(assocIsAllowed(updateObj));
             }
         });
         return all(assocValidationPromises).then(function(resultsArr2){
@@ -52,7 +52,7 @@ function update(req){
                     writePromises.push(Assocs.update(updateObj.assoc));
                 }
                 if(updateObj.collection == 'assocs' && updateObj.action == 'delete') {
-                    writePromises.push(Assocs.remove(updateObj.id));
+                    //writePromises.push(Assocs.remove(updateObj.id));
                 }
             });
 
@@ -134,6 +134,7 @@ function itemIsValid(updateObj) {
 
 }
 function assocIsAllowed(updateObj) {
+    if(updateObj.action == 'delete') return true;
     var assoc = updateObj.assoc;
     var action = updateObj.action;
 

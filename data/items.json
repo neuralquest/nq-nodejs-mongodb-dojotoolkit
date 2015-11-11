@@ -356,12 +356,6 @@
     "name" : "Service Request Executer"
 }
 { 
-    "_id" : NumberInt(1754), 
-    "type" : "object", 
-    "_icon" : NumberInt(85), 
-    "name" : "Update does not work correctly"
-}
-{ 
     "_id" : NumberInt(1766), 
     "type" : "object", 
     "_icon" : NumberInt(79), 
@@ -390,12 +384,6 @@
     "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Attribute References"
-}
-{ 
-    "_id" : NumberInt(1790), 
-    "type" : "object", 
-    "_icon" : NumberInt(90), 
-    "name" : "Service Request History"
 }
 { 
     "_id" : NumberInt(1793), 
@@ -521,6 +509,11 @@
     "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Attribute References"
+}
+{ 
+    "_id" : NumberInt(2689), 
+    "type" : "class", 
+    "name" : "Current Liabilities"
 }
 { 
     "_id" : NumberInt(1883), 
@@ -682,23 +675,6 @@
     "description" : "<p>JavaScript source: <a href=\"js/extensions/NqTree.js\" target=\"_blank\">NqTree.js.<br /></a>The document is use to display and modify The Document</p>"
 }
 { 
-    "_id" : NumberInt(2158), 
-    "type" : "object", 
-    "_icon" : NumberInt(90), 
-    "name" : "Process View"
-}
-{ 
-    "_id" : NumberInt(2295), 
-    "type" : "object", 
-    "_icon" : NumberInt(95), 
-    "incidentStates" : "asess"
-}
-{ 
-    "_id" : NumberInt(2296), 
-    "type" : "object", 
-    "_icon" : NumberInt(95)
-}
-{ 
     "_id" : NumberInt(2327), 
     "type" : "object", 
     "_icon" : NumberInt(79), 
@@ -807,20 +783,6 @@
     "parentId" : NumberInt(810)
 }
 { 
-    "_id" : NumberInt(2389), 
-    "type" : "object", 
-    "_icon" : NumberInt(99), 
-    "name" : "Process Widget", 
-    "displayTypes" : "Process Model"
-}
-{ 
-    "_id" : NumberInt(2393), 
-    "type" : "object", 
-    "_icon" : NumberInt(99), 
-    "name" : "Service Request History Widget", 
-    "displayTypes" : "Table"
-}
-{ 
     "_id" : NumberInt(2413), 
     "type" : "object", 
     "_icon" : NumberInt(99), 
@@ -909,12 +871,6 @@
     "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Fotos"
-}
-{ 
-    "_id" : NumberInt(2459), 
-    "type" : "object", 
-    "_icon" : NumberInt(95), 
-    "incidentStates" : "accepted"
 }
 { 
     "_id" : NumberInt(2461), 
@@ -1069,26 +1025,6 @@
     "displayTypes" : "Document"
 }
 { 
-    "_id" : NumberInt(2590), 
-    "type" : "object", 
-    "_icon" : NumberInt(90), 
-    "name" : "Role Table Tab"
-}
-{ 
-    "_id" : NumberInt(2592), 
-    "type" : "object", 
-    "_icon" : NumberInt(99), 
-    "name" : "Role Table Widget", 
-    "displayTypes" : "Table"
-}
-{ 
-    "_id" : NumberInt(2594), 
-    "type" : "object", 
-    "_icon" : NumberInt(99), 
-    "name" : "Service Request Details", 
-    "displayTypes" : "Form"
-}
-{ 
     "_id" : NumberInt(2624), 
     "type" : "object", 
     "_icon" : NumberInt(70), 
@@ -1123,37 +1059,6 @@
     "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Demo"
-}
-{ 
-    "_id" : NumberInt(1939), 
-    "type" : "object", 
-    "_icon" : NumberInt(74), 
-    "toManyAssociations" : "manyToOne", 
-    "name" : "State View", 
-    "accordionOrTab" : "Tab Container", 
-    "schema" : {
-        "name" : {
-            "type" : "string", 
-            "readOnly" : false, 
-            "title" : "State"
-        }
-    }
-}
-{ 
-    "_id" : NumberInt(2166), 
-    "type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Org Unit View", 
-    "toManyAssociations" : "manyToMany", 
-    "mapsTo" : NumberInt(70), 
-    "accordionOrTab" : "Tab Container", 
-    "schema" : {
-        "name" : {
-            "type" : "string", 
-            "readOnly" : false, 
-            "title" : "Role"
-        }
-    }
 }
 { 
     "_id" : NumberInt(2618), 
@@ -1191,37 +1096,6 @@
             "type" : "object", 
             "readOnly" : false, 
             "title" : "Class Schema"
-        }
-    }
-}
-{ 
-    "_id" : NumberInt(2585), 
-    "type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Roles View", 
-    "toManyAssociations" : "oneToMany", 
-    "accordionOrTab" : "Accordion in Border Container", 
-    "onlyIfParentEquals" : NumberInt(810), 
-    "schema" : {
-        "name" : {
-            "type" : "string", 
-            "readOnly" : false, 
-            "title" : "Label"
-        }
-    }
-}
-{ 
-    "_id" : NumberInt(731), 
-    "type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Service Request History View", 
-    "mapsTo" : NumberInt(95), 
-    "accordionOrTab" : "Tab Container", 
-    "schema" : {
-        "startDates" : {
-            "type" : "Date", 
-            "readOnly" : false, 
-            "title" : "Date Modified"
         }
     }
 }
@@ -1280,30 +1154,6 @@
     }
 }
 { 
-    "_id" : NumberInt(2596), 
-    "type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Service Request Details View", 
-    "mapsTo" : NumberInt(85), 
-    "schema" : {
-        "startDates" : {
-            "type" : "string", 
-            "readOnly" : false, 
-            "title" : "Date"
-        }, 
-        "name" : {
-            "type" : "string", 
-            "readOnly" : false, 
-            "title" : "Header"
-        }, 
-        "description" : {
-            "type" : "string", 
-            "readOnly" : false, 
-            "title" : "Description"
-        }
-    }
-}
-{ 
     "_id" : NumberInt(733), 
     "type" : "object", 
     "_icon" : NumberInt(74), 
@@ -1335,22 +1185,6 @@
             "type" : "string", 
             "readOnly" : false, 
             "title" : "Doc Tree Content Paragraph"
-        }
-    }
-}
-{ 
-    "_id" : NumberInt(2293), 
-    "type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Service Request View", 
-    "mapsTo" : NumberInt(85), 
-    "toManyAssociations" : "orderedParent", 
-    "accordionOrTab" : "Tab Container", 
-    "schema" : {
-        "name" : {
-            "type" : "string", 
-            "readOnly" : false, 
-            "title" : "Request"
         }
     }
 }
@@ -1462,10 +1296,10 @@
     "toManyAssociations" : "children", 
     "accordionOrTab" : "Tab Container", 
     "schema" : {
-        "cellName" : {
+        "name" : {
             "type" : "string", 
             "readOnly" : false, 
-            "title" : "Cell Name"
+            "title" : "Class Name"
         }
     }
 }
@@ -1498,32 +1332,6 @@
             "type" : "string", 
             "readOnly" : false, 
             "title" : "Widget Name"
-        }
-    }
-}
-{ 
-    "_id" : NumberInt(2314), 
-    "type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Service Request History View", 
-    "toManyAssociations" : "ordered", 
-    "mapsTo" : NumberInt(95), 
-    "accordionOrTab" : "Tab Container", 
-    "schema" : {
-        "states" : {
-            "type" : "string", 
-            "readOnly" : false, 
-            "title" : "State"
-        }, 
-        "startDates" : {
-            "type" : "Date", 
-            "readOnly" : false, 
-            "title" : "Date Modified"
-        }, 
-        "description" : {
-            "type" : "string", 
-            "readOnly" : false, 
-            "title" : "Comment"
         }
     }
 }
@@ -1836,16 +1644,6 @@
     "name" : "Folders"
 }
 { 
-    "_id" : NumberInt(84), 
-    "type" : "class", 
-    "name" : "Balance Sheet"
-}
-{ 
-    "_id" : NumberInt(85), 
-    "type" : "class", 
-    "name" : "Service Requests"
-}
-{ 
     "_id" : NumberInt(88), 
     "type" : "class", 
     "name" : "Owners"
@@ -1866,25 +1664,6 @@
                 "enum" : [
                     "Accordion in Border Container", 
                     "Tab Container"
-                ]
-            }
-        }
-    }
-}
-{ 
-    "_id" : NumberInt(95), 
-    "type" : "class", 
-    "name" : "Service Request History", 
-    "schema" : {
-        "properties" : {
-            "incidentStates" : {
-                "type" : "string", 
-                "enum" : [
-                    "asess", 
-                    "accepted", 
-                    "initial", 
-                    "reject", 
-                    "closed"
                 ]
             }
         }
@@ -2056,18 +1835,6 @@
     "_id" : NumberInt(86), 
     "type" : "class", 
     "name" : "Agreements"
-}
-{ 
-    "_id" : NumberInt(96), 
-    "type" : "class", 
-    "name" : "Business Class Histories", 
-    "schema" : {
-        "properties" : {
-            "startDates" : {
-                "type" : "date"
-            }
-        }
-    }
 }
 { 
     "_id" : NumberInt(108), 
@@ -2257,26 +2024,7 @@
 { 
     "_id" : NumberInt(111), 
     "type" : "class", 
-    "name" : "Iventory", 
-    "schema" : {
-        "properties" : {
-            "value" : {
-                "type" : "number", 
-                "title" : "Price", 
-                "minimum" : NumberInt(0), 
-                "maximum" : NumberInt(100000), 
-                "places" : NumberInt(2)
-            }, 
-            "currency" : {
-                "type" : "number", 
-                "title" : "Currency", 
-                "enum" : [
-                    "EUR", 
-                    "USD"
-                ]
-            }
-        }
-    }
+    "name" : "Iventory"
 }
 { 
     "_id" : NumberInt(2655), 
@@ -2357,12 +2105,7 @@
     "_id" : NumberInt(2670), 
     "type" : "object", 
     "name" : "Balance Sheet", 
-    "displayTypes" : "Tree"
-}
-{ 
-    "_id" : NumberInt(2671), 
-    "type" : "object", 
-    "mapsTo" : NumberInt(84)
+    "displayTypes" : "Table"
 }
 { 
     "_id" : NumberInt(2672), 
@@ -2404,15 +2147,276 @@
     "displayTypes" : "Form"
 }
 { 
+    "_id" : NumberInt(2678), 
+    "type" : "object", 
+    "name" : "Associations"
+}
+{ 
+    "_id" : NumberInt(2688), 
+    "type" : "class", 
+    "name" : "Current Assests"
+}
+{ 
+    "_id" : NumberInt(2694), 
+    "type" : "class", 
+    "name" : "Investments"
+}
+{ 
+    "_id" : NumberInt(2690), 
+    "type" : "class", 
+    "name" : "Property, Plant, and Equipment"
+}
+{ 
+    "_id" : NumberInt(2692), 
+    "type" : "class", 
+    "name" : "Intangible Assets"
+}
+{ 
+    "_id" : NumberInt(2691), 
+    "type" : "class", 
+    "name" : "Long-term Liabilities"
+}
+{ 
+    "_id" : NumberInt(2693), 
+    "type" : "class", 
+    "name" : "Other Assets"
+}
+{ 
+    "_id" : NumberInt(2695), 
+    "type" : "class", 
+    "name" : "Cash"
+}
+{ 
+    "_id" : NumberInt(2700), 
+    "type" : "class", 
+    "name" : "Petty Cash"
+}
+{ 
+    "_id" : NumberInt(2699), 
+    "type" : "class", 
+    "name" : "Prepaid Insurance"
+}
+{ 
+    "_id" : NumberInt(2697), 
+    "type" : "class", 
+    "name" : "Accounts Receivable - net"
+}
+{ 
+    "_id" : NumberInt(2698), 
+    "type" : "class", 
+    "name" : "Supplies"
+}
+{ 
+    "_id" : NumberInt(2696), 
+    "type" : "class", 
+    "name" : "Temporary Investments"
+}
+{ 
+    "_id" : NumberInt(2705), 
+    "type" : "class", 
+    "name" : "Land"
+}
+{ 
+    "_id" : NumberInt(2702), 
+    "type" : "class", 
+    "name" : "Land Improvements"
+}
+{ 
+    "_id" : NumberInt(2701), 
+    "type" : "class", 
+    "name" : "Buildings"
+}
+{ 
+    "_id" : NumberInt(2703), 
+    "type" : "class", 
+    "name" : "Less: Accumulated Depreciation"
+}
+{ 
+    "_id" : NumberInt(2704), 
+    "type" : "class", 
+    "name" : "Equipment"
+}
+{ 
+    "_id" : NumberInt(2706), 
+    "type" : "class", 
+    "name" : "Goodwill"
+}
+{ 
+    "_id" : NumberInt(2707), 
+    "type" : "class", 
+    "name" : "Trade Names"
+}
+{ 
+    "_id" : NumberInt(2715), 
+    "type" : "class", 
+    "name" : "Liabilities"
+}
+{ 
+    "_id" : NumberInt(2716), 
+    "type" : "class", 
+    "name" : "Stockholders' Equity"
+}
+{ 
+    "_id" : NumberInt(2713), 
+    "type" : "class", 
+    "name" : "Notes Payable"
+}
+{ 
+    "_id" : NumberInt(2708), 
+    "type" : "class", 
+    "name" : "Intrest Payable"
+}
+{ 
+    "_id" : NumberInt(2709), 
+    "type" : "class", 
+    "name" : "Taxes Payable"
+}
+{ 
+    "_id" : NumberInt(2714), 
+    "type" : "class", 
+    "name" : "Wages Payable"
+}
+{ 
+    "_id" : NumberInt(2711), 
+    "type" : "class", 
+    "name" : "Accounts Payable"
+}
+{ 
+    "_id" : NumberInt(2710), 
+    "type" : "class", 
+    "name" : "Warenty Liability"
+}
+{ 
+    "_id" : NumberInt(2712), 
+    "type" : "class", 
+    "name" : "Unearnd Revenues"
+}
+{ 
+    "_id" : NumberInt(2718), 
+    "type" : "class", 
+    "name" : "Notes Payable"
+}
+{ 
+    "_id" : NumberInt(2719), 
+    "type" : "class", 
+    "name" : "Bonds Payable"
+}
+{ 
+    "_id" : NumberInt(2720), 
+    "type" : "class", 
+    "name" : "Common Stock"
+}
+{ 
+    "_id" : NumberInt(2721), 
+    "type" : "class", 
+    "name" : "Retained Earnings"
+}
+{ 
+    "_id" : NumberInt(2717), 
+    "type" : "class", 
+    "name" : "Less: Treasury Stock"
+}
+{ 
+    "_id" : NumberInt(84), 
+    "type" : "class", 
+    "name" : "Balance Sheet", 
+    "schema" : {
+        "properties" : {
+            "value" : {
+                "type" : "number", 
+                "title" : "Price", 
+                "minimum" : NumberInt(0), 
+                "maximum" : NumberInt(1000000), 
+                "places" : NumberInt(2)
+            }, 
+            "currency" : {
+                "type" : "string", 
+                "title" : "Currency", 
+                "enum" : [
+                    "EUR", 
+                    "USD"
+                ]
+            }
+        }, 
+        "required" : [
+            "value"
+        ]
+    }
+}
+{ 
+    "_id" : NumberInt(2730), 
+    "type" : "object", 
+    "name" : "Current Account", 
+    "value" : NumberInt(10000), 
+    "currency" : "EUR"
+}
+{ 
+    "_id" : NumberInt(2731), 
+    "type" : "object", 
+    "name" : "Current Account", 
+    "value" : NumberInt(5000), 
+    "currency" : "EUR"
+}
+{ 
+    "_id" : NumberInt(2732), 
+    "type" : "object", 
+    "name" : "Current Account", 
+    "value" : NumberInt(7000), 
+    "currency" : "EUR"
+}
+{ 
+    "_id" : NumberInt(2733), 
+    "type" : "object", 
+    "name" : "Ask A Question", 
+    "value" : NumberInt(0), 
+    "currency" : "EUR"
+}
+{ 
     "_id" : NumberInt(2677), 
     "type" : "object", 
     "name" : "Profile View", 
     "toManyAssociations" : "owns", 
     "accordionOrTab" : "Tab Container", 
-    "mapsTo" : NumberInt(51)
+    "mapsTo" : NumberInt(51), 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "readOnly" : false, 
+            "title" : "User Name"
+        }, 
+        "isActive" : {
+            "type" : "boolean", 
+            "title" : "Is Active"
+        }, 
+        "password" : {
+            "type" : "string", 
+            "title" : "password"
+        }, 
+        "description" : {
+            "type" : "string", 
+            "readOnly" : false, 
+            "title" : "Description"
+        }
+    }
 }
 { 
-    "_id" : NumberInt(2678), 
+    "_id" : NumberInt(2671), 
     "type" : "object", 
-    "name" : "Associations"
+    "mapsTo" : NumberInt(84), 
+    "name" : "Balance Sheet View", 
+    "toManyAssociations" : "owns", 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "title" : "From"
+        }, 
+        "value" : {
+            "type" : "number", 
+            "title" : "Value"
+        }, 
+        "currency" : {
+            "type" : "string", 
+            "title" : "Currency"
+        }
+    }
 }

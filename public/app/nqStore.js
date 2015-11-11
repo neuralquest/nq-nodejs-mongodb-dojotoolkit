@@ -282,7 +282,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                                 self.assocsColl.filter(query).fetch().then(function(assocArr){
                                     if(assocArr.length!=1) throw (new Error('Expected to find one association'));
                                     var assoc = assocArr[0];
-                                    self.assocsColl.put(assoc._id);
+                                    self.assocsColl.remove(assoc._id);
                                 });
                             }
                         }

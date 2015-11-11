@@ -313,7 +313,7 @@ CLASSSCHEMA = {
         type : {
             type : "string",
             readOnly : true,
-            enum : ['class']},
+            enum : ['class', 'object']},
         description : {
             type : "string",
             readOnly : false,

@@ -293,6 +293,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     parentMenu.addChild(new MenuItem({
                         label:"Delete",
                         iconClass:"removeIcon",
+                        viewId: viewId,
                         onClick: function(){
                             var pathArr = self.tree.path;
                             var selectedItem = pathArr[pathArr.length-1];
@@ -320,7 +321,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                                     '_icon': this.classId
                                 };
                                 var selectedItem = self.tree.get("selectedItem");
-                                var directives = {parent: selectedItem, viewId: this.viewId};
+                                var directives = {parent: selectedItem, viewId: 844};
                                 var newItem = self.store.add(addObj, directives);
 
                                 var selectedNodes = self.tree.getNodesByItem(selectedItem);

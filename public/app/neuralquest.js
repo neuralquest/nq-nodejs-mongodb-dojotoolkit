@@ -830,7 +830,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             type : {
                 type : "string",
                 readOnly : true,
-                enum : ['class']},
+                enum : ['class', 'object']},
             description : {
                 type : "string",
                 readOnly : false,
