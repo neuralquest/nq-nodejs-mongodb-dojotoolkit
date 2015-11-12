@@ -74,9 +74,9 @@ function(declare, lang, array, when, all, Store, QueryResults,
         add: function (item, directives) {
             this.enableTransactionButtons();
             var id = Math.floor((Math.random()*1000000)+1);
-            //item._id = id;
+            item._id = id;
             this.itemsColl.add(item, directives);// not async??
-            //this.assocsColl.add({source: item._id, type: 'parent', dest: item._icon});
+            this.assocsColl.add({source: item._id, type: 'parent', dest: directives.classId});
             if(directives) this.processDirectives(item, directives);
             this.emit('add', {target:item, directives:directives});
         },
@@ -592,7 +592,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 data._version = this.storage.version;
                 this.data = data;
             }
-            return new QueryResults(data);//TODO should be returning a collection
+            return new QueryResults(data);//TODO should be returning a collection?
         },
         fetchRange: function (kwArgs) {
             var data = this.fetch(),

@@ -516,6 +516,16 @@
     "name" : "Current Liabilities"
 }
 { 
+    "_id" : NumberInt(2735), 
+    "type" : "class", 
+    "name" : "States"
+}
+{ 
+    "_id" : NumberInt(2738), 
+    "type" : "class", 
+    "name" : "Initial"
+}
+{ 
     "_id" : NumberInt(1883), 
     "type" : "object", 
     "_icon" : NumberInt(79), 
@@ -871,60 +881,6 @@
     "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Fotos"
-}
-{ 
-    "_id" : NumberInt(2461), 
-    "type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Jamie Jurgensen"
-}
-{ 
-    "_id" : NumberInt(2462), 
-    "type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Tyrone Trembath"
-}
-{ 
-    "_id" : NumberInt(2463), 
-    "type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Emile Esperanza"
-}
-{ 
-    "_id" : NumberInt(2464), 
-    "type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Whitney Winrow"
-}
-{ 
-    "_id" : NumberInt(2465), 
-    "type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Jazmine Jeffery"
-}
-{ 
-    "_id" : NumberInt(2466), 
-    "type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Rosario Reinhart"
-}
-{ 
-    "_id" : NumberInt(2467), 
-    "type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Jayne Jeansonne"
-}
-{ 
-    "_id" : NumberInt(2468), 
-    "type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Dione Defoor"
-}
-{ 
-    "_id" : NumberInt(2469), 
-    "type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Susy Shippy"
 }
 { 
     "_id" : NumberInt(2499), 
@@ -2116,7 +2072,7 @@
     "schema" : {
         "name" : {
             "type" : "string", 
-            "title" : "From"
+            "title" : "Title"
         }, 
         "description" : {
             "type" : "string", 
@@ -2417,6 +2373,122 @@
         "currency" : {
             "type" : "string", 
             "title" : "Currency"
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(2734), 
+    "type" : "class", 
+    "name" : "Purchase"
+}
+{ 
+    "_id" : NumberInt(2736), 
+    "type" : "class", 
+    "name" : "Dialog"
+}
+{ 
+    "_id" : NumberInt(2739), 
+    "type" : "class", 
+    "name" : "Closed"
+}
+{ 
+    "_id" : NumberInt(2740), 
+    "type" : "class", 
+    "name" : "In Progress"
+}
+{ 
+    "_id" : NumberInt(2741), 
+    "type" : "object", 
+    "name" : "Purchase Proposed"
+}
+{ 
+    "_id" : NumberInt(2742), 
+    "type" : "object", 
+    "name" : "Purchase Agreed"
+}
+{ 
+    "_id" : NumberInt(2743), 
+    "type" : "object", 
+    "name" : "Purchase Concluded"
+}
+{ 
+    "_id" : NumberInt(2746), 
+    "type" : "object", 
+    "name" : "Purchase Rejected"
+}
+{ 
+    "_id" : NumberInt(2747), 
+    "type" : "object", 
+    "name" : "Buy a Bike"
+}
+{ 
+    "_id" : NumberInt(2749), 
+    "type" : "object", 
+    "name" : "Message Details View", 
+    "mapsTo" : NumberInt(86), 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "title" : "Title"
+        }, 
+        "currentState" : {
+            "type" : "string", 
+            "title" : "Current State", 
+            "readOnly" : true, 
+            "#ref" : {
+                "itemId" : NumberInt(2735), 
+                "assocType" : "instantiations"
+            }
+        }, 
+        "nextState" : {
+            "type" : "string", 
+            "title" : "Next State", 
+            "#ref" : {
+                "itemId" : NumberInt(2735), 
+                "assocType" : "mapsTo"
+            }
+        }, 
+        "description" : {
+            "type" : "string", 
+            "title" : "Description"
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(2750), 
+    "type" : "object", 
+    "name" : "Product Details Tab"
+}
+{ 
+    "_id" : NumberInt(2751), 
+    "type" : "object", 
+    "name" : "Product Details Widget", 
+    "displayTypes" : "Form"
+}
+{ 
+    "_id" : NumberInt(2752), 
+    "type" : "object", 
+    "name" : "Product Details View", 
+    "mapsTo" : NumberInt(111), 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "title" : "Product"
+        }, 
+        "value" : {
+            "type" : "number", 
+            "title" : "Price", 
+            "minimum" : NumberInt(0), 
+            "maximum" : NumberInt(100000), 
+            "places" : NumberInt(2)
+        }, 
+        "currency" : {
+            "type" : "number", 
+            "title" : "Currency", 
+            "enum" : [
+                "EUR", 
+                "USD"
+            ]
         }
     }
 }

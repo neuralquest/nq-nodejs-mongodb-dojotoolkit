@@ -321,8 +321,8 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                                     '_icon': this.classId
                                 };
                                 var selectedItem = self.tree.get("selectedItem");
-                                var directives = {parent: selectedItem, viewId: 844};
-                                var newItem = self.store.add(addObj, directives);
+                                var directives = {parent: selectedItem, viewId: this.viewId, classId:this.classId};
+                                self.store.add(addObj, directives);
 
                                 var selectedNodes = self.tree.getNodesByItem(selectedItem);
                                 if(!selectedNodes[0].isExpanded){
