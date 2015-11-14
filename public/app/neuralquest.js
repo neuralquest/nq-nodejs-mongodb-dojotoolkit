@@ -3,13 +3,13 @@ require([
 'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct',
 'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
-'app/nqStore', 'dstore/RequestMemory', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument',
+'app/nqStore', 'dstore/RequestMemory', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument','app/nqBalanceSheet',
 "dojo/json","dijit/Dialog","dijit/form/Form","dijit/form/TextBox","dijit/form/Button","dojo/dom-attr",'dojox/html/styles', 'dojo/query!css2'],
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct,
 		Deferred, when, all, query, BorderContainer,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
-		nqStore, RequestMemory, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument,
+		nqStore, RequestMemory, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument, nqBalanceSheet,
 		JSON, Dialog,Form,TextBox,Button,domattr,styles, css2) {
 
     nqStore = new nqStore();
@@ -51,31 +51,27 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		// lvl: Number
 		//		The level we are currently processing. Defaults to 0 as is the case when we are called by on hash change topic
 		// returns: Promise
-		//		All of the page elements of the underlaying levels are completed 
-		//var currentHash = hash();		
+		//		All of the page elements of the underlaying levels are completed
+		//var currentHash = hash();
 		//console.log('hash', _hash);
 		when(drawFramesRecursive(0), function(result){
-            setTimeout(function(){// Let the browser display thread catchup.
-                var hashArr = hash().split('.');
-                var levels = Math.ceil(hashArr.length/3);//determine the number of levels, rounded to the highest integer
-                var widgetPromises = [];
-                for(var level = levels-1; level>=0; level--){//we start at the highest level and work our way down (user experience)
-                    widgetPromises.push(drawWidgets(level));
-                }
-                return all(widgetPromises).then(function(widgetsArrArr){
-                    setTimeout(function(){// Let the browser display thread catchup.
-                        var level = levels-1;
-                        widgetsArrArr.forEach(function(widgetsArr){
-                            var state = getState(level);
-                            widgetsArr.forEach(function(widget){
-                                widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel);
-                                widget.setSelectedObjIdThisLevel(state.selectedObjId);
-                            });
-                            level = level -1;
-                        });
-                    },10);
-                }, errorDialog);
-            },50);
+			var hashArr = hash().split('.');
+			var levels = Math.ceil(hashArr.length/3);//determine the number of levels, rounded to the highest integer
+			var widgetPromises = [];
+			for(var level = levels-1; level>=0; level--){//we start at the highest level and work our way down (user experience)
+				widgetPromises.push(drawWidgets(level));
+			}
+			return all(widgetPromises).then(function(widgetsArrArr){
+				var level = levels-1;
+				widgetsArrArr.forEach(function(widgetsArr){
+					var state = getState(level);
+					widgetsArr.forEach(function(widget){
+						widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel);
+						widget.setSelectedObjIdThisLevel(state.selectedObjId);
+					});
+					level = level -1;
+				});
+			});
 		}, errorDialog);
 	}
 	function drawFramesRecursive(level){
@@ -94,7 +90,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		
 		//are we creating an accordion container in a border container or a tab container?
 		return nqStore.get(state.viewId).then(function(view){
-            console.log('level', level, view);
+            //console.log('level', level, view);
 			var viewPaneCreated;
 			if(view.accordionOrTab=='Accordion in Border Container') viewPaneCreated = createAccordionInBorderContainer(state.viewId, parentContentPane, level);
 			else viewPaneCreated = createTabs(state.viewId, parentContentPane, level);
@@ -107,6 +103,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     function drawWidgets(level){
         var state = getState(level);
         var selectedTabId = getSelectedTabRecursive(state.viewId);
+        if(!selectedTabId) return [];//The selected tab could not be found. There is a problem in your page model
         return nqStore.getItemsByAssocTypeAndDestClass(selectedTabId, 'ordered', WIDGETS_ATTRCLASS).then(function(widgetsArr){
             var widgetPromises = [];
             widgetsArr.forEach(function(widget){
@@ -340,7 +337,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             }, domConstruct.create('div'));
             tab.addChild(widgetObj);
         }
-        if (widget.displayTypes == 'Form'){
+        else if (widget.displayTypes == 'Form'){
             widgetObj = new nqForm({
                 id: 'nqWidget'+widget._id,
                 store: nqStore,
@@ -350,7 +347,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             }, domConstruct.create('div'));
             tab.addChild(widgetObj);
         }
-        if (widget.displayTypes ==  'Table'){
+        else if (widget.displayTypes ==  'Table'){
             widgetObj = new nqTable({
                 id: 'nqWidget'+widget._id,
                 store: nqStore,
@@ -363,7 +360,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             }, domConstruct.create('div'));
             tab.addChild(widgetObj);
         }
-        if (widget.displayTypes == 'Tree'){
+        else if (widget.displayTypes == 'Tree'){
             widgetObj = new nqTree({
                 id: 'nqWidget'+widget._id,
                 store: nqStore,
@@ -377,7 +374,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             //widgetObj.startup();
             //createDeferred.resolve(widgetObj);
         }
-        if (widget.displayTypes == 'Process Model'){
+        else if (widget.displayTypes == 'Process Model'){
             widgetObj = new nqProcessChart({
                 id: 'nqWidget'+widget._id,
                 store: nqStore,
@@ -388,7 +385,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             tab.addChild(widgetObj);
             //widgetObj.startup();
         }
-        if (widget.displayTypes == '3D Class Model'){
+        else if (widget.displayTypes == '3D Class Model'){
             widgetObj = new nqClassChart({
                 id: 'nqWidget'+widget._id,
                 store: nqStore,
@@ -396,6 +393,17 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 viewId: viewId,
                 tabId: tabId, // used by resize
                 //skyboxArray: [ 'img/Neuralquest/space_3_right.jpg', 'img/Neuralquest/space_3_left.jpg', 'img/Neuralquest/space_3_top.jpg' ,'img/Neuralquest/space_3_bottom.jpg','img/Neuralquest/space_3_front.jpg','img/Neuralquest/space_3_back.jpg']
+            }, domConstruct.create('div'));
+            tab.addChild(widgetObj);
+            //widgetObj.startup();
+        }
+        else if (widget.displayTypes == 'Balance Sheet'){
+            widgetObj = new nqBalanceSheet({
+                id: 'nqWidget'+widget._id,
+                store: nqStore,
+                createDeferred: createDeferred, //tell us when your done by returning the widgetObj
+                viewId: viewId,
+                widgetId: widget._id
             }, domConstruct.create('div'));
             tab.addChild(widgetObj);
             //widgetObj.startup();

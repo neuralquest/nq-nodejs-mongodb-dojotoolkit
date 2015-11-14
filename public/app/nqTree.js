@@ -119,7 +119,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 self.tree.set('path', treePaths).then(function(results){
                     console.log('results',results);
                     //self.tree.set('selectedItem', result[results.length-1]);
-                });
+                }, function(err){console.log('defect in set tree path');});
             }, nq.errorDialog);
 		},
 		createTree: function(){

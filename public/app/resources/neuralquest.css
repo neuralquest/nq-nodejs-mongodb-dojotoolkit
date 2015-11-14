@@ -113,6 +113,10 @@ div.todofloatright p {font-size: 90%; background-color: rgb(252, 252, 181);}
 .nqtable th{text-align: center; font-weight: bold; background-color: silver; }
 
 
+form  { display: table;      }
+p     { display: table-row;  }
+label { display: table-cell; white-space: nowrap; }
+input { display: table-cell; width:5em;}
 
 /* Gennerated by means of nqapp/nqSprites.css */
 /* You can also gennerate a sprite template using nqapp/nqSprites.png */

@@ -82,6 +82,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
         },
         put: function (item, directives) {
             this.enableTransactionButtons();
+            if(!directives.viewId) directives.viewId = item._viewId;//TODO pastItem should send viewID in directives
             this.itemsColl.put(item, directives);
             if(directives) this.processDirectives(item, directives);
             this.emit('update', {target:item, directives:directives});
@@ -92,8 +93,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
             this.itemsColl.remove(item._id, directives);
             this.emit('remove', {target:item, directives:directives});
         },
-        getChildren: function (object, onComplete) {
-            if(!object._id || !object._viewId) throw (new Error('Invalid parameters'));
+        getChildren: function (object, onComplete) { if (!object._id || !object._viewId) throw (new Error('Invalid parameters'));
             //var collection = this.filter({parentId: object.id, parentViewId: object.viewId });
             //collection.fetch();
             //return onComplete(collection);

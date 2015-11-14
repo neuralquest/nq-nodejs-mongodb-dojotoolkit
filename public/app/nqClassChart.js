@@ -60,7 +60,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		buildHierarchy: function(id){
 			var self = this;
 			return when(self.store.get(id), function(cell){
-				if(cell._type == 'object') return cell;
+				if(cell.type == 'object') return cell;
 				//var isAPermittedvalue = pv?pv:cell.id==PERTMITTEDVALUE_CLASS;
 				var associations = {};
 				var promisses = [];
@@ -71,7 +71,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
                 promisses.push(self.store.getItemsByAssocType(id, 'mapsTo'));
                 promisses.push(self.store.getItemsByAssocType(id, 'owns'));
 
-				cellPostionsStore.put({id:cell._id, name: cell._name, type: cell._type, associations:associations});
+				cellPostionsStore.put({id:cell._id, name: cell.name, type: cell.type, associations:associations});
 				return when(all(promisses), function(resArrArr){
                     var subClassesArr = [];
                     resArrArr[0].forEach(function(child){

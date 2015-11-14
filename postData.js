@@ -34,7 +34,8 @@ function update(req){
                 if(updateObj.collection == 'items' && updateObj.action == 'add') {
                     writePromises.push(Items.insert(updateObj.item));
                     //associate with the user
-                    writePromises.push(Assocs.insert({source:user._id, type:'owns', dest:updateObj.item._id}));
+                    //TODO
+                    //writePromises.push(Assocs.insert({source:user._id, type:'owns', dest:updateObj.item._id}));
                 }
                 if(updateObj.collection == 'items' && updateObj.action == 'update') {
                     //TODO $unset

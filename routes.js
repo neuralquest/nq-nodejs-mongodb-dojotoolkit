@@ -40,11 +40,18 @@ exports = module.exports = function(app, passport) {
         });
     });
     app.get("/consistency", function (req, res, next) {
-        consistency.check().then(function(items){
-            res.json(items);
-        }, function(err){
+        if(req.isAuthenticated()) {
+            consistency.check().then(function(items){
+                res.json(items);
+            }, function(err){
+                next(err);
+            });
+        }
+        else{
+            var err = new Error('Must be signed in for consistency check');
+            err.status = 404;
             next(err);
-        });
+        }
     });
 
     app.post('/login',

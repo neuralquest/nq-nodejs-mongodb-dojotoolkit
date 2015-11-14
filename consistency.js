@@ -170,12 +170,12 @@ function validateAssocByClassModel(assoc){
                 var sourcesArr = [];
                 sourceAncestors.forEach(function(ancestor){
                     if(ancestor.type == 'object') sourcesArr.push('O '+ancestor._id+' - '+ancestor.name);
-                    else sourcesArr.push('C '+ancestor._id+' - '+ancestor._name);
+                    else sourcesArr.push('C '+ancestor._id+' - '+ancestor.name);
                 });
                 var destsArr = [];
                 destAncestors.forEach(function(ancestor){
                     if(ancestor.type == 'object') destsArr.push('O '+ancestor._id+' - '+ancestor.name);
-                    else destsArr.push('C '+ancestor._id+' - '+ancestor._name);
+                    else destsArr.push('C '+ancestor._id+' - '+ancestor.name);
                 });
                 var assocText = assoc.source+' '+assoc.type+' '+assoc.dest;
                 return {noCorrespondingClassAssoc: {objectAssoc:assocText, from: sourcesArr, to: destsArr}};
@@ -233,7 +233,7 @@ function cleanup(){
     //var newitems = db.get().collection('newitems');
     return Items.find({type:'class'}).then(function(itemsArr){
         itemsArr.forEach(function(item) {
-            var newClass = {_id: item._id, type:'class', name:item._name};
+            var newClass = {_id: item._id, type:'class', name:item.name};
             var properties = JSON.parse(JSON.stringify(item));
             var required = [];
             var propsFound = false;
