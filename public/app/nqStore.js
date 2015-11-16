@@ -555,16 +555,10 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         else if(query.itemId && query.viewId) {
                             // used by form to get an array with a single object
                             // used by tree and document to get the root
+                            // used by dropdown select
                             var promise = this.getItemByItemIdViewId(query.itemId, query.viewId);
                             promise.then(function (res) {
                                 data = res;
-                            });
-                        }
-                        else if(query.itemId) {
-                            //Not used anymore
-                            debugger;
-                            this.get(query.itemId).then(function(res){
-                                data = [res];
                             });
                         }
                         else if (query.parentId && query.viewId) {
@@ -576,13 +570,6 @@ function(declare, lang, array, when, all, Store, QueryResults,
                         else if(query.parentId && query.parentViewId) {
                             // used by table to populate the grid
                             this.getItemsByParentIdParentViewId(query.parentId, query.parentViewId).then(function(res){
-                                data = res;
-                            });
-                        }
-                        else if(query.parentId && query.type && query.destClassId) {
-                            //Not used anymore
-                            debugger;
-                            this.getItemsByAssocTypeAndDestClass(query.parentId, query.type, query.destClassId).then(function(res){
                                 data = res;
                             });
                         }
@@ -615,7 +602,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
             });
         },
         getCombinedSchemaForView: function(view) {
-            /* summary:  Used to create a JSON schema based on the view schema in combination with class attributes inherited through view.mapsTo.
+            /* summary:  Used to create a JSON schema based on the view schema in combination with class schemas inherited through view.mapsTo.
              //          The same method is used server side to validate updates.
              // view: Object
              //          The starting point for our schema

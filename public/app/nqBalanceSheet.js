@@ -15,8 +15,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                 this.inherited(arguments);
                 var self = this;
                 //this.form = new Form();
-                this.form = new Form(null, domConstruct.create('form', null, self.pane.containerNode));
-                //var formNode = domConstruct.create('form', {style: 'border-spacing:5px;'}, this.pane.containerNode);
+                //this.form = new Form(null, domConstruct.create('form', null, self.pane.containerNode));
+                var formNode = domConstruct.create('form', {style: 'border-spacing:5px;'}, this.pane.containerNode);
                 var initialized = self.store.get(self.widgetId).then(function(widget){
                     self.widget = widget;
                     self.headerDivNode.innerHTML = '<h1>'+widget.name+'</h1>';
@@ -32,13 +32,13 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     });
                 });
                 when(initialized, function(result){
-                    var p1 = domConstruct.create("p", {style: "font-weight:bold; font-size:1.5em"}, self.form.domNode);
+                    var p1 = domConstruct.create("p", {style: "font-weight:bold; font-size:1.5em"}, formNode);
                     domConstruct.create("label", {innerHTML: ('Assets')}, p1);
                     domConstruct.create("label", null, p1);
                     domConstruct.create("label", {innerHTML: ('Liabilities')}, p1);
                     domConstruct.create("label", null, p1);
 
-                    var p2 = domConstruct.create("p", {style: "font-weight:bold"}, self.form.domNode);
+                    var p2 = domConstruct.create("p", {style: "font-weight:bold"}, formNode);
                     domConstruct.create("label", {innerHTML: ('Current Assets')}, p2);
                     domConstruct.create("label", null, p2);
                     domConstruct.create("label", {innerHTML: ('Current Liabilities')}, p2);
@@ -47,49 +47,49 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 
 
 
-                    var p3 = domConstruct.create("p", null, self.form.domNode);
+                    var p3 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Cash')}, p3);
                     self.bsCash = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p3));
                     domConstruct.create("label", {innerHTML: ('Notes payable')}, p3);
                     self.bsNotesPayable = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p3));
 
-                    var p4 = domConstruct.create("p", null, self.form.domNode);
+                    var p4 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Petty pash')}, p4);
                     self.bsPettyCash = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p4));
                     domConstruct.create("label", {innerHTML: ('Accounts payable')}, p4);
                     self.bsAccountsPayable = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p4));
 
-                    var p5 = domConstruct.create("p", null, self.form.domNode);
+                    var p5 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Temporary investments')}, p5);
                     self.bsTempInvestments = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p5));
                     domConstruct.create("label", {innerHTML: ('Wages payable')}, p5);
                     self.bsWagesPayable = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p5));
 
-                    var p6 = domConstruct.create("p", null, self.form.domNode);
+                    var p6 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Accounts receivable - net')}, p6);
                     self.bsAccountsReceivable = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p6));
                     domConstruct.create("label", {innerHTML: ('Intrest payable')}, p6);
                     self.bsIntrestPayable = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p6));
 
-                    var p7 = domConstruct.create("p", null, self.form.domNode);
+                    var p7 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Inventory')}, p7);
                     self.bsInventory = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p7));
                     domConstruct.create("label", {innerHTML: ('Taxes payable')}, p7);
                     self.bsTaxesPayable = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p7));
 
-                    var p8 = domConstruct.create("p", null, self.form.domNode);
+                    var p8 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Supplies')}, p8);
                     self.bsSupplies = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p8));
                     domConstruct.create("label", {innerHTML: ('Warranty liability')}, p8);
                     self.bsWarentyLibility = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p8));
 
-                    var p9 = domConstruct.create("p", null, self.form.domNode);
+                    var p9 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Prepaid insurance')}, p9);
                     self.bsPrepaidInsurance = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p9));
                     domConstruct.create("label", {innerHTML: ('Unearned revenues')}, p9);
                     self.bsUnearndRevenues = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p9));
 
-                    var p10 = domConstruct.create("p", null, self.form.domNode);
+                    var p10 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", null, p10);
                     self.bsTotalCurrentAssests = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p10));
                     domStyle.set(self.bsTotalCurrentAssests.domNode, 'font-weight', 'bold');
@@ -103,7 +103,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 
 
 
-                    var p11 = domConstruct.create("p", {style: "font-weight:bold"}, self.form.domNode);
+                    var p11 = domConstruct.create("p", {style: "font-weight:bold"}, formNode);
                     domConstruct.create("label", {innerHTML: ('Investments')}, p11);
                     self.bsTotalInvestments = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p11));
                     domStyle.set(self.bsTotalInvestments.domNode, 'font-weight', 'bold');
@@ -113,46 +113,46 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     domConstruct.create("label", {innerHTML: ('Long-term Liabilities')}, p11);
                     domConstruct.create("label", null, p11);
 
-                    var p12 = domConstruct.create("p", null, self.form.domNode);
+                    var p12 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Property, plant & equipment'), style: "font-weight:bold"}, p12);
                     domConstruct.create("label", null, p12);
                     domConstruct.create("label", {innerHTML: ('Notes payable')}, p12);
                     self.bsNotesPayable2 = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p12));
 
-                    var p13 = domConstruct.create("p", null, self.form.domNode);
+                    var p13 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Land')}, p13);
                     self.bsLand = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p13));
                     domConstruct.create("label", {innerHTML: ('Bonds payable')}, p13);
                     self.bsBondsPayable = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p13));
 
-                    var p14 = domConstruct.create("p", null, self.form.domNode);
+                    var p14 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Land Improvements')}, p14);
                     self.bsLandImprovements = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p14));
                     domConstruct.create("label", null, p14);
                     self.bsTotalLongTermLiablities = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p14));
                     domStyle.set(self.bsTotalLongTermLiablities.domNode, 'font-weight', 'bold');
-                    domStyle.set(self.bsTotalCurrentLiabilities.domNode, 'border-top-style', 'solid');
-                    domStyle.set(self.bsTotalCurrentLiabilities.domNode, 'border-top-color', 'lightgrey');
+                    domStyle.set(self.bsTotalLongTermLiablities.domNode, 'border-top-style', 'solid');
+                    domStyle.set(self.bsTotalLongTermLiablities.domNode, 'border-top-color', 'lightgrey');
 
-                    var p15 = domConstruct.create("p", null, self.form.domNode);
+                    var p15 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Buildings')}, p15);
                     self.bsBuildings = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p15));
                     domConstruct.create("label", {innerHTML: ("Stockholders' Equity"), style: "font-weight:bold; font-size:1.5em"}, p15);
                     domConstruct.create("label", null, p15);
 
-                    var p16 = domConstruct.create("p", null, self.form.domNode);
+                    var p16 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Equipment')}, p16);
                     self.bsEquipment = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p16));
                     domConstruct.create("label", {innerHTML: ('Common stock')}, p16);
                     self.bsCommonStock = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p16));
 
-                    var p17 = domConstruct.create("p", null, self.form.domNode);
+                    var p17 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Less: acc deprecation')}, p17);
                     self.bsAccDeprecation = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p17));
                     domConstruct.create("label", {innerHTML: ('Retained earnings')}, p17);
                     self.bsRetainedEarnings = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p17));
 
-                    var p18 = domConstruct.create("p", null, self.form.domNode);
+                    var p18 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", null, p18);
                     self.bsTotalPropPlantEquipNet = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p18));
                     domStyle.set(self.bsTotalPropPlantEquipNet.domNode, 'font-weight', 'bold');
@@ -161,7 +161,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     domConstruct.create("label", {innerHTML: ('Less: Treasury stock')}, p18);
                     self.bsTreasuryStock = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p18));
 
-                    var p19 = domConstruct.create("p", {style: "font-weight:bold"}, self.form.domNode);
+                    var p19 = domConstruct.create("p", {style: "font-weight:bold"}, formNode);
                     domConstruct.create("label", {innerHTML: ('Current Assets')}, p19);
                     domConstruct.create("label", null, p19);
                     domConstruct.create("label", null, p19);
@@ -170,30 +170,30 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     domStyle.set(self.bsTotalStockHolderEquipment.domNode, 'border-top-style', 'solid');
                     domStyle.set(self.bsTotalStockHolderEquipment.domNode, 'border-top-color', 'lightgrey');
 
-                    var p20 = domConstruct.create("p", null, self.form.domNode);
+                    var p20 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Goodwill')}, p20);
                     self.bsGoodWill = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p20));
 
 
-                    var p21 = domConstruct.create("p", null, self.form.domNode);
+                    var p21 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", {innerHTML: ('Trade names')}, p21);
                     self.bsTradeNames = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p21));
 
-                    var p22 = domConstruct.create("p", null, self.form.domNode);
+                    var p22 = domConstruct.create("p", null, formNode);
                     domConstruct.create("label", null, p22);
                     self.bsTotalIntangibleAssests = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p22));
                     domStyle.set(self.bsTotalIntangibleAssests.domNode, 'font-weight', 'bold');
-                    domStyle.set(self.bsTotalCurrentLiabilities.domNode, 'border-top-style', 'solid');
+                    domStyle.set(self.bsTotalIntangibleAssests.domNode, 'border-top-style', 'solid');
                     domStyle.set(self.bsTotalIntangibleAssests.domNode, 'border-top-color', 'lightgrey');
 
-                    var p23 = domConstruct.create("p", {style: "font-weight:bold"}, self.form.domNode);
+                    var p23 = domConstruct.create("p", {style: "font-weight:bold"}, formNode);
                     domConstruct.create("label", {innerHTML: ('Other assests')}, p23);
                     self.bsOtherAssets = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p23));
                     domStyle.set(self.bsOtherAssets.domNode, 'font-weight', 'bold');
                     domStyle.set(self.bsOtherAssets.domNode, 'border-top-style', 'solid');
                     domStyle.set(self.bsOtherAssets.domNode, 'border-top-color', 'lightgrey');
 
-                    var p24 = domConstruct.create("p", {style: "font-weight:bold"}, self.form.domNode);
+                    var p24 = domConstruct.create("p", {style: "font-weight:bold"}, formNode);
                     domConstruct.create("label", {innerHTML: ('Total Assets')}, p24);
                     self.bsTotalAssets = new NumberTextBox({readonly:false, places:2}, domConstruct.create('input', null, p24));
                     domStyle.set(self.bsTotalAssets.domNode, 'font-weight', 'bold');
@@ -216,6 +216,30 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 
                 var self = this;
 
+                var promises = [];
+                promises.push(this.store.getItemsByAssocTypeAndDestClass(value, 'owns', 2695));
+                promises.push(this.store.getItemsByAssocTypeAndDestClass(value, 'owns', 111));
+
+                all(promises).then(function(valuesArrArr){
+                    var totalCurrentAssests = 0;
+                    var value = 0;
+                    valuesArrArr[0].forEach(function(valueObj){
+                        value = value + valueObj.value;
+                    });
+                    self.bsCash.set('value', value);
+                    totalCurrentAssests += value;
+
+                    var value = 0;
+                    valuesArrArr[1].forEach(function(valueObj){
+                        value = value + valueObj.value;
+                    });
+                    self.bsInventory.set('value', value);
+                    totalCurrentAssests += value;
+
+                    self.bsTotalCurrentAssests.set('value', totalCurrentAssests);
+                });
+
+                /*
                 self.bsCash.set('value', 10000);
                 self.bsNotesPayable.set('value', 10000);
                 self.bsPettyCash.set('value', 10000);
@@ -229,7 +253,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                 self.bsSupplies.set('value', 10000);
                 self.bsPrepaidInsurance.set('value', 10000);
                 self.bsWarentyLibility.set('value', 10000);
-                self.bsCash.set('value', 10000);
+                self.bsPrepaidInsurance.set('value', 10000);
                 self.bsUnearndRevenues.set('value', 10000);
                 self.bsTotalCurrentAssests.set('value', 10000);
                 self.bsTotalCurrentLiabilities.set('value', 10000);
@@ -253,11 +277,11 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                 self.bsOtherAssets.set('value', 10000);
                 self.bsTotalAssets.set('value', 10000);
                 self.bsTotalLibilitiesStockHolderEquity.set('value', 10000);
-                
+                */
                 
                 //this.form.set('value', updateObj);
-                var value = this.form.get('value');
-                console.log(value);
+                //var value = this.form.get('value');
+                //console.log(value);
 /*
 //            var collection = this.store.filter({itemId:1802});
                 var collection = this.store.filter({itemId:this.selectedObjIdPreviousLevel, viewId:self.view._id});
