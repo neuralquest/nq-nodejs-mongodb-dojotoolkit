@@ -1,58 +1,58 @@
 { 
     "_id" : NumberInt(494), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(89), 
     "name" : "ACME ITIL v3 Service Organization"
 }
 { 
     "_id" : NumberInt(510), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(89), 
     "name" : "Service Organization", 
     "description" : "<p>This is where we try some HTML.<BR>As yoy can see it's <B>not</B> easy.</p>"
 }
 { 
     "_id" : NumberInt(702), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(89), 
     "name" : "Neuralquest - Browser based process modeling and execution", 
     "description" : "<table style=\"table-layout: fixed; width:100%; border:0px\">\n<tbody>\n<tr style=\"color:lightgrey; font-size:400%;text-align:center;vertical-align: bottom;font-weight: bold\">\n<td style=\"background:rgba(128,0,128, 0.5)\">What</td>\n<td style=\"background:rgba(128,128,0, 0.5)\">How</td>\t\t\n<td style=\"background:rgba(255,0,102, 0.5)\">Why</td>\n</tr>\n<tr style=\"vertical-align: top; background: rgba(220,230,255,0.8);\">\n<td style=\"padding-left:5px; padding-right:5px;\"><h3>Neuralquest is an opensource framework that allows you to:</h3><ul>\n<li>Browse publications</li>\n<li>Create your own space to publish blogs and applications</li>\n<li>Participate in organizations and communities</li><li>Respond to tasks assigned to you based on your roles in various organizations</li>\n<li>Create your own organizations based on industry standard templates</li>\n</ul>\n<p>Neuralquest consists of a all-in-one modelling and execution environment based on an airtight authentication and role based authorization framework.</p>\n</td>\n<td style=\"padding-left:5px; padding-right:5px;\"><h3>Lightweight application, endless possibilities:</h3><ul>\n<li>No 3GL: All development takes place through an easy to use GUI interface.</li>\n<li>No deployment: Changes to any of the models take effect immediately.</li>\n<li>Self documenting thanks to dozens of overviews and diagrams</li>\n<li>Strong emphasis on 2D and 3D diagramming, ...because they're cool and you can learn a lot from them.</li>\n<li>By keeping it simple: The entire application consists of 3000 lines of code. Everything you've seen until now: the class model, page model, the data it's self, is contained in 120K of data, stored in just two tables.</li>\n</ul>\n<p>Neuralquest employs several opensource resources including  <a href=\"http://www.oracle.com/technetwork/java/index.html\" target=\"_blank\">Java</a>, <a href=\"http://tomcat.apache.org/\" target=\"_blank\">Tomcat</a>, <a href=\"http://hibernate.org/\" target=\"_blank\">Hibernate,</a> <a href=\"http://www.mysql.com/\" target=\"_blank\">MySQL</a>, <a href=\"http://dojotoolkit.org/\" target=\"_blank\">Dojo Toolkit</a>, and <a href=\"http://threejs.org/\" target=\"_blank\">Three.js</a>.</p>\n</td>\n<td style=\"padding-left:5px; padding-right:5px;\">\n<h3>Complexity is the biggest challenge facing today's organizations, large and small</h3>\n<p>A typical IT landscape in any large organization will consist of hundreds of loosely coupled IT systems, each responsible for a small part of the overall business process. Note that the process themselves aren't particularity complex, rather it's managing the various systems and their interfaces to each other that makes the system as a whole difficult to maintain. This complexity came about as a result of a long history of emerging technologies and market forces.<br />Neuralquest takes a step back and asks: &quot;<i>What is it the we really want computers to do for us when it comes to supporting business processes?</i>&quot;. From there we take the shortest possible rout to your browser, eliminating as many architectural layers as possible.<br />The result is a highly flexible framework that allows your to start out with simple processes and gradually grow your implementation so that it covers most if not of your business process needs, at very little cost.<br /></p>\n</td>\n</tr>\n<tr style=\"height:300px; vertical-align: top; background:rgba(220,230,255,0.8)\">\n<td colspan=\"3\" style=\"padding-left:5px; padding-right:5px;\"><b>BETA: </b>Many of the features you read about on these pages are still under development.<h3>More Information</h3><ul><li>Find out more about how Neuralquest works browsing the <a href=\"#842.1784.702.2485.2502.824.2518\" target=\"_self\">documentation</a>.</li><li>Browse or take part in one of the organizations or communities. </li><li>Get your hands dirty by playing around in the sandbox. </li><li>Get involved.<br /></li></ul></td>\n</tr>\n</tbody>\n</table>"
 }
 { 
     "_id" : NumberInt(1002), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(80), 
     "name" : "Trash"
 }
 { 
     "_id" : NumberInt(1004), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79)
 }
 { 
     "_id" : NumberInt(2648), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Attributes", 
     "accordionOrTab" : "Accordion in Border Container"
 }
 { 
     "_id" : NumberInt(810), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(80), 
     "name" : "Contents", 
     "description" : "<p>Matters of intrest.</p><p>How to use the content manager: <br /></p><ul><li>Double clicking on text will pop up an editor. </li><li>Documents are managed by dragging and dropping headers in the tree. </li><li>Right-click on a tree node to add or remove headers.Ã?????Ã????Ã???Ã??Ã?Â </li></ul>You must be authorized to save changes to the server.<br />"
 }
 { 
     "_id" : NumberInt(824), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Neuralquest - Browser-based process modeling and execution", 
     "description" : "<p><b>Beta </b>- <i>under construction</i><br /><br /></p>"
 }
 { 
     "_id" : NumberInt(842), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "navigation view", 
     "accordionOrTab" : "Accordion in Border Container", 
@@ -62,387 +62,375 @@
 }
 { 
     "_id" : NumberInt(994), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Development features", 
-    "description" : "<ul><li><b>Integrated Development Environment</b>: includes process model, use case model and class model.</li><li><b>Choose from a host of open source process models</b>*: Anything from Change Request procedures to Small-business in a box. Models are maintained through a Wikipedia-type peer-reviewed process.</li><li><b>Extend existing models</b>: Start with a copy of an existing template model, then modify it to suit your own needs.</li><li><b>Death to 3GL</b>: You won't need to write a single line of code. Easy to use DnD interface.</li><li><b>Changes to your model become effective immediately</b>: No cumbersome deployment process.</li><li><b>Sandbox</b>: Participants can play around with models.</li></ul>\n"
+    "description" : "<ul><li><b>Integrated Development Environment</b>: includes process model, use case model and class model.</li><li><b>Choose from a host of open source process models</b> Anything from Change Request procedures to Small-business in a box. Models are maintained through a Wikipedia-type peer-reviewed process.</li><li><b>Extend existing models</b>: Start with a copy of an existing template model, then modify it to suit your own needs.</li><li><b>Death to 3GL</b>: You won't need to write a single line of code. Easy to use DnD interface.</li><li><b>Changes to your model become effective immediately</b>: No cumbersome deployment process.</li><li><b>Sandbox</b>: Participants can play around with models.</li></ul>\n"
 }
 { 
     "_id" : NumberInt(996), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Enable WebGl in FireFox", 
     "description" : "<p>You may need to enable WebGl in FireFox.<br />In the address bar type 'webgl' and then change webgl.force-enabled to true </p>"
 }
 { 
     "_id" : NumberInt(1005), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79)
 }
 { 
     "_id" : NumberInt(1008), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "General Problem Solving", 
     "description" : "<p>Life is a curious thing.<br /></p>"
 }
 { 
     "_id" : NumberInt(1016), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Identifying The Problem Type", 
     "description" : "<p><br /></p>"
 }
 { 
     "_id" : NumberInt(1018), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Finding a Suitable Solution", 
     "description" : "<p><br /></p>"
 }
 { 
     "_id" : NumberInt(1028), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79)
 }
 { 
     "_id" : NumberInt(1029), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79)
 }
 { 
     "_id" : NumberInt(1188), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79)
 }
 { 
     "_id" : NumberInt(1190), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "NqWebGlChart", 
     "description" : "<p>NqWebGlChart forms the basis for our chart widgets.</p>"
 }
 { 
     "_id" : NumberInt(1192), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Organization Model", 
     "description" : "<p>The Organization Model describes legal entities and their subdivisions. Legal entities can be Users or Organizations. The later has two sub-classes Commercial and Non-profit. Organizations can have a hierarchy of Organizational Units. Users can have an ownership relationship with Organisation and/or a responsibility relationship with roles.</p>"
 }
 { 
     "_id" : NumberInt(1193), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "doPost", 
     "description" : "<div class=\"floatright\" style=\"width: 400px;\"><pre>[\n    {\n        &quot;action&quot;:&quot;put&quot;,\n        &quot;data&quot;:{\n            &quot;873&quot;:&quot;The future of America lies ahead of us&quot;,\n            &quot;959&quot;:&quot;&lt;p&gt;Don't be evil.&lt;/p&gt;&quot;,\n            &quot;id&quot;:&quot;846/cid:306276&quot;,\n            &quot;viewId&quot;:846,\n            &quot;classId&quot;:79}},    \n        {\n        &quot;action&quot;:&quot;post&quot;,\n        &quot;data&quot;:{\n            &quot;846&quot;:[\n                &quot;846/2327&quot;,\n                &quot;846/2030&quot;,\n                &quot;846/2107&quot;,\n                &quot;846/2032&quot;,\n                &quot;cid:306276&quot;],\n            &quot;873&quot;:&quot;Neuralquest - Browser-based process modeling and execution&quot;,\n            &quot;959&quot;:&quot;&lt;p&gt;&lt;b&gt;Beta &lt;/b&gt;- &lt;i&gt;still under development&lt;/i&gt;&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;\\n&quot;,\n            &quot;id&quot;:&quot;846/824&quot;,\n            &quot;viewName&quot;:&quot;846 - contents view&quot;,\n            &quot;classId&quot;:79,\n            &quot;viewId&quot;:846\n        }\n    },\n    {\n        &quot;action&quot;:&quot;delete&quot;,\n        &quot;data&quot;:{\n            &quot;id&quot;:&quot;846/2030&quot;,\n        }\n    }\n]\n</pre>\n<p><b>POST request</b> . </p></div><p>The doPost request takes an array of update commands. These can be either <code>delete</code>, <code>put</code> or <code>post</code>.</p>"
 }
 { 
     "_id" : NumberInt(1194), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Cells", 
     "description" : "<p>Cells are the basic unit of information.\nThe CELL table has three attributes:\n<br /></p><ul><li>ID: Long, auto generated</li><li>TYPE: Short, 0 or 1, meaning class or object</li><li>NAME: String, holds the name in the case of a class, or the value in the case of an Association object. <br /></li></ul><p>ID and TYPE are mandatory, NAME may be NULL.<br />NOTE: In future there may be a need to separate out the NAME attribute, or change it to a BLOB so we can store images and videos. This my also be useful for multilingual text.\n<br />NOTE: There is a case to be made for a third type: Attributes. Currently attributes are defined as subclass of one of the primary attribute classes. This works fine during normal usage, however when defining classes and their attributes, there is no way of distinguishing between the primary attribute types and the types that were added for previous attributes. A separate Cell type may help to solve this problem.<br /></p>"
 }
 { 
     "_id" : NumberInt(1195), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Associations", 
     "description" : "<p>Relationships between Classes and Objects are represented by Associations. At the Class level the Associations define which Association are allowed at the Object level.</p><p>The ASSOC table has four attributes, three of which are foreign keys to Cell:</p><p><ul><li>ID: Long, auto generated<br /></li><li>FK_SOURCE: Long, foreign key to the source for the association<br /></li><li>FK_TYPE: Short, foreign key to the type type of association<br /></li><li>FK_DEST: Long, foreign key to the destination of the association<br /></li></ul></p><p>All attributes are mandatory. </p><p>The combination of FK_SOURCE, FK_TYPE and FK_DEST is unique. The client is never aware of the ID of associations. It always addresses these by means of a combination of the foreign keys.</p><p>The foreign keys are not enforced by the database manager, we leave that up to Hibernate. The TYPE foreign key is not even enforced by Hibernate. This is due to the fact that is a Short integer, while the primary key of Cell is Long. It is en forced by the Data Sevlet.</p><p>NOTE: The ID could quite possibly be redundant, since we never do anything with it. Instead we could make a primary key combined remaining columns, since this combination is unique. It would be interesting to see what the performance consequence would be.  </p>"
 }
 { 
     "_id" : NumberInt(1207), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "doGet", 
     "description" : "<div class=\"floatright\" style=\"width: 400px;\"><pre>{\n    &quot;959&quot;: &quot;&lt;p&gt;&lt;b&gt;Beta &lt;\\/b&gt;- &lt;i&gt;still under development&lt;\\/i&gt;&lt;br \\/&gt;&lt;br \\/&gt;&lt;\\/p&gt;\\n&quot;,\n    &quot;id&quot;: &quot;846\\/824&quot;,\n    &quot;viewName&quot;: &quot;846 - contents view&quot;,\n    &quot;classId&quot;: 79,\n    &quot;873&quot;: &quot;Neuralquest - Browser-based process modeling and execution&quot;,\n    &quot;846&quot;: [\n        &quot;846\\/2327&quot;,\n        &quot;846\\/2107&quot;,\n        &quot;846\\/2030&quot;,\n        &quot;846\\/2032&quot;],\n    &quot;viewId&quot;: 846\n}\n</pre>\n<p><b>GET request</b> This is the result of this GET request <a href=\"data/846/824\" target=\"_blank\">http://neuralquest.org/data/846/824</a>.   </p></div>\n<p>The doGet request takes two forms.</p>"
 }
 { 
     "_id" : NumberInt(1208), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Document widget", 
     "description" : "<p>JavaScript source: <a href=\"js/extensions/NqDocument.js\" target=\"_blank\">NqDocument.js</a><br />The document is use to display and modify The Document</p>"
 }
 { 
     "_id" : NumberInt(1212), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Technical architecture", 
     "description" : "<ul><li><b>MySQL</b>: Two tables Cells ans Assocs.</li><li><b>Hibernate</b>: Object relational mapping, referential integrity.</li><li><b>Apache Tomcat</b>: The Data servlet is in effect a RESTful server, Tomcat also takes care of authentication </li><li><b>DOJO Toolkit</b>: Rich user experience, lazy loading, transaction processing</li></ul>\n"
 }
 { 
     "_id" : NumberInt(1213), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "WebGl Image", 
     "description" : "<p>vcvcvcv</p>"
 }
 { 
     "_id" : NumberInt(1216), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Mantainance is hard to do"
 }
 { 
     "_id" : NumberInt(1218), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Data Servlet"
 }
 { 
     "_id" : NumberInt(1220), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Client Layer", 
     "description" : "<p>The client layer consists of one main JavaScript module: nq.js, and several Dojo extensions</p>"
 }
 { 
     "_id" : NumberInt(1223), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "NqWidgetBase", 
     "description" : "<p>\n\tThe Neuralquest widgets have a common widgetbase which inturn is based on diji/_widgetbase.</p>"
 }
 { 
     "_id" : NumberInt(1224), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Business Classes Model", 
     "description" : "<p>The Business Classes Model contains a set of classes that represent the things we make or do.</p>\n"
 }
 { 
     "_id" : NumberInt(1225), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "description" : "<p></p><ul><li><b>The Document</b>: A content management system that allows you to develop and maintain written content for things like blogs, news letters, formal documentation etc. This is the interface you're using right now.</li><li><b>Messaging</b>: This hub ties-in all the things you need to respond to events, such as e-mail, role-based messaging and activities assigned to you based on your roles in various organizations.</li><li><b>Organizations</b>: Provides a hierarchical overview of organizations in which you have been assigned roles.</li><li><b>Self diagramming</b>: We try to provide as many views as possible for any given dataset. This includes fly-around process models, Gantt charts and a knock-your-socks-off 3D class model. All diagrams are generated on the fly by the server, based on current information.</li><li><b>Built-in user manual</b>: The Help button bottom right, .</li><li><b>Built-in authorization</b>: The owner can delegate authorization for use cases to members.</li><li><b>Partial page rendering</b>: You don't get a white page between clicks. All pages are generated client side, based on the page model.</li><li><b>Lazy loading</b>: JavaScript and data are loaded only when called on.</li><li><b>Transactions</b>: Client side updates are rolled into a single transaction. If the server rollbacks, so will the client</li></ul><p></p>", 
     "name" : "Usage features"
 }
 { 
     "_id" : NumberInt(1243), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(80), 
     "name" : "Pre-publish"
 }
 { 
     "_id" : NumberInt(1245), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Create the widget"
 }
 { 
     "_id" : NumberInt(1246), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "The Worlds Energy Problem", 
     "description" : "<p>Europeans currently continuously consume 5kW. Let's assume for a moment that this is sufficient for a comfortable life style.<br />Where is this energy going to come from in future given the fact more and more people are going to adopt our casual lifestyle and our current energy supplies are running out?</p>"
 }
 { 
     "_id" : NumberInt(1261), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79)
 }
 { 
     "_id" : NumberInt(1466), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Guiding Pricipals", 
     "description" : "<p></p><ul><li><b>Store once</b>: This one is so obvious, it'Â\u0099s like spitting into the wind. Yet, we keep finding reasons for replicating data.</li><li><b>Keep it simple</b>. The oldest rule in the book. Choice is a good thing but too much can lead to excessive cost, so we try to keep functionality limited to bare essentials. Our aim is not to make the prettiest application but the least expensive in terms of cost of ownership.</li></ul><p></p>"
 }
 { 
     "_id" : NumberInt(1484), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Architectural features", 
     "description" : "<ul><li style=\"min-height: 1.2em; \"><b>Tight coupling between data and business rules</b>: For some reason we let go of the idea of storing business rules in the data store. Instead, we insist on replicating rules in a business layer. This additional complexity is the primary reason of the excessive maintainance costs you see in todays IT organizations.</li><li style=\"min-height: 1.2em; \"><b>Tight coupling between business rules and GUI</b>: Any change to the property of a model is reflected immediately in the front end.</li><li style=\"min-height: 1.2em; \"><b>Integration of data and processes</b>: The data, the data definitions, the process models that operate on them and written content are all stored in a single data store that consists of just two tables: Cells and Assocs. This ??meta data approach has the advantage of providing flexibility when id comes to modifying data structures.</li></ul>"
 }
 { 
     "_id" : NumberInt(1501), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Road Map", 
     "description" : "<p></p><p><ul><li>Certified business process models: ITIL, Prince2, CMMi, Basil II, Financial Accounting etc.</li><li>Exposure of public finances</li><li>Facilitate public debate through data and decision trees</li></ul></p><p></p>"
 }
 { 
     "_id" : NumberInt(1510), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "IFrame Image", 
     "description" : "<p>tryframe</p>"
 }
 { 
     "_id" : NumberInt(1513), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Data Layer", 
     "description" : "<div class=\"floatright\" style=\"width: 400px;\">\n<pre>&lt;?xml version=&quot;1.0&quot;?&gt;\n&lt;!DOCTYPE hibernate-mapping PUBLIC &quot;-//Hibernate/Hibernate Mapping DTD 3.0//EN&quot; &quot;http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd&quot; &gt;\n&lt;hibernate-mapping package=&quot;com.neuralquest.server&quot;&gt;\n    &lt;class name=&quot;Cell&quot; table=&quot;cell&quot;&gt;\n        &lt;id name=&quot;id&quot; type=&quot;long&quot;&gt;\n            &lt;column name=&quot;id&quot; not-null=&quot;true&quot; /&gt;\n            &lt;generator class=&quot;native&quot; /&gt;\n        &lt;/id&gt;\n        &lt;property name=&quot;name&quot; type=&quot;string&quot; /&gt;\n        &lt;property name=&quot;type&quot; type=&quot;byte&quot; not-null=&quot;true&quot; /&gt;\n        &lt;set name=&quot;sourceAssocs&quot; inverse=&quot;true&quot; cascade=&quot;all&quot;&gt;\n            &lt;key column=&quot;fk_source&quot; /&gt;\n            &lt;one-to-many class=&quot;Assoc&quot; /&gt;\n        &lt;/set&gt;\n        &lt;set name=&quot;destAssocs&quot; inverse=&quot;true&quot; cascade=&quot;all&quot;&gt;\n            &lt;key column=&quot;fk_dest&quot; /&gt;\n            &lt;one-to-many class=&quot;Assoc&quot; /&gt;\n        &lt;/set&gt;\n    &lt;/class&gt;\n    &lt;class name=&quot;Assoc&quot; table=&quot;assoc&quot;&gt;\n        &lt;id name=&quot;id&quot; type=&quot;long&quot;&gt;\n            &lt;column name=&quot;id&quot; not-null=&quot;true&quot; /&gt;\n            &lt;generator class=&quot;native&quot; /&gt;\n        &lt;/id&gt;\n        &lt;property name=&quot;type&quot; type=&quot;byte&quot; not-null=&quot;true&quot; /&gt;\n        &lt;many-to-one name=&quot;destFk&quot; column=&quot;fk_dest&quot; class=&quot;Cell&quot;\n            not-null=&quot;true&quot; /&gt;\n        &lt;many-to-one name=&quot;sourceFk&quot; column=&quot;fk_source&quot; class=&quot;Cell&quot;\n            not-null=&quot;true&quot; /&gt;\n    &lt;/class&gt;\n&lt;/hibernate-mapping&gt;\n</pre>\n<p><b>Hibernate mapping </b>Contains the definition of both the Cell and Assoc mappings. Note the the type attribute in Assoc is not really a foreign key. It just a byte.</p></div>\n<p>As mentioned before, the database consists of just two tables CELL and ASSOC. We used Hibernate Synchronizer to generate the necessary classes based on the the mapping xml on the right. As a result we have two Java Classes: Cell and Assoc which we can use to access data in the database POJO-style (plain old java object). \nHibernate takes care of lazy-loading of the Associations to our Cells, referential integrity and transactional integrity.<br />TODO: Still need to look at things like Transaction Factory and Caching (I thing it;s currently set to default).\n</p>\n\n"
 }
 { 
     "_id" : NumberInt(1527), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "Event Management"
 }
 { 
     "_id" : NumberInt(1528), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "Incident Management"
 }
 { 
     "_id" : NumberInt(1529), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "Request Fulfilment"
 }
 { 
     "_id" : NumberInt(1530), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "Access Management"
 }
 { 
     "_id" : NumberInt(1531), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "Problem Management"
 }
 { 
     "_id" : NumberInt(1532), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "IT Operations Management"
 }
 { 
     "_id" : NumberInt(1533), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "IT Facilities Management"
 }
 { 
     "_id" : NumberInt(1681), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "Service Request Customer"
 }
 { 
     "_id" : NumberInt(1682), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "Service Request Assesor"
 }
 { 
     "_id" : NumberInt(1683), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "xx"
 }
 { 
     "_id" : NumberInt(1684), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "Service Request Rejector"
 }
 { 
     "_id" : NumberInt(1685), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "closed"
 }
 { 
     "_id" : NumberInt(1686), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "Service Request Executer"
 }
 { 
-    "_id" : NumberInt(1754), 
-    "_type" : "object", 
-    "_icon" : NumberInt(85), 
-    "name" : "Update does not work correctly"
-}
-{ 
     "_id" : NumberInt(1766), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "description" : "<p><br /></p>"
 }
 { 
     "_id" : NumberInt(1784), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "The Document"
 }
 { 
     "_id" : NumberInt(1787), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Page Model"
 }
 { 
     "_id" : NumberInt(1788), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Class Model"
 }
 { 
     "_id" : NumberInt(1789), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Attribute References"
 }
 { 
-    "_id" : NumberInt(1790), 
-    "_type" : "object", 
-    "_icon" : NumberInt(90), 
-    "name" : "Service Request History"
-}
-{ 
     "_id" : NumberInt(1793), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "3D Class Model"
 }
 { 
     "_id" : NumberInt(1794), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Details"
 }
 { 
     "_id" : NumberInt(1857), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Details"
 }
 { 
     "_id" : NumberInt(1863), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Details"
 }
 { 
     "_id" : NumberInt(1866), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "contents tab"
 }
 { 
     "_id" : NumberInt(1875), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Other Features"
 }
 { 
     "_id" : NumberInt(1887), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "description" : "<p>The models determine which object types we can add, how we view them, which rules apply when we modify them and who get to see them. In short: everything. <br />Neuralquest consists of several modeling layers stacked on top of one another. Changes to a lower level model automatically impact the higher level models. The models are: <br /></p><ol><li>The Data Model which describes the actual storage in the database</li><li>The Meta Model which determines the rules for Classes Objects and their associations</li><li>The Neuralquest Class Model which is subdivided into several sub-models that describe the objects we work with, the pages we use to navigate the data, organizations and processes </li></ol>The Data and Meta model are enforce by the database manager and Data Servlet respectively. Developers will mostly be working with objects in the Process and Page models. <p></p>", 
     "name" : "Models"
 }
 { 
     "_id" : NumberInt(1934), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "associations", 
     "toManyAssociations" : "associations", 
@@ -453,899 +441,600 @@
 }
 { 
     "_id" : NumberInt(2016), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(80), 
     "name" : "Organizations"
 }
 { 
     "_id" : NumberInt(1878), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "description" : "<div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"IBM 7090'\" src=\"http://upload.wikimedia.org/wikipedia/commons/b/b9/NASAComputerRoom7090.NARA.jpg\" style=\"width: inherit;\" />\n<p><b>IBM 7090</b></p></div><p>The biggest challenge facing today's corporate IT systems is complexity. A typical IT landscape at a large financial institution will consist of hundreds of separate systems. Each system will have it''s own interface style and manor of communicating with it's surrounding systems. Ideally all these systems will be connected through some form of common communication bus to a service. In practice you'll find dozens of poorly documented interfaces including direct database connection, emails with spreadsheet attachments, sneakerware, data retype and just about anything else you can come up with.</p><p>If you take a peek inside the Computer Centre you'll see much the same. There might be dozens of servers humming away, each with their own operating system, physical database, and programming environment and power consumption. In one corner you'll still find the mainframe which is still responsible for most of the core systems written in the '80s.</p><p>Needles to say all this complexity leads to excessive maintenance costs. Each of these systems needs a team of highly qualified specialists, just to keep them from falling over. Quite often the complexity leads to onset of rigor mortis, as organizations find they are no longer able to evolve their IT systems.</p><p>While it's obvious to everybody that this situation is far from ideal there seams to be little incentive to fix the problem.</p>", 
     "name" : "The Problem"
 }
 { 
-    "_id" : NumberInt(1883), 
-    "_type" : "object", 
-    "_icon" : NumberInt(79), 
-    "name" : "A Brief History", 
-    "description" : "<div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"IBM System 370\" src=\"http://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Hist._Rechenzentrum.png/320px-Hist._Rechenzentrum.png\" style=\"width: inherit;\" />\n<p><b>IBM System 370</b></p></div>\n<p>The '80s saw a departure from the monolithic approach to IT systems. Until then, it seemed obvious to everyone that, computers being so expensive, you would invest lots of money in a single, fast, well maintained mainframe. The advent Relational Data Base Management Systems meant you could run several online programs simultaneously against a common data base. The RDMS took care of all the important things like data integrity, transactional integrity, contention, performance and authorization. In effect this lead to the decoupling data storage and the programs that modified the data.</p><p>Over time the applications would migrate towards the central data store, ideally centered on one or two well established programming environments. The end result would be a highly standardized, self documenting easy to maintain IT system that would cover all the business needs. This seemed like the ideal setup.</p><p>The dream was not to last. Several events transpired which would shatter any hope of everyone happily working on a single data store.</p><p></p><ul><li>For one thing, the dream was never fully implemented. With an installed base worth hundreds of millions there's no way you're going to obtain funding to replace legacy systems for the sake of the latest fade in IT, especially since these systems are often poorly documented and highly interconnected. The risk is simply too great.</li><li>Decentralized budgetary responsibility meant that business units were responsible for their own IT budgets. Off hand, this makes perfect sense. Who better to decide on IT investments than the person whose job it is to make a profit? Unfortunately it is often difficult to justify regular maintenance on IT systems, especially when faced with pressing business needs. The 'if it ain'??t broke don??t fix it' attitude lead to a serious backlog. To the extent even, that many systems run on OSs, DBs, Severs etc. that are no longer supported by their respective vendors. I kid you not.</li><div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"IBM PC model 5150\" src=\"http://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Ibm_pc_5150.jpg/259px-Ibm_pc_5150.jpg\" style=\"width: inherit;\" />\n<p><b>IBM PC model 5150</b></p></div>\n<li>The PC revolution took everybody by surprise, with the possible exception of Bill Gates. CPU cycles suddenly became dirt cheap. You could log off from the mainframe with a message saying you had just spent $1500 worth of service units and then continue working on your workstation which had happily been burning cycles, waiting for you to do something useful. We immediately became addicted to the graphical user interface and the need arose for a solution to the client-server problem. Itâ??s taken a long time for suitable open standards to emerge and the debate is still raging. The Internet revolution on the other hand, took everybody by surprise (no exceptions) and we are still reeling from its effects.</li><li>The past couple of decades have seen a deluge of operating systems, programming languages, server technologies, open standards, frameworks etc. Choice is a good thing, but one unintended consequence is that you can never be sure of your investment. What might seem like the perfect solution one year, could be totally obsolete the next. By saying there are several standards available to solve a given problem, you are in effect saying there is no standard.</li><li>Systems architects recognized that things were not well and they came up with the notion of loosely coupled systems centered around a service bus known as SOA (Service Oriented Architecture). Each system would be responsible for one aspect of the overall business process and they would all be required to communicate with each other by means of a predefined set of messages, or language -akin to requiring members of the United Nations to speak Esperanto. This meant that business units were no longer dependent the monopolistic IT department but instead, could invite external competitors to come up with solutions. Basically, the architects said â??Forget it. Thereâ??s no way youâ??re going to be able to capture all the business needs in a single system. Businesses change too rapidly and IT systems too slowlyâ??. The hope was that by letting standardization at a systems level go, you could delegate responsibility to the business units and that competition ensured they were not paying too much. Unfortunately these architectures are seldom fully implemented and is generally poorly supported, creating even more complexity, thereby defeating the purpose for which they were designed.</li><li>Meanwhile spiraling maintenance costs were driving corporate executives up the wall. They were desperate and out sourcing seemed like the only way out. The arrival of intercontinental fiber optics meant that communication costs plummeted. It made sense to try to externalize maintenance costs given that someone in India was quite happy to do the same work at a third of the cost. This approach however, ignores the fact that we have a hard time communicating when the other person is sitting across the table, let alone when the heâ??s sitting in a different time zone and speaks a different native language. Very few off shored projects live up to expectations.</li></ul><p></p><p>In short, we went from what seamed like a good idea, to near anarchy in the span of a single generation. Commercial pressure put the profit centers firmly in the driving seat and they subsequently found themselves trying to solve the forth industrial revolution.</p><p>Neuralquest takes the view that we need to look again at why we departed form the notion of single data store / single application paradigm in the first place. Remember the main reason was lack of flexibility which came about as a result of the many programming environments and data stores. It was thought that exposing IT departments to external market forces would break open their monopolies and force down costs. In part this is true, but the market forces also so brought a huge amount of complexity of the obscure kind. By obscure we mean: it can no longer traced back to the IT department. Every business unitÂ </p><p>Any solution to this problem would have to greatly reduce complexity while at the same time increasing flexibility.</p><p><br /></p>"
-}
-{ 
     "_id" : NumberInt(1890), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
-    "description" : "<p>Currently there are 10 types of associations. Not all of them are used.<br /></p><table class=\"nqtable\">\t\n<thead>\n\t<tr>\n\t\t<th colspan=\"2\">Normal</th>\n\t\t<th colspan=\"2\">Inverse</th>\n\t\t<th colspan=\"2\">If the source is a Class</th>\n\t\t<th colspan=\"3\">If the source is an Object</th>\n\t</tr>\n\t<tr>\n\t\t<th>Name</th>\n\t\t<th>Id</th>\n\t\t<th>Name</th>\n\t\t<th>Id</th>\n\t\t<th>Destination</th>\n\t\t<th>Usage</th>\n\t\t<th>Destination</th>\n\t\t<th>Occurrence</th>\n\t\t<th>Usage</th>\n\t</tr>\n</thead>\n<tbody>\n\t<tr>\n\t\t<td>parent</td>\n\t\t<td>3</td>\n\t\t<td>children</td>\n\t\t<td>15</td>\n\t\t<td>Class</td>\n\t\t<td>Points to the super-class</td>\n\t\t<td>Class</td>\n\t\t<td>one</td>\n\t\t<td>Points to the class of this object</td>\n\t</tr>\n\t<tr>\n\t\t<td>attribute</td>\n\t\t<td>4</td>\n\t\t<td>attribute of</td>\n\t\t<td>16</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted attribute for objects of this class type.</td>\n\t\t<td>Object</td>\n\t\t<td>one</td>\n\t\t<td>Points an attribute of this object</td>\n\t</tr>\n\t<tr>\n\t\t<td>maps to<br /></td>\n\t\t<td>5</td>\n\t\t<td>mapped to by</td>\n\t\t<td>17</td>\n\t\t<td><br /></td>\n\t\t<td>not used</td>\n\t\t<td>Class</td>\n\t\t<td>one</td>\n\t\t<td>Maps an object to a class. For instance, View to Class or Attribute Reference to Attribute</td>\n\t</tr>\n\t<tr>\n\t\t<td>default</td>\n\t\t<td>6</td>\n\t\t<td>default of</td>\n\t\t<td>18</td>\n\t\t<td>Object</td>\n\t\t<td>Points to the default attribute for this class</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td>not used</td>\n\t</tr>\n\t<tr>\n\t\t<td>one to one</td>\n\t\t<td>7</td>\n\t\t<td>one to one reverse</td>\n\t\t<td>19</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted one to one association for objects of this class type</td>\n\t\t<td>Object</td>\n\t\t<td>one</td>\n\t\t<td>Points to a permitted one to one association for objects of this class type.<br /></td>\n\t</tr>\n\t<tr>\n\t\t<td>ordered</td>\n\t\t<td>8</td>\n\t\t<td>ordered parent</td>\n\t\t<td>20</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted ordered association for objects of this class type.<br /></td>\n\t\t<td>Object</td>\n\t\t<td>many*</td>\n\t\t<td>Points the first object of a sequence. This association works in combination with next to produce an ordered list.</td>\n\t</tr>\n\t<tr>\n\t\t<td>next</td>\n\t\t<td>9</td>\n\t\t<td>previous</td>\n\t\t<td>21</td>\n\t\t<td><br /></td>\n\t\t<td>not used</td>\n\t\t<td>Object</td>\n\t\t<td>one</td>\n\t\t<td>Points the next object in a sequence. This association is not meant  to be used by the developer.<br /></td>\n\t</tr>\n\t<tr>\n\t\t<td>many to many</td>\n\t\t<td>10</td>\n\t\t<td>many to many reverse</td>\n\t\t<td>22</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted many to many association for objects of this class type.<br /></td>\n\t\t<td>Object</td>\n\t\t<td>many</td>\n\t\t<td>Produces an unordered list of associated objects.</td>\n\t</tr>\n\t<tr>\n\t\t<td>one to many</td>\n\t\t<td>11</td>\n\t\t<td>one to many reverse</td>\n\t\t<td>23</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted one to many association for objects of this class type.<br /></td>\n\t\t<td>Object</td>\n\t\t<td>many</td>\n\t\t<td>Produces an unordered list of associated objects.<br /></td>\n\t</tr>\n\t<tr>\n\t\t<td>owns</td>\n\t\t<td>12</td>\n\t\t<td>owned by</td>\n\t\t<td>24</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted ownership association for objects of this class type.<br /></td>\n\t\t<td>Object</td>\n\t\t<td>many</td>\n\t\t<td>Produces an unordered list of associated objects.<br /></td>\n\t</tr>\n\n</tbody></table><p></p>", 
+    "description" : "<p>Currently there are 10 types of associations. Not all of them are used.<br /></p><table class=\"nqtable\">\t\n<thead>\n\t<tr>\n\t\t<th colspan=\"2\">Normal</th>\n\t\t<th colspan=\"2\">Inverse</th>\n\t\t<th colspan=\"2\">If the source is a Class</th>\n\t\t<th colspan=\"3\">If the source is an Object</th>\n\t</tr>\n\t<tr>\n\t\t<th>Name</th>\n\t\t<th>Id</th>\n\t\t<th>Name</th>\n\t\t<th>Id</th>\n\t\t<th>Destination</th>\n\t\t<th>Usage</th>\n\t\t<th>Destination</th>\n\t\t<th>Occurrence</th>\n\t\t<th>Usage</th>\n\t</tr>\n</thead>\n<tbody>\n\t<tr>\n\t\t<td>parent</td>\n\t\t<td>3</td>\n\t\t<td>children</td>\n\t\t<td>15</td>\n\t\t<td>Class</td>\n\t\t<td>Points to the super-class</td>\n\t\t<td>Class</td>\n\t\t<td>one</td>\n\t\t<td>Points to the class of this object</td>\n\t</tr>\n\t<tr>\n\t\t<td>attribute</td>\n\t\t<td>4</td>\n\t\t<td>attribute of</td>\n\t\t<td>16</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted attribute for objects of this class type.</td>\n\t\t<td>Object</td>\n\t\t<td>one</td>\n\t\t<td>Points an attribute of this object</td>\n\t</tr>\n\t<tr>\n\t\t<td>maps to<br /></td>\n\t\t<td>5</td>\n\t\t<td>mapped to by</td>\n\t\t<td>17</td>\n\t\t<td><br /></td>\n\t\t<td>not used</td>\n\t\t<td>Class</td>\n\t\t<td>one</td>\n\t\t<td>Maps an object to a class. For instance, View to Class or Attribute Reference to Attribute</td>\n\t</tr>\n\t<tr>\n\t\t<td>default</td>\n\t\t<td>6</td>\n\t\t<td>default of</td>\n\t\t<td>18</td>\n\t\t<td>Object</td>\n\t\t<td>Points to the default attribute for this class</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td>not used</td>\n\t</tr>\n\t<tr>\n\t\t<td>one to one</td>\n\t\t<td>7</td>\n\t\t<td>one to one reverse</td>\n\t\t<td>19</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted one to one association for objects of this class type</td>\n\t\t<td>Object</td>\n\t\t<td>one</td>\n\t\t<td>Points to a permitted one to one association for objects of this class type.<br /></td>\n\t</tr>\n\t<tr>\n\t\t<td>ordered</td>\n\t\t<td>8</td>\n\t\t<td>ordered parent</td>\n\t\t<td>20</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted ordered association for objects of this class type.<br /></td>\n\t\t<td>Object</td>\n\t\t<td>many</td>\n\t\t<td>Points the first object of a sequence. This association works in combination with next to produce an ordered list.</td>\n\t</tr>\n\t<tr>\n\t\t<td>next</td>\n\t\t<td>9</td>\n\t\t<td>previous</td>\n\t\t<td>21</td>\n\t\t<td><br /></td>\n\t\t<td>not used</td>\n\t\t<td>Object</td>\n\t\t<td>one</td>\n\t\t<td>Points the next object in a sequence. This association is not meant  to be used by the developer.<br /></td>\n\t</tr>\n\t<tr>\n\t\t<td>many to many</td>\n\t\t<td>10</td>\n\t\t<td>many to many reverse</td>\n\t\t<td>22</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted many to many association for objects of this class type.<br /></td>\n\t\t<td>Object</td>\n\t\t<td>many</td>\n\t\t<td>Produces an unordered list of associated objects.</td>\n\t</tr>\n\t<tr>\n\t\t<td>one to many</td>\n\t\t<td>11</td>\n\t\t<td>one to many reverse</td>\n\t\t<td>23</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted one to many association for objects of this class type.<br /></td>\n\t\t<td>Object</td>\n\t\t<td>many</td>\n\t\t<td>Produces an unordered list of associated objects.<br /></td>\n\t</tr>\n\t<tr>\n\t\t<td>owns</td>\n\t\t<td>12</td>\n\t\t<td>owned by</td>\n\t\t<td>24</td>\n\t\t<td>Class</td>\n\t\t<td>Defines a permitted ownership association for objects of this class type.<br /></td>\n\t\t<td>Object</td>\n\t\t<td>many</td>\n\t\t<td>Produces an unordered list of associated objects.<br /></td>\n\t</tr>\n\n</tbody></table><p></p>", 
     "name" : "Association types"
 }
 { 
     "_id" : NumberInt(1959), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Implementing the Solution", 
     "description" : "<p>HTML <b>test</b></p>"
 }
 { 
     "_id" : NumberInt(2018), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(80), 
     "name" : "Users"
 }
 { 
     "_id" : NumberInt(2025), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Features"
 }
 { 
-    "_id" : NumberInt(2030), 
-    "_type" : "object", 
-    "_icon" : NumberInt(79), 
-    "name" : "Flexibility is key", 
-    "description" : "<div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"3D Class Model\" src=\"img/Neuralquest/3dClassModel.png\" style=\"width: inherit;\" />\n<p><b>3D Class Model</b> <a href=\"#842.1788.78.844.1793\">example</a>.</p></div>\n<p>Neuralquest disputes this supposition. We take the view that you <i>can </i>have a single system to cover all your business process needs, <b>provided the system is sufficiently flexible</b>. Flexibility is achieved in several ways:</p><p></p><ul><li>by combining the modeling and execution environment and eliminating as many architectural components as possible.<br /></li><li>by ensuring the models are fully self-documenting and self-diagramming, making them easy to access, understand and maintain.<br /></li><li>by providing an easy to use modeling interface. There's no 3GL programming and no deployment process.</li><li>by placing intellectual property rights of the models and software in the Open Source Domain, ensuring hassle-free licencing and a large support community.<br /></li><li>by providing various industry standard templates to start out with, lessening the learning curve. <br /></li><li>by building on an airtight security and authorization model.</li></ul><p>Click on the <a href=\"#842.1784.2025.846.1866\" target=\"_self\">Features</a> node on the left for a more extensive overview of the features.<br />From a technical standpoint, one of the ways we ensure flexibility is by storing all process logic in the database, as opposed to handwritten code. In addition, the database is setup according a metadata approach, meaning we use the database to store both the data and the structure of the data. All told, Neuralquest software is limited to just a couple of thousand lines of code and the database is comprised of just two tables. One to store values and one for the associations between the values. See <a href=\"#842.1784.2103.846.1866\" target=\"_self\">Implementation</a> for a more complete description of the technical architecture.</p>"
-}
-{ 
     "_id" : NumberInt(2032), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Roadmap", 
     "description" : "<div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"Classic Achitechure\" src=\"img/Neuralquest/RoadMap.jpg\" style=\"width: inherit;\" />\n<p><b>Roadmap</b></p></div>\n<div class=\"todofloatright\" style=\"width: 200px;\">\n<p><b>ToDo</b> Elaborate</p></div>\n<p>Neuralquest is still in its infancy. Here are some of the steps we expect to follow.</p>"
 }
 { 
-    "_id" : NumberInt(2037), 
-    "_type" : "object", 
-    "_icon" : NumberInt(79), 
-    "name" : "Neuralquest Class Model", 
-    "description" : "<div class=\"floatright\" style=\"width: 400px;\">\n<img alt=\"Standard Model\" src=\"img/Neuralquest/svg/StandardModel.svg\" style=\"width: inherit;\"/>\n<p><b>Standard Model</b> This image depicts an important part of the class model as it is in use today.\n</p>\n</div><p>The Neuralquest Class Model contains a set of classes that are used to store and display data relevant to our processes. It can be thought of as being made up of several sub-models, as described in more detail below.</p>"
-}
-{ 
     "_id" : NumberInt(2038), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Page Model", 
     "description" : "<p>The Page Model describes how Views and Tabs/Accordion Panes are related. The model is based on the notion that when navigate data we generally have a stating point, say a customer, and then drill-down from there using various views to view and/or modify objects related to the customer, for instance a purchase order.</p>"
 }
 { 
     "_id" : NumberInt(2045), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Process Model"
 }
 { 
     "_id" : NumberInt(2047), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Attributes"
 }
 { 
+    "_id" : NumberInt(2052), 
+    "type" : "object", 
+    "_icon" : NumberInt(79), 
+    "name" : "Attribute References"
+}
+{ 
+    "_id" : NumberInt(2689), 
+    "type" : "class", 
+    "name" : "Current Liabilities"
+}
+{ 
+    "_id" : NumberInt(2735), 
+    "type" : "class", 
+    "name" : "States"
+}
+{ 
+    "_id" : NumberInt(2738), 
+    "type" : "class", 
+    "name" : "Initial"
+}
+{ 
+    "_id" : NumberInt(1883), 
+    "type" : "object", 
+    "_icon" : NumberInt(79), 
+    "name" : "A Brief History", 
+    "description" : "<div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"IBM System 370\" src=\"http://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Hist._Rechenzentrum.png/320px-Hist._Rechenzentrum.png\" style=\"width: inherit;\" />\n<p><b>IBM System 370</b></p></div>\n<p>The '80s saw a departure from the monolithic approach to IT systems. Until then, it seemed obvious to everyone that, computers being so expensive, you would invest lots of money in a single, fast, well maintained mainframe. The advent Relational Data Base Management Systems meant you could run several online programs simultaneously against a common data base. The RDMS took care of all the important things like data integrity, transactional integrity, contention, performance and authorization. In effect this lead to the decoupling data storage and the programs that modified the data.</p><p>Over time the applications would migrate towards the central data store, ideally centered on one or two well established programming environments. The end result would be a highly standardized, self documenting easy to maintain IT system that would cover all the business needs. This seemed like the ideal setup.</p><p>The dream was not to last. Several events transpired which would shatter any hope of everyone happily working on a single data store.</p><p></p><ul><li>For one thing, the dream was never fully implemented. With an installed base worth hundreds of millions there's no way you're going to obtain funding to replace legacy systems for the sake of the latest fade in IT, especially since these systems are often poorly documented and highly interconnected. The risk is simply too great.</li><li>Decentralized budgetary responsibility meant that business units were responsible for their own IT budgets. Off hand, this makes perfect sense. Who better to decide on IT investments than the person whose job it is to make a profit? Unfortunately it is often difficult to justify regular maintenance on IT systems, especially when faced with pressing business needs. The 'if it ain'??t broke don??t fix it' attitude lead to a serious backlog. To the extent even, that many systems run on OSs, DBs, Severs etc. that are no longer supported by their respective vendors. I kid you not.</li><div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"IBM PC model 5150\" src=\"http://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Ibm_pc_5150.jpg/259px-Ibm_pc_5150.jpg\" style=\"width: inherit;\" />\n<p><b>IBM PC model 5150</b></p></div>\n<li>The PC revolution took everybody by surprise, with the possible exception of Bill Gates. CPU cycles suddenly became dirt cheap. You could log off from the mainframe with a message saying you had just spent $1500 worth of service units and then continue working on your workstation which had happily been burning cycles, waiting for you to do something useful. We immediately became addicted to the graphical user interface and the need arose for a solution to the client-server problem. Itâ??s taken a long time for suitable open standards to emerge and the debate is still raging. The Internet revolution on the other hand, took everybody by surprise (no exceptions) and we are still reeling from its effects.</li><li>The past couple of decades have seen a deluge of operating systems, programming languages, server technologies, open standards, frameworks etc. Choice is a good thing, but one unintended consequence is that you can never be sure of your investment. What might seem like the perfect solution one year, could be totally obsolete the next. By saying there are several standards available to solve a given problem, you are in effect saying there is no standard.</li><li>Systems architects recognized that things were not well and they came up with the notion of loosely coupled systems centered around a service bus known as SOA (Service Oriented Architecture). Each system would be responsible for one aspect of the overall business process and they would all be required to communicate with each other by means of a predefined set of messages, or language -akin to requiring members of the United Nations to speak Esperanto. This meant that business units were no longer dependent the monopolistic IT department but instead, could invite external competitors to come up with solutions. Basically, the architects said â??Forget it. Thereâ??s no way youâ??re going to be able to capture all the business needs in a single system. Businesses change too rapidly and IT systems too slowlyâ??. The hope was that by letting standardization at a systems level go, you could delegate responsibility to the business units and that competition ensured they were not paying too much. Unfortunately these architectures are seldom fully implemented and is generally poorly supported, creating even more complexity, thereby defeating the purpose for which they were designed.</li><li>Meanwhile spiraling maintenance costs were driving corporate executives up the wall. They were desperate and out sourcing seemed like the only way out. The arrival of intercontinental fiber optics meant that communication costs plummeted. It made sense to try to externalize maintenance costs given that someone in India was quite happy to do the same work at a third of the cost. This approach however, ignores the fact that we have a hard time communicating when the other person is sitting across the table, let alone when the heâ??s sitting in a different time zone and speaks a different native language. Very few off shored projects live up to expectations.</li></ul><p></p><p>In short, we went from what seamed like a good idea, to near anarchy in the span of a single generation. Commercial pressure put the profit centers firmly in the driving seat and they subsequently found themselves trying to solve the forth industrial revolution.</p><p>Neuralquest takes the view that we need to look again at why we departed form the notion of single data store / single application paradigm in the first place. Remember the main reason was lack of flexibility which came about as a result of the many programming environments and data stores. It was thought that exposing IT departments to external market forces would break open their monopolies and force down costs. In part this is true, but the market forces also so brought a huge amount of complexity of the obscure kind. By obscure we mean: it can no longer traced back to the IT department. Every business unitÂ </p><p>Any solution to this problem would have to greatly reduce complexity while at the same time increasing flexibility.</p><p><br /></p>"
+}
+{ 
+    "_id" : NumberInt(2030), 
+    "type" : "object", 
+    "_icon" : NumberInt(79), 
+    "name" : "Flexibility is key", 
+    "description" : "<div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"3D Class Model\" src=\"img/Neuralquest/3dClassModel.png\" style=\"width: inherit;\" />\n<p><b>3D Class Model</b> <a href=\"#842.1788.78.844.1793\">example</a>.</p></div>\n<p>Neuralquest disputes this supposition. We take the view that you <i>can </i>have a single system to cover all your business process needs, <b>provided the system is sufficiently flexible</b>. Flexibility is achieved in several ways:</p><p></p><ul><li>by combining the modeling and execution environment and eliminating as many architectural components as possible.<br /></li><li>by ensuring the models are fully self-documenting and self-diagramming, making them easy to access, understand and maintain.<br /></li><li>by providing an easy to use modeling interface. There's no 3GL programming and no deployment process.</li><li>by placing intellectual property rights of the models and software in the Open Source Domain, ensuring hassle-free licencing and a large support community.<br /></li><li>by providing various industry standard templates to start out with, lessening the learning curve. <br /></li><li>by building on an airtight security and authorization model.</li></ul><p>Click on the <a href=\"#842.1784.2025.846.1866\" target=\"_self\">Features</a> node on the left for a more extensive overview of the features.<br />From a technical standpoint, one of the ways we ensure flexibility is by storing all process logic in the database, as opposed to handwritten code. In addition, the database is setup according a metadata approach, meaning we use the database to store both the data and the structure of the data. All told, Neuralquest software is limited to just a couple of thousand lines of code and the database is comprised of just two tables. One to store values and one for the associations between the values. See <a href=\"#842.1784.2103.846.1866\" target=\"_self\">Implementation</a> for a more complete description of the technical architecture.</p>"
+}
+{ 
+    "_id" : NumberInt(2037), 
+    "type" : "object", 
+    "_icon" : NumberInt(79), 
+    "name" : "Neuralquest Class Model", 
+    "description" : "<div class=\"floatright\" style=\"width: 400px;\">\n<img alt=\"Standard Model\" src=\"img/Neuralquest/svg/StandardModel.svg\" style=\"width: inherit;\"/>\n<p><b>Standard Model</b> This image depicts an important part of the class model as it is in use today.\n</p>\n</div><p>The Neuralquest Class Model contains a set of classes that are used to store and display data relevant to our processes. It can be thought of as being made up of several sub-models, as described in more detail below.</p>"
+}
+{ 
     "_id" : NumberInt(2049), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Tabs and Accordion Panes", 
     "description" : "<p>Tab and Accordion Panes are discussed together because they play the same role in our model.</p>"
 }
 { 
     "_id" : NumberInt(2051), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Views", 
     "description" : "<p>Views are similar to the views you find in SQL. In SQL views map to existing database tables. Our views map to existing classes. </p>"
 }
 { 
-    "_id" : NumberInt(2052), 
-    "_type" : "object", 
-    "_icon" : NumberInt(79), 
-    "name" : "Attribute References"
-}
-{ 
     "_id" : NumberInt(2055), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Scientific Method", 
     "description" : "<p>History of Physics</p>\n<table class=\"nqtable\">\t\n<thead>\n\t<tr>\n\t\t<th>When</th>\n\t\t<th>Who</th>\n\t\t<th>Problem</th>\n\t\t<th>Theory/method</th>\n\t\t<th>Prediction</th>\n\t\t<th>Confirmed</th>\n\t</tr>\n</thead>\n<tbody>\n<tr>\n\t\t<td><br /></td>\n\t\t<td>Pattern seeking primate</td>\n\t\t<td>We have an innate sense of good vs. evil. Not everybody agrees in the distinction. How do we know what's right?</td>\n\t\t<td>There is a creator who will punish or reward you after you die.</td>\n\t\t<td>Good people live longer and get less diseases.</td>\n\t\t<td><br /></td>\n\t</tr>\n\t<tr>\n\t\t<td>300 BC</td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/Euclid\" target=\"_blank\">Euclid</a><br /></td>\n\t\t<td>How to predict the area of a circle and volume of a sphere?</td>\n\t\t<td>The <a href=\"http://en.wikipedia.org/wiki/Euclid%27s_Elements\" target=\"_blank\">Elements</a> Euclidean Geometry, PI</td>\n\t\t<td>The area of a circle and volume of a sphere<br /></td>\n\t\t<td>Yes</td>\n\t</tr>\n\t<tr>\n\t\t<td>100 BC</td>\n\t\t<td>?</td>\n\t\t<td>How to predict the positions of the heavenly bodies?</td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/Antikythera_mechanism\" target=\"_blank\">Antikythera mechanism</a> analog computer</td>\n\t\t<td>The positions of the heavenly bodies.<br /></td>\n\t\t<td>Yes</td>\n\t</tr>\n\t<tr>\n\t\t<td>1543</td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/Nicolaus_Copernicus\" target=\"_blank\">Nicolaus Copernicus</a><br /></td>\n\t\t<td><br /></td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/On_the_Revolutions_of_the_Heavenly_Spheres\" target=\"_blank\">On the Revolutions of the Heavenly Spheres</a> </td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\n\t<tr>\n\t\t<td><br /></td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/Galileo_Galilei\" target=\"_blank\">Galileo Galilei</a><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\n\t<tr>\n\t\t<td>1609</td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/Johannes_Kepler\" target=\"_blank\">Johannes Kepler</a><br /></td>\n\t\t<td><br /></td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/Kepler%27s_laws_of_planetary_motion\" target=\"_blank\">Laws of planetary motion</a><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\n\t<tr>\n\t\t<td>1687</td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/Isaac_Newton\" target=\"_blank\">Isaac Newton</a><br /></td>\n\t\t<td><br /></td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/Philosophi%C3%A6_Naturalis_Principia_Mathematica\" target=\"_blank\">Mathematical Principles of Natural Philosophy</a> Laws of motion</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\n\t<tr>\n\t\t<td>1865</td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/Michael_Faraday\" target=\"_blank\">Michael Faraday</a><br /><a href=\"http://en.wikipedia.org/wiki/James_Clerk_Maxwell\" target=\"_blank\">James Clerk Maxwell </a><br /></td>\n\t\t<td><br /></td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/A_Dynamical_Theory_of_the_Electromagnetic_Field\" target=\"_blank\">A Dynamical Theory of the Electromagnetic Field</a><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\n\t<tr>\n\t\t<td>1905</td>\n\t\t<td><a href=\"http://en.wikipedia.org/wiki/Albert_Einstein\" target=\"_blank\">Albert Einstein</a><br /></td>\n\t\t<td><br /></td>\n\t\t<td>The atom does exist and it is very small</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Rutherford</td>\n\t\t<td><br /></td>\n\t\t<td>The nucleus, electron solar system.<br />The atom consists mostly of nothing.<br />Each element is  determined by the the number of protons in the nucleus.<br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Niels Bohr<br /></td>\n\t\t<td><br /></td>\n\t\t<td>Quantum jump</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t<tr>\n\t\t<td><br /></td>\n\t\t<td style=\"\n    valign: initial;\n\">Wolfgang Pauly</td>\n\t\t<td><br /></td>\n\t\t<td>Exclusion principle<br />Each floor can accommodate a fixed number of electrons </td>\n\t\t<td>Explains chemistry</td>\n\t\t<td><br /></td>\n\t</tr>\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Heisenberg</td>\n\t\t<td><br /></td>\n\t\t<td>Matrix Mechanics. <br />The uncertainty principle. <br />The Copenhagen Interpretation, Quantum Mechanics. </td>\n\t\t<td>The uncertainty principle. <br />You can never know both the speed of an election and the position at the same time.<br />Atoms are unknowable, can only be understood through mathematics.<br /></td>\n\t\t<td><br /></td>\n\t</tr>\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Aston</td>\n\t\t<td><br /></td>\n\t\t<td>Spectrograph<br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Chadewich</td>\n\t\t<td>Nucleus is too heavy. There must be something else<br /></td>\n\t\t<td>Neutron</td>\n\t\t<td>Solved the problem of the weight of atoms</td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Physicists</td>\n\t\t<td><br /></td>\n\t\t<td>Strong nuclear force sti<br />Nuclear fusion </td>\n\t\t<td>How does the sun shine?</td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Otto Han</td>\n\t\t<td><br /></td>\n\t\t<td>Fired neutrons at uranium, produced barium</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Lisa Meitner,<br />Frish </td>\n\t\t<td>Where doe the barium come from?</td>\n\t\t<td>Explanation: uranium is split<br /> </td>\n\t\t<td>Nuclear fission releases a lot of energy</td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td>1945</td>\n\t\t<td>Openheimer</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td>Atomic bomb</td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Fred Heul,<br />William Fauler </td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td>Stars make heaver atoms in red giants<br />Gold uranium in super nova <br />What about Hydrogen and Helium? </td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td>Iron is the most stable atom</td>\n\t\t<td>Stability graph</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\n\t\t<tr>\n\t\t<td>1945</td>\n\t\t<td>Gamov</td>\n\t\t<td>Why is there so much helium in the sun?<br /></td>\n\t\t<td>Big Bang Theory <br />in 10 minutes </td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Penzias, Wilson</td>\n\t\t<td><br /></td>\n\t\t<td>Microwave background radiation<br />afterglow of the big bang </td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Victor Hess</td>\n\t\t<td><br /></td>\n\t\t<td>Cosmic rays</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Paul Durak</td>\n\t\t<td><br /></td>\n\t\t<td>Unify quantum mechanics and theory of special relativity: Deals with speed of light.</td>\n\t\t<td>There must be another universe: anti-mater.<br />Only works for a single electron </td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td>1932</td>\n\t\t<td>Carl Anderson</td>\n\t\t<td><br /></td>\n\t\t<td>Cloud chamber<br />Discoverers anti-electron in cosmic rays </td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Richard Feynman</td>\n\t\t<td>Durak's equation works only for a single electron</td>\n\t\t<td>Quantum Electro Dynamics<br />There is only nothing there on average </td>\n\t\t<td>electro-magnetic moment:<br />2.00231904 Extremely accurate</td>\n\t\t<td> </td>\n\t</tr>\t\t<tr>\n\t\t<td>1947</td>\n\t\t<td>Casimere</td>\n\t\t<td>Colloidal solution: mayonnaise</td>\n\t\t<td>Vacuum energy</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td>6 particals<br />electrons, protons and neutrons </td>\n\t\t<td>Particle zoo</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td>Murry Galman</td>\n\t\t<td>Particle zoo</td>\n\t\t<td>Used group theory: the eight fold way.<br />Quarks</td>\n\t\t<td>Quarks</td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td>'60s</td>\n\t\t<td><br /></td>\n\t\t<td>Electron accelerator</td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td>Measurement problem<br />the act of measurement creates the universe </td>\n\t\t<td>String theory<br />Brane theory <br />Quantum loop gravity<br />Multiverse </td>\n\t\t<td>Sheudingers cat</td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\t\t<tr>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t\t<td><br /></td>\n\t</tr>\n</tbody></table>"
 }
 { 
     "_id" : NumberInt(2089), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Widget Details"
 }
 { 
     "_id" : NumberInt(2103), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Implementation", 
     "description" : "<p>The technical architecture is comprised of three layers: the data, server and client layers.</p>"
 }
 { 
     "_id" : NumberInt(2105), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "The Solution", 
     "description" : "<p>At Neuralquest we took a long hard look at the challenges facing today's business processes in terms of IT support and decided we needed a new approach. We started by readdressing the question: '<i>What is it we want computers to do for us when it come to supporting processes?</i>'. From there we took the shortest possible rout to your browser, eliminating as many components as possible.<br />When you think about it, all we really want is a data store and some forms to modify the data according to a fixed set of business rules and predefined processes. Such a system must be secure, so that only persons with a particular role can access and/or modify certain data. But above all, <b>the system must be flexible</b>. By this we mean, it should be easy to access and understand the business rules underpinning the processes and it should be easy to modify them so that the system can adapt overtime to suit evolving business needs without incurring new complexities. We're not asking for the moon.<br />The solution we came up with involves several layers of models, all tightly coupled  </p>"
 }
 { 
     "_id" : NumberInt(2107), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "The IT industry has been notably lacking when it comes to supporting business processes", 
     "description" : "<div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"Classic Achitechure\" src=\"img/Neuralquest/svg/ClassicAchitechure.svg\" style=\"width: inherit;\" />\n<p><b>Classic Achitechure</b> in a large organization.</p></div>\n<p>Few would dispute that the IT revolution has brought about a tremendous increase in productivity. Yet, when you look at any large organization you will typically see hundreds of separate, loosely coupled systems. Often with their own operating system, data base, programming environment and manor of interacting with the user and other systems. Crucial documentation is often lacking or spread out over various media including everything from spreadsheets stored in mailboxes to local heros on the verge of retirement. Maintaining these systems comes at a huge expense.<br />You'd think that by now someone would have come up with a better way of supporting our business process needs, one that is adaptable and straightforward to use. After all, the processes themselves aren't particularity complex. Generally speaking, it's the interaction between the various parts of the system, that makes the system as a whole complex.<br />Current wisdom would have it that it is not possible to develop a single system that completely suits your business process needs because the processes are too complex and evolve too rapidly for any IT department to keep-up. Any such system would soon become an inhibitor as opposed to an enabler to your developing business. Instead, we elect to subdivide the overall process and either build or buy the various parts, tying them together as best we can. <br /></p><p></p>"
 }
 { 
     "_id" : NumberInt(2110), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "3D class model widget", 
     "description" : "<div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"3D Class Model\" src=\"img/Neuralquest/3dClassModel.png\" style=\"width: inherit;\" />\n<p><b>3D Class Model chart</b> <a href=\"#842.1788.78.844.1793\">example</a>.</p></div>\n<p>JavaScript source: <a href=\"js/extensions/NqClassChart.js\" target=\"_blank\">NqClassChart.js <br /></a>The document is use to display and modify The Document</p>"
 }
 { 
     "_id" : NumberInt(2113), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Main Module: nq.js", 
     "description" : "<p>JavaScript source: <a href=\"js/nq.js\" target=\"_blank\">nq.js</a><br />The interface uses <a href=\"http://dojotoolkit.org/\" target=\"_blank\">Dojo Toolkit</a> to provide a rich user experience drag and drop trees, scrollable tables and a local data store which stores updates until you're ready to save them to the server.<br />The main task if the client is to respond to changes the hash part of the browser url. Every time you click on a tree node, table row or tab, the hash is updated, triggering the client to display the corresponding page set. For example the hash in: <a href=\"http://neuralquest.org/#842.1784.824.846.1866\">http://neuralquest.org/#<font color=\"#0000ff\">842.1784.824.846.1866</font></a> will direct you to the Welcome page.</p>"
 }
 { 
     "_id" : NumberInt(2116), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "The Hash", 
     "description" : "<p>The hash actually represents the entire state of the client so you can bookmark it or send it by e-mail to others. Clicking on the link will recreate the exact same page set, provided the user is authorized to view it. In effect the hash represents a path down the view/tab hierarchy, including selected objects in trees tables etc.<br />The hash consists of repetitive sets of threes, notably the identifiers of views, tabs and objects. In the example above the hash translates to:</p><ul><li>level 0</li><ul><li>view id = 842</li><li>tab id = 1784</li><li>object id = 824</li></ul><li>level 1</li><ul><li>view id = 846</li><li>tab id = 1866</li></ul></ul><p>In theory the levels can go on forever but you'll seldom encounter more than three levels.<br /></p>"
 }
 { 
     "_id" : NumberInt(2119), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Hash change", 
     "description" : "<p>The hash change listener calls interpritHash() which dissects the hash, starting at level 0 and checks to make sure that the identifiers in that level correspond to what is shown in the browser. If not, the necessary page parts are generated and displayed.<br />The algorithm goes something like this:<br />For each level in the hash {</p><ol><li>if the view for this level is not currently displayed, create it.</li><li>if the tab for this level is not displayed, select it.</li><li>if the widget for that tab has not been created yet, create it.</li><li>if the widget does not display data corresponding to the selected object of the previous level, set the query for the widget.</li><li>if the object for this level is not selected, select it.</li></ol>}<p>Each step is described in more detail below.</p>"
 }
 { 
     "_id" : NumberInt(2122), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Create view and accordion/tabs container", 
     "description" : "<div class=\"floatright\" style=\"width: 300px;\">\n<img alt=\"Data Model\" src=\"img/Neuralquest/AccordionContainer.png\" style=\"width: inherit;\" />\n<p><b>Accordion</b> is displayed inside the left pane of a Border Container. The right pane is used to display details of selected objects.</p></div>\n<div class=\"floatright\" style=\"width: 300px;\">\n<img alt=\"Data Model\" src=\"img/Neuralquest/TabsContainer.png\" style=\"width: inherit;\" />\n<p><b>Tabs</b> are displayed inside a Tab Container.</p></div>\n<p>In this first step we make sure the requested view is presented to the user.<br />From a presentation perspective the view's main function is to serve as a starting point for the underlying ordered list of accordions/tabs. The view also has an 'Accordion or Tabs' attribute that tells us whether the list should be presented as a page of accordions or tabs. Accordions are presented as a BorderContainer with a splitter down the middle and an AccordionContainer in the left pane. The right pane is use to display views on object selected in the left pane: master-slave. Tabs is presented or as ordinary TabContainer.<br />If there is only one accordion/tab in the list, the the container is skipped and the contents are displayed in an ordinary container. <br />The client will query the dijit registry for <code>'acctab'+viewId</code> to find out if the view is already displayed. <br /></p><ul><li>If it is found then we we go on to the next step, which is to find out if the requested tab is selected.<br /></li><li>If it is not found we have to do a couple of things<br /></li><ul><li>Find out which parent container we will displaying our view in by calling <code>findParentContainer</code>.<br /></li><li>Depending on the 'Accordion or Tabs' attribute either call <code>createAccordion</code> or <code>createTabs</code></li></ul></ul><p>When a accordion or tab container is newly created it will already have the correct tab selected. </p>"
 }
 { 
     "_id" : NumberInt(2123), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Select accordion/tab", 
     "description" : "<p>After the creation of the view is completed and it has been filled with either an accordion or tab container we make sure the correct tab is selected. If no tab is provided by the hash, we look to see if there is a cookie that tells us which tab was selected the last time the user was here.<br />Selecting a tab tab is pretty straightforward. We can simply call select tab on the accordion/tab container. can't hurt.<br />TODO: if I'm not mistaken this is currently not implemented.<br />TODO: create view should be made asynchronous. </p>"
 }
 { 
     "_id" : NumberInt(2124), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Extensions"
 }
 { 
     "_id" : NumberInt(2125), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Provide data for the widget", 
     "description" : "<p>The document is use to display and modify The Document</p>"
 }
 { 
     "_id" : NumberInt(2126), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Select the object", 
     "description" : "<p>The document is use to display and modify The Document</p>"
 }
 { 
     "_id" : NumberInt(2132), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Cell", 
     "description" : "<p>Cell contains all of the utility methods needed to navigate the network of Cell objects.</p>"
 }
 { 
     "_id" : NumberInt(2135), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Process model widget", 
     "description" : "<div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"Data Model\" src=\"img/Neuralquest/2dProcessModel.png\" style=\"width: inherit;\" />\n<p><b>Process Model chart</b> <a href=\"#842.1786.702.850.1549\">example</a>.</p></div><p>JavaScript source: <a href=\"js/extensions/NqProcessChart.js\" target=\"_blank\">NqProcessChart.js.<br /></a>The document is use to display and modify The Document</p>"
 }
 { 
     "_id" : NumberInt(2138), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Table widget", 
     "description" : "<p>JavaScript source: <a href=\"js/extensions/NqGrid.js\" target=\"_blank\">NqGrid.js.<br /></a>The document is use to display and modify The Document</p>"
 }
 { 
     "_id" : NumberInt(2142), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Tree widget", 
     "description" : "<p>JavaScript source: <a href=\"js/extensions/NqTree.js\" target=\"_blank\">NqTree.js.<br /></a>The document is use to display and modify The Document</p>"
 }
 { 
-    "_id" : NumberInt(2158), 
-    "_type" : "object", 
-    "_icon" : NumberInt(90), 
-    "name" : "Process View"
-}
-{ 
-    "_id" : NumberInt(2295), 
-    "_type" : "object", 
-    "_icon" : NumberInt(95), 
-    "incidentStates" : "asess", 
-    "startDates" : "2015-10-18"
-}
-{ 
-    "_id" : NumberInt(2296), 
-    "_type" : "object", 
-    "_icon" : NumberInt(95)
-}
-{ 
     "_id" : NumberInt(2327), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "The purpose of Neuralquest is to make developing and executing business processes easy", 
     "description" : "<div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"Process Model\" src=\"img/Neuralquest/2dProcessModel.png\" style=\"width: inherit;\" />\n<p><b>Process Model</b> <a href=\"#842.1786.702.850.1549\">example</a>.</p></div>\n<p>Neuralquest is an Open Source project that consists of an Integrated Development Environment which provides a multitude of views on models and their contents, making them fully self documenting. The same environment can be used to execute processes you initiate. Any changes to model properties have a direct effect on the processes.<br />How you use Neuralquest depends one whether you logged on as a participant or just visiting.<br /><i>Participants </i>can create organizations based one of the many industry standard templates. These include ITIL, Prince2, Scrum and 'Small business in a box'. The owner of the organization can then assign roles to members of the organization to allow them to perform certain tasks. Neuralquest allows for extension processes to suit specific needs the organisation evolves. </p><p><i>Participants </i>also have access to a content management system and a messaging hub which allows you to view and respond to activities assigned to you based on your roles in various organizations, as well as e-mail and some innovations like: smart-mail (role-based, stateful e-mail) and smart-minutes (treats meetings as a miniature project).\n<br />As a <i>visitor </i>you can browse all the information that has been made public by participants and their organizations, which is what you're doing right now. You can gain insight in publications, blogs, models and much more.</p>"
 }
 { 
     "_id" : NumberInt(2330), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Neuralquest provides an integrated process modeling and execution environment"
 }
 { 
     "_id" : NumberInt(2332), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Form widget", 
     "description" : "<p>JavaScript source: <a href=\"js/extensions/NqForm.js\" target=\"_blank\">NqForm.js</a>.<br />The document is use to display and modify The Document</p>"
 }
 { 
     "_id" : NumberInt(2334), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Meta Model", 
     "description" : "<div class=\"floatright\" style=\"width: 400px;\">\n<img alt=\"A Typical Class Model\" src=\"img/Neuralquest/svg/ClassModel.svg\" style=\"width: inherit;\" />\n<p><b>A Typical Class Model</b> In this case there are three objects of type <i>Users</i>. Each has three attributes. A user inherits permitted associations from <i>Users</i> and <i>Business Classes</i>. Here we see three permitted attribute associations. Two from Users to <i>Street</i> and <i>House Number</i> and one form <i>Business Classes</i> to <i>Primary Name</i>.<br />\nNote that name field behaves unexpectedly for objects. <i>Business Classes</i> objects for instance, do not have a name. With <i>Attributes</i> on the other hand, the name field represents the value.\n</p>\n</div><p>The Meta Model is built on the Data Model. It describes the rules that the Class Model and it's objects must abide by. The Meta Model is implicit, that is to say its enforcement is hard-coded into the Data Servlet. The rules are similar to the ones found in the object oriented paradigm. These are the rules:<br /></p><ul><li>The universe consists of objects, classes and associations of various types.<br /></li><li>All classes have a <i>parent </i>association to another class, except the <i>root </i>class which has no parent. Together they form form a hierarchy. Circular parent references are not allowed.</li><li>All objects have a <i>parent </i>association to a class.</li><li>Classes can be related to other classes by means of an association.</li><li>Objects can be related to other objects by means of an association. The<i> parent</i> and <i>maps to</i> associations form an exception since they have a class as destination.</li><li>Associations have a direction. They go from the source to the destination.<br /></li><li>Associations have a type which is a reference to an object of class type <i>Associations</i>.</li><li>For associations,  the combination of source, type, and destination is unique.</li><li>Each object inherits a set of permitted associations from it's class type ...or one of it's super classes. The <i>parent </i>association forms an exception. It's presence is implicit. The <i>next </i>association also forms an exception. It presence is dictated by an <i>ordered </i>association (see below).</li><li>There are two sub-classes of Associations: <i>to one</i> and <i>to many</i>. Objects can be related to more than one other object (of the same class type and via the same association type) if the the association is of class type <i>to many</i>.</li><li>The <i>ordered </i>association is a special kind of <i>to many</i>. It infers that the associated objects form a linked list by means of a <i>next </i>association.</li><li>All <i>Attribute </i>objects must be used by one object except Permitted Values. These can be used by more than one object.</li></ul>That's the universe in a nutshell.<br />TODO: How to deal with redundant or conflicting hereditary associations?"
 }
 { 
     "_id" : NumberInt(2336), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Data Model", 
     "description" : "<div class=\"floatright\" style=\"width: 300px;\">\n<img alt=\"Data Model\" src=\"img/Neuralquest/svg/DataModel.svg\" style=\"width: inherit;\"/>\n<p><b>Data Model</b> Two entity types: <i>Cell</i> and <i>Assoc</i>. <i>Cell</i> has three <i>one to many</i> associations to <i>Assoc</i>.</p></div>\n<p>The Data Model consists of two entity types: Cells and Associations.</p>"
 }
 { 
     "_id" : NumberInt(2338), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Server Layer", 
     "description" : "<p>There is just one servlet, the Data Servlet, which runs under Apache Tomcat (not counting some utility servlets). It is responsible for translating the database data structure to the client data structure, more specifically from a network to a hierarchy. It does so both ways, during retrieval in response to a GET and during update in response to a POST. All updates to attribute values are validated against the process, page and attribute models. All updates to object associations are validated against the Class model. </p>"
 }
 { 
     "_id" : NumberInt(2341), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Make it work", 
     "description" : "<p>This is the stage we're currently in. Features we need to develop include:<br /></p><ul><li>Class modeling<br /></li><li>Page modeling<br /></li><li>Process modeling<br /></li><li>Airtight authorization<br /></li><li>Initial organizational templates<br /></li><li>Documentation and guidelines </li></ul>"
 }
 { 
     "_id" : NumberInt(2344), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Make it right"
 }
 { 
     "_id" : NumberInt(2345), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Make it viral"
 }
 { 
     "_id" : NumberInt(2348), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Make it right"
 }
 { 
     "_id" : NumberInt(2349), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Make it viral"
 }
 { 
     "_id" : NumberInt(2352), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Make it right", 
     "description" : "<p>This stage deals with professionalizing Neuralquest. It includes the following steps:</p><ul><li>Setup the non-profit organization</li><li>Eat our own dog food, setup defect/enhancement tracker </li><li>Develop a community of volunteers and a healthy ecosystem</li><li>Find sponsors</li><li>Internationalization</li><li>Get the software and templates certified </li></ul>"
 }
 { 
     "_id" : NumberInt(2353), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Make it unmissable", 
     "description" : "<div class=\"floatright\" style=\"width: 200px;\">\n<img alt=\"Classic Achitechure\" src=\"img/Neuralquest/MakeItUnmissable.jpg\" style=\"width: inherit;\" />\n<p><b>Make it unmissable</b></p></div>\n<p>Finally:</p><ul><li>Spread the word</li><li>Spread the knowledge</li><li>Contiguous enhancement</li></ul><br /><br /><br /><br /><br /><br /><br />"
 }
 { 
     "_id" : NumberInt(2372), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "[new header]sss", 
     "description" : "<p>new paragraph</p>"
 }
 { 
     "_id" : NumberInt(2382), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Document Widget", 
     "displayTypes" : "Document"
 }
 { 
     "_id" : NumberInt(2387), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Document Tree Widget", 
     "displayTypes" : "Tree", 
-    "parentId" : "810"
-}
-{ 
-    "_id" : NumberInt(2389), 
-    "_type" : "object", 
-    "_icon" : NumberInt(99), 
-    "name" : "Process Widget", 
-    "displayTypes" : "Process Model"
-}
-{ 
-    "_id" : NumberInt(2393), 
-    "_type" : "object", 
-    "_icon" : NumberInt(99), 
-    "name" : "Service Request History Widget", 
-    "displayTypes" : "Table"
+    "parentId" : NumberInt(810)
 }
 { 
     "_id" : NumberInt(2413), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Item Properties", 
     "displayTypes" : "Form"
 }
 { 
     "_id" : NumberInt(2415), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Associations Widget", 
     "displayTypes" : "Tree"
 }
 { 
     "_id" : NumberInt(2417), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "3D Class Model Widget", 
     "displayTypes" : "3D Class Model"
 }
 { 
     "_id" : NumberInt(2419), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Class Model Widget", 
     "displayTypes" : "Tree", 
-    "parentId" : "67"
+    "parentId" : NumberInt(67)
 }
 { 
     "_id" : NumberInt(2430), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Widget Properties", 
     "displayTypes" : "Form"
 }
 { 
     "_id" : NumberInt(2432), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Accordion-Tabs Properties", 
     "displayTypes" : "Form"
 }
 { 
     "_id" : NumberInt(2434), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "View Properties", 
     "displayTypes" : "Form"
 }
 { 
     "_id" : NumberInt(2436), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Attribute Properties", 
     "displayTypes" : "Table"
 }
 { 
     "_id" : NumberInt(2438), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Page Model Widget", 
     "displayTypes" : "Tree", 
-    "parentId" : "842"
+    "parentId" : NumberInt(842)
 }
 { 
     "_id" : NumberInt(2448), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(80), 
     "name" : "Experiments", 
     "description" : "<p>Html Examples</p>"
 }
 { 
     "_id" : NumberInt(2451), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "The Flat File Nemmisis"
 }
 { 
     "_id" : NumberInt(2453), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "The Bain of Excel"
 }
 { 
     "_id" : NumberInt(2455), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(79), 
     "name" : "Fotos"
 }
 { 
-    "_id" : NumberInt(2459), 
-    "_type" : "object", 
-    "_icon" : NumberInt(95), 
-    "incidentStates" : "accepted", 
-    "startDates" : "2015-03-30T22:00:00.000Z"
-}
-{ 
-    "_id" : NumberInt(2461), 
-    "_type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Jamie Jurgensen"
-}
-{ 
-    "_id" : NumberInt(2462), 
-    "_type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Tyrone Trembath"
-}
-{ 
-    "_id" : NumberInt(2463), 
-    "_type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Emile Esperanza"
-}
-{ 
-    "_id" : NumberInt(2464), 
-    "_type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Whitney Winrow"
-}
-{ 
-    "_id" : NumberInt(2465), 
-    "_type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Jazmine Jeffery"
-}
-{ 
-    "_id" : NumberInt(2466), 
-    "_type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Rosario Reinhart"
-}
-{ 
-    "_id" : NumberInt(2467), 
-    "_type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Jayne Jeansonne"
-}
-{ 
-    "_id" : NumberInt(2468), 
-    "_type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Dione Defoor"
-}
-{ 
-    "_id" : NumberInt(2469), 
-    "_type" : "object", 
-    "_icon" : NumberInt(51), 
-    "name" : "Susy Shippy"
-}
-{ 
     "_id" : NumberInt(2499), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Home"
 }
 { 
     "_id" : NumberInt(2502), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Documents", 
     "accordionOrTab" : "Accordion in Border Container"
 }
 { 
     "_id" : NumberInt(2504), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Structure"
 }
 { 
     "_id" : NumberInt(2506), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Financial"
 }
 { 
     "_id" : NumberInt(2508), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Balance Sheet"
 }
 { 
     "_id" : NumberInt(2510), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Transactions"
 }
 { 
     "_id" : NumberInt(2514), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Documents Tab"
 }
 { 
     "_id" : NumberInt(2516), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Documents Widget", 
     "displayTypes" : "Tree"
 }
 { 
     "_id" : NumberInt(2526), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Doc Tree Contents Tab"
 }
 { 
     "_id" : NumberInt(2529), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Doc Tree Contents Widget", 
     "displayTypes" : "Document"
 }
 { 
     "_id" : NumberInt(2531), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "Home Widget", 
     "displayTypes" : "Document"
 }
 { 
     "_id" : NumberInt(2556), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
-    "name" : "User Tab", 
+    "name" : "Blog", 
     "accordionOrTab" : "Accordion in Border Container"
 }
 { 
     "_id" : NumberInt(2567), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "User Document Tree", 
     "displayTypes" : "Tree"
 }
 { 
     "_id" : NumberInt(2573), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "accordionOrTab" : "Tab Container", 
     "name" : "User Doc Tree Tab"
 }
 { 
     "_id" : NumberInt(2577), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(99), 
     "name" : "User Doc Widget", 
     "displayTypes" : "Document"
 }
 { 
-    "_id" : NumberInt(2590), 
-    "_type" : "object", 
-    "_icon" : NumberInt(90), 
-    "name" : "Role Table Tab"
-}
-{ 
-    "_id" : NumberInt(2592), 
-    "_type" : "object", 
-    "_icon" : NumberInt(99), 
-    "name" : "Role Table Widget", 
-    "displayTypes" : "Table"
-}
-{ 
-    "_id" : NumberInt(2594), 
-    "_type" : "object", 
-    "_icon" : NumberInt(99), 
-    "name" : "Service Request Details", 
-    "displayTypes" : "Form"
-}
-{ 
     "_id" : NumberInt(2624), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(70), 
     "name" : "Data Servlet"
 }
 { 
     "_id" : NumberInt(2627), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Home"
 }
 { 
     "_id" : NumberInt(2638), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Documents"
 }
 { 
     "_id" : NumberInt(2643), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Service Requests"
 }
 { 
     "_id" : NumberInt(2645), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Service Requests"
 }
 { 
     "_id" : NumberInt(2647), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(90), 
     "name" : "Demo"
 }
 { 
-    "_id" : NumberInt(50), 
-    "_type" : "class", 
-    "_name" : "Resources"
-}
-{ 
-    "_id" : NumberInt(51), 
-    "_type" : "class", 
-    "_name" : "Persons", 
-    "userId" : {
-        "type" : "String"
-    }
-}
-{ 
-    "_id" : NumberInt(62), 
-    "_type" : "class", 
-    "_name" : "Pages"
-}
-{ 
-    "_id" : NumberInt(67), 
-    "_type" : "class", 
-    "_name" : "Problem Domain", 
-    "name" : {
-        "type" : "String"
-    }, 
-    "description" : {
-        "type" : "String", 
-        "media" : {
-            "mediaType" : "text/html"
-        }
-    }
-}
-{ 
-    "_id" : NumberInt(70), 
-    "_type" : "class", 
-    "_name" : "Organizational Units"
-}
-{ 
-    "_id" : NumberInt(71), 
-    "_type" : "class", 
-    "_name" : "Subscriptions"
-}
-{ 
-    "_id" : NumberInt(78), 
-    "_type" : "class", 
-    "_name" : "Documents"
-}
-{ 
-    "_id" : NumberInt(79), 
-    "_type" : "class", 
-    "_name" : "Pages"
-}
-{ 
-    "_id" : NumberInt(80), 
-    "_type" : "class", 
-    "_name" : "Folders"
-}
-{ 
-    "_id" : NumberInt(84), 
-    "_type" : "class", 
-    "_name" : "Balance Sheet"
-}
-{ 
-    "_id" : NumberInt(85), 
-    "_type" : "class", 
-    "_name" : "Service Requests"
-}
-{ 
-    "_id" : NumberInt(86), 
-    "_type" : "class", 
-    "_name" : "Agreements"
-}
-{ 
-    "_id" : NumberInt(88), 
-    "_type" : "class", 
-    "_name" : "Owners"
-}
-{ 
-    "_id" : NumberInt(89), 
-    "_type" : "class", 
-    "_name" : "Organizations"
-}
-{ 
-    "_id" : NumberInt(90), 
-    "_type" : "class", 
-    "_name" : "Accordions Tabs", 
-    "accordionOrTab" : {
-        "type" : "String", 
-        "enum" : [
-            "Accordion in Border Container", 
-            "Tab Container"
-        ]
-    }
-}
-{ 
-    "_id" : NumberInt(95), 
-    "_type" : "class", 
-    "_name" : "Service Request History", 
-    "incidentStates" : {
-        "type" : "String", 
-        "enum" : [
-            "asess", 
-            "accepted", 
-            "initial", 
-            "reject", 
-            "closed"
-        ]
-    }
-}
-{ 
-    "_id" : NumberInt(96), 
-    "_type" : "class", 
-    "_name" : "Business Class Histories", 
-    "startDates" : {
-        "type" : "Date"
-    }
-}
-{ 
-    "_id" : NumberInt(97), 
-    "_type" : "class", 
-    "_name" : "Assets"
-}
-{ 
-    "_id" : NumberInt(98), 
-    "_type" : "class", 
-    "_name" : "Liabilities and Shareholder Equity"
-}
-{ 
-    "_id" : NumberInt(99), 
-    "_type" : "class", 
-    "_name" : "Widgets", 
-    "displayTypes" : {
-        "type" : "String", 
-        "enum" : [
-            "Sub Tabs", 
-            "Tree", 
-            "Table", 
-            "Report", 
-            "3D Class Model", 
-            "Preview", 
-            "Form", 
-            "Document", 
-            "Sub Accordion", 
-            "Process Model"
-        ]
-    }, 
-    "parentId" : {
-        "type" : "Number"
-    }
-}
-{ 
-    "_id" : NumberInt(103), 
-    "_type" : "class", 
-    "_name" : "Member"
-}
-{ 
-    "_id" : NumberInt(108), 
-    "_type" : "class", 
-    "_name" : "Inset"
-}
-{ 
-    "_id" : NumberInt(110), 
-    "_type" : "class", 
-    "_name" : "Off Balance Sheet"
-}
-{ 
-    "_id" : NumberInt(1939), 
-    "_type" : "object", 
-    "_icon" : NumberInt(74), 
-    "toManyAssociations" : "manyToOne", 
-    "mapsTo" : null, 
-    "name" : "State View", 
-    "accordionOrTab" : "Tab Container", 
-    "schema" : {
-        "name" : {
-            "type" : "String", 
-            "required" : false, 
-            "readOnly" : false, 
-            "title" : "State"
-        }
-    }
-}
-{ 
-    "_id" : NumberInt(2166), 
-    "_type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Org Unit View", 
-    "toManyAssociations" : "manyToMany", 
-    "mapsTo" : NumberInt(70), 
-    "accordionOrTab" : "Tab Container", 
-    "schema" : {
-        "name" : {
-            "type" : "String", 
-            "required" : false, 
-            "readOnly" : false, 
-            "title" : "Role"
-        }
-    }
-}
-{ 
     "_id" : NumberInt(2618), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Cell Details View", 
-    "mapsTo" : NumberInt(101), 
     "schema" : {
         "_id" : {
-            "type" : "Number", 
+            "type" : "number", 
             "required" : true, 
             "readOnly" : true, 
             "title" : "id"
         }, 
-        "_name" : {
-            "type" : "String", 
-            "required" : false, 
+        "name" : {
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Item Name"
         }, 
-        "_type" : {
-            "type" : "String", 
+        "type" : {
+            "type" : "string", 
             "required" : true, 
             "readOnly" : false, 
             "title" : "Item Type", 
@@ -1353,47 +1042,22 @@
                 "object", 
                 "class"
             ]
-        }
-    }
-}
-{ 
-    "_id" : NumberInt(2585), 
-    "_type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Roles View", 
-    "toManyAssociations" : "oneToMany", 
-    "mapsTo" : null, 
-    "accordionOrTab" : "Accordion in Border Container", 
-    "onlyIfParentEquals" : "810", 
-    "schema" : {
-        "name" : {
-            "type" : "String", 
-            "required" : false, 
+        }, 
+        "description" : {
+            "type" : "string", 
             "readOnly" : false, 
-            "title" : "Label"
-        }
-    }
-}
-{ 
-    "_id" : NumberInt(731), 
-    "_type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Service Request History View", 
-    "mapsTo" : NumberInt(95), 
-    "toManyAssociations" : "attribute of", 
-    "accordionOrTab" : "Tab Container", 
-    "schema" : {
-        "startDates" : {
-            "type" : "Date", 
-            "required" : false, 
+            "title" : "Description"
+        }, 
+        "schema" : {
+            "type" : "object", 
             "readOnly" : false, 
-            "title" : "Date Modified"
+            "title" : "Class Schema"
         }
     }
 }
 { 
     "_id" : NumberInt(2561), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Organizational Units View", 
     "toManyAssociations" : "oneToMany", 
@@ -1401,8 +1065,7 @@
     "accordionOrTab" : "Tab Container", 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Unit Name"
         }
@@ -1410,17 +1073,16 @@
 }
 { 
     "_id" : NumberInt(2485), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Organization Instances View", 
     "toManyAssociations" : "instantiations", 
     "mapsTo" : NumberInt(89), 
     "accordionOrTab" : "Tab Container", 
-    "onlyIfParentEquals" : "2016", 
+    "onlyIfParentEquals" : NumberInt(2016), 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Label"
         }
@@ -1428,7 +1090,7 @@
 }
 { 
     "_id" : NumberInt(2579), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "User Doc View", 
     "toManyAssociations" : "ordered", 
@@ -1436,57 +1098,27 @@
     "accordionOrTab" : "Tab Container", 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Hearder"
         }, 
         "description" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Paragraph"
         }
     }
 }
 { 
-    "_id" : NumberInt(2596), 
-    "_type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Service Request Details View", 
-    "mapsTo" : NumberInt(85), 
-    "schema" : {
-        "startDates" : {
-            "type" : "String", 
-            "required" : false, 
-            "readOnly" : false, 
-            "title" : "Date"
-        }, 
-        "name" : {
-            "type" : "String", 
-            "required" : false, 
-            "readOnly" : false, 
-            "title" : "Header"
-        }, 
-        "description" : {
-            "type" : "String", 
-            "required" : false, 
-            "readOnly" : false, 
-            "title" : "Description"
-        }
-    }
-}
-{ 
     "_id" : NumberInt(733), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Classes", 
     "toManyAssociations" : "byAssociationType", 
     "accordionOrTab" : "Accordion in Border Container", 
     "schema" : {
         "cellName" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Cell Name"
         }
@@ -1494,56 +1126,36 @@
 }
 { 
     "_id" : NumberInt(2533), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Doc Tree Contests View", 
     "toManyAssociations" : "ordered", 
     "mapsTo" : NumberInt(79), 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Doc Tree Contents Header"
         }, 
         "description" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Doc Tree Content Paragraph"
         }
     }
 }
 { 
-    "_id" : NumberInt(2293), 
-    "_type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Service Request View", 
-    "mapsTo" : NumberInt(85), 
-    "toManyAssociations" : "orderedParent", 
-    "accordionOrTab" : "Tab Container", 
-    "schema" : {
-        "name" : {
-            "type" : "String", 
-            "required" : false, 
-            "readOnly" : false, 
-            "title" : "Request"
-        }
-    }
-}
-{ 
     "_id" : NumberInt(2552), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "User Instances View", 
     "toManyAssociations" : "instantiations", 
     "mapsTo" : NumberInt(51), 
-    "onlyIfParentEquals" : "2018", 
-    "accordionOrTab" : "Accordion in Border Container", 
+    "onlyIfParentEquals" : NumberInt(2018), 
+    "accordionOrTab" : "Tab Container", 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "User Name"
         }
@@ -1551,7 +1163,7 @@
 }
 { 
     "_id" : NumberInt(2518), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Doc Tree Pages View", 
     "mapsTo" : NumberInt(78), 
@@ -1559,8 +1171,7 @@
     "toManyAssociations" : "ordered", 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Paragraph Header"
         }
@@ -1568,7 +1179,7 @@
 }
 { 
     "_id" : NumberInt(846), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "document view", 
     "mapsTo" : NumberInt(78), 
@@ -1576,14 +1187,12 @@
     "accordionOrTab" : "Tab Container", 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Header"
         }, 
         "description" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Paragraph Contents"
         }
@@ -1591,19 +1200,19 @@
 }
 { 
     "_id" : NumberInt(2610), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Accordion-Tabs Details View", 
     "mapsTo" : NumberInt(90), 
     "schema" : {
         "name" : {
-            "type" : "String", 
+            "type" : "string", 
             "required" : true, 
             "readOnly" : false, 
             "title" : "Tab Name"
         }, 
         "accordionOrTab" : {
-            "type" : "String", 
+            "type" : "string", 
             "required" : true, 
             "readOnly" : false, 
             "title" : "Accordion orTab", 
@@ -1613,8 +1222,7 @@
             ]
         }, 
         "description" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Page Description"
         }
@@ -1622,7 +1230,7 @@
 }
 { 
     "_id" : NumberInt(1802), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Accordion-Tabs view", 
     "mapsTo" : NumberInt(90), 
@@ -1630,8 +1238,7 @@
     "accordionOrTab" : "Tab Container", 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Tab Name"
         }
@@ -1639,23 +1246,22 @@
 }
 { 
     "_id" : NumberInt(844), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "class model view", 
     "toManyAssociations" : "children", 
     "accordionOrTab" : "Tab Container", 
     "schema" : {
-        "cellName" : {
-            "type" : "String", 
-            "required" : false, 
+        "name" : {
+            "type" : "string", 
             "readOnly" : false, 
-            "title" : "Cell Name"
+            "title" : "Class Name"
         }
     }
 }
 { 
     "_id" : NumberInt(2569), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "User Document Tree View", 
     "toManyAssociations" : "ordered", 
@@ -1663,8 +1269,7 @@
     "accordionOrTab" : "Tab Container", 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Header"
         }
@@ -1672,7 +1277,7 @@
 }
 { 
     "_id" : NumberInt(2378), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Widget View", 
     "toManyAssociations" : "ordered", 
@@ -1680,64 +1285,31 @@
     "accordionOrTab" : "Tab Container", 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Widget Name"
-        }
-    }
-}
-{ 
-    "_id" : NumberInt(2314), 
-    "_type" : "object", 
-    "_icon" : NumberInt(74), 
-    "name" : "Service Request History View", 
-    "toManyAssociations" : "ordered", 
-    "mapsTo" : NumberInt(95), 
-    "accordionOrTab" : "Tab Container", 
-    "schema" : {
-        "states" : {
-            "type" : "String", 
-            "required" : false, 
-            "readOnly" : false, 
-            "title" : "State"
-        }, 
-        "startDates" : {
-            "type" : "Date", 
-            "required" : false, 
-            "readOnly" : false, 
-            "title" : "Date Modified"
-        }, 
-        "description" : {
-            "type" : "String", 
-            "required" : false, 
-            "readOnly" : false, 
-            "title" : "Comment"
         }
     }
 }
 { 
     "_id" : NumberInt(2614), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Widget Deatils View", 
     "mapsTo" : NumberInt(99), 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Widget Name"
         }, 
         "parentId" : {
-            "type" : "Number", 
-            "required" : false, 
+            "type" : "number", 
             "readOnly" : false, 
             "title" : "ParentId"
         }, 
         "displayTypes" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Widget Type", 
             "enum" : [
@@ -1754,8 +1326,7 @@
             ]
         }, 
         "description" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Description"
         }
@@ -1763,7 +1334,7 @@
 }
 { 
     "_id" : NumberInt(2380), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "page view", 
     "accordionOrTab" : "Tab Container", 
@@ -1771,26 +1342,22 @@
     "mapsTo" : NumberInt(79), 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "nqWidget"
         }, 
         "description" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Paragraph"
         }, 
         "paragraphSVG" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "SVG"
         }, 
         "paragraphAnnotation" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Annotation"
         }
@@ -1798,45 +1365,40 @@
 }
 { 
     "_id" : NumberInt(537), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Attribute References", 
-    "mapsTo" : NumberInt(63), 
+    "mapsTo" : NumberInt(74), 
     "description" : "<p><b>Help</b>Text</p>", 
     "toManyAssociations" : "ordered", 
     "accordionOrTab" : "Tab Container", 
     "subDocument" : "schema", 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Name"
         }, 
         "title" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Title", 
             "description" : "attribute description"
         }, 
         "type" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Type", 
             "enum" : [
-                "String", 
-                "Number", 
-                "RichText", 
-                "Date", 
-                "Int32", 
-                "Boolean"
+                "string", 
+                "number", 
+                "richText", 
+                "date", 
+                "boolean"
             ]
         }, 
         "media" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Media Type", 
             "enum" : [
@@ -1853,7 +1415,7 @@
 }
 { 
     "_id" : NumberInt(538), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Views view", 
     "mapsTo" : NumberInt(74), 
@@ -1861,8 +1423,7 @@
     "accordionOrTab" : "Tab Container", 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "View Name"
         }
@@ -1870,20 +1431,18 @@
 }
 { 
     "_id" : NumberInt(2604), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "View Details View", 
     "mapsTo" : NumberInt(74), 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "View Name"
         }, 
         "toManyAssociations" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Relationship from Previous", 
             "enum" : [
@@ -1903,7 +1462,7 @@
             ]
         }, 
         "accordionOrTab" : {
-            "type" : "String", 
+            "type" : "string", 
             "required" : true, 
             "readOnly" : false, 
             "title" : "Accoordian or Tab", 
@@ -1913,42 +1472,37 @@
             ]
         }, 
         "onlyIfParentEquals" : {
-            "type" : "Number", 
-            "required" : false, 
+            "type" : "number", 
             "readOnly" : false, 
             "title" : "Only if Parent"
         }, 
         "mapsTo" : {
-            "type" : "Number", 
+            "type" : "number", 
             "#ref" : {
                 "itemId" : NumberInt(67), 
                 "assocType" : "allSubclasses"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Maps To"
         }, 
         "subDocument" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "subDocument"
         }, 
         "description" : {
-            "type" : "String", 
+            "type" : "string", 
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Description"
         }, 
         "schema" : {
-            "type" : "String", 
+            "type" : "string", 
             "media" : {
                 "mediaType" : "text/json"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Schema"
         }
@@ -1956,219 +1510,372 @@
 }
 { 
     "_id" : NumberInt(2541), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Home View", 
     "toManyAssociations" : "ordered", 
     "mapsTo" : NumberInt(89), 
     "schema" : {
         "name" : {
-            "type" : "String", 
+            "type" : "string", 
             "required" : true, 
             "readOnly" : false, 
             "title" : "Header"
         }, 
         "description" : {
-            "type" : "String", 
+            "type" : "string", 
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Paragraph"
         }, 
         "what" : {
-            "type" : "String", 
+            "type" : "string", 
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "What"
         }, 
         "how" : {
-            "type" : "String", 
+            "type" : "string", 
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "How"
         }, 
         "why" : {
-            "type" : "String", 
+            "type" : "string", 
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "required" : false, 
             "readOnly" : false, 
             "title" : "Why"
         }
     }
 }
 { 
-    "_id" : NumberInt(74), 
-    "_type" : "class", 
-    "_name" : "Views", 
-    "toManyAssociations" : {
-        "type" : "String", 
-        "enum" : [
-            "parent", 
-            "mapsTo", 
-            "default", 
-            "oneToOne", 
-            "ordered", 
-            "next", 
-            "manyToMany", 
-            "oneToMany", 
-            "owns", 
-            "subclasses", 
-            "instantiations", 
-            "children", 
-            "allSubclasses", 
-            "mappedToBy", 
-            "defaultOf", 
-            "oneToOneReverse", 
-            "orderedParent", 
-            "previous", 
-            "manyToManyReverse", 
-            "manyToOne", 
-            "ownedBy", 
-            "associations", 
-            "byAssociationType"
-        ]
-    }, 
-    "accordionOrTab" : {
-        "type" : "String", 
-        "enum" : [
-            "Accordion in Border Container", 
-            "Tab Container"
-        ]
-    }, 
-    "mapsTo" : {
-        "type" : "Number"
-    }, 
-    "onlyIfParentEquals" : {
-        "type" : "Number"
-    }, 
-    "subDocument" : {
-        "type" : "String"
-    }, 
+    "_id" : NumberInt(2649), 
+    "type" : "object", 
+    "_icon" : NumberInt(90), 
+    "name" : "Attributes SubTab"
+}
+{ 
+    "_id" : NumberInt(2650), 
+    "type" : "object", 
+    "_icon" : NumberInt(99), 
+    "name" : "Attribute Form", 
+    "displayTypes" : "Form"
+}
+{ 
+    "_id" : NumberInt(50), 
+    "type" : "class", 
+    "name" : "Resources"
+}
+{ 
+    "_id" : NumberInt(62), 
+    "type" : "class", 
+    "name" : "Pages"
+}
+{ 
+    "_id" : NumberInt(70), 
+    "type" : "class", 
+    "name" : "Organizational Units"
+}
+{ 
+    "_id" : NumberInt(71), 
+    "type" : "class", 
+    "name" : "Subscriptions"
+}
+{ 
+    "_id" : NumberInt(79), 
+    "type" : "class", 
+    "name" : "Pages"
+}
+{ 
+    "_id" : NumberInt(80), 
+    "type" : "class", 
+    "name" : "Folders"
+}
+{ 
+    "_id" : NumberInt(88), 
+    "type" : "class", 
+    "name" : "Owners"
+}
+{ 
+    "_id" : NumberInt(89), 
+    "type" : "class", 
+    "name" : "Organizations"
+}
+{ 
+    "_id" : NumberInt(90), 
+    "type" : "class", 
+    "name" : "Accordions Tabs", 
     "schema" : {
-        "type" : "Object", 
         "properties" : {
-            "type" : {
+            "accordionOrTab" : {
                 "type" : "string", 
                 "enum" : [
-                    "String", 
-                    "Number", 
-                    "Date", 
-                    "Array", 
-                    "Object"
+                    "Accordion in Border Container", 
+                    "Tab Container"
+                ]
+            }
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(97), 
+    "type" : "class", 
+    "name" : "Assets"
+}
+{ 
+    "_id" : NumberInt(98), 
+    "type" : "class", 
+    "name" : "Liabilities and Shareholder Equity"
+}
+{ 
+    "_id" : NumberInt(99), 
+    "type" : "class", 
+    "name" : "Widgets", 
+    "schema" : {
+        "properties" : {
+            "displayTypes" : {
+                "type" : "string", 
+                "enum" : [
+                    "Sub Tabs", 
+                    "Tree", 
+                    "Table", 
+                    "Report", 
+                    "3D Class Model", 
+                    "Preview", 
+                    "Form", 
+                    "Document", 
+                    "Sub Accordion", 
+                    "Process Model"
                 ]
             }, 
-            "enum" : {
-                "type" : "array"
-            }, 
-            "#ref" : {
-                "type" : "object"
-            }, 
-            "required" : {
-                "type" : "boolean"
-            }, 
-            "readOnly" : {
-                "type" : "boolean"
-            }, 
-            "hidden" : {
-                "type" : "boolean"
-            }, 
-            "title" : {
-                "type" : "string"
-            }, 
-            "default" : {
-                "type" : "string"
-            }, 
-            "description" : {
-                "type" : "string"
-            }, 
-            "style" : {
-                "type" : "string"
-            }, 
-            "collumnWidth" : {
-                "type" : "number"
-            }, 
-            "maxLength" : {
-                "type" : "number"
-            }, 
-            "minLength" : {
-                "type" : "number"
-            }, 
-            "minimum" : {
-                "type" : "number"
-            }, 
-            "maximum" : {
-                "type" : "number"
-            }, 
-            "places" : {
+            "parentId" : {
                 "type" : "number"
             }
         }
     }
 }
 { 
-    "_id" : NumberInt(2649), 
-    "_type" : "object", 
-    "_icon" : NumberInt(90), 
-    "name" : "Attributes SubTab"
+    "_id" : NumberInt(103), 
+    "type" : "class", 
+    "name" : "Member"
 }
 { 
-    "_id" : NumberInt(2650), 
-    "_type" : "object", 
-    "_icon" : NumberInt(99), 
-    "name" : "Attribute Form", 
-    "displayTypes" : "Form"
+    "_id" : NumberInt(110), 
+    "type" : "class", 
+    "name" : "Off Balance Sheet"
+}
+{ 
+    "_id" : NumberInt(74), 
+    "type" : "class", 
+    "name" : "Views", 
+    "schema" : {
+        "properties" : {
+            "toManyAssociations" : {
+                "type" : "string", 
+                "enum" : [
+                    "parent", 
+                    "mapsTo", 
+                    "default", 
+                    "oneToOne", 
+                    "ordered", 
+                    "next", 
+                    "manyToMany", 
+                    "oneToMany", 
+                    "owns", 
+                    "subclasses", 
+                    "instantiations", 
+                    "children", 
+                    "allSubclasses", 
+                    "mappedToBy", 
+                    "defaultOf", 
+                    "oneToOneReverse", 
+                    "orderedParent", 
+                    "previous", 
+                    "manyToManyReverse", 
+                    "manyToOne", 
+                    "ownedBy", 
+                    "associations", 
+                    "byAssociationType"
+                ]
+            }, 
+            "accordionOrTab" : {
+                "type" : "string", 
+                "enum" : [
+                    "Accordion in Border Container", 
+                    "Tab Container"
+                ]
+            }, 
+            "mapsTo" : {
+                "type" : "number", 
+                "#ref" : {
+                    "itemId" : NumberInt(67), 
+                    "assocType" : "allSubclasses"
+                }
+            }, 
+            "onlyIfParentEquals" : {
+                "type" : "number"
+            }, 
+            "subDocument" : {
+                "type" : "string"
+            }, 
+            "schema" : {
+                "type" : "object", 
+                "properties" : {
+                    "type" : {
+                        "type" : "object"
+                    }, 
+                    "enum" : {
+                        "type" : "array"
+                    }, 
+                    "#ref" : {
+                        "type" : "object"
+                    }, 
+                    "required" : {
+                        "type" : "object"
+                    }, 
+                    "readOnly" : {
+                        "type" : "object"
+                    }, 
+                    "hidden" : {
+                        "type" : "object"
+                    }, 
+                    "title" : {
+                        "type" : "object"
+                    }, 
+                    "default" : {
+                        "type" : "object"
+                    }, 
+                    "description" : {
+                        "type" : "object"
+                    }, 
+                    "style" : {
+                        "type" : "object"
+                    }, 
+                    "collumnWidth" : {
+                        "type" : "object"
+                    }, 
+                    "maxLength" : {
+                        "type" : "object"
+                    }, 
+                    "minLength" : {
+                        "type" : "object"
+                    }, 
+                    "minimum" : {
+                        "type" : "object"
+                    }, 
+                    "maximum" : {
+                        "type" : "object"
+                    }, 
+                    "places" : {
+                        "type" : "object"
+                    }
+                }
+            }
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(78), 
+    "type" : "class", 
+    "name" : "Documents"
+}
+{ 
+    "_id" : NumberInt(86), 
+    "type" : "class", 
+    "name" : "Agreements"
+}
+{ 
+    "_id" : NumberInt(108), 
+    "type" : "class", 
+    "name" : "Inset"
+}
+{ 
+    "_id" : NumberInt(67), 
+    "type" : "class", 
+    "name" : "Problem Domain", 
+    "schema" : {
+        "properties" : {
+            "_id" : {
+                "type" : "number", 
+                "readOnly" : true, 
+                "minimum" : NumberInt(0), 
+                "places" : NumberInt(0)
+            }, 
+            "name" : {
+                "type" : "string", 
+                "readOnly" : false, 
+                "maxLength" : NumberInt(100000)
+            }, 
+            "type" : {
+                "type" : "string", 
+                "readOnly" : true, 
+                "enum" : [
+                    "object"
+                ]
+            }, 
+            "description" : {
+                "type" : "string", 
+                "readOnly" : false, 
+                "maxLength" : NumberInt(100000), 
+                "media" : {
+                    "mediaType" : "text/html"
+                }
+            }, 
+            "_icon" : {
+                "type" : "number"
+            }
+        }, 
+        "required" : [
+            "_id", 
+            "type"
+        ], 
+        "additionalProperties" : false
+    }
 }
 { 
     "_id" : NumberInt(2651), 
-    "_type" : "object", 
+    "type" : "object", 
     "_icon" : NumberInt(74), 
     "name" : "Attribute References", 
-    "mapsTo" : NumberInt(63), 
+    "mapsTo" : NumberInt(74), 
     "description" : "<p><b>Help</b>Text</p>", 
     "toManyAssociations" : "ordered", 
     "accordionOrTab" : "Tab Container", 
     "subDocument" : "schema", 
     "schema" : {
         "name" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Name"
         }, 
         "title" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Title", 
             "description" : "attribute description"
         }, 
         "type" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Type", 
             "enum" : [
-                "String", 
-                "Number", 
-                "RichText", 
-                "Date", 
-                "Int32", 
-                "Boolean"
+                "string", 
+                "number", 
+                "object", 
+                "date", 
+                "boolean"
             ]
         }, 
         "media" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Media Type", 
             "enum" : [
@@ -2182,22 +1889,606 @@
             ]
         }, 
         "readOnly" : {
-            "type" : "Boolean", 
-            "required" : false, 
+            "type" : "boolean", 
             "readOnly" : false, 
             "title" : "ReadOnly"
         }, 
         "required" : {
-            "type" : "Boolean", 
-            "required" : false, 
+            "type" : "boolean", 
             "readOnly" : false, 
             "title" : "Required"
         }, 
+        "maxLength" : {
+            "type" : "number", 
+            "readOnly" : false, 
+            "title" : "Maximum Length"
+        }, 
+        "minLength" : {
+            "type" : "number", 
+            "readOnly" : false, 
+            "title" : "Minimum Length"
+        }, 
+        "maximum" : {
+            "type" : "number", 
+            "readOnly" : false, 
+            "title" : "Maximum"
+        }, 
+        "minimum" : {
+            "type" : "number", 
+            "readOnly" : false, 
+            "title" : "Minimum"
+        }, 
+        "places" : {
+            "type" : "number", 
+            "readOnly" : false, 
+            "title" : "Decimal Places"
+        }, 
+        "columnWidth" : {
+            "type" : "number", 
+            "readOnly" : false, 
+            "title" : "Column Width"
+        }, 
         "description" : {
-            "type" : "String", 
-            "required" : false, 
+            "type" : "string", 
             "readOnly" : false, 
             "title" : "Description"
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(2656), 
+    "type" : "object", 
+    "name" : "Products Widget", 
+    "displayTypes" : "Table"
+}
+{ 
+    "_id" : NumberInt(2658), 
+    "type" : "object", 
+    "name" : "Bicycle", 
+    "description" : "", 
+    "value" : 50.25, 
+    "currency" : "EUR"
+}
+{ 
+    "_id" : NumberInt(2657), 
+    "type" : "object", 
+    "name" : "Products View", 
+    "toManyAssociations" : "owns", 
+    "mapsTo" : NumberInt(111), 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "title" : "Product"
+        }, 
+        "value" : {
+            "type" : "number", 
+            "title" : "Price", 
+            "minimum" : NumberInt(0), 
+            "maximum" : NumberInt(100000), 
+            "places" : NumberInt(2)
+        }, 
+        "currency" : {
+            "type" : "number", 
+            "title" : "Currency", 
+            "enum" : [
+                "EUR", 
+                "USD"
+            ]
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(111), 
+    "type" : "class", 
+    "name" : "Iventory"
+}
+{ 
+    "_id" : NumberInt(2655), 
+    "type" : "object", 
+    "name" : "Products and Services", 
+    "accordionOrTab" : "Accordion in Border Container"
+}
+{ 
+    "_id" : NumberInt(2663), 
+    "type" : "object", 
+    "name" : "cjong", 
+    "isActive" : true, 
+    "password" : "$2a$10$5A74wmdtEVN2szH/ENXGwOU5rAaI0BNvQ8xlFBiyZrNfKK8xLb8cS", 
+    "email" : "chris@flash.a2000.nl"
+}
+{ 
+    "_id" : NumberInt(51), 
+    "type" : "class", 
+    "name" : "Persons", 
+    "schema" : {
+        "properties" : {
+            "email" : {
+                "type" : "string"
+            }, 
+            "isActive" : {
+                "type" : "boolean"
+            }, 
+            "password" : {
+                "type" : "string"
+            }
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(2664), 
+    "type" : "object", 
+    "name" : "testuser01", 
+    "isActive" : true, 
+    "password" : "$2a$10$R8metvhU0ka1jWSCpUCEQughuib7XcJGf89IEzwVk1mN4IknTz1Ii", 
+    "email" : "testuser01"
+}
+{ 
+    "_id" : NumberInt(2665), 
+    "type" : "object", 
+    "name" : "testuser02", 
+    "isActive" : true, 
+    "password" : "$2a$10$OBO31h6jqfjMBpJH6U8GBuLgF8vBv9VrW7a30WTvM81bNbl2x2gpi", 
+    "email" : "testuser02"
+}
+{ 
+    "_id" : NumberInt(2659), 
+    "type" : "object", 
+    "name" : "Blog Tab"
+}
+{ 
+    "_id" : NumberInt(2667), 
+    "type" : "object", 
+    "name" : "Messaging", 
+    "accordionOrTab" : "Accordion in Border Container"
+}
+{ 
+    "_id" : NumberInt(2666), 
+    "type" : "object", 
+    "name" : "Balance Sheet"
+}
+{ 
+    "_id" : NumberInt(2668), 
+    "type" : "object", 
+    "name" : "Messaging Tab"
+}
+{ 
+    "_id" : NumberInt(2669), 
+    "type" : "object", 
+    "name" : "Messaging Table Widget", 
+    "displayTypes" : "Table"
+}
+{ 
+    "_id" : NumberInt(2670), 
+    "type" : "object", 
+    "name" : "Balance Sheet", 
+    "displayTypes" : "Table"
+}
+{ 
+    "_id" : NumberInt(2672), 
+    "type" : "object", 
+    "name" : "Messaging View", 
+    "mapsTo" : NumberInt(86), 
+    "toManyAssociations" : "owns", 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "title" : "Title"
+        }, 
+        "description" : {
+            "type" : "string", 
+            "title" : "Description"
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(2673), 
+    "type" : "object", 
+    "name" : "Message Content"
+}
+{ 
+    "_id" : NumberInt(2674), 
+    "type" : "object", 
+    "name" : "Message Details", 
+    "displayTypes" : "Form"
+}
+{ 
+    "_id" : NumberInt(2675), 
+    "type" : "object", 
+    "name" : "Profile"
+}
+{ 
+    "_id" : NumberInt(2676), 
+    "type" : "object", 
+    "name" : "Profile Widget", 
+    "displayTypes" : "Form"
+}
+{ 
+    "_id" : NumberInt(2678), 
+    "type" : "object", 
+    "name" : "Associations"
+}
+{ 
+    "_id" : NumberInt(2688), 
+    "type" : "class", 
+    "name" : "Current Assests"
+}
+{ 
+    "_id" : NumberInt(2694), 
+    "type" : "class", 
+    "name" : "Investments"
+}
+{ 
+    "_id" : NumberInt(2690), 
+    "type" : "class", 
+    "name" : "Property, Plant, and Equipment"
+}
+{ 
+    "_id" : NumberInt(2692), 
+    "type" : "class", 
+    "name" : "Intangible Assets"
+}
+{ 
+    "_id" : NumberInt(2691), 
+    "type" : "class", 
+    "name" : "Long-term Liabilities"
+}
+{ 
+    "_id" : NumberInt(2693), 
+    "type" : "class", 
+    "name" : "Other Assets"
+}
+{ 
+    "_id" : NumberInt(2695), 
+    "type" : "class", 
+    "name" : "Cash"
+}
+{ 
+    "_id" : NumberInt(2700), 
+    "type" : "class", 
+    "name" : "Petty Cash"
+}
+{ 
+    "_id" : NumberInt(2699), 
+    "type" : "class", 
+    "name" : "Prepaid Insurance"
+}
+{ 
+    "_id" : NumberInt(2697), 
+    "type" : "class", 
+    "name" : "Accounts Receivable - net"
+}
+{ 
+    "_id" : NumberInt(2698), 
+    "type" : "class", 
+    "name" : "Supplies"
+}
+{ 
+    "_id" : NumberInt(2696), 
+    "type" : "class", 
+    "name" : "Temporary Investments"
+}
+{ 
+    "_id" : NumberInt(2705), 
+    "type" : "class", 
+    "name" : "Land"
+}
+{ 
+    "_id" : NumberInt(2702), 
+    "type" : "class", 
+    "name" : "Land Improvements"
+}
+{ 
+    "_id" : NumberInt(2701), 
+    "type" : "class", 
+    "name" : "Buildings"
+}
+{ 
+    "_id" : NumberInt(2703), 
+    "type" : "class", 
+    "name" : "Less: Accumulated Depreciation"
+}
+{ 
+    "_id" : NumberInt(2704), 
+    "type" : "class", 
+    "name" : "Equipment"
+}
+{ 
+    "_id" : NumberInt(2706), 
+    "type" : "class", 
+    "name" : "Goodwill"
+}
+{ 
+    "_id" : NumberInt(2707), 
+    "type" : "class", 
+    "name" : "Trade Names"
+}
+{ 
+    "_id" : NumberInt(2715), 
+    "type" : "class", 
+    "name" : "Liabilities"
+}
+{ 
+    "_id" : NumberInt(2716), 
+    "type" : "class", 
+    "name" : "Stockholders' Equity"
+}
+{ 
+    "_id" : NumberInt(2713), 
+    "type" : "class", 
+    "name" : "Notes Payable"
+}
+{ 
+    "_id" : NumberInt(2708), 
+    "type" : "class", 
+    "name" : "Intrest Payable"
+}
+{ 
+    "_id" : NumberInt(2709), 
+    "type" : "class", 
+    "name" : "Taxes Payable"
+}
+{ 
+    "_id" : NumberInt(2714), 
+    "type" : "class", 
+    "name" : "Wages Payable"
+}
+{ 
+    "_id" : NumberInt(2711), 
+    "type" : "class", 
+    "name" : "Accounts Payable"
+}
+{ 
+    "_id" : NumberInt(2710), 
+    "type" : "class", 
+    "name" : "Warenty Liability"
+}
+{ 
+    "_id" : NumberInt(2712), 
+    "type" : "class", 
+    "name" : "Unearnd Revenues"
+}
+{ 
+    "_id" : NumberInt(2718), 
+    "type" : "class", 
+    "name" : "Notes Payable"
+}
+{ 
+    "_id" : NumberInt(2719), 
+    "type" : "class", 
+    "name" : "Bonds Payable"
+}
+{ 
+    "_id" : NumberInt(2720), 
+    "type" : "class", 
+    "name" : "Common Stock"
+}
+{ 
+    "_id" : NumberInt(2721), 
+    "type" : "class", 
+    "name" : "Retained Earnings"
+}
+{ 
+    "_id" : NumberInt(2717), 
+    "type" : "class", 
+    "name" : "Less: Treasury Stock"
+}
+{ 
+    "_id" : NumberInt(84), 
+    "type" : "class", 
+    "name" : "Balance Sheet", 
+    "schema" : {
+        "properties" : {
+            "value" : {
+                "type" : "number", 
+                "title" : "Price", 
+                "minimum" : NumberInt(0), 
+                "maximum" : NumberInt(1000000), 
+                "places" : NumberInt(2)
+            }, 
+            "currency" : {
+                "type" : "string", 
+                "title" : "Currency", 
+                "enum" : [
+                    "EUR", 
+                    "USD"
+                ]
+            }
+        }, 
+        "required" : [
+            "value"
+        ]
+    }
+}
+{ 
+    "_id" : NumberInt(2730), 
+    "type" : "object", 
+    "name" : "Current Account", 
+    "value" : NumberInt(10000), 
+    "currency" : "EUR"
+}
+{ 
+    "_id" : NumberInt(2731), 
+    "type" : "object", 
+    "name" : "Current Account", 
+    "value" : NumberInt(5000), 
+    "currency" : "EUR"
+}
+{ 
+    "_id" : NumberInt(2732), 
+    "type" : "object", 
+    "name" : "Current Account", 
+    "value" : NumberInt(7000), 
+    "currency" : "EUR"
+}
+{ 
+    "_id" : NumberInt(2733), 
+    "type" : "object", 
+    "name" : "Ask A Question", 
+    "value" : NumberInt(0), 
+    "currency" : "EUR"
+}
+{ 
+    "_id" : NumberInt(2677), 
+    "type" : "object", 
+    "name" : "Profile View", 
+    "toManyAssociations" : "owns", 
+    "accordionOrTab" : "Tab Container", 
+    "mapsTo" : NumberInt(51), 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "readOnly" : false, 
+            "title" : "User Name"
+        }, 
+        "isActive" : {
+            "type" : "boolean", 
+            "title" : "Is Active"
+        }, 
+        "password" : {
+            "type" : "string", 
+            "title" : "password"
+        }, 
+        "description" : {
+            "type" : "string", 
+            "readOnly" : false, 
+            "title" : "Description"
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(2671), 
+    "type" : "object", 
+    "mapsTo" : NumberInt(84), 
+    "name" : "Balance Sheet View", 
+    "toManyAssociations" : "owns", 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "title" : "From"
+        }, 
+        "value" : {
+            "type" : "number", 
+            "title" : "Value"
+        }, 
+        "currency" : {
+            "type" : "string", 
+            "title" : "Currency"
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(2734), 
+    "type" : "class", 
+    "name" : "Purchase"
+}
+{ 
+    "_id" : NumberInt(2736), 
+    "type" : "class", 
+    "name" : "Dialog"
+}
+{ 
+    "_id" : NumberInt(2739), 
+    "type" : "class", 
+    "name" : "Closed"
+}
+{ 
+    "_id" : NumberInt(2740), 
+    "type" : "class", 
+    "name" : "In Progress"
+}
+{ 
+    "_id" : NumberInt(2741), 
+    "type" : "object", 
+    "name" : "Purchase Proposed"
+}
+{ 
+    "_id" : NumberInt(2742), 
+    "type" : "object", 
+    "name" : "Purchase Agreed"
+}
+{ 
+    "_id" : NumberInt(2743), 
+    "type" : "object", 
+    "name" : "Purchase Concluded"
+}
+{ 
+    "_id" : NumberInt(2746), 
+    "type" : "object", 
+    "name" : "Purchase Rejected"
+}
+{ 
+    "_id" : NumberInt(2747), 
+    "type" : "object", 
+    "name" : "Buy a Bike"
+}
+{ 
+    "_id" : NumberInt(2749), 
+    "type" : "object", 
+    "name" : "Message Details View", 
+    "mapsTo" : NumberInt(86), 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "title" : "Title"
+        }, 
+        "currentState" : {
+            "type" : "string", 
+            "title" : "Current State", 
+            "readOnly" : true, 
+            "#ref" : {
+                "itemId" : NumberInt(2735), 
+                "assocType" : "instantiations"
+            }
+        }, 
+        "nextState" : {
+            "type" : "string", 
+            "title" : "Next State", 
+            "#ref" : {
+                "itemId" : NumberInt(2735), 
+                "assocType" : "mapsTo"
+            }
+        }, 
+        "description" : {
+            "type" : "string", 
+            "title" : "Description"
+        }
+    }
+}
+{ 
+    "_id" : NumberInt(2750), 
+    "type" : "object", 
+    "name" : "Product Details Tab"
+}
+{ 
+    "_id" : NumberInt(2751), 
+    "type" : "object", 
+    "name" : "Product Details Widget", 
+    "displayTypes" : "Form"
+}
+{ 
+    "_id" : NumberInt(2752), 
+    "type" : "object", 
+    "name" : "Product Details View", 
+    "mapsTo" : NumberInt(111), 
+    "schema" : {
+        "name" : {
+            "type" : "string", 
+            "title" : "Product"
+        }, 
+        "value" : {
+            "type" : "number", 
+            "title" : "Price", 
+            "minimum" : NumberInt(0), 
+            "maximum" : NumberInt(100000), 
+            "places" : NumberInt(2)
+        }, 
+        "currency" : {
+            "type" : "number", 
+            "title" : "Currency", 
+            "enum" : [
+                "EUR", 
+                "USD"
+            ]
         }
     }
 }
