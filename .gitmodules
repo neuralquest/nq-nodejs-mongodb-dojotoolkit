@@ -19,6 +19,6 @@
 [submodule "public/dstore"]
 	path = public/dstore
 	url = https://github.com/SitePen/dstore.git
-[submodule "src/util"]
-	path = src/util
+[submodule "public/util"]
+	path = public/util
 	url = https://github.com/dojo/util.git
