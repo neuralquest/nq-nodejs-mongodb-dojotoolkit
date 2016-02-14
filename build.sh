@@ -6,13 +6,13 @@ set -e
 BASEDIR=$(cd $(dirname $0) && pwd)
 
 # Source directory for unbuilt code
-SRCDIR="$BASEDIR/WebContent"
+SRCDIR="$BASEDIR/public"
 
 # Directory containing dojo build utilities
-TOOLSDIR="$SRCDIR/util/buildscripts"
+TOOLSDIR="$SRCDIR/public/util/buildscripts"
 
 # Destination directory for built code
-DISTDIR="$BASEDIR/dist"
+DISTDIR="$BASEDIR/public/dist"
 
 # Main application package build configuration
 PROFILE="$BASEDIR/profiles/app.profile.js"
