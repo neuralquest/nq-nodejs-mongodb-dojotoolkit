@@ -3,7 +3,7 @@ Experimental
 Neuralquest
 ===========
 
-Neuralquest aims to provide a single platform to cover all your business process needs.
+Neuralquest provides a platform to cover all your business process needs.
 It provides class, page, organization and process modellers as well as an execution environment.
 Please visit [neuralquest.org](http://neuralquest.org) for details.
 
@@ -21,7 +21,7 @@ MonogDB:
 Clone Repository:
 
 0. Install [Node.js](http://nodejs.org) .
-1. Create a directory called `C:\Users\<user>\Git`.
+1. Using GitBash, create a directory called `C:\Users\<user>\Git`.
 2. Form the 'Git' directory clone the repository using `git clone --recursive https://github.com/Neuralquest/neuralquest.git`.
 3. From the 'neuralquest' directory run `npm install` to install Node.js dependencies.
 
