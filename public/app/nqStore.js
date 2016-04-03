@@ -7,6 +7,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
         autoEmitEvents: false,
         //transactionIds: {assocsColl:{add:{}, update:{}, delete:{}}, itemsColl:{add:{}, update:{}, delete:{}}},
         transactionArr: [],
+        docsColl: new RequestMemory({target: '/documents', idProperty: '_id'}),
         assocsColl: new RequestMemory({target: '/assocs', idProperty: '_id'}),
         itemsColl: new RequestMemory({target: '/items', idProperty: '_id'}),
 
@@ -67,9 +68,8 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return result;
             });
         },
-        get: function (_itemId) {
-            var itemId = Number(_itemId);
-            return this.itemsColl.get(itemId);
+        get: function (objId) {
+            return this.docsColl.get(objId);
         },
         add: function (item, directives) {
             this.enableTransactionButtons();
@@ -601,7 +601,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return self.isA(assocsArr[0].dest, destClassId, originalId);
             });
         },
-        getCombinedSchemaForView: function(view) {
+        getInheritedSchema: function(objId) {
             /* summary:  Used to create a JSON schema based on the view schema in combination with class schemas inherited through view.mapsTo.
              //          The same method is used server side to validate updates.
              // view: Object

@@ -25,6 +25,13 @@ exports = module.exports = function(app, passport) {
             next(err);
         }
     });
+    app.get("/documents", function (req, res) {
+        var itemsColl = req.db.collection('documents');
+        itemsColl.find().toArray(function(err, itemsArr) {
+            if(err) res.status(500).send(err);
+            else res.json(itemsArr);
+        });
+    });
     app.get("/items", function (req, res) {
         var itemsColl = req.db.collection('items');
         itemsColl.find().toArray(function(err, itemsArr) {

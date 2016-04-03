@@ -11,25 +11,50 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			nqClassChart, domStyle, query, mouse){
 
 	return declare("nqDocument", [nqWidgetBase], {
-		parentId: null,
-		viewId: null,
-/*		HEADER_ATTRREF: 873,
-		PARAGRAPH_ATTRREF: 959,
-
-		HEADER_ATTRREF: 2535,
-		PARAGRAPH_ATTRREF: 2537,
-		SVG_ATTRREF: 747,
-		IMAGEURL_ATTRREF: 1613,
-		ANNOTATION_ATTRREF: 1734,
-		WIDGET_ATTRREF: 1747,*/
-
-		//		editMode: false,
-		normalToolbar: null,
-		// Map from id of each parent node to array of its children, or to Promise for that array of children.
-		childrenCache: {},
-
-
 		postCreate: function(){
+			this.inherited(arguments);
+		},
+		setSelectedObjIdPreviousLevel: function(objId){
+			var self = this;
+			//Clear the page
+			this.pane.destroyDescendants(false);//destroy all the widget but leave the pane intact
+			//load the data
+			return self.store.get(objId).then(function(obj){
+				return self.generateNextLevelContents(obj, 1, null, false).then(function(obj){
+					registry.byId('tab'+self.tabId).resize();
+					//self.pane.resize();
+					self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
+					return item;
+				});
+			}, nq.errorDialog);
+		},
+		//Create an ordinary HTML page recursively by obtaining data from the server
+		generateNextLevelContents: function(item, headerLevel, parentId, previousParagrphHasRightFloat){
+			var self = this;
+			//Header
+			domConstruct.create(
+				'h'+headerLevel,
+				{innerHTML: obj.name, style: {'clear': previousParagrphHasRightFloat?'both':'none'}},
+				this.pane.containerNode
+			);
+			//Paragraph
+			domConstruct.create("p", {innerHTML: obj.description}, this.pane.containerNode);
+
+
+			this.store.getChildren(item, function(children){
+				children.forEach(function(childItem){
+					var previousParagrphHasRightFloat = false;
+					self.generateNextLevelContents(childItem, headerLevel+1, item.id, previousParagrphHasRightFloat);
+					previousParagrphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
+				})
+			});
+		},
+
+
+
+
+
+		XpostCreate: function(){
 			this.inherited(arguments);
 			//initially show the toolbar div
 			domStyle.set(this.pageToolbarDivNode, 'display' , '');
@@ -155,7 +180,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				self.createDeferred.resolve(self);//ready to be loaded with data
 			}, function(err){self.createDeferred.reject(err)});
 		},
-		setSelectedObjIdPreviousLevel: function(value){
+		XsetSelectedObjIdPreviousLevel: function(value){
 			//load the data
 			if(value){
 				if(this.selectedObjIdPreviousLevel == value) return this;
@@ -190,7 +215,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
  			return this.setSelectedObjIdPreviousLevelDeferred.promise;
 		},
 		//Create an ordinary HTML page recursivly by obtaining data from the server
-		generateNextLevelContents: function(item, headerLevel, parentId, previousParagrphHasRightFloat){
+		XgenerateNextLevelContents: function(item, headerLevel, parentId, previousParagrphHasRightFloat){
 			//console.log('do item',item[2535]);
 			var self = this;
 			//var hearderObj = item['attrRef'+this.HEADER_ATTRREF];

@@ -36,71 +36,208 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 
         if(hash() == "") {
             var neuralquestState = cookie('neuralquestState');
-            if(neuralquestState) hash(neuralquestState, true);
-            else hash(".842.1784.702.2485", true);
+            //if(neuralquestState) hash(neuralquestState, true);
+            hash(".56f89f625dde184ccfb9fc76.1.1.5700046f5dde184ccfb9fc7c", true);
         }
         else interpretHash();
 	});
-	function interpretHash(_hash){
-		// summary:
-		//		Interpret the hash change. The hash consists of sets of threes: viewId.tabId.selectedObjectId.
-		//		Each set is interpreted consecutively.
-		//		This method is initially called by on hash change and subsequently by ourselves with incrementing level
-		// hash: String
-		//		The current hash
-		// lvl: Number
-		//		The level we are currently processing. Defaults to 0 as is the case when we are called by on hash change topic
-		// returns: Promise
-		//		All of the page elements of the underlaying levels are completed
-		//var currentHash = hash();
-		//console.log('hash', _hash);
-		when(drawFramesRecursive(0), function(result){
-			var hashArr = hash().split('.');
-			var levels = Math.ceil(hashArr.length/3);//determine the number of levels, rounded to the highest integer
-			var widgetPromises = [];
-			for(var level = levels-1; level>=0; level--){//we start at the highest level and work our way down (user experience)
-				widgetPromises.push(drawWidgets(level));
-			}
-			return all(widgetPromises).then(function(widgetsArrArr){
-				var level = levels-1;
-				widgetsArrArr.forEach(function(widgetsArr){
-					var state = getState(level);
-					widgetsArr.forEach(function(widget){
-						widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel);
-						widget.setSelectedObjIdThisLevel(state.selectedObjId);
-					});
-					level = level -1;
-				});
-			});
-		}, errorDialog);
-	}
-	function drawFramesRecursive(level){
-		var state = getState(level);
-		//console.log('state', state);
-		if(!state.viewId) return false;//nothing left to display
-		// if the view pane already exists we can simply go on to the next level
-		if(registry.byId('viewPane'+state.viewId)) return drawFramesRecursive(level+1);		
-		// We're filling a slave, clean it first. It may have been used by another view before
-		var parentContentPane; 
-		if(!state.viewIdPreviousLevel) parentContentPane = registry.byId('placeholder');
-		else parentContentPane = registry.byId('slave'+state.viewIdPreviousLevel);
-		if(!parentContentPane) parentContentPane = registry.byId('slave'+state.tabIdPreviousLevel);
-		if(!parentContentPane) return false; 
-		parentContentPane.destroyDescendants(false);
-		
-		//are we creating an accordion container in a border container or a tab container?
-		return nqStore.get(state.viewId).then(function(view){
-            //console.log('level', level, view);
-			var viewPaneCreated;
-			if(view.accordionOrTab=='Accordion in Border Container') viewPaneCreated = createAccordionInBorderContainer(state.viewId, parentContentPane, level);
-			else viewPaneCreated = createTabs(state.viewId, parentContentPane, level);
-			return when(viewPaneCreated, function(newParentContentPane){
-				parentContentPane.resize();//this is a must
-				return drawFramesRecursive(level+1);//try the next level
-			});
+    function interpretHash(_hash){
+        var state = getState(0);
+        var parentContentPane = registry.byId('placeholder');
+        when(all(drawPage(state.pageId, parentContentPane)), function(widgetsArr){
+
+        });
+    }
+    function drawPage(pageId, parentContentPane){
+		return nqStore.get(pageId).then(function(page){
+            if(page.divider == 'Horizontal' || page.divider == 'Vertical'){
+                var borderContainer = new BorderContainer( {
+                    //'id' : 'borderContainer'+parentViewOrTabId,
+                    'region' : 'center',
+                    'design' : page.divider == 'Vertical'?'sidebar':'headline',
+                    'persist' : true,
+                    //'class': 'noOverFlow'
+                    'style' : {width: '100%', height: '100%', overflow: 'hidden', padding: '0px', margin: '0px'}
+                });
+                //borderContainer.startup();
+                var leftPane = new ContentPane( {
+                    //'id' : 'master'+parentViewOrTabId,
+                    'region' : page.divider == 'Vertical'?'leading':'top',
+                    'class' : 'backgroundClass',
+                    'splitter' : true,
+                    //'class': 'noOverFlow',
+                    'style' : {width: '200px',overflow: 'hidden',padding: '0px', margin: '0px'}
+                });
+                var centerPane = new ContentPane( {
+                    //'id' : 'slave'+parentViewOrTabId,
+                    'region' : 'center',
+                    'class' : 'backgroundClass',
+                    //'content' : '<p>Loading...</p>',
+                    //'class': 'noOverFlow'
+                    'style' : {overflow: 'hidden',padding: '0px', margin: '0px'}
+                });
+                borderContainer.addChild(leftPane);
+                borderContainer.addChild(centerPane);
+                parentContentPane.containerNode.appendChild(borderContainer.domNode); //appendChild works better than attaching through create
+                borderContainer.startup();//this is a must
+                parentContentPane.resize();//this is a must
+                return drawAccordionsOrTabs(page, leftPane)
+            }
+            else{
+                return drawAccordionsOrTabs(page, parentContentPane)
+            }
 		});
 	}
-    function drawWidgets(level){
+    function drawAccordionsOrTabs(page, parentContentPane){
+        if(page.tabs.length==1){
+            return drawWidgets(page.tabs[0], parentContentPane);
+        }
+        else {
+            var container = null;
+            if(page.accordionOrTab == 'Accordions'){
+                container = new AccordionContainer( {
+                    //'id' : 'viewPane'+parentViewOrTabId,
+                    //'persist' : true,//cookies override our hash tabId
+                    'region' : 'center'
+                });
+            }
+            else{
+                container = new TabContainer( {
+                    //'id' : 'viewPane'+parentViewOrTabId,
+                    //'persist' : true,//cookies override our hash tabId
+                    'region' : 'center'
+                });
+            }
+            parentContentPane.addChild(container);
+            container.startup();
+            var tabsPromises = []
+            page.tabs.forEach(function(tabObj) {
+                var tabPane = new ContentPane( {
+                    //'id' : 'tab'+tab._id,
+                    'title' : tabObj.name,
+                    //'selected' : tab._id==state.tabId?true:false,
+                    'class' : 'backgroundClass',
+                    'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
+                });
+                container.addChild(tabPane);
+                tabsPromises = tabsPromises.concat(drawWidgets(tabObj, tabPane));
+            });
+            container.watch("selectedChildWidget", function(name, oval, nval){
+                //console.log("selected child changed from ", oval.title, " to ", nval.title);
+                var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
+                setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
+            });
+            return tabsPromises;
+        }
+    }
+    function drawWidgets(tabObj, tabPane){
+        var widgetPromises = [];
+        tabObj.widgets.forEach(function(widget){
+            var createDeferred = new Deferred();
+            widgetPromises.push(createDeferred.promise);
+            if (widget.displayType == 'Document'){
+                var widgetObj = new nqDocument({
+                    widget: widget,
+                    store: nqStore,
+                    createDeferred: createDeferred
+                }, domConstruct.create('div'));
+                tabPane.addChild(widgetObj);
+            }
+            else if (widget.displayType == 'Form'){
+                var widgetObj = new nqForm({
+                    widget: widget,
+                    store: nqStore,
+                    createDeferred: createDeferred
+                }, domConstruct.create('div'));
+                tabPane.addChild(widgetObj);
+            }
+            else if (widget.displayType ==  'Table'){
+                var widgetObj = new nqTable({
+                    widget: widget,
+                    store: nqStore,
+                    createDeferred: createDeferred
+                }, domConstruct.create('div'));
+                tabPane.addChild(widgetObj);
+            }
+            else if (widget.displayType == 'Tree'){
+                var widgetObj = new nqTree({
+                    widget: widget,
+                    store: nqStore,
+                    createDeferred: createDeferred
+                }, domConstruct.create('div'));
+                tabPane.addChild(widgetObj);
+            }
+            else if (widget.displayType == '3D Class Model'){
+                var widgetObj = new nqClassChart({
+                    widget: widget,
+                    store: nqStore,
+                    createDeferred: createDeferred
+                }, domConstruct.create('div'));
+                tabPane.addChild(widgetObj);
+            }
+        });
+        return widgetPromises;
+    }
+
+
+
+
+
+
+
+
+
+
+
+    function xinterpretHash(_hash){
+        // summary:
+        //		Interpret the hash change. The hash consists of sets of threes: viewId.tabId.selectedObjectId.
+        //		Each set is interpreted consecutively.
+        //		This method is initially called by on hash change and subsequently by ourselves with incrementing level
+        // hash: String
+        //		The current hash
+        // lvl: Number
+        //		The level we are currently processing. Defaults to 0 as is the case when we are called by on hash change topic
+        // returns: Promise
+        //		All of the page elements of the underlaying levels are completed
+        //var currentHash = hash();
+        //console.log('hash', _hash);
+        when(drawFramesRecursive(0), function(result){
+            var hashArr = hash().split('.');
+            var levels = Math.ceil(hashArr.length/3);//determine the number of levels, rounded to the highest integer
+            var widgetPromises = [];
+            for(var level = levels-1; level>=0; level--){//we start at the highest level and work our way down (user experience)
+                widgetPromises.push(drawWidgets(level));
+            }
+            return all(widgetPromises).then(function(widgetsArrArr){
+                var level = levels-1;
+                widgetsArrArr.forEach(function(widgetsArr){
+                    var state = getState(level);
+                    widgetsArr.forEach(function(widget){
+                        widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel);
+                        widget.setSelectedObjIdThisLevel(state.selectedObjId);
+                    });
+                    level = level -1;
+                });
+            });
+        }, errorDialog);
+    }
+    function drawFramesRecursive(level){
+        var state = getState(level);
+        //console.log('state', state);
+        if(!state.pageId) return false;//nothing left to display
+        // if the view pane already exists we can simply go on to the next level
+        if(registry.byId('page'+state.pageId)) return drawFramesRecursive(level+1);
+        // We're filling a slave, clean it first. It may have been used by another view before
+        var parentContentPane;
+        if(!state.pageIdPreviousLevel) parentContentPane = registry.byId('placeholder');
+        else parentContentPane = registry.byId('slave'+state.pageIdPreviousLevel);
+        if(!parentContentPane) parentContentPane = registry.byId('slave'+state.pageIdPreviousLevel);
+        if(!parentContentPane) return false;
+        parentContentPane.destroyDescendants(false);
+        drawPage(state.pageId, parentContentPane);
+    }
+    function XdrawWidgets(level){
         var state = getState(level);
         var selectedTabId = getSelectedTabRecursive(state.viewId);
         if(!selectedTabId) return [];//The selected tab could not be found. There is a problem in your page model
@@ -175,16 +312,16 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			//parentContentPane.addChild(borderContainer);
 			parentContentPane.containerNode.appendChild(borderContainer.domNode); //appendChild works better than attaching through create
 		
-			var accordianContainer;
+			var accordionContainer;
 			if(tabsArr.length==1){// this is really only to have palce to store viewPane+viewObj.id. Is there a better way?
-				accordianContainer = new ContentPane( {
+				accordionContainer = new ContentPane( {
 					'id' : 'viewPane'+parentViewOrTabId,
 					'region' : 'center',
 					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
 				});
 			}
 			else {
-				accordianContainer = new AccordionContainer( {
+				accordionContainer = new AccordionContainer( {
 					'id' : 'viewPane'+parentViewOrTabId,
 					'region' : 'center',
 					'duration' : 0,//animation screws out layout. Is there a better solution?
@@ -193,7 +330,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
 				});
 			}
-			leftPane.addChild(accordianContainer);
+			leftPane.addChild(accordionContainer);
 			for(var i=0;i<tabsArr.length;i++){
 				var tab = tabsArr[i];
 				//console.log('accId', tab, 'parentViewOrTabId', parentViewOrTabId, 'level',level);
@@ -204,8 +341,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 					'class' : 'backgroundClass',
 					'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
 				});
-				accordianContainer.addChild(tabPane);
-				accordianContainer.watch("selectedChildWidget", function(name, oval, nval){
+				accordionContainer.addChild(tabPane);
+				accordionContainer.watch("selectedChildWidget", function(name, oval, nval){
 					//console.log("selected child changed from ", oval.title, " to ", nval.title);
 					var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
 					setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
@@ -214,9 +351,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 
 			//parentContentPane.addChild(container);
 			//parentPane.addChild(container);
-			accordianContainer.startup();
+			accordionContainer.startup();
 			borderContainer.startup();
-			//if(tabsArr.length>1) accordianContainer.resize();
+			//if(tabsArr.length>1) accordionContainer.resize();
 
 			return centerPane;
 
@@ -417,12 +554,14 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 	function getState(level){
 		var hashArr = hash().split('.');
 		return {
-            viewIdPreviousLevel: parseInt(hashArr[level*3-2]),
-            tabIdPreviousLevel: parseInt(hashArr[level*3-1]),
+            pageIdPreviousLevel: hashArr[level*3-3],
+            tabNumPreviousLevel: hashArr[level*3-2],
+            widgetNumPreviousLevel: hashArr[level*3-1],
             selectedObjectIdPreviousLevel: hashArr[level*3-0],
-            viewId: parseInt(hashArr[level*3+1]),
-            tabId: parseInt(hashArr[level*3+2]),
-            selectedObjId: parseInt(hashArr[level*3+3])
+            pageId: hashArr[level*3+1],
+            tabNum: hashArr[level*3+2],
+            widgetNum: hashArr[level*3+3],
+            selectedObjId: hashArr[level*3+4]
 		};
 	}
 	function setHashTabId(level, tabId, viewId){

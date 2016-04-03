@@ -15,7 +15,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			var initialized = self.store.get(self.widgetId).then(function(widget){
 				self.widget = widget;
 				//self.headerDivNode.innerHTML = widget.name;
-				self.pageHelpTextDiv.innerHTML = widget.description;
+				self.pageHelpTextDiv.innerHTML = this.widget.description;
 				return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
 					self.view = viewsArr[0]//for now assume only one view
                     return when(self.store.getCombinedSchemaForView(self.view),function(schema) {
@@ -34,7 +34,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				});
 			});
             when(initialized, function(result){
-                self.createMenusForWidget();
+                //self.createMenusForWidget();
 				self.createDeferred.resolve(self);//ready to be loaded with data
 			}, function(err){self.createDeferred.reject(err)});
 		},

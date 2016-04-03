@@ -5,13 +5,17 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			arrayUtil, domAttr, Deferred, all, when, registry, Memory,
 			Toolbar){
 	return declare("nqWidgetBase", [_WidgetBase], {
+        widget: null,
 		store: null,
-		parentId: null,
-		viewId: null,
+        createDeferred: null,
+
+
+        parentId: null,
+		schema: null,
 		selectedObjIdPreviousLevel: null,
 		selectedObjIdThisLevel: null,
 		
-		createDeferred: null,
+
 		setSelectedObjIdPreviousLevelDeferred: new Deferred(),
 		
 		setSelectedObjIdPreviousLevel: function(value){
@@ -53,7 +57,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			});
 			this.pane.resize();
 		},
-        enrichSchema: function(schema){
+        enrichObjectWithDefaults: function(obj, schema){
             var self = this;
             for(var attrName in schema.properties){
                 var attrProps = schema.properties[attrName];
