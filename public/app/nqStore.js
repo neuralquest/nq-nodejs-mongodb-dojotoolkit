@@ -601,7 +601,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
                 return self.isA(assocsArr[0].dest, destClassId, originalId);
             });
         },
-        getInheritedSchema: function(objId) {
+        getInheritedSchema: function(view) {
             /* summary:  Used to create a JSON schema based on the view schema in combination with class schemas inherited through view.mapsTo.
              //          The same method is used server side to validate updates.
              // view: Object
@@ -609,6 +609,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
              // returns: Object
              //          The schema object.
              */
+            return view;
             var classSchemaPromise = null;
             if(view.mapsTo) classSchemaPromise = this.getAttrPropertiesFromAncestors(view.mapsTo);
             else classSchemaPromise = CLASSSCHEMA;//No mapsTo means we're asking for a class (meta schema)

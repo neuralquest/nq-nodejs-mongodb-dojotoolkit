@@ -10,27 +10,32 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 		parentId: null,
 		
 		postCreate: function(){
-			this.inherited(arguments);
-			var self = this;
-			var initialized = self.store.get(self.widgetId).then(function(widget){
-				self.widget = widget;
-				//self.headerDivNode.innerHTML = widget.name;
-				self.pageHelpTextDiv.innerHTML = this.widget.description;
-				return self.store.getItemsByAssocTypeAndDestClass(self.widgetId, 'manyToMany', VIEW_CLASS_TYPE).then(function(viewsArr) {
-					self.view = viewsArr[0]//for now assume only one view
-                    return when(self.store.getCombinedSchemaForView(self.view),function(schema) {
-                        self.enrichSchema(schema);
-                        self.schema = schema;
-                        var uViewsArr = [];
-                        return self.store.getUniqueViewsForWidget(self.widgetId, uViewsArr).then(function(uniqueViewsArr){
-							//console.log('uViewsArr',uViewsArr);
-                            var viewPromises = [];
-                            uViewsArr.forEach(function(uView){
-                                viewPromises.push(self.permittedClassesForUniqueView(uView));
-                            });
-                            return all(viewPromises);
+            this.inherited(arguments);
+            var self = this;
+            if(!self.widget.viewRefs || self.widget.viewRefs.length<1) {
+                //self.createDeferred.reject({message:"could not open tree"});
+                self.createDeferred.resolve(self);
+                return;
+            }
+            var initialized = self.store.get(self.widget.viewRefs[0]).then(function(view){
+                self.view = view;
+                self.headerDivNode.innerHTML = '<h1>'+view.name+'</h1>';
+                //domStyle.set(self.headerDivNode, 'display', 'block');//set the header node, created in the superclass,  to visible
+                self.pageHelpTextDiv.innerHTML = view.description;
+                return when(self.store.getInheritedSchema(view),function(schema){
+                    self.schema = schema;
+                    self.enrichObjectWithDefaults(view, schema);
+                    self.schema = schema;
+                    return true;
+                    /*var uViewsArr = [];
+                    return self.store.getUniqueViewsForWidget(self.widgetId, uViewsArr).then(function(uniqueViewsArr){
+                        //console.log('uViewsArr',uViewsArr);
+                        var viewPromises = [];
+                        uViewsArr.forEach(function(uView){
+                            viewPromises.push(self.permittedClassesForUniqueView(uView));
                         });
-					});
+                        return all(viewPromises);
+					});*/
 				});
 			});
             when(initialized, function(result){
@@ -62,17 +67,11 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
         },
 		setSelectedObjIdPreviousLevel: function(value){
             var self = this;
-            if(self.widget.parentId) {
-                if(self.widget.parentId == this.selectedObjIdPreviousLevel) return this;
-                else this.selectedObjIdPreviousLevel = Number(self.widget.parentId);
-            }
-            else if(!value || value == this.selectedObjIdPreviousLevel) return this;
-			else this.selectedObjIdPreviousLevel = value;
+            if(self.widget.initialObject) value = self.widget.initialObject;
+            self.selectedObjIdPreviousLevel = value; // need this to pass value to treemodel
 			if(self.tree) self.tree.destroy(); 
 			self.createTree();
-			self.treeModel.query = {parentId: self.selectedObjIdPreviousLevel, viewId: this.widgetId};
-			self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
-			return this.setSelectedObjIdPreviousLevelDeferred.promise;
+			self.treeModel.query = {parentId: value, viewId: this.view};
 		},
 		setSelectedObjIdThisLevel: function(itemId){
             if(!itemId) return;

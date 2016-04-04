@@ -14,14 +14,15 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
             postCreate: function(){
                 this.inherited(arguments);
                 var self = this;
-                var initialized = self.store.get(self.pageId).then(function(page){
-                    self.page = page;
-                    self.headerDivNode.innerHTML = '<h1>'+page.name+'</h1>';
+                if(!self.widget.viewRefs || self.widget.viewRefs.length<1) return;
+                var initialized = self.store.get(self.widget.viewRefs[0]).then(function(view){
+                    self.view = view;
+                    self.headerDivNode.innerHTML = '<h1>'+view.name+'</h1>';
                     domStyle.set(self.headerDivNode, 'display', 'block');//set the header node, created in the superclass,  to visible
-                    self.pageHelpTextDiv.innerHTML = page.description;
-                    return when(self.store.getInheritedSchema(self.pageId),function(schema) {
+                    self.pageHelpTextDiv.innerHTML = view.description;
+                    return when(self.store.getInheritedSchema(self.viewId),function(schema) {
                         self.schema = schema;
-                        self.enrichObjectWithDefaults(page, schema);
+                        self.enrichObjectWithDefaults(view, schema);
                         var formNode = domConstruct.create('form', {style: 'border-spacing:5px;'}, this.pane.containerNode);
                         //Collect the properties in a three dimensional array:
                         //[rows, columns, propertiesList]

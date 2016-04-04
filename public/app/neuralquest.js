@@ -37,19 +37,26 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         if(hash() == "") {
             var neuralquestState = cookie('neuralquestState');
             //if(neuralquestState) hash(neuralquestState, true);
-            hash(".56f89f625dde184ccfb9fc76.1.1.5700046f5dde184ccfb9fc7c", true);
+            hash(".56f89f625dde184ccfb9fc76.0.0.5700046f5dde184ccfb9fc7c", true);
         }
         else interpretHash();
 	});
     function interpretHash(_hash){
         var state = getState(0);
         var parentContentPane = registry.byId('placeholder');
-        when(all(drawPage(state.pageId, parentContentPane)), function(widgetsArr){
-
-        });
+        return drawPage(state.pageId, parentContentPane).then(function(pagePromise){
+            return all(pagePromise).then(function(widgetsArr){
+                widgetsArr.forEach(function(widget){
+                    //console.log(widget);
+                    widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel);
+                });
+                return true;
+            }, errorDialog);
+        }, errorDialog);
     }
     function drawPage(pageId, parentContentPane){
 		return nqStore.get(pageId).then(function(page){
+            var widgetPromisesArr = [];
             if(page.divider == 'Horizontal' || page.divider == 'Vertical'){
                 var borderContainer = new BorderContainer( {
                     //'id' : 'borderContainer'+parentViewOrTabId,
@@ -81,11 +88,12 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 parentContentPane.containerNode.appendChild(borderContainer.domNode); //appendChild works better than attaching through create
                 borderContainer.startup();//this is a must
                 parentContentPane.resize();//this is a must
-                return drawAccordionsOrTabs(page, leftPane)
+                widgetPromisesArr = drawAccordionsOrTabs(page, leftPane);
             }
             else{
-                return drawAccordionsOrTabs(page, parentContentPane)
+                return drawAccordionsOrTabs(page, parentContentPane);
             }
+            return widgetPromisesArr;
 		});
 	}
     function drawAccordionsOrTabs(page, parentContentPane){
@@ -96,37 +104,49 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             var container = null;
             if(page.accordionOrTab == 'Accordions'){
                 container = new AccordionContainer( {
+                //container = new TabContainer( {
                     //'id' : 'viewPane'+parentViewOrTabId,
                     //'persist' : true,//cookies override our hash tabId
-                    'region' : 'center'
+                    'region' : 'center',
+                    //'class': 'noOverFlow',
+                    'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
                 });
             }
             else{
                 container = new TabContainer( {
                     //'id' : 'viewPane'+parentViewOrTabId,
                     //'persist' : true,//cookies override our hash tabId
-                    'region' : 'center'
+                    'region' : 'center',
+                    //'class': 'noOverFlow',
+                    'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
                 });
             }
             parentContentPane.addChild(container);
-            container.startup();
-            var tabsPromises = []
+            container.startup();//this is a must
+            parentContentPane.resize();//this is a must
+            var tabsPromises = [];
+            var num = 0;
+            var state = getState(0);
+            var selectedTab = null;
             page.tabs.forEach(function(tabObj) {
                 var tabPane = new ContentPane( {
                     //'id' : 'tab'+tab._id,
                     'title' : tabObj.name,
-                    //'selected' : tab._id==state.tabId?true:false,
+                    //'content' : '<p>Loading...</p>',
                     'class' : 'backgroundClass',
                     'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
                 });
+                if(num==state.tabNum) selectedTab = tabPane;
                 container.addChild(tabPane);
                 tabsPromises = tabsPromises.concat(drawWidgets(tabObj, tabPane));
+                num++;
             });
-            container.watch("selectedChildWidget", function(name, oval, nval){
+            container.selectChild(selectedTab,false);
+            /*container.watch("selectedChildWidget", function(name, oval, nval){
                 //console.log("selected child changed from ", oval.title, " to ", nval.title);
-                var tabId = (nval.id).substring(3);//why is this called so offten? probably cant hurt
+                var tabId = (nval.id).substring(3);//why is this called so often? probably cant hurt
                 setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
-            });
+            });*/
             return tabsPromises;
         }
     }
@@ -555,12 +575,12 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		var hashArr = hash().split('.');
 		return {
             pageIdPreviousLevel: hashArr[level*3-3],
-            tabNumPreviousLevel: hashArr[level*3-2],
-            widgetNumPreviousLevel: hashArr[level*3-1],
+            tabNumPreviousLevel: parseInt(hashArr[level*3-2]),
+            widgetNumPreviousLevel: parseInt(hashArr[level*3-1]),
             selectedObjectIdPreviousLevel: hashArr[level*3-0],
             pageId: hashArr[level*3+1],
-            tabNum: hashArr[level*3+2],
-            widgetNum: hashArr[level*3+3],
+            tabNum: parseInt(hashArr[level*3+2]),
+            widgetNum: parseInt(hashArr[level*3+3]),
             selectedObjId: hashArr[level*3+4]
 		};
 	}

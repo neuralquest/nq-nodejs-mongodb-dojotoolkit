@@ -36,7 +36,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.pane = new ContentPane( {
 //				'class' : 'backgroundClass',
 				'doLayout' : 'true',
-//				'content': 'Some Content',
+				'content': 'Loading...',
 //				'style' : { 'overflow': 'auto', 'padding': '0px', 'margin': '0px', width: '100%', height: '100%', background:'transparent'}
 			},  domConstruct.create('div'));
 			this.domNode.appendChild(this.pane.domNode);
@@ -58,6 +58,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.pane.resize();
 		},
         enrichObjectWithDefaults: function(obj, schema){
+            return schema;
             var self = this;
             for(var attrName in schema.properties){
                 var attrProps = schema.properties[attrName];
