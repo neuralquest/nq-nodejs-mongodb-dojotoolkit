@@ -47,13 +47,13 @@ code {border:none; font-size: 100%;}
 /*.nqGrid .dgrid-row-odd {background: #F2F5F9;}*/
 /*.dgrid-selected { background: #999; / * Make selected rows be gray * /}*/
 
-/*Make the child element the same size as to table cell*/
+/*Make the child element the same size as to table cell
 table .last, td:last-child { padding: 2px 24px 2px 0px;}
-
+*/
 
 /*make dijits transparent*/
-.soria .dijitTextBox, .soria .dijitSelect, .soria .dijitSelect .dijitButtonContents {border: none; background: transparent;}
-input {border: none; background: transparent;}
+.soria .dijitTextBox, .soria .dijitSelect, .soria .dijitSelect .dijitButtonContents {border: solid; border-color: lightgrey; border-width: thin; background: transparent;}
+input {border: solid; border-color: lightgrey; border-width: thin;  background: transparent;}
 
 
 .helpTextInvisable {color:navy; display:none;}
@@ -61,11 +61,11 @@ input {border: none; background: transparent;}
 /*reward*/
 .popUp {border: 2px solid gray;	border-radius: 5px; position: fixed; z-index: 2; opacity: 0;background-color: lime; top: 30%; left: 40%; width: 100px; height: 50px; font-weight: bold; font-size: 16px;}
 
-/*the startup page*/
+/*the startup page
 .pageOverlay {top: 0;left: 0;position: absolute;height: 100%;width: 100%;z-index: 1001;display: block;}
 #loadingOverlay {background:  #fff url('img/Neuralquest/loadingAnimation.gif') no-repeat 10px 23px;}
 .loadingMessage {padding: 25px 40px;color: #999;}
-
+*/
 /*our icons*/
 .editIcon {background-image: url('img/Neuralquest/edit.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 .annoIcon {background-image: url('img/Neuralquest/anno.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
@@ -116,7 +116,7 @@ div.todofloatright p {font-size: 90%; background-color: rgb(252, 252, 181);}
 form  { display: table;      }
 p     { display: table-row;  }
 label { display: table-cell; white-space: nowrap; }
-input { display: table-cell; width:5em;}
+input { display: table-cell; }/*width:5em;*/
 
 /* Gennerated by means of nqapp/nqSprites.css */
 /* You can also gennerate a sprite template using nqapp/nqSprites.png */

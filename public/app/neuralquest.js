@@ -3,213 +3,408 @@ require([
 'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct',
 'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
-'app/nqStore', 'dstore/RequestMemory', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument','app/nqBalanceSheet',
-"dojo/json","dijit/Dialog","dijit/form/Form","dijit/form/TextBox","dijit/form/Button","dojo/dom-attr",'dojox/html/styles', 'dojo/query!css2'],
+'app/nqDocStore', 'dstore/RequestMemory', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument','app/nqBalanceSheet',
+"dojo/json","dijit/Dialog","dijit/form/Form","dijit/form/TextBox","dijit/form/Button","dojo/dom-attr",'dojox/html/styles', 'dojo/query!css2','dstore/SimpleQuery'],
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct,
 		Deferred, when, all, query, BorderContainer,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
-		nqStore, RequestMemory, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument, nqBalanceSheet,
-		JSON, Dialog,Form,TextBox,Button,domattr,styles, css2) {
+         nqDocStore, RequestMemory, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument, nqBalanceSheet,
+		JSON, Dialog,Form,TextBox,Button,domattr,styles, css2, SimpleQuery) {
 
-    nqStore = new nqStore();
+    var nqStore = new nqDocStore();
     var userName = null;
-
-	ready( function() {
-		request.get('/hello').then(function(data){
-			userName = data==''?null:data;
-			domattr.set('userNameDiv', 'innerHTML', data);
-		},errorDialog);
+    ready(function () {
+        request.get('/hello').then(function (data) {
+            userName = data == '' ? null : data;
+            domattr.set('userNameDiv', 'innerHTML', data);
+        }, errorDialog);
         topic.subscribe("/dojo/hashchange", interpretHash);
-		on(registry.byId('loginButtonId'), 'click', function(event){login();});
-		on(registry.byId('cancelButtonId'), 'click', function(event){nqStore.abort();});
-		on(registry.byId('saveButtonId'), 'click', function(event){nqStore.commit();});
-		on(registry.byId('helpButtonId'), 'change', function(value){
-			if(value) dojox.html.insertCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
-			else dojox.html.removeCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
-		});
+        on(registry.byId('loginButtonId'), 'click', function (event) {
+            login();
+        });
+        on(registry.byId('cancelButtonId'), 'click', function (event) {
+            nqStore.abort();
+        });
+        on(registry.byId('saveButtonId'), 'click', function (event) {
+            nqStore.commit();
+        });
+        on(registry.byId('helpButtonId'), 'change', function (value) {
+            if (value) dojox.html.insertCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
+            else dojox.html.removeCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
+        });
 
-		/*when(nqDataStore.preFetch(), function(results){
-		}, errorDialog);*/
-        fx.fadeOut({node: 'loadingOverlay', onEnd: function(node){domStyle.set(node, 'display', 'none');}}).play();
+        /*when(nqDataStore.preFetch(), function(results){
+         }, errorDialog);
+        fx.fadeOut({
+            node: 'loadingOverlay', onEnd: function (node) {
+                domStyle.set(node, 'display', 'none');
+            }
+        }).play();*/
         //domStyle.set('loadingOverlay', 'display', 'none');
 
-        if(hash() == "") {
+        if (hash() == "") {
             var neuralquestState = cookie('neuralquestState');
             //if(neuralquestState) hash(neuralquestState, true);
-            hash(".56f89f625dde184ccfb9fc76.0.0.5700046f5dde184ccfb9fc7c", true);
+            hash(".56f89f625dde184ccfb9fc76....5700046f5dde184ccfb9fc7c", true);
         }
         else interpretHash();
-	});
-    function interpretHash(_hash){
-        var state = getState(0);
-        var parentContentPane = registry.byId('placeholder');
-        return drawPage(state.pageId, parentContentPane).then(function(pagePromise){
-            return all(pagePromise).then(function(widgetsArr){
-                widgetsArr.forEach(function(widget){
-                    //console.log(widget);
-                    widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel);
+    });
+    function interpretHash(_hash) {
+        var tabContainerArr = array.filter(registry.toArray(), function(item){
+            return item.pageId == getState(0).pageId && item.pageType == 'tabContainer';
+        });
+        var drawPagePromise = true;
+        if(tabContainerArr.length==0){
+            var parentContentPane = registry.byId('placeholder');
+            parentContentPane.destroyDescendants(false);
+            drawPagePromise = drawPage(parentContentPane, 0);
+        }
+        when(drawPagePromise, function(res){
+            var hashArr = hash().split('.');
+            var levels = Math.ceil(hashArr.length/4);//determine the number of levels, rounded to the highest integer
+            for(var level = 0; level<levels; level++){
+                var state = getState(level);
+                var registryArr = registry.toArray();
+                var filteredArr = array.filter(registryArr, function(item){
+                    return item.pageId == state.pageId && item.pageType == 'tabContainer';
                 });
-                return true;
-            }, errorDialog);
-        }, errorDialog);
+                var tabContainer = filteredArr[0];
+
+                var tabPaneArr = array.filter(registry.toArray(), function(item){
+                    return item.pageId == state.pageId && item.tabNum == state.tabNum && item.pageType == 'tabPane';
+                });
+                var tabPane = tabPaneArr[0];
+
+                //if it really is a tabContainer maker sure the right tab is selected
+                if(tabContainer.selectedChildWidget) tabContainer.selectChild(tabPane, false);
+
+                var widgetsDonePromise = true;
+                if(!tabPane.widgetsDone){
+                    tabPane.destroyDescendants(false);
+                    widgetsDonePromise = drawWidgets(state.pageId, state.tabNum, tabPane, level);
+                }
+                when(widgetsDonePromise, function(res){
+                    var widgetsArr = array.filter(registry.toArray(), function(item){
+                        return item.pageId == state.pageId && item.tabNum == state.tabNum && item.pageType == 'widget';
+                    });
+                    widgetsArr.forEach(function (widget) {
+                        widget.setSelectedObjIdPreviousLevel(level.selectedObjectIdPreviousLevel);
+                        //widget.setSelectedObjIdThisLevel(state.selectedObjId);
+                    });
+               });
+            }
+        });
     }
-    function drawPage(pageId, parentContentPane){
-		return nqStore.get(pageId).then(function(page){
-            var widgetPromisesArr = [];
-            if(page.divider == 'Horizontal' || page.divider == 'Vertical'){
-                var borderContainer = new BorderContainer( {
-                    //'id' : 'borderContainer'+parentViewOrTabId,
-                    'region' : 'center',
-                    'design' : page.divider == 'Vertical'?'sidebar':'headline',
-                    'persist' : true,
+
+    function drawPage(parentContentPane, level) {
+        console.log('page level', level);
+        var state = getState(level);
+        return nqStore.get(state.pageId).then(function (pageObj) {
+            if(pageObj.divider == 'Horizontal' || pageObj.divider == 'Vertical') {
+                var borderContainer = new BorderContainer({
+                    //'id' : state.pageId,
+                    'region': 'center',
+                    'design': pageObj.divider == 'Vertical' ? 'sidebar' : 'headline',
+                    'persist': true,
                     //'class': 'noOverFlow'
-                    'style' : {width: '100%', height: '100%', overflow: 'hidden', padding: '0px', margin: '0px'}
+                    'style': {width: '100%', height: '100%', overflow: 'hidden', padding: '0px', margin: '0px'}
                 });
                 //borderContainer.startup();
-                var leftPane = new ContentPane( {
+                var leftPane = new ContentPane({
                     //'id' : 'master'+parentViewOrTabId,
-                    'region' : page.divider == 'Vertical'?'leading':'top',
-                    'class' : 'backgroundClass',
-                    'splitter' : true,
+                    'region': pageObj.divider == 'Vertical' ? 'leading' : 'top',
+                    'class': 'backgroundClass',
+                    'splitter': true,
                     //'class': 'noOverFlow',
-                    'style' : {width: '200px',overflow: 'hidden',padding: '0px', margin: '0px'}
+                    'style': {width: '200px', overflow: 'hidden', padding: '0px', margin: '0px'}
                 });
-                var centerPane = new ContentPane( {
+                var centerPane = new ContentPane({
                     //'id' : 'slave'+parentViewOrTabId,
-                    'region' : 'center',
-                    'class' : 'backgroundClass',
+                    slaveOf: state.pageId,
+                    'region': 'center',
+                    'class': 'backgroundClass',
                     //'content' : '<p>Loading...</p>',
                     //'class': 'noOverFlow'
-                    'style' : {overflow: 'hidden',padding: '0px', margin: '0px'}
+                    'style': {overflow: 'hidden', padding: '0px', margin: '0px'}
                 });
                 borderContainer.addChild(leftPane);
                 borderContainer.addChild(centerPane);
                 parentContentPane.containerNode.appendChild(borderContainer.domNode); //appendChild works better than attaching through create
                 borderContainer.startup();//this is a must
                 parentContentPane.resize();//this is a must
-                widgetPromisesArr = drawAccordionsOrTabs(page, leftPane);
+                drawAccordionsOrTabs(pageObj, leftPane, level);
+                return drawPage(centerPane, level + 1);
             }
-            else{
-                return drawAccordionsOrTabs(page, parentContentPane);
+            else {
+                drawAccordionsOrTabs(pageObj, parentContentPane, level);
+                return true;
             }
-            return widgetPromisesArr;
-		});
-	}
-    function drawAccordionsOrTabs(page, parentContentPane){
-        if(page.tabs.length==1){
-            return drawWidgets(page.tabs[0], parentContentPane);
+        });
+    }
+
+    function drawAccordionsOrTabs(pageObj, parentContentPane, level) {
+        var state = getState(level);
+        if (pageObj.tabs.length == 1) {
+            parentContentPane.pageId = state.pageId;
+            parentContentPane.pageType = 'tabContainer';
+            parentContentPane.level = level;
+            parentContentPane.tabNum = 0;
         }
         else {
             var container = null;
-            if(page.accordionOrTab == 'Accordions'){
-                container = new AccordionContainer( {
-                //container = new TabContainer( {
-                    //'id' : 'viewPane'+parentViewOrTabId,
-                    //'persist' : true,//cookies override our hash tabId
-                    'region' : 'center',
-                    //'class': 'noOverFlow',
-                    'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
-                });
-            }
-            else{
-                container = new TabContainer( {
-                    //'id' : 'viewPane'+parentViewOrTabId,
-                    //'persist' : true,//cookies override our hash tabId
-                    'region' : 'center',
-                    //'class': 'noOverFlow',
-                    'style' : {width: '100%',height: '100%',overflow: 'hidden',padding: '0px', margin: '0px'}
-                });
-            }
+            var props = {
+                //'id' : 'viewPane'+parentViewOrTabId,
+                //'persist' : true,//cookies override our hash tabId
+                pageId: state.pageId,
+                pageType: 'tabContainer',
+                'region': 'center',
+                //'class': 'noOverFlow',
+                'style': {width: '100%', height: '100%', overflow: 'hidden', padding: '0px', margin: '0px'}
+            };
+            if(pageObj.accordionOrTab == 'Accordions')container = new AccordionContainer(props);
+            else container = new TabContainer(props);
+
             parentContentPane.addChild(container);
             container.startup();//this is a must
             parentContentPane.resize();//this is a must
-            var tabsPromises = [];
             var num = 0;
             var state = getState(0);
-            var selectedTab = null;
-            page.tabs.forEach(function(tabObj) {
-                var tabPane = new ContentPane( {
-                    //'id' : 'tab'+tab._id,
-                    'title' : tabObj.name,
+            var retObj = {};
+            pageObj.tabs.forEach(function (tabObj) {
+                var state = getState(level);//!!! state get overwitten, not know why
+                var tabPane = new ContentPane({
+                    pageId: state.pageId,
+                    level: level,
+                    tabNum: num,
+                    pageType: 'tabPane',
+                    title: tabObj.name,
                     //'content' : '<p>Loading...</p>',
-                    'class' : 'backgroundClass',
-                    'style' : {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
+                    'class': 'backgroundClass',
+                    style: {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
                 });
-                if(num==state.tabNum) selectedTab = tabPane;
+                if (num == state.tabNum) retObj = {tabObj: tabObj, contentPane: tabPane, level: level};
                 container.addChild(tabPane);
-                tabsPromises = tabsPromises.concat(drawWidgets(tabObj, tabPane));
+                if (num == state.tabNum) container.selectChild(tabPane, false);
                 num++;
             });
-            container.selectChild(selectedTab,false);
-            /*container.watch("selectedChildWidget", function(name, oval, nval){
-                //console.log("selected child changed from ", oval.title, " to ", nval.title);
-                var tabId = (nval.id).substring(3);//why is this called so often? probably cant hurt
-                setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
-            });*/
-            return tabsPromises;
+
+            container.watch("selectedChildWidget", function(name, oval, nval){
+                console.log("selected child changed from ", oval.tabNum, " to ", nval.tabNum);
+                //var tabId = (nval.id).substring(3);//why is this called so often? probably cant hurt
+                //setHashTabId(level, tabId, viewId); // this will trigger createNqWidget
+                var hashArr = hash().split('.');
+                if(hashArr[level*4+2] == nval.tabNum) return;//same
+                //set our tabId in the hash array
+                hashArr[level*4+2] = nval.tabNum;
+                //remove anything following this tab in the hash since it is no longer valid
+                hashArr = hashArr.slice(0,level*4+3);
+                //see if there is a cookie for our tab
+                //var tabCookieStr = cookie('tabId'+tabId);
+                //if, append it to our hash array
+                //if(tabCookieStr) hashArr = hashArr.concat(JSON.parse(tabCookieStr));
+                var newHash = hashArr.join('.');
+                //newHash = newHash.replace(/,/g,'.');
+                hash(newHash, true);// update history, instead of adding a new record
+
+            });
+            return retObj;
         }
     }
-    function drawWidgets(tabObj, tabPane){
-        var widgetPromises = [];
-        tabObj.widgets.forEach(function(widget){
-            var createDeferred = new Deferred();
-            widgetPromises.push(createDeferred.promise);
-            if (widget.displayType == 'Document'){
-                var widgetObj = new nqDocument({
+
+    function drawWidgets(pageId, tabNum, tabPane, level) {
+        return nqStore.get(pageId).then(function (pageObj) {
+            tabPane.widgetsDone = true;
+            var widgetPromises = [];
+            pageObj.tabs[tabNum].widgets.forEach(function (widget) {
+                var createDeferred = new Deferred();
+                widgetPromises.push(createDeferred.promise);
+                var parms = {
+                    pageId: pageId,
+                    tabNum: tabNum,
+                    level: level,
+                    pageType: 'widget',
                     widget: widget,
                     store: nqStore,
                     createDeferred: createDeferred
-                }, domConstruct.create('div'));
-                tabPane.addChild(widgetObj);
-            }
-            else if (widget.displayType == 'Form'){
-                var widgetObj = new nqForm({
-                    widget: widget,
-                    store: nqStore,
-                    createDeferred: createDeferred
-                }, domConstruct.create('div'));
-                tabPane.addChild(widgetObj);
-            }
-            else if (widget.displayType ==  'Table'){
-                var widgetObj = new nqTable({
-                    widget: widget,
-                    store: nqStore,
-                    createDeferred: createDeferred
-                }, domConstruct.create('div'));
-                tabPane.addChild(widgetObj);
-            }
-            else if (widget.displayType == 'Tree'){
-                var widgetObj = new nqTree({
-                    widget: widget,
-                    store: nqStore,
-                    createDeferred: createDeferred
-                }, domConstruct.create('div'));
-                tabPane.addChild(widgetObj);
-            }
-            else if (widget.displayType == '3D Class Model'){
-                var widgetObj = new nqClassChart({
-                    widget: widget,
-                    store: nqStore,
-                    createDeferred: createDeferred
-                }, domConstruct.create('div'));
-                tabPane.addChild(widgetObj);
-            }
+                };
+                if (widget.displayType == 'Document') {
+                    var widgetObj = new nqDocument(parms, domConstruct.create('div'));
+                    tabPane.addChild(widgetObj);
+                }
+                else if (widget.displayType == 'Form') {
+                    var widgetObj = new nqForm(parms, domConstruct.create('div'));
+                    tabPane.addChild(widgetObj);
+                }
+                else if (widget.displayType == 'Table') {
+                    var widgetObj = new nqTable(parms, domConstruct.create('div'));
+                    tabPane.addChild(widgetObj);
+                }
+                else if (widget.displayType == 'Tree') {
+                    var widgetObj = new nqTree(parms, domConstruct.create('div'));
+                    tabPane.addChild(widgetObj);
+                }
+                else if (widget.displayType == '3D Class Model') {
+                    var widgetObj = new nqClassChart(parms, domConstruct.create('div'));
+                    tabPane.addChild(widgetObj);
+                }
+            });
+            return all(widgetPromises);
         });
-        return widgetPromises;
     }
 
+    //////////////////////////////////////////////////////////////////////////////
+    //Helpers
+    //////////////////////////////////////////////////////////////////////////////
+    lang.setObject("nq.getState", getState);//make the function globally accessable
+    function getState(level){
+        var hashArr = hash().split('.');
+        return {
+            pageIdPreviousLevel: hashArr[level*4-3],
+            tabNumPreviousLevel: parseInt(hashArr[level*4-2])?parseInt(hashArr[level*4-2]):0,
+            widgetNumPreviousLevel: parseInt(hashArr[level*4-1])?parseInt(hashArr[level*4-1]):0,
+            selectedObjectIdPreviousLevel: hashArr[level*4-0],
+            pageId: hashArr[level*4+1],
+            tabNum: parseInt(hashArr[level*4+2])?parseInt(hashArr[level*4+2]):0,
+            widgetNum: parseInt(hashArr[level*4+3])?parseInt(hashArr[level*4+3]):0,
+            selectedObjId: hashArr[level*4+4]
+        };
+    }
+
+    lang.setObject("nq.errorDialog", errorDialog);//make the function globally accessible
+    function errorDialog(err) {
+        var content, title;
+        if (err.response) {
+            title = err.message;
+            if (err.response.text)content = err.response.text;
+            else content = err.response;
+        }
+        else {
+            title = 'Client Error';
+            content = err.message;
+        }
+        var dlg = new dijit.Dialog({
+            title: title,
+            extractContent: true,//important in the case of server response, it'll screw up your css.
+            onClick: function (evt) {
+                this.hide();
+            },//click anywhere to close
+            content: content
+        });
+        dlg.show();
+        //throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
+        if (!err.response) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
+    }
+    function getSelectedTabRecursive(paneId){
+        var tabContainer = registry.byId('viewPane'+paneId);
+        if(!tabContainer) return false;
+        var tabId;
+        if(tabContainer.selectedChildWidget) tabId = tabContainer.selectedChildWidget.id;
+        else tabId = tabContainer.containerNode.firstChild.id;
+        if(!tabId) return false;
+        var subTab = getSelectedTabRecursive(tabId.substring(3));
+        if(subTab) return subTab;// there's a selected tab below us, so return it's id
+        else return tabId.substring(3);//we are at the bottom, so return our id
+    }
+});
 
 
 
 
 
 
+/*
+function XinterpretHash(_hash) {
+    var parentContentPane = registry.byId('placeholder');
+    //tabPaneObjArr gathers all the tabObjs and their respective panes into which the widgets will be drawn
+    var tabPaneObjArr = [];
+    //drawPage draws all the border/accordion/tab containers as needed.
+    //it does so recursively for each level in the hash
+    when(drawPage(parentContentPane, 0, tabPaneObjArr), function (res) {
+        var widgetPromises = [];
+        for (var i = tabPaneObjArr.length - 1; i >= 0; i--) {//we start at the highest level and work our way down (user experience)
+            var tabPaneObj = tabPaneObjArr[i];
+            widgetPromises.push(drawWidgets(tabPaneObj.tabObj, tabPaneObj.contentPane, tabPaneObj.level));
+        }
+        all(widgetPromises).then(function (widgetsArrArr) {
+            widgetsArrArr.forEach(function (widgetsArr) {
+                widgetsArr.forEach(function (widgetLevelObj) {
+                    when(widgetLevelObj.widgetProm, function (widget) {
+                        widget.setSelectedObjIdPreviousLevel(getState(widgetLevelObj.level).selectedObjectIdPreviousLevel);
+                        //widget.setSelectedObjIdThisLevel(state.selectedObjId);
+                    }, errorDialog);
+                });
+            });
+        }, errorDialog);
+    }, errorDialog);
+}
+function XdrawWidgets(tabObj, tabPane, level) {
+    tabPane.widgetsDone = true;
+    var widgetPromises = [];
+    tabObj.widgets.forEach(function (widget) {
+        var createDeferred = new Deferred();
+        widgetPromises.push({widgetProm: createDeferred.promise, level: level});
+        if (widget.displayType == 'Document') {
+            var widgetObj = new nqDocument({
+                widget: widget,
+                store: nqStore,
+                createDeferred: createDeferred
+            }, domConstruct.create('div'));
+            tabPane.addChild(widgetObj);
+        }
+        else if (widget.displayType == 'Form') {
+            var widgetObj = new nqForm({
+                widget: widget,
+                store: nqStore,
+                createDeferred: createDeferred
+            }, domConstruct.create('div'));
+            tabPane.addChild(widgetObj);
+        }
+        else if (widget.displayType == 'Table') {
+            var widgetObj = new nqTable({
+                widget: widget,
+                store: nqStore,
+                createDeferred: createDeferred
+            }, domConstruct.create('div'));
+            tabPane.addChild(widgetObj);
+        }
+        else if (widget.displayType == 'Tree') {
+            var widgetObj = new nqTree({
+                widget: widget,
+                store: nqStore,
+                createDeferred: createDeferred
+            }, domConstruct.create('div'));
+            tabPane.addChild(widgetObj);
+        }
+        else if (widget.displayType == '3D Class Model') {
+            var widgetObj = new nqClassChart({
+                widget: widget,
+                store: nqStore,
+                createDeferred: createDeferred
+            }, domConstruct.create('div'));
+            tabPane.addChild(widgetObj);
+        }
+    });
+    return widgetPromises;
+}
 
 
-
-
-    function xinterpretHash(_hash){
+     function setHashTabId(level, tabId, viewId){
+         var hashArr = hash().split('.');
+         if(hashArr[level*3+2] == tabId) return;//same
+         //set our tabId in the hash array
+         hashArr[level*3+2] = tabId;
+         //remove anything following this tab in the hash since it is no longer valid
+         hashArr = hashArr.slice(0,level*3+3);
+         //see if there is a cookie for our tab
+         var tabCookieStr = cookie('tabId'+tabId);
+         //if, append it to our hash array
+         if(tabCookieStr) hashArr = hashArr.concat(JSON.parse(tabCookieStr));
+         var newHash = hashArr.join('.');
+         //newHash = newHash.replace(/,/g,'.');
+         hash(newHash, true);// update history, instead of adding a new record
+     }
+     function xinterpretHash(_hash){
         // summary:
         //		Interpret the hash change. The hash consists of sets of threes: viewId.tabId.selectedObjectId.
         //		Each set is interpreted consecutively.
@@ -629,7 +824,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 				if(tabsArr.length>0) hashArr[(level+1)*3+2] = tabsArr[0].id;
 			}
 			var tabsArr = _nqSchemaMemoryStore.query({parentViewId: viewId, entity: 'tab'});//get the tabs		 
-			if(tabsArr.length>0) hashArr[(level+1)*3+2] = tabsArr[0].id;*/
+			if(tabsArr.length>0) hashArr[(level+1)*3+2] = tabsArr[0].id;* /
 		}
 
 		var newHash = hashArr.join('.');
@@ -667,31 +862,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             }
             return [];
         }
-    }*/
-	lang.setObject("nq.errorDialog", errorDialog);//make the function globally accessable
-	function errorDialog(err) {
-        var content, title;
-        if(err.response){
-            title = err.message;
-            if(err.response.text)content = err.response.text;
-            else content = err.response;
-        }
-        else{
-            title = 'Client Error';
-            content = err.message;
-        }
-        var dlg = new dijit.Dialog({
-            title: title,
-            extractContent: true,//important in the case of server response, it'll screw up your css.
-            onClick: function (evt) {
-                this.hide();
-            },//click anywhere to close
-            content: content
-        });
-        dlg.show();
-		//throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
-		if(!err.response) throw err.stack;//extremely useful for asycronons errors, stack otherwise gets lost
-	};
+    }* /
     lang.setObject("nq.login", login);//make the function globally accessable
     function login() {
         var form = new Form();
@@ -857,7 +1028,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 			item.name = 'xxxxx';
 			console.log('new', item);
 			nqStore.put(item);
-		});*/
+		});* /
     }
 
 
@@ -1011,4 +1182,4 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         required: ['_id', 'type'],
         additionalProperties: false
     };
-});
+});*/

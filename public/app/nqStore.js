@@ -7,7 +7,7 @@ function(declare, lang, array, when, all, Store, QueryResults,
         autoEmitEvents: false,
         //transactionIds: {assocsColl:{add:{}, update:{}, delete:{}}, itemsColl:{add:{}, update:{}, delete:{}}},
         transactionArr: [],
-        docsColl: new RequestMemory({target: '/documents', idProperty: '_id'}),
+        //docsColl: new RequestMemory({target: '/documents', idProperty: '_id'}),
         assocsColl: new RequestMemory({target: '/assocs', idProperty: '_id'}),
         itemsColl: new RequestMemory({target: '/items', idProperty: '_id'}),
 

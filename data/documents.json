@@ -1,0 +1,1708 @@
+{ 
+    "_id" : ObjectId("56f863505dde184ccfb9fc62"), 
+    "docType" : "class", 
+    "title" : "View Class Schema", 
+    "description" : "<p>Bad-ass schema describes view objects in general: the schema of schema's.</p><p>Considerations for jsonschema draft-v5: replace enum with single value, with constant, Use definitions and inheritance</p>", 
+    "type" : "object", 
+    "properties" : {
+        "title" : {
+            "label" : "Title", 
+            "type" : "string", 
+            "maxLength" : NumberInt(1000), 
+            "default" : "[unnamed]"
+        }, 
+        "description" : {
+            "label" : "Description", 
+            "type" : "string", 
+            "maxLength" : NumberInt(10000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>[no text]</p>"
+        }, 
+        "display" : {
+            "label" : "Display", 
+            "type" : "string", 
+            "enum" : [
+                "Form", 
+                "Paragraph"
+            ], 
+            "default" : "Form"
+        }, 
+        "type" : {
+            "label" : "Type", 
+            "type" : "string", 
+            "enum" : [
+                "object"
+            ]
+        }, 
+        "properties" : {
+            "label" : "Properties", 
+            "type" : "object", 
+            "patternProperties" : {
+                "^[a-z0-9]+$" : {
+                    "anyOf" : [
+                        {
+                            "description" : "string", 
+                            "type" : "object", 
+                            "properties" : {
+                                "label" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "string"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "default" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "minLength" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(10000), 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(0)
+                                }, 
+                                "maxLength" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(10000), 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(10000)
+                                }, 
+                                "width" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(10000), 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(0)
+                                }, 
+                                "pattern" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : ""
+                                }, 
+                                "media" : {
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "mediaType" : {
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "text/plain", 
+                                                "text/html", 
+                                                "text/json", 
+                                                "text/javascript"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false, 
+                                    "default" : {
+                                        "mediaType" : "text/plain"
+                                    }
+                                }, 
+                                "format" : {
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "date-time", 
+                                        "hostname", 
+                                        "uri", 
+                                        "email"
+                                    ], 
+                                    "default" : ""
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "description" : "image", 
+                            "type" : "object", 
+                            "properties" : {
+                                "label" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "string"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "height" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(10000), 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(0)
+                                }, 
+                                "width" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(10000), 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(300)
+                                }, 
+                                "url" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "format" : "hostname"
+                                }, 
+                                "media" : {
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "mediaType" : {
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "image/jpg", 
+                                                "image/webgl"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false, 
+                                    "default" : {
+                                        "mediaType" : "image/jpg"
+                                    }
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "description" : "number", 
+                            "type" : "object", 
+                            "properties" : {
+                                "label" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "number"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "default" : {
+                                    "type" : "number", 
+                                    "maximum" : NumberLong(9223372036854775807), 
+                                    "minimum" : NumberLong(-9223372036854775807), 
+                                    "default" : null
+                                }, 
+                                "maximum" : {
+                                    "type" : "number", 
+                                    "maximum" : NumberLong(9223372036854775807), 
+                                    "minimum" : NumberLong(-9223372036854775807), 
+                                    "default" : NumberLong(9223372036854775807)
+                                }, 
+                                "minimum" : {
+                                    "type" : "number", 
+                                    "maximum" : NumberLong(9223372036854775807), 
+                                    "minimum" : NumberLong(-9223372036854775807), 
+                                    "default" : NumberLong(-9223372036854775807)
+                                }, 
+                                "sum" : {
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "pattern" : "[a-f0-9]+$"
+                                        }, 
+                                        "association" : {
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "ordered", 
+                                                "oneToMany", 
+                                                "instances"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "description" : "integer", 
+                            "type" : "object", 
+                            "properties" : {
+                                "label" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "integer"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "default" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(2147483647), 
+                                    "minimum" : NumberInt(-2147483647), 
+                                    "default" : null
+                                }, 
+                                "maximum" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(2147483647), 
+                                    "minimum" : NumberInt(-2147483647), 
+                                    "default" : NumberInt(2147483647)
+                                }, 
+                                "minimum" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(2147483647), 
+                                    "minimum" : NumberInt(-2147483647), 
+                                    "default" : NumberInt(-2147483647)
+                                }, 
+                                "sum" : {
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "pattern" : "[a-f0-9]+$"
+                                        }, 
+                                        "association" : {
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "ordered", 
+                                                "oneToMany", 
+                                                "instances"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "description" : "boolean", 
+                            "type" : "object", 
+                            "properties" : {
+                                "label" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "boolean"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "default" : {
+                                    "type" : "boolean", 
+                                    "default" : false
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "description" : "toMany", 
+                            "type" : "object", 
+                            "properties" : {
+                                "label" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "array"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "query" : {
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "pattern" : "[a-f0-9]+$"
+                                        }, 
+                                        "association" : {
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "ordered", 
+                                                "oneToMany", 
+                                                "instances"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false
+                                }, 
+                                "minItems" : {
+                                    "type" : "integer", 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(0)
+                                }, 
+                                "uniqueItems" : {
+                                    "type" : "boolean", 
+                                    "enum" : [
+                                        true
+                                    ]
+                                }, 
+                                "items" : {
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "type" : {
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000)
+                                        }, 
+                                        "maxLength" : {
+                                            "type" : "integer", 
+                                            "enum" : [
+                                                NumberInt(1000)
+                                            ]
+                                        }, 
+                                        "pattern" : {
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "[a-f0-9]+$"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "description" : "toOne", 
+                            "type" : "object", 
+                            "properties" : {
+                                "label" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "string"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "query" : {
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "pattern" : "[a-f0-9]+$"
+                                        }, 
+                                        "association" : {
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "ordered", 
+                                                "oneToMany", 
+                                                "instances"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false
+                                }, 
+                                "pattern" : {
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "[a-f0-9]+$"
+                                    ]
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }
+                    ]
+                }
+            }
+        }, 
+        "required" : {
+            "label" : "Required", 
+            "type" : "array", 
+            "items" : {
+                "type" : "string"
+            }
+        }, 
+        "additionalProperties" : {
+            "label" : "Additional Properties", 
+            "type" : "boolean", 
+            "enum" : [
+                false
+            ]
+        }
+    }, 
+    "additionalProperties" : false
+}
+{ 
+    "_id" : ObjectId("56f86a8f5dde184ccfb9fc66"), 
+    "docType" : "object", 
+    "title" : "View Object Schema", 
+    "description" : "<p>This schema describes a view on objects of a particular class</p>", 
+    "display" : "Form", 
+    "type" : "object", 
+    "properties" : {
+        "_id" : {
+            "label" : "_id", 
+            "readOnly" : true, 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]+$"
+        }, 
+        "id" : {
+            "label" : "Name", 
+            "type" : "integer", 
+            "readOnly" : true, 
+            "maximum" : NumberInt(10000), 
+            "minimum" : NumberInt(0), 
+            "default" : NumberInt(1)
+        }, 
+        "name" : {
+            "label" : "Name", 
+            "readOnly" : false, 
+            "description" : "Name of the product", 
+            "type" : "string", 
+            "default" : "[no name]", 
+            "column" : NumberInt(1), 
+            "minLength" : NumberInt(2), 
+            "maxLength" : NumberInt(50), 
+            "media" : {
+                "mediaType" : "text/html"
+            }
+        }, 
+        "phone" : {
+            "label" : "Phone", 
+            "readOnly" : false, 
+            "type" : "string", 
+            "pattern" : "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$"
+        }, 
+        "price" : {
+            "label" : "Price", 
+            "readOnly" : false, 
+            "type" : "number", 
+            "sum" : {
+                "_id" : "560b1407434ec958241693e8", 
+                "association" : "instances"
+            }, 
+            "maximum" : NumberInt(100), 
+            "minimum" : NumberInt(0)
+        }, 
+        "stamp" : {
+            "label" : "When", 
+            "readOnly" : false, 
+            "type" : "string", 
+            "format" : "date-time"
+        }, 
+        "new" : {
+            "label" : "When", 
+            "readOnly" : false, 
+            "type" : "boolean"
+        }, 
+        "tabsAssoc" : {
+            "label" : "Tabs", 
+            "readOnly" : false, 
+            "items" : {
+                "type" : "string", 
+                "maxLength" : NumberInt(1000), 
+                "pattern" : "[a-f0-9]+$"
+            }, 
+            "query" : {
+                "_id" : "560b1407434ec958241693e8", 
+                "association" : "ordered"
+            }, 
+            "type" : "array", 
+            "minItems" : NumberInt(1), 
+            "uniqueItems" : true
+        }, 
+        "default" : {
+            "label" : "When", 
+            "readOnly" : false, 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]+$", 
+            "query" : {
+                "_id" : "560b1407434ec958241693e8", 
+                "association" : "instances"
+            }
+        }
+    }, 
+    "required" : [
+        "_id", 
+        "name", 
+        "price"
+    ], 
+    "additionalProperties" : false
+}
+{ 
+    "_id" : ObjectId("56f86c6a5dde184ccfb9fc6a"), 
+    "docType" : "class", 
+    "title" : "Problem Domain", 
+    "description" : "<p>The root of all classes and objects</p>", 
+    "type" : "object", 
+    "properties" : {
+        "_id" : {
+            "label" : "_id", 
+            "readOnly" : true, 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]+$"
+        }, 
+        "name" : {
+            "label" : "Name", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "default" : "[unnamed]"
+        }, 
+        "docType" : {
+            "label" : "Doument Type", 
+            "type" : "string", 
+            "readOnly" : true, 
+            "enum" : [
+                "object"
+            ]
+        }, 
+        "description" : {
+            "label" : "Description", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>no text</p>"
+        }, 
+        "icon" : {
+            "label" : "Icon", 
+            "type" : "string"
+        }
+    }, 
+    "required" : [
+        "_id", 
+        "type"
+    ], 
+    "additionalProperties" : false, 
+    "children" : [
+        "56f870a55dde184ccfb9fc6c", 
+        "56f87bcc5dde184ccfb9fc70"
+    ]
+}
+{ 
+    "_id" : ObjectId("56f870a55dde184ccfb9fc6c"), 
+    "docType" : "class", 
+    "title" : "Owners", 
+    "description" : "<p>These are the users/organizations that own resources and want execute processes</p>", 
+    "type" : "object", 
+    "properties" : {
+        "ownsResources" : {
+            "label" : "Owns Resources", 
+            "readOnly" : true, 
+            "type" : "array", 
+            "items" : {
+                "type" : "string", 
+                "maxLength" : NumberInt(1000), 
+                "pattern" : "[a-f0-9]+$"
+            }, 
+            "query" : {
+                "_id" : "56f87bcc5dde184ccfb9fc70", 
+                "association" : "owns"
+            }, 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
+        }
+    }, 
+    "children" : [
+        "570064645dde184ccfb9fc84"
+    ]
+}
+{ 
+    "_id" : ObjectId("56f87bcc5dde184ccfb9fc70"), 
+    "docType" : "class", 
+    "title" : "Resources", 
+    "description" : "<p>Things owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "children" : [
+        "56f8a22e5dde184ccfb9fc78", 
+        "56f87ec55dde184ccfb9fc74", 
+        "56f89f625dde184ccfb9fc76", 
+        "56f8a22e5dde184ccfb9fc78"
+    ]
+}
+{ 
+    "_id" : ObjectId("56f87ec55dde184ccfb9fc74"), 
+    "docType" : "class", 
+    "title" : "Pages", 
+    "description" : "Describes the Tab-Widget-View Reference structure", 
+    "type" : "object", 
+    "oneOf" : [
+        {
+            "name" : "SubTabs", 
+            "properties" : {
+                "name" : {
+                    "label" : "Name", 
+                    "type" : "string", 
+                    "maxLength" : NumberInt(1000), 
+                    "default" : "[unnamed]"
+                }, 
+                "description" : {
+                    "label" : "Description", 
+                    "type" : "string", 
+                    "maxLength" : NumberInt(10000), 
+                    "media" : {
+                        "mediaType" : "text/html"
+                    }, 
+                    "default" : "<p>[no text]</p>"
+                }, 
+                "subTabs" : {
+                    "label" : "Tabs", 
+                    "readOnly" : false, 
+                    "items" : {
+                        "type" : "string", 
+                        "maxLength" : NumberInt(1000), 
+                        "pattern" : "[a-f0-9]+$"
+                    }, 
+                    "query" : {
+                        "_id" : "560b1407434ec958241693e8", 
+                        "association" : "ordered"
+                    }, 
+                    "type" : "array", 
+                    "minItems" : NumberInt(0), 
+                    "uniqueItems" : true
+                }
+            }, 
+            "additionalProperties" : false
+        }, 
+        {
+            "name" : "Widgets", 
+            "properties" : {
+                "title" : {
+                    "label" : "Title", 
+                    "type" : "string", 
+                    "maxLength" : NumberInt(1000), 
+                    "default" : "[unnamed]"
+                }, 
+                "description" : {
+                    "label" : "Description", 
+                    "type" : "string", 
+                    "maxLength" : NumberInt(10000), 
+                    "media" : {
+                        "mediaType" : "text/html"
+                    }, 
+                    "default" : "<p>[no text]</p>"
+                }, 
+                "widgets" : {
+                    "label" : "Widgets", 
+                    "description" : "", 
+                    "type" : "array", 
+                    "items" : {
+                        "type" : "object", 
+                        "properties" : {
+                            "name" : {
+                                "type" : "string", 
+                                "maxLength" : NumberInt(1000), 
+                                "default" : "[unnamed]"
+                            }, 
+                            "description" : {
+                                "type" : "string", 
+                                "maxLength" : NumberInt(10000), 
+                                "media" : {
+                                    "mediaType" : "text/html"
+                                }, 
+                                "default" : "<p>[no text]</p>"
+                            }, 
+                            "displayTypes" : {
+                                "type" : "string", 
+                                "enum" : [
+                                    "Sub Tabs", 
+                                    "Tree", 
+                                    "Table", 
+                                    "3D Class Model", 
+                                    "Form"
+                                ], 
+                                "default" : "Form"
+                            }, 
+                            "viewRefs" : {
+                                "name" : "View References", 
+                                "description" : "", 
+                                "type" : "array", 
+                                "items" : {
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "name" : {
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "default" : "[unnamed]"
+                                        }, 
+                                        "description" : {
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(10000), 
+                                            "media" : {
+                                                "mediaType" : "text/html"
+                                            }, 
+                                            "default" : "<p>[no text]</p>"
+                                        }, 
+                                        "divider" : {
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "None", 
+                                                "Vertical", 
+                                                "Horizontal"
+                                            ], 
+                                            "default" : "None"
+                                        }, 
+                                        "accordionOrTab" : {
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "Accordions", 
+                                                "Tabs"
+                                            ], 
+                                            "default" : "Tabs"
+                                        }, 
+                                        "mapsToView" : {
+                                            "label" : "maps to view", 
+                                            "readOnly" : true, 
+                                            "type" : "string", 
+                                            "pattern" : "[a-f0-9]+$", 
+                                            "query" : {
+                                                "_id" : "560b1407434ec958241693e8", 
+                                                "association" : "mapsTo"
+                                            }
+                                        }, 
+                                        "tabs" : {
+                                            "label" : "Tabs", 
+                                            "readOnly" : false, 
+                                            "items" : {
+                                                "type" : "string", 
+                                                "maxLength" : NumberInt(1000), 
+                                                "pattern" : "[a-f0-9]+$"
+                                            }, 
+                                            "query" : {
+                                                "_id" : "560b1407434ec958241693e8", 
+                                                "association" : "ordered"
+                                            }, 
+                                            "type" : "array", 
+                                            "minItems" : NumberInt(0), 
+                                            "uniqueItems" : true
+                                        }, 
+                                        "viewRefs" : {
+                                            "type" : "array"
+                                        }, 
+                                        "recursive" : {
+                                            "type" : "boolean"
+                                        }
+                                    }, 
+                                    "additionalProperties" : false
+                                }
+                            }
+                        }, 
+                        "additionalProperties" : false
+                    }
+                }
+            }
+        }
+    ], 
+    "children" : [
+        "56f89f625dde184ccfb9fc76", 
+        "56f8a22e5dde184ccfb9fc78"
+    ]
+}
+{ 
+    "_id" : ObjectId("56f89f625dde184ccfb9fc76"), 
+    "docType" : "object", 
+    "name" : "Navigation Page", 
+    "description" : "Starting point for Neuralquest navigation", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Accordions", 
+    "tabs" : [
+        {
+            "name" : "Navigation", 
+            "description" : "This page provides an overview of users/organizations", 
+            "widgets" : [
+                {
+                    "displayType" : "Tree", 
+                    "name" : "The Document", 
+                    "initialObject" : "5700046f5dde184ccfb9fc7c", 
+                    "viewRefs" : [
+                        "57019b3c5dde184ccfb9fc88"
+                    ]
+                }
+            ]
+        }, 
+        {
+            "name" : "Class Model", 
+            "description" : "Explore the Class Model", 
+            "widgets" : [
+                {
+                    "displayType" : "Tree", 
+                    "name" : "Class Model Tree", 
+                    "viewRefs" : [
+                        "57019b3c5dde184ccfb9fc88"
+                    ]
+                }
+            ]
+        }
+    ]
+}
+{ 
+    "_id" : ObjectId("56f8a22e5dde184ccfb9fc78"), 
+    "docType" : "object", 
+    "name" : "Neuralquest Page", 
+    "description" : "Neuraquest.org Page", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Balance Sheet", 
+            "description" : "Assets and Liabilities", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Balance Sheet Form", 
+                    "viewRefs" : [
+                        "570067985dde184ccfb9fc86"
+                    ]
+                }
+            ]
+        }, 
+        {
+            "name" : "View Class Schema", 
+            "description" : "Welcome tab", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "placeholder widget", 
+                    "viewRefs" : [
+                        "56f863505dde184ccfb9fc62"
+                    ]
+                }
+            ]
+        }, 
+        {
+            "name" : "Problem Domain Schema", 
+            "description" : "The document", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Document tree widget", 
+                    "viewRefs" : [
+                        "56f86c6a5dde184ccfb9fc6a"
+                    ]
+                }
+            ]
+        }, 
+        {
+            "name" : "Page Schema", 
+            "description" : "The document", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Document tree widget", 
+                    "viewRefs" : [
+                        "56f87ec55dde184ccfb9fc74"
+                    ]
+                }
+            ]
+        }
+    ]
+}
+{ 
+    "_id" : ObjectId("5700046f5dde184ccfb9fc7c"), 
+    "docType" : "object", 
+    "name" : "The Document", 
+    "description" : "Explore published material", 
+    "paragraphParts" : [
+        {
+            "content" : "<p>Example</p>", 
+            "mediaType" : {
+                "media" : "text/html"
+            }
+        }
+    ], 
+    "childDocs" : [
+        "570063755dde184ccfb9fc80", 
+        "570063855dde184ccfb9fc82"
+    ]
+}
+{ 
+    "_id" : ObjectId("570063755dde184ccfb9fc80"), 
+    "docType" : "object", 
+    "name" : "Organizations", 
+    "description" : "Explore organizations", 
+    "paragraphParts" : [
+        {
+            "content" : "<p>Example</p>", 
+            "mediaType" : {
+                "media" : "text/html"
+            }
+        }
+    ], 
+    "childDocs" : [
+
+    ]
+}
+{ 
+    "_id" : ObjectId("570063855dde184ccfb9fc82"), 
+    "docType" : "object", 
+    "name" : "Users", 
+    "description" : "Explore users", 
+    "paragraphParts" : [
+        {
+            "content" : "<p>Example</p>", 
+            "mediaType" : {
+                "media" : "text/html"
+            }
+        }
+    ], 
+    "childDocs" : [
+
+    ]
+}
+{ 
+    "_id" : ObjectId("570064645dde184ccfb9fc84"), 
+    "docType" : "object", 
+    "name" : "Neuralquest", 
+    "description" : "The Neuralquest organization", 
+    "page" : "56f8a22e5dde184ccfb9fc78"
+}
+{ 
+    "_id" : ObjectId("570067985dde184ccfb9fc86"), 
+    "docType" : "object", 
+    "title" : "Balance Sheet View", 
+    "description" : "<p>Standard balance sheet view</p>", 
+    "display" : "Form", 
+    "type" : "object", 
+    "properties" : {
+        "assets" : {
+            "label" : "Assets", 
+            "readOnly" : true, 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "size" : "1.5em", 
+            "bold" : "true"
+        }, 
+        "currentAssets" : {
+            "label" : "Current Assets", 
+            "readOnly" : true, 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "bold" : "true"
+        }, 
+        "pettyCash" : {
+            "label" : "Petty Cash", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "temporaryInvestments" : {
+            "label" : "Temporary Investments", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "accountReceivibale" : {
+            "label" : "Accounts Receivible -net", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "inventory" : {
+            "label" : "Inventory", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "supplies" : {
+            "label" : "Supplies", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "prepaidInsurance" : {
+            "label" : "Prepaid Insurance", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "totalCurrentAssests" : {
+            "label" : "Total Current Assents", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "bold" : true, 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "investments" : {
+            "label" : "Investments", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "bold" : true, 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "propertyPlantEquipment" : {
+            "label" : "Property, Plant and Equipment", 
+            "readOnly" : true, 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "bold" : "true"
+        }, 
+        "land" : {
+            "label" : "Land", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "landImprovements" : {
+            "label" : "Land Improvements", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "buildings" : {
+            "label" : "Buildings", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "equipment" : {
+            "label" : "Equipment", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "lessAccumDeprecation" : {
+            "label" : "Less: Accum Deprecation", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "totalPropPlantEquipment" : {
+            "label" : "Total Property, Plant and Equipment", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "bold" : true, 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "intangibleAssets" : {
+            "label" : "Intangible Assets", 
+            "readOnly" : true, 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "bold" : "true"
+        }, 
+        "goodwill" : {
+            "label" : "Goodwill", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "tradeNames" : {
+            "label" : "Trade Names", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "totalIntangibleAssests" : {
+            "label" : "Total Intabgible Assets", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(1), 
+            "bold" : true, 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "totalAssests" : {
+            "label" : "Total Assests", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(2), 
+            "col" : NumberInt(1), 
+            "size" : "1.5em", 
+            "bold" : true, 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "libilities" : {
+            "label" : "Liabilities", 
+            "readOnly" : true, 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "size" : "1.5em", 
+            "bold" : "true"
+        }, 
+        "currentLiabilities" : {
+            "label" : "Current Libilities", 
+            "readOnly" : true, 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "bold" : "true"
+        }, 
+        "notesPayable" : {
+            "label" : "Notes Payable", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "accountsPayable" : {
+            "label" : "Accounts Payable", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "wagesPayable" : {
+            "label" : "Wages Payable", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "intrestPayable" : {
+            "label" : "Intrest Payable", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "taxesPayable" : {
+            "label" : "Taxes Payable", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "warantyLiability" : {
+            "label" : "Waranty Liability", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "Unearned Revenues" : {
+            "label" : "Unearned Revenues", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "totalCurrentLiabilities" : {
+            "label" : "Total Current Liabilities", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "bold" : true, 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "longTermLiabilities" : {
+            "label" : "Long-Term Libilities", 
+            "readOnly" : true, 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "bold" : "true"
+        }, 
+        "notesPayable2" : {
+            "label" : "Notes Payable", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "bondsPayable" : {
+            "label" : "Bonds Payable", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "totalLongTermLiabilities" : {
+            "label" : "Total Long-Term Liabilities", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "bold" : true, 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "totalLiabilities" : {
+            "label" : "Total Liabilities", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "bold" : true, 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "stockoldersEquity" : {
+            "label" : "Stockholder's Equity", 
+            "readOnly" : true, 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "size" : "1.5em", 
+            "bold" : "true"
+        }, 
+        "commonStock" : {
+            "label" : "Common Stock", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "retainedEarnings" : {
+            "label" : "Retained Earnings", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "AccumOtherComprehesiveIncome" : {
+            "label" : "Accum Other Comprehensive Income", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "lessTreasuryStock" : {
+            "label" : "Less: Treasury Stock", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "totalStockholdersEquity" : {
+            "label" : "Total Stockholders Equity", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(1), 
+            "col" : NumberInt(2), 
+            "bold" : true, 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }, 
+        "totalLibilitiesAndStock" : {
+            "label" : "Total Libilities and Stockholder's Equity", 
+            "readOnly" : true, 
+            "type" : "number", 
+            "row" : NumberInt(2), 
+            "col" : NumberInt(2), 
+            "size" : "1.5em", 
+            "bold" : true, 
+            "sum" : {
+                "_id" : "", 
+                "association" : "instances"
+            }
+        }
+    }
+}
+{ 
+    "_id" : ObjectId("57019b3c5dde184ccfb9fc88"), 
+    "title" : "The Document View", 
+    "description" : "<p>public View used on navigation page</p>", 
+    "type" : "object", 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "docType" : {
+
+        }, 
+        "name" : {
+
+        }, 
+        "description" : {
+
+        }, 
+        "paragraphParts" : {
+            "type" : "array", 
+            "items" : {
+                "type" : "object", 
+                "properties" : {
+                    "content" : {
+                        "type" : "string", 
+                        "maxLength" : NumberInt(10000), 
+                        "media" : {
+                            "mediaType" : "text/html"
+                        }
+                    }, 
+                    "mediaType" : {
+                        "type" : "object"
+                    }
+                }, 
+                "required" : [
+                    "content", 
+                    "mediaType"
+                ], 
+                "additionalProperties" : false
+            }
+        }, 
+        "childDocs" : {
+            "label" : "Tabs", 
+            "readOnly" : false, 
+            "items" : {
+                "type" : "string", 
+                "maxLength" : NumberInt(1000), 
+                "pattern" : "[a-f0-9]+$"
+            }, 
+            "query" : {
+                "_id" : "560b1407434ec958241693e8", 
+                "association" : "ordered"
+            }, 
+            "type" : "array", 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
+        }
+    }, 
+    "required" : [
+        "_id", 
+        "name"
+    ], 
+    "additionalProperties" : false
+}

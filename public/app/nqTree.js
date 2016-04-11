@@ -1,7 +1,7 @@
-define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang', "dijit/registry",/* 'app/nqObjectStoreModel',*/"dijit/tree/ObjectStoreModel", "dojo/hash","dojo/when", "dojo/promise/all",
+define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang', "dijit/registry", 'app/nqObjectStoreModel',/*"dijit/tree/ObjectStoreModel",*/ "dojo/hash","dojo/when", "dojo/promise/all",
         'dojo/dom-construct', 'dijit/tree/dndSource', 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', "dojo/_base/array",
         'dojo/query!css2'],
-	function(declare, nqWidgetBase, Tree, lang, registry, ObjectStoreModel, hash, when, all,
+	function(declare, nqWidgetBase, Tree, lang, registry, nqObjectStoreModel, hash, when, all,
 			domConstruct, dndSource, Menu, MenuItem, PopupMenuItem, array){
 
 	return declare("nqTree", [nqWidgetBase], {
@@ -22,12 +22,13 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 self.headerDivNode.innerHTML = '<h1>'+view.name+'</h1>';
                 //domStyle.set(self.headerDivNode, 'display', 'block');//set the header node, created in the superclass,  to visible
                 self.pageHelpTextDiv.innerHTML = view.description;
-                return when(self.store.getInheritedSchema(view),function(schema){
+                return true;
+                /*return when(self.store.getInheritedSchema(view),function(schema){
                     self.schema = schema;
                     self.enrichObjectWithDefaults(view, schema);
                     self.schema = schema;
-                    return true;
-                    /*var uViewsArr = [];
+
+                    var uViewsArr = [];
                     return self.store.getUniqueViewsForWidget(self.widgetId, uViewsArr).then(function(uniqueViewsArr){
                         //console.log('uViewsArr',uViewsArr);
                         var viewPromises = [];
@@ -35,8 +36,8 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                             viewPromises.push(self.permittedClassesForUniqueView(uView));
                         });
                         return all(viewPromises);
-					});*/
-				});
+					});
+				});*/
 			});
             when(initialized, function(result){
                 //self.createMenusForWidget();
@@ -123,11 +124,13 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 		},
 		createTree: function(){
 			var self = this;
-			this.treeModel = new ObjectStoreModel({
+			this.treeModel = new nqObjectStoreModel({
 				childrenAttr: this.viewIdsArr,
 				store : this.store,
-				query : {itemId: this.selectedObjIdPreviousLevel, viewId: this.view._id}
+                //query : {_id: this.selectedObjIdPreviousLevel, viewId: this.view._id}
+                query : {_id: this.selectedObjIdPreviousLevel} // the root query
 			});
+            /*
             this.treeModel.getIdentity = function(item){
                 if(lang.isObject(item)) return item._id;
                 return item; //hack to get Tree to respect numeric ids
@@ -146,10 +149,9 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					var obj = event.target;
 					self.onChange(obj);
 				});	
-				var children = collection.fetch();*/
+				var children = collection.fetch();* /
                 //this.store.getChildren({_id:self.selectedObjIdPreviousLevel, _viewId:self.widgetId}, onItem);
 
-                if(self.selectedObjIdPreviousLevel==1) self.selectedObjIdPreviousLevel=67;
                 self.store.get(self.selectedObjIdPreviousLevel).then(function(item) {
                     if(!item) onError('item not found');
                     else {
@@ -158,7 +160,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     }
                 });
 			},
-			this.treeModel.getChildren = function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
+			this.treeModel.getChildren = function(/*Object* / parentItem, /*function(items)* / onComplete, /*function* / onError){
                 var self = this;
                 //this.store.getChildren(parentItem, onComplete);
                 //return;
@@ -174,7 +176,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				}
 				var children = this.childrenCache[id] = this.store.getChildren(parentItem, onComplete);
                 return;
-                */
+                * /
 				var collection = this.childrenCache[parentItem._id];
 				if(!collection) {
                     var query = {parentId: parentItem._id, parentViewId:parentItem._viewId};
@@ -196,7 +198,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                         if(collection){
                             var children = collection.fetch();
                             self.onChildrenChange(parent, children);
-                        }*/
+                        }* /
                     });
                     collection.on('update', function(event){
                         var obj = event.target;
@@ -205,9 +207,9 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 }
 				var children = collection.fetch();
 				return onComplete(children);
-			},
+			},*/
 			this.tree = new Tree({
-				id: 'tree'+this.widgetId,
+				//id: 'tree'+this.widgetId,
 				store: this.store,
                 //model: this.store,
                 model: this.treeModel,
@@ -259,11 +261,12 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     }
  					return found;
 				},
+                /*
 				getRoot: function(onItem, onError){
                     self.store.get(self.selectedObjIdPreviousLevel).then(function(item) {
                         onItem(item);
                     });
-				},
+				},*/
 				onLoad: function(){
 					fullPage.resize();//need this for lazy loaded trees, some how the first tree lags behind
 					//console.dir(self.createDeferred.resolve(self));
