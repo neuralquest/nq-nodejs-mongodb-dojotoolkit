@@ -6,13 +6,13 @@
     "type" : "object", 
     "properties" : {
         "title" : {
-            "label" : "Title", 
+            "title" : "Title", 
             "type" : "string", 
             "maxLength" : NumberInt(1000), 
             "default" : "[unnamed]"
         }, 
         "description" : {
-            "label" : "Description", 
+            "title" : "Description", 
             "type" : "string", 
             "maxLength" : NumberInt(10000), 
             "media" : {
@@ -21,7 +21,7 @@
             "default" : "<p>[no text]</p>"
         }, 
         "display" : {
-            "label" : "Display", 
+            "title" : "Display", 
             "type" : "string", 
             "enum" : [
                 "Form", 
@@ -30,28 +30,30 @@
             "default" : "Form"
         }, 
         "type" : {
-            "label" : "Type", 
+            "title" : "Type", 
             "type" : "string", 
             "enum" : [
                 "object"
             ]
         }, 
         "properties" : {
-            "label" : "Properties", 
+            "title" : "Properties", 
             "type" : "object", 
             "patternProperties" : {
                 "^[a-z0-9]+$" : {
                     "anyOf" : [
                         {
-                            "description" : "string", 
+                            "name" : "string", 
                             "type" : "object", 
                             "properties" : {
-                                "label" : {
+                                "title" : {
+                                    "title" : "Label", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(1000), 
                                     "default" : "[unnamed]"
                                 }, 
                                 "description" : {
+                                    "title" : "Description", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(10000), 
                                     "media" : {
@@ -60,59 +62,70 @@
                                     "default" : "<p>[no text]</p>"
                                 }, 
                                 "readOnly" : {
+                                    "title" : "Read Only", 
                                     "type" : "boolean", 
                                     "default" : true
                                 }, 
                                 "type" : {
+                                    "title" : "Type", 
                                     "type" : "string", 
                                     "enum" : [
                                         "string"
                                     ]
                                 }, 
                                 "row" : {
+                                    "title" : "Row Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(0), 
                                     "minimum" : NumberInt(5), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "column" : {
+                                    "title" : "Column Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(1), 
                                     "minimum" : NumberInt(3), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "default" : {
+                                    "title" : "Default Value", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(1000), 
                                     "default" : "[unnamed]"
                                 }, 
                                 "minLength" : {
+                                    "title" : "Minimum Length", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(10000), 
                                     "minimum" : NumberInt(0), 
                                     "default" : NumberInt(0)
                                 }, 
                                 "maxLength" : {
+                                    "title" : "Maximum Length", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(10000), 
                                     "minimum" : NumberInt(0), 
                                     "default" : NumberInt(10000)
                                 }, 
                                 "width" : {
+                                    "title" : "Width", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(10000), 
                                     "minimum" : NumberInt(0), 
                                     "default" : NumberInt(0)
                                 }, 
                                 "pattern" : {
+                                    "title" : "Patern", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(1000), 
                                     "default" : ""
                                 }, 
                                 "media" : {
+                                    "title" : "Media", 
                                     "type" : "object", 
                                     "properties" : {
                                         "mediaType" : {
+                                            "title" : "Media Type", 
                                             "type" : "string", 
                                             "enum" : [
                                                 "text/plain", 
@@ -128,6 +141,7 @@
                                     }
                                 }, 
                                 "format" : {
+                                    "title" : "Format", 
                                     "type" : "string", 
                                     "enum" : [
                                         "date-time", 
@@ -146,15 +160,17 @@
                             ]
                         }, 
                         {
-                            "description" : "image", 
+                            "name" : "image", 
                             "type" : "object", 
                             "properties" : {
-                                "label" : {
+                                "title" : {
+                                    "title" : "Label", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(1000), 
                                     "default" : "[unnamed]"
                                 }, 
                                 "description" : {
+                                    "title" : "Description", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(10000), 
                                     "media" : {
@@ -163,48 +179,57 @@
                                     "default" : "<p>[no text]</p>"
                                 }, 
                                 "readOnly" : {
+                                    "title" : "Read Only", 
                                     "type" : "boolean", 
                                     "default" : true
                                 }, 
                                 "type" : {
+                                    "title" : "Type", 
                                     "type" : "string", 
                                     "enum" : [
                                         "string"
                                     ]
                                 }, 
                                 "row" : {
+                                    "title" : "Row Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(0), 
                                     "minimum" : NumberInt(5), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "column" : {
+                                    "title" : "Column Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(1), 
                                     "minimum" : NumberInt(3), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "height" : {
+                                    "title" : "Height", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(10000), 
                                     "minimum" : NumberInt(0), 
                                     "default" : NumberInt(0)
                                 }, 
                                 "width" : {
+                                    "title" : "Width", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(10000), 
                                     "minimum" : NumberInt(0), 
                                     "default" : NumberInt(300)
                                 }, 
                                 "url" : {
+                                    "title" : "Url", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(1000), 
                                     "format" : "hostname"
                                 }, 
                                 "media" : {
+                                    "title" : "Media", 
                                     "type" : "object", 
                                     "properties" : {
                                         "mediaType" : {
+                                            "title" : "Media Type", 
                                             "type" : "string", 
                                             "enum" : [
                                                 "image/jpg", 
@@ -229,12 +254,14 @@
                             "description" : "number", 
                             "type" : "object", 
                             "properties" : {
-                                "label" : {
+                                "title" : {
+                                    "title" : "Label", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(1000), 
                                     "default" : "[unnamed]"
                                 }, 
                                 "description" : {
+                                    "title" : "Description", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(10000), 
                                     "media" : {
@@ -243,54 +270,64 @@
                                     "default" : "<p>[no text]</p>"
                                 }, 
                                 "readOnly" : {
+                                    "title" : "Read Only", 
                                     "type" : "boolean", 
                                     "default" : true
                                 }, 
                                 "type" : {
+                                    "title" : "Type", 
                                     "type" : "string", 
                                     "enum" : [
                                         "number"
                                     ]
                                 }, 
                                 "row" : {
+                                    "title" : "Row Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(0), 
                                     "minimum" : NumberInt(5), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "column" : {
+                                    "title" : "Column Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(1), 
                                     "minimum" : NumberInt(3), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "default" : {
+                                    "title" : "Default Value", 
                                     "type" : "number", 
                                     "maximum" : NumberLong(9223372036854775807), 
                                     "minimum" : NumberLong(-9223372036854775807), 
                                     "default" : null
                                 }, 
                                 "maximum" : {
+                                    "title" : "Maximum Value", 
                                     "type" : "number", 
                                     "maximum" : NumberLong(9223372036854775807), 
                                     "minimum" : NumberLong(-9223372036854775807), 
                                     "default" : NumberLong(9223372036854775807)
                                 }, 
                                 "minimum" : {
+                                    "title" : "Minimum Value", 
                                     "type" : "number", 
                                     "maximum" : NumberLong(9223372036854775807), 
                                     "minimum" : NumberLong(-9223372036854775807), 
                                     "default" : NumberLong(-9223372036854775807)
                                 }, 
                                 "sum" : {
+                                    "title" : "Height", 
                                     "type" : "object", 
                                     "properties" : {
                                         "_id" : {
+                                            "title" : "ID", 
                                             "type" : "string", 
                                             "maxLength" : NumberInt(1000), 
                                             "pattern" : "[a-f0-9]+$"
                                         }, 
                                         "association" : {
+                                            "title" : "Association Type", 
                                             "type" : "string", 
                                             "enum" : [
                                                 "ordered", 
@@ -313,12 +350,14 @@
                             "description" : "integer", 
                             "type" : "object", 
                             "properties" : {
-                                "label" : {
+                                "title" : {
+                                    "title" : "Label", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(1000), 
                                     "default" : "[unnamed]"
                                 }, 
                                 "description" : {
+                                    "title" : "Description", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(10000), 
                                     "media" : {
@@ -327,54 +366,64 @@
                                     "default" : "<p>[no text]</p>"
                                 }, 
                                 "readOnly" : {
+                                    "title" : "Read Only", 
                                     "type" : "boolean", 
                                     "default" : true
                                 }, 
                                 "type" : {
+                                    "title" : "Type", 
                                     "type" : "string", 
                                     "enum" : [
                                         "integer"
                                     ]
                                 }, 
                                 "row" : {
+                                    "title" : "Row Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(0), 
                                     "minimum" : NumberInt(5), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "column" : {
+                                    "title" : "Column Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(1), 
                                     "minimum" : NumberInt(3), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "default" : {
+                                    "title" : "Column Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(2147483647), 
                                     "minimum" : NumberInt(-2147483647), 
-                                    "default" : null
+                                    "default" : "[null]"
                                 }, 
                                 "maximum" : {
+                                    "title" : "Maximum Value", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(2147483647), 
                                     "minimum" : NumberInt(-2147483647), 
                                     "default" : NumberInt(2147483647)
                                 }, 
                                 "minimum" : {
+                                    "title" : "Minimum Value", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(2147483647), 
                                     "minimum" : NumberInt(-2147483647), 
                                     "default" : NumberInt(-2147483647)
                                 }, 
                                 "sum" : {
+                                    "title" : "Sum Query", 
                                     "type" : "object", 
                                     "properties" : {
                                         "_id" : {
+                                            "title" : "ID", 
                                             "type" : "string", 
                                             "maxLength" : NumberInt(1000), 
                                             "pattern" : "[a-f0-9]+$"
                                         }, 
                                         "association" : {
+                                            "title" : "Association Type", 
                                             "type" : "string", 
                                             "enum" : [
                                                 "ordered", 
@@ -397,12 +446,14 @@
                             "description" : "boolean", 
                             "type" : "object", 
                             "properties" : {
-                                "label" : {
+                                "title" : {
+                                    "title" : "Label", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(1000), 
                                     "default" : "[unnamed]"
                                 }, 
                                 "description" : {
+                                    "title" : "Description", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(10000), 
                                     "media" : {
@@ -411,28 +462,33 @@
                                     "default" : "<p>[no text]</p>"
                                 }, 
                                 "readOnly" : {
+                                    "title" : "Read Only", 
                                     "type" : "boolean", 
                                     "default" : true
                                 }, 
                                 "type" : {
+                                    "title" : "Type", 
                                     "type" : "string", 
                                     "enum" : [
                                         "boolean"
                                     ]
                                 }, 
                                 "row" : {
+                                    "title" : "Row Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(0), 
                                     "minimum" : NumberInt(5), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "column" : {
+                                    "title" : "Column Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(1), 
                                     "minimum" : NumberInt(3), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "default" : {
+                                    "title" : "Defsult Value", 
                                     "type" : "boolean", 
                                     "default" : false
                                 }
@@ -448,12 +504,14 @@
                             "description" : "toMany", 
                             "type" : "object", 
                             "properties" : {
-                                "label" : {
+                                "title" : {
+                                    "title" : "Label", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(1000), 
                                     "default" : "[unnamed]"
                                 }, 
                                 "description" : {
+                                    "title" : "Description", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(10000), 
                                     "media" : {
@@ -462,36 +520,43 @@
                                     "default" : "<p>[no text]</p>"
                                 }, 
                                 "readOnly" : {
+                                    "title" : "Read Only", 
                                     "type" : "boolean", 
                                     "default" : true
                                 }, 
                                 "type" : {
+                                    "title" : "Type", 
                                     "type" : "string", 
                                     "enum" : [
                                         "array"
                                     ]
                                 }, 
                                 "row" : {
+                                    "title" : "Row Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(0), 
                                     "minimum" : NumberInt(5), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "column" : {
+                                    "title" : "Column Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(1), 
                                     "minimum" : NumberInt(3), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "query" : {
+                                    "title" : "Query", 
                                     "type" : "object", 
                                     "properties" : {
                                         "_id" : {
+                                            "title" : "ID", 
                                             "type" : "string", 
                                             "maxLength" : NumberInt(1000), 
                                             "pattern" : "[a-f0-9]+$"
                                         }, 
                                         "association" : {
+                                            "title" : "Association Type", 
                                             "type" : "string", 
                                             "enum" : [
                                                 "ordered", 
@@ -503,30 +568,36 @@
                                     "additionalProperties" : false
                                 }, 
                                 "minItems" : {
+                                    "title" : "Minimum Number of Items", 
                                     "type" : "integer", 
                                     "minimum" : NumberInt(0), 
                                     "default" : NumberInt(0)
                                 }, 
                                 "uniqueItems" : {
+                                    "title" : "Unique Items", 
                                     "type" : "boolean", 
                                     "enum" : [
                                         true
                                     ]
                                 }, 
                                 "items" : {
+                                    "title" : "Items", 
                                     "type" : "object", 
                                     "properties" : {
                                         "type" : {
+                                            "title" : "Type", 
                                             "type" : "string", 
                                             "maxLength" : NumberInt(1000)
                                         }, 
                                         "maxLength" : {
+                                            "title" : "Maximum Length", 
                                             "type" : "integer", 
                                             "enum" : [
                                                 NumberInt(1000)
                                             ]
                                         }, 
                                         "pattern" : {
+                                            "title" : "Partern", 
                                             "type" : "string", 
                                             "enum" : [
                                                 "[a-f0-9]+$"
@@ -546,12 +617,14 @@
                             "description" : "toOne", 
                             "type" : "object", 
                             "properties" : {
-                                "label" : {
+                                "title" : {
+                                    "title" : "Label", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(1000), 
                                     "default" : "[unnamed]"
                                 }, 
                                 "description" : {
+                                    "title" : "Description", 
                                     "type" : "string", 
                                     "maxLength" : NumberInt(10000), 
                                     "media" : {
@@ -560,35 +633,42 @@
                                     "default" : "<p>[no text]</p>"
                                 }, 
                                 "readOnly" : {
+                                    "title" : "Read Only", 
                                     "type" : "boolean", 
                                     "default" : true
                                 }, 
                                 "type" : {
+                                    "title" : "Type", 
                                     "type" : "string", 
                                     "enum" : [
                                         "string"
                                     ]
                                 }, 
                                 "row" : {
+                                    "title" : "Row Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(0), 
                                     "minimum" : NumberInt(5), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "column" : {
+                                    "title" : "Column Number", 
                                     "type" : "integer", 
                                     "maximum" : NumberInt(1), 
                                     "minimum" : NumberInt(3), 
                                     "default" : NumberInt(1)
                                 }, 
                                 "query" : {
+                                    "title" : "Query", 
                                     "type" : "object", 
                                     "properties" : {
                                         "_id" : {
+                                            "title" : "ID", 
                                             "type" : "string", 
                                             "maxLength" : NumberInt(1000), 
                                             "pattern" : "[a-f0-9]+$"
                                         }, 
+                                        "title" : "Association Type", 
                                         "association" : {
                                             "type" : "string", 
                                             "enum" : [
@@ -601,6 +681,7 @@
                                     "additionalProperties" : false
                                 }, 
                                 "pattern" : {
+                                    "title" : "Patern", 
                                     "type" : "string", 
                                     "enum" : [
                                         "[a-f0-9]+$"
@@ -619,14 +700,14 @@
             }
         }, 
         "required" : {
-            "label" : "Required", 
+            "title" : "Required", 
             "type" : "array", 
             "items" : {
                 "type" : "string"
             }
         }, 
         "additionalProperties" : {
-            "label" : "Additional Properties", 
+            "title" : "Additional Properties", 
             "type" : "boolean", 
             "enum" : [
                 false
@@ -644,13 +725,13 @@
     "type" : "object", 
     "properties" : {
         "_id" : {
-            "label" : "_id", 
+            "title" : "_id", 
             "readOnly" : true, 
             "type" : "string", 
             "pattern" : "[a-f0-9]+$"
         }, 
         "id" : {
-            "label" : "Name", 
+            "title" : "Name", 
             "type" : "integer", 
             "readOnly" : true, 
             "maximum" : NumberInt(10000), 
@@ -658,7 +739,7 @@
             "default" : NumberInt(1)
         }, 
         "name" : {
-            "label" : "Name", 
+            "title" : "Name", 
             "readOnly" : false, 
             "description" : "Name of the product", 
             "type" : "string", 
@@ -671,13 +752,13 @@
             }
         }, 
         "phone" : {
-            "label" : "Phone", 
+            "title" : "Phone", 
             "readOnly" : false, 
             "type" : "string", 
             "pattern" : "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$"
         }, 
         "price" : {
-            "label" : "Price", 
+            "title" : "Price", 
             "readOnly" : false, 
             "type" : "number", 
             "sum" : {
@@ -688,18 +769,18 @@
             "minimum" : NumberInt(0)
         }, 
         "stamp" : {
-            "label" : "When", 
+            "title" : "When", 
             "readOnly" : false, 
             "type" : "string", 
             "format" : "date-time"
         }, 
         "new" : {
-            "label" : "When", 
+            "title" : "When", 
             "readOnly" : false, 
             "type" : "boolean"
         }, 
         "tabsAssoc" : {
-            "label" : "Tabs", 
+            "title" : "Tabs", 
             "readOnly" : false, 
             "items" : {
                 "type" : "string", 
@@ -715,7 +796,7 @@
             "uniqueItems" : true
         }, 
         "default" : {
-            "label" : "When", 
+            "title" : "When", 
             "readOnly" : false, 
             "type" : "string", 
             "pattern" : "[a-f0-9]+$", 
@@ -740,20 +821,20 @@
     "type" : "object", 
     "properties" : {
         "_id" : {
-            "label" : "_id", 
+            "title" : "_id", 
             "readOnly" : true, 
             "type" : "string", 
             "pattern" : "[a-f0-9]+$"
         }, 
         "name" : {
-            "label" : "Name", 
+            "title" : "Name", 
             "type" : "string", 
             "readOnly" : false, 
             "maxLength" : NumberInt(100000), 
             "default" : "[unnamed]"
         }, 
         "docType" : {
-            "label" : "Doument Type", 
+            "title" : "Doument Type", 
             "type" : "string", 
             "readOnly" : true, 
             "enum" : [
@@ -761,7 +842,7 @@
             ]
         }, 
         "description" : {
-            "label" : "Description", 
+            "title" : "Description", 
             "type" : "string", 
             "readOnly" : false, 
             "maxLength" : NumberInt(100000), 
@@ -771,7 +852,7 @@
             "default" : "<p>no text</p>"
         }, 
         "icon" : {
-            "label" : "Icon", 
+            "title" : "Icon", 
             "type" : "string"
         }
     }, 
@@ -793,7 +874,7 @@
     "type" : "object", 
     "properties" : {
         "ownsResources" : {
-            "label" : "Owns Resources", 
+            "title" : "Owns Resources", 
             "readOnly" : true, 
             "type" : "array", 
             "items" : {
@@ -840,13 +921,13 @@
             "name" : "SubTabs", 
             "properties" : {
                 "name" : {
-                    "label" : "Name", 
+                    "title" : "Name", 
                     "type" : "string", 
                     "maxLength" : NumberInt(1000), 
                     "default" : "[unnamed]"
                 }, 
                 "description" : {
-                    "label" : "Description", 
+                    "title" : "Description", 
                     "type" : "string", 
                     "maxLength" : NumberInt(10000), 
                     "media" : {
@@ -855,7 +936,7 @@
                     "default" : "<p>[no text]</p>"
                 }, 
                 "subTabs" : {
-                    "label" : "Tabs", 
+                    "title" : "Tabs", 
                     "readOnly" : false, 
                     "items" : {
                         "type" : "string", 
@@ -877,13 +958,13 @@
             "name" : "Widgets", 
             "properties" : {
                 "title" : {
-                    "label" : "Title", 
+                    "title" : "Title", 
                     "type" : "string", 
                     "maxLength" : NumberInt(1000), 
                     "default" : "[unnamed]"
                 }, 
                 "description" : {
-                    "label" : "Description", 
+                    "title" : "Description", 
                     "type" : "string", 
                     "maxLength" : NumberInt(10000), 
                     "media" : {
@@ -892,18 +973,20 @@
                     "default" : "<p>[no text]</p>"
                 }, 
                 "widgets" : {
-                    "label" : "Widgets", 
+                    "title" : "Widgets", 
                     "description" : "", 
                     "type" : "array", 
                     "items" : {
                         "type" : "object", 
                         "properties" : {
                             "name" : {
+                                "title" : "Name", 
                                 "type" : "string", 
                                 "maxLength" : NumberInt(1000), 
                                 "default" : "[unnamed]"
                             }, 
                             "description" : {
+                                "title" : "Description", 
                                 "type" : "string", 
                                 "maxLength" : NumberInt(10000), 
                                 "media" : {
@@ -912,6 +995,7 @@
                                 "default" : "<p>[no text]</p>"
                             }, 
                             "displayTypes" : {
+                                "title" : "Display Types", 
                                 "type" : "string", 
                                 "enum" : [
                                     "Sub Tabs", 
@@ -923,6 +1007,7 @@
                                 "default" : "Form"
                             }, 
                             "viewRefs" : {
+                                "title" : "View References", 
                                 "name" : "View References", 
                                 "description" : "", 
                                 "type" : "array", 
@@ -930,11 +1015,13 @@
                                     "type" : "object", 
                                     "properties" : {
                                         "name" : {
+                                            "title" : "Name", 
                                             "type" : "string", 
                                             "maxLength" : NumberInt(1000), 
                                             "default" : "[unnamed]"
                                         }, 
                                         "description" : {
+                                            "title" : "Description", 
                                             "type" : "string", 
                                             "maxLength" : NumberInt(10000), 
                                             "media" : {
@@ -943,6 +1030,7 @@
                                             "default" : "<p>[no text]</p>"
                                         }, 
                                         "divider" : {
+                                            "title" : "Divider", 
                                             "type" : "string", 
                                             "enum" : [
                                                 "None", 
@@ -952,6 +1040,7 @@
                                             "default" : "None"
                                         }, 
                                         "accordionOrTab" : {
+                                            "title" : "Accordian or Tab", 
                                             "type" : "string", 
                                             "enum" : [
                                                 "Accordions", 
@@ -960,7 +1049,7 @@
                                             "default" : "Tabs"
                                         }, 
                                         "mapsToView" : {
-                                            "label" : "maps to view", 
+                                            "title" : "maps to view", 
                                             "readOnly" : true, 
                                             "type" : "string", 
                                             "pattern" : "[a-f0-9]+$", 
@@ -970,7 +1059,7 @@
                                             }
                                         }, 
                                         "tabs" : {
-                                            "label" : "Tabs", 
+                                            "title" : "Tabs", 
                                             "readOnly" : false, 
                                             "items" : {
                                                 "type" : "string", 
@@ -986,9 +1075,11 @@
                                             "uniqueItems" : true
                                         }, 
                                         "viewRefs" : {
+                                            "title" : "View References", 
                                             "type" : "array"
                                         }, 
                                         "recursive" : {
+                                            "title" : "Recursive", 
                                             "type" : "boolean"
                                         }
                                     }, 
@@ -1174,7 +1265,7 @@
     "type" : "object", 
     "properties" : {
         "assets" : {
-            "label" : "Assets", 
+            "title" : "Assets", 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
@@ -1182,14 +1273,14 @@
             "bold" : "true"
         }, 
         "currentAssets" : {
-            "label" : "Current Assets", 
+            "title" : "Current Assets", 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : "true"
         }, 
         "pettyCash" : {
-            "label" : "Petty Cash", 
+            "title" : "Petty Cash", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1200,7 +1291,7 @@
             }
         }, 
         "temporaryInvestments" : {
-            "label" : "Temporary Investments", 
+            "title" : "Temporary Investments", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1211,7 +1302,7 @@
             }
         }, 
         "accountReceivibale" : {
-            "label" : "Accounts Receivible -net", 
+            "title" : "Accounts Receivible -net", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1222,7 +1313,7 @@
             }
         }, 
         "inventory" : {
-            "label" : "Inventory", 
+            "title" : "Inventory", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1233,7 +1324,7 @@
             }
         }, 
         "supplies" : {
-            "label" : "Supplies", 
+            "title" : "Supplies", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1244,7 +1335,7 @@
             }
         }, 
         "prepaidInsurance" : {
-            "label" : "Prepaid Insurance", 
+            "title" : "Prepaid Insurance", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1255,7 +1346,7 @@
             }
         }, 
         "totalCurrentAssests" : {
-            "label" : "Total Current Assents", 
+            "title" : "Total Current Assents", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1267,7 +1358,7 @@
             }
         }, 
         "investments" : {
-            "label" : "Investments", 
+            "title" : "Investments", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1279,14 +1370,14 @@
             }
         }, 
         "propertyPlantEquipment" : {
-            "label" : "Property, Plant and Equipment", 
+            "title" : "Property, Plant and Equipment", 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : "true"
         }, 
         "land" : {
-            "label" : "Land", 
+            "title" : "Land", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1297,7 +1388,7 @@
             }
         }, 
         "landImprovements" : {
-            "label" : "Land Improvements", 
+            "title" : "Land Improvements", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1308,7 +1399,7 @@
             }
         }, 
         "buildings" : {
-            "label" : "Buildings", 
+            "title" : "Buildings", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1319,7 +1410,7 @@
             }
         }, 
         "equipment" : {
-            "label" : "Equipment", 
+            "title" : "Equipment", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1330,7 +1421,7 @@
             }
         }, 
         "lessAccumDeprecation" : {
-            "label" : "Less: Accum Deprecation", 
+            "title" : "Less: Accum Deprecation", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1341,7 +1432,7 @@
             }
         }, 
         "totalPropPlantEquipment" : {
-            "label" : "Total Property, Plant and Equipment", 
+            "title" : "Total Property, Plant and Equipment", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1353,14 +1444,14 @@
             }
         }, 
         "intangibleAssets" : {
-            "label" : "Intangible Assets", 
+            "title" : "Intangible Assets", 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : "true"
         }, 
         "goodwill" : {
-            "label" : "Goodwill", 
+            "title" : "Goodwill", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1371,7 +1462,7 @@
             }
         }, 
         "tradeNames" : {
-            "label" : "Trade Names", 
+            "title" : "Trade Names", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1382,7 +1473,7 @@
             }
         }, 
         "totalIntangibleAssests" : {
-            "label" : "Total Intabgible Assets", 
+            "title" : "Total Intabgible Assets", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1394,7 +1485,7 @@
             }
         }, 
         "totalAssests" : {
-            "label" : "Total Assests", 
+            "title" : "Total Assests", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(2), 
@@ -1407,7 +1498,7 @@
             }
         }, 
         "libilities" : {
-            "label" : "Liabilities", 
+            "title" : "Liabilities", 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
@@ -1415,14 +1506,14 @@
             "bold" : "true"
         }, 
         "currentLiabilities" : {
-            "label" : "Current Libilities", 
+            "title" : "Current Libilities", 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : "true"
         }, 
         "notesPayable" : {
-            "label" : "Notes Payable", 
+            "title" : "Notes Payable", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1433,7 +1524,7 @@
             }
         }, 
         "accountsPayable" : {
-            "label" : "Accounts Payable", 
+            "title" : "Accounts Payable", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1444,7 +1535,7 @@
             }
         }, 
         "wagesPayable" : {
-            "label" : "Wages Payable", 
+            "title" : "Wages Payable", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1455,7 +1546,7 @@
             }
         }, 
         "intrestPayable" : {
-            "label" : "Intrest Payable", 
+            "title" : "Intrest Payable", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1466,7 +1557,7 @@
             }
         }, 
         "taxesPayable" : {
-            "label" : "Taxes Payable", 
+            "title" : "Taxes Payable", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1477,7 +1568,7 @@
             }
         }, 
         "warantyLiability" : {
-            "label" : "Waranty Liability", 
+            "title" : "Waranty Liability", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1488,7 +1579,7 @@
             }
         }, 
         "Unearned Revenues" : {
-            "label" : "Unearned Revenues", 
+            "title" : "Unearned Revenues", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1499,7 +1590,7 @@
             }
         }, 
         "totalCurrentLiabilities" : {
-            "label" : "Total Current Liabilities", 
+            "title" : "Total Current Liabilities", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1511,14 +1602,14 @@
             }
         }, 
         "longTermLiabilities" : {
-            "label" : "Long-Term Libilities", 
+            "title" : "Long-Term Libilities", 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : "true"
         }, 
         "notesPayable2" : {
-            "label" : "Notes Payable", 
+            "title" : "Notes Payable", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1529,7 +1620,7 @@
             }
         }, 
         "bondsPayable" : {
-            "label" : "Bonds Payable", 
+            "title" : "Bonds Payable", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1540,7 +1631,7 @@
             }
         }, 
         "totalLongTermLiabilities" : {
-            "label" : "Total Long-Term Liabilities", 
+            "title" : "Total Long-Term Liabilities", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1552,7 +1643,7 @@
             }
         }, 
         "totalLiabilities" : {
-            "label" : "Total Liabilities", 
+            "title" : "Total Liabilities", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1564,7 +1655,7 @@
             }
         }, 
         "stockoldersEquity" : {
-            "label" : "Stockholder's Equity", 
+            "title" : "Stockholder's Equity", 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
@@ -1572,7 +1663,7 @@
             "bold" : "true"
         }, 
         "commonStock" : {
-            "label" : "Common Stock", 
+            "title" : "Common Stock", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1583,7 +1674,7 @@
             }
         }, 
         "retainedEarnings" : {
-            "label" : "Retained Earnings", 
+            "title" : "Retained Earnings", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1594,7 +1685,7 @@
             }
         }, 
         "AccumOtherComprehesiveIncome" : {
-            "label" : "Accum Other Comprehensive Income", 
+            "title" : "Accum Other Comprehensive Income", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1605,7 +1696,7 @@
             }
         }, 
         "lessTreasuryStock" : {
-            "label" : "Less: Treasury Stock", 
+            "title" : "Less: Treasury Stock", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1616,7 +1707,7 @@
             }
         }, 
         "totalStockholdersEquity" : {
-            "label" : "Total Stockholders Equity", 
+            "title" : "Total Stockholders Equity", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1628,7 +1719,7 @@
             }
         }, 
         "totalLibilitiesAndStock" : {
-            "label" : "Total Libilities and Stockholder's Equity", 
+            "title" : "Total Libilities and Stockholder's Equity", 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(2), 

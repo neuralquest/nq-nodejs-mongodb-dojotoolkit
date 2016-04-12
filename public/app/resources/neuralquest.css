@@ -115,7 +115,7 @@ div.todofloatright p {font-size: 90%; background-color: rgb(252, 252, 181);}
 
 form  { display: table;      }
 p     { display: table-row;  }
-label { display: table-cell; white-space: nowrap; }
+label { display: table-cell; white-space: nowrap; vertical-align: top; }
 input { display: table-cell; }/*width:5em;*/
 
 /* Gennerated by means of nqapp/nqSprites.css */
