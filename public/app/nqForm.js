@@ -1,14 +1,14 @@
 define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox',  'dijit/form/NumberTextBox','dijit/form/Textarea',
         'dijit/form/CheckBox', 'dijit/Editor', 'dijit/form/CurrencyTextBox', 'dijit/form/ValidationTextBox',"dijit/form/RadioButton", 'dojo/dom-construct', "dojo/on",
         "dojo/when", "dojo/query", 'dijit/registry', "app/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/_base/lang",
-        "dojo/promise/all", "dojo/html", 'dojo/store/Memory', "dojo/dom-style","dojo/dom-attr", "dojo/json",
+        "dojo/promise/all", "dojo/html", 'dojo/store/Memory', "dojo/dom-style","dojo/dom-attr", "dojo/json", 'dgrid/OnDemandGrid',
 
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins',
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
     function(declare, arrayUtil, Select, Toolbar, DateTextBox, NumberTextBox, Textarea,
              CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton, domConstruct, on,
              when, query, registry, nqWidgetBase, ContentPane, domGeometry, has, lang,
-             all, html, Memory, domStyle, domAttr, JSON ){
+             all, html, Memory, domStyle, domAttr, JSON, OnDemandGrid ){
 
         return declare("nqForm", [nqWidgetBase],{
             postCreate: function(){
@@ -23,18 +23,21 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     //return when(self.store.getInheritedSchema(self.viewId),function(schema) {
                         self.schema = view;
                         //self.enrichObjectWithDefaults(view, schema);
-                        var formNode = domConstruct.create('form', {style: 'border-spacing:5px;'}, self.pane.containerNode);
+                        var formNode = domConstruct.create('table', null, self.pane.containerNode);
                         if(self.schema.oneOf){
-                            var par = domConstruct.create("p", null, formNode);
-                            domConstruct.create("label", {innerHTML: 'Choose Page Type'}, par);
+                            var par = domConstruct.create("tr", null, formNode);
+                            domConstruct.create("td", {innerHTML: 'Choose Page Type'}, par);
+                            var radioTd = domConstruct.create("td", null, par);
                             self.schema.oneOf.forEach(function(typeOf){
-                                var par = domConstruct.create("p", null, formNode);
-                                domConstruct.create("label", {innerHTML: typeOf.name}, par);
+                                //var par = domConstruct.create("tr", null, formNode);
+                                //domConstruct.create("label", {innerHTML: typeOf.name}, par);
                                 var dijit = new RadioButton({
-                                    checked: true,
+                                    checked: false,
                                     value: typeOf.name,
                                     name: "typeOf"
-                                }, domConstruct.create('input', null, par));
+                                }, domConstruct.create("div", {display: 'inline-block'}, radioTd));
+                                domConstruct.create("div", {innerHTML: typeOf.name, style:{display: 'inline-block'}}, radioTd);
+                                domConstruct.create("br", null, radioTd);
                                 dijit.startup();
                             });
                             self.schema.oneOf.forEach(function(typeOf){
@@ -72,7 +75,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     }
                     for(var l=0;l<maxProperties;l++){
                         //Create a row (takes the form of a paragraph thanks to css)
-                        var par = domConstruct.create("p", null, formNode);
+                        var par = domConstruct.create("tr", null, formNode);
                         //For each column in this row
                         for(var j=1;j<colProperties.length;j++){//column 0 is not used
                             var propertiesList = colProperties[j];
@@ -83,19 +86,32 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                     style: {
                                         'font-weight': attrProps.bold?'bold':'normal',
                                         'font-size': attrProps.size?attrProps.size:'1em',
-                                        'padding-left': nestingLevel*3+'em'
+                                        //'padding':'5px',
+                                        'padding-left': (nestingLevel*10+10)+'px'//need px here because different font sizes will have different em
                                     }
                                 };
-                                domConstruct.create("label", format, par);
+                                domConstruct.create("td", format, par);
                                 var dijit = null;
                                 if(attrProps.type == 'string'){
                                     if(attrProps.media && attrProps.media.mediaType == 'text/html'){
-                                        //domConstruct.create("label", null, par);//empty td
-                                        //var par = domConstruct.create("p", null, formNode);
-                                        dijit = new Editor(attrProps, domConstruct.create('td', {name: attrProps.name}, par));/*setting the name wont be done autoamticly*/
+                                        domConstruct.create("td", null, par);//empty td
+                                        var row = domConstruct.create("tr", null, formNode);
+                                        var style = {
+                                            //style: {
+                                                border: 'solid',
+                                                'border-color': 'lightgrey',
+                                                'border-width': 'thin',
+                                                background: 'transparent',
+                                                //'padding':'5px'
+                                                //width: '15em',
+
+                                            //}
+                                        };
+                                        var rowTd = domConstruct.create("td", {style:{'padding-left': (nestingLevel*10+10)+'px'}}, row);
+                                        dijit = new Editor({height: ''}, domConstruct.create('div', {name: attrProps.title}, rowTd));/*setting the name wont be done autoamticly*/
                                         dijit.addStyleSheet('app/resources/editor.css');
                                         //Needed for auto sizing, found it somewhere in the dijit library
-                                        dijit.startup();//dijit has to be started before we can attach evens
+                                        //dijit.startup();//dijit has to be started before we can attach evens
                                         dijit.on("NormalizedDisplayChanged", function(event){
                                             var height = domGeometry.getMarginSize(this.domNode).h;
                                             if(has("opera")){
@@ -105,7 +121,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                             //this.resize({h: height});
                                             domGeometry.setMarginBox(this.iframe, { h: height });
                                         });
-                                        //domAttr.set(dijit.domNode, 'colspan', '2');
+                                        domStyle.set(dijit.domNode, style);
+                                        domAttr.set(rowTd, 'colspan', '2');
                                     }
                                     else if(attrProps.media && attrProps.media.mediaType == 'image/jpg'){
                                     }
@@ -113,7 +130,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                     }
                                     else if(attrProps.enum){
                                         if(attrProps.enum.length == 1){
-                                            domConstruct.create("label", {innerHTML: attrProps.enum[0], style: style}, par);
+                                            domConstruct.create("td", {innerHTML: attrProps.enum[0], style: style}, par);
                                         }
                                         else {
                                             var data = [];
@@ -125,22 +142,22 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                             var editorArgs = {
                                                 name: attrName,
                                                 store: selectStore,
-                                                style: "width:99%;",
+                                                //style: "width:99%;",
                                                 labelAttr: 'label',
                                                 maxHeight: -1, // tells _HasDropDown to fit menu within viewport
                                                 fetchProperties: { sort : [ { attribute : "name" }]},
                                                 queryOptions: { ignoreCase: true }//doesnt work
                                                 //value: 749
                                             };
-                                            dijit = new Select(editorArgs, domConstruct.create('input', null, par));
+                                            dijit = new Select(editorArgs, domConstruct.create("td", {class: 'inputClass'}, par));
                                         }
                                     }
                                     else{
                                         if(attrProps.readOnly == true) {
-                                            domConstruct.create("input", null, par);
+                                            domConstruct.create("td", {class: 'inputClass'}, par);
                                         }
                                         else {
-                                            dijit = new ValidationTextBox(attrProps, domConstruct.create('input', null, par));
+                                            dijit = new ValidationTextBox(attrProps, domConstruct.create("td", {class: 'inputClass'}, par));
                                         }
                                     }
                                 }
@@ -153,34 +170,34 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                             'border-top-color': 'lightgrey',
                                             'text-align': 'right'
                                         };
-                                        domConstruct.create("label", {innerHTML: '0.00', style: style}, par);
+                                        domConstruct.create("td", {innerHTML: '0.00', style: style}, par);
                                     }
                                     else {
-                                        dijit = new NumberTextBox(attrProps, domConstruct.create('input', null, par));
+                                        dijit = new NumberTextBox(attrProps, domConstruct.create("td", {class: 'inputClass'}, par));
                                     }
                                 }
                                 else if(attrProps.type == 'integer'){
                                     if(attrProps.readOnly == true){
-                                        domConstruct.create("label", null, par);
+                                        domConstruct.create("td", null, par);
                                     }
                                     else {
-                                        dijit = new NumberTextBox(attrProps, domConstruct.create('input', null, par));
+                                        dijit = new NumberTextBox(attrProps, domConstruct.create("td", {class: 'inputClass'}, par));
                                     }
                                 }
                                 else if(attrProps.type == 'date'){
                                     if(attrProps.readOnly == true){
-                                        domConstruct.create("label", null, par);
+                                        domConstruct.create("td", null, par);
                                     }
                                     else {
-                                        dijit = new DateTextBox(attrProps, domConstruct.create('input', null, par));
+                                        dijit = new DateTextBox(attrProps, domConstruct.create("td", {class: 'inputClass'}, par));
                                     }
                                 }
                                 else if(attrProps.type == 'boolean'){
                                     if(attrProps.readOnly == true){
-                                        domConstruct.create("label", null, par);
+                                        domConstruct.create("td", null, par);
                                     }
                                     else {
-                                        dijit = new CheckBox(attrProps, domConstruct.create('input', null, par));
+                                        dijit = new CheckBox(attrProps, domConstruct.create("td", {class: 'inputClass'}, par));
                                     }
                                 }
                                 else if(attrProps.type == 'array'){
@@ -190,20 +207,29 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                             var attrProps = itemProperties.properties;
                                             self.buildRowCols(attrProps, formNode, nestingLevel+1);
                                         }
-                                        else domConstruct.create("label", {innerHTML: 'TABLE'}, par);
+                                        else {
+                                            grid = new OnDemandGrid({
+                                                collection: self.nqStore, // a dstore store
+                                                columns: [
+                                                    { label: 'ID', field: '_id', sortable: false },
+                                                    { label: 'name', field: 'name' }
+                                                ]
+                                            }, domConstruct.create("td", {class: 'inputClass'}, par));
+                                            //domConstruct.create("td", {innerHTML: 'TABLE'}, par);
+                                        }
                                     }
                                     else if(attrProps.readOnly == true){
-                                        domConstruct.create("label", null, par);
+                                        domConstruct.create("td", null, par);
                                     }
                                     else {
-                                        dijit = new Select(attrProps.editorArgs, domConstruct.create('input', null, par));
+                                        dijit = new Select(attrProps.editorArgs, domConstruct.create("td", {class: 'inputClass'}, par));
                                     }
                                 }
                                 else if(attrProps.type == 'object'){
                                     if(attrProps.patternProperties){
                                         var patPropObj = attrProps.patternProperties;
                                         for(var attrName in patPropObj) {
-                                            domConstruct.create("label", {innerHTML: attrName}, par);
+                                            domConstruct.create("td", {innerHTML: attrName}, par);
                                             var attrProps = patPropObj[attrName];
                                             if(attrProps.anyOf){
                                                 attrProps.anyOf.forEach(function(typeOf){
@@ -217,18 +243,18 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                         self.buildRowCols(attrProps.properties, formNode, nestingLevel+1);
                                     }
                                     else if(attrProps.readOnly == true){
-                                        domConstruct.create("label", null, par);
+                                        domConstruct.create("td", null, par);
                                     }
                                     else {
                                         if(attrProps.media && attrProps.media.mediaType == 'text/json'){
                                         }
                                         else if(attrProps.media && attrProps.media.mediaType == 'text/javascript'){
                                         }
-                                        dijit = new Textarea(attrProps, domConstruct.create('input', null, par));
+                                        dijit = new Textarea(attrProps, domConstruct.create("td", {class: 'inputClass'}, par));
                                     }
                                 }
                                 else {
-                                    domConstruct.create("label", null, par);
+                                    domConstruct.create("td", null, par);
                                 }
                                 if(dijit){
                                     self.own(dijit);
@@ -248,7 +274,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                 }
                             }
                             else {//Empty row
-                                domConstruct.create("label", {colspan:2}, par);
+                                domConstruct.create("td", {colspan:2}, par);
                             }
                         }
                     }

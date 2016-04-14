@@ -23,8 +23,10 @@ ul,ol {margin-left: -1em;}
 h1, h2, h3, h4, h5, h6 {margin-top: 0.5em; margin-bottom: 0em; overflow:hidden;}
 code {border:none; font-size: 100%;}
 .dojoDndContainerOver {	border: 0px;}
+table{border-spacing:3px;}
+td{vertical-align: top;}
 
-/*Fancy bit copied from the Internet: generate header numbers*/
+/*Fancy bit copied from the Internet: generates header numbers. Don't we just love the internet*/
   body {counter-reset: h2}
   h2 {counter-reset: h3}
   h3 {counter-reset: h4}
@@ -40,9 +42,13 @@ code {border:none; font-size: 100%;}
   h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.nocount:before, h6.nocount:before { content: ""; counter-increment: none } 
 
 /*dgrid*/
+.dgrid { height: auto;}
+/*.dgrid .dgrid-scroller {position: relative;overflow: visible;}*/
+.dgrid .dgrid-scroller {position: relative; max-height: 200px; overflow: auto;}
+
 .nqGrid .dgrid-cell-padding {padding: 0px;}
-/*.field-classId {width:2em} icon column*/
 .dgrid-content .ui-widget-content {background: none;}
+/*.field-classId {width:2em} icon column*/
 /*.nqGrid .dgrid-cell {border: none;}*/
 /*.nqGrid .dgrid-row-odd {background: #F2F5F9;}*/
 /*.dgrid-selected { background: #999; / * Make selected rows be gray * /}*/
@@ -51,9 +57,14 @@ code {border:none; font-size: 100%;}
 table .last, td:last-child { padding: 2px 24px 2px 0px;}
 */
 
+
+
 /*make dijits transparent*/
-.soria .dijitTextBox, .soria .dijitSelect, .soria .dijitSelect .dijitButtonContents {border: solid; border-color: lightgrey; border-width: thin; background: transparent;}
-input {border: solid; border-color: lightgrey; border-width: thin;  background: transparent;}
+/*
+.inputClass{border: solid; border-color: lightgrey; border-width: thin; background: transparent; width: 15em;}
+*/
+.soria .dijitTextBox, .soria .dijitSelect, .soria .dijitSelect .dijitButtonContents {border: solid; border-color: lightgrey; border-width: thin; background: transparent; width: 15em;}
+input {border: solid; border-color: lightgrey; border-width: thin;  background: transparent; width: 15em;}
 
 
 .helpTextInvisable {color:navy; display:none;}
@@ -77,16 +88,16 @@ input {border: solid; border-color: lightgrey; border-width: thin;  background: 
 .addIcon {background-image: url('img/Neuralquest/add.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 .removeIcon {background-image: url('img/Neuralquest/remove.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 
-/*used for image floats*/
+/*used for image floats* /
 .floatright { float: right; width: 400px; margin: 0 0 10px 10px; background-color: fff; padding: 3px; border-top: 1px solid #999; border-right: 2px solid #555; border-bottom: 2px solid #555; border-left: 1px solid #999; clear:right }
 div.floatright p {font-size: 90%; }
 div.floatright pre {font-size: 90%; padding:2px;}
 div.floatright img {width: inherit;}
 div.floatright iframe {
-  /* Set the width of the iframe the size you want to transform it FROM */
+  /* Set the width of the iframe the size you want to transform it FROM * /
   width: 1200px;
   height: 800px;
-  /* apply the transform */
+  /* apply the transform * /
   -webkit-transform:scale(0.25);
   -moz-transform:scale(0.25);
   -o-transform:scale(0.25);
@@ -94,7 +105,7 @@ div.floatright iframe {
   /* position it, as if it was the original size 
   position: absolute;
   left: -400px;
-  top: -200px;*/
+  top: -200px;* /
   -moz-transform-origin: top left;
   -webkit-transform-origin: top left;
   -o-transform-origin: top left;
@@ -102,22 +113,22 @@ div.floatright iframe {
   transform-origin: top left;
 }
 
-/*used for todo floats*/
+/*used for todo floats* /
 .todofloatright { display:none; float: right; width: 300px; margin: 0 0 10px 10px; background-color: fff; padding: 3px; border-top: 1px solid #999; border-right: 2px solid #555; border-bottom: 2px solid #555; border-left: 1px solid #999; clear:right }
 div.todofloatright p {font-size: 90%; background-color: rgb(252, 252, 181);}
 
 
-/*used for html tables in the document*/
+/*used for html tables in the document
 .nqtable {border-collapse:collapse;}
 .nqtable td, .nqtable th{padding:3px; border-width:1px; border-color:gray; border-style:solid; vertical-align:top;}
 .nqtable th{text-align: center; font-weight: bold; background-color: silver; }
-
-
+*/
+/*
 form  { display: table;      }
 p     { display: table-row;  }
 label { display: table-cell; white-space: nowrap; vertical-align: top; }
-input { display: table-cell; }/*width:5em;*/
-
+input { display: table-cell; }/*width:5em;* /
+*/
 /* Gennerated by means of nqapp/nqSprites.css */
 /* You can also gennerate a sprite template using nqapp/nqSprites.png */
 .icondefault { background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1264px; width: 16px; height: 16px;} /*  79 - page  */
