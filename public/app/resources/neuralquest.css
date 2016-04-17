@@ -6,6 +6,7 @@
 @import '../../dgrid/css/skins/soria.css';
 /*for the editor  */
 @import '../../dojox/editor/plugins/resources/editorPlugins.css';
+@import "../../dojox/form/resources/CheckedMultiSelect.css";
 
 /* NOTE: for a full screen layout, must set body size equal to the viewport.*/
 html, body, #fullPage, #placholder {width: 100%;height: 100%;overflow: hidden;padding: 0px;margin: 0px;}
@@ -23,7 +24,6 @@ ul,ol {margin-left: -1em;}
 h1, h2, h3, h4, h5, h6 {margin-top: 0.5em; margin-bottom: 0em; overflow:hidden;}
 code {border:none; font-size: 100%;}
 .dojoDndContainerOver {	border: 0px;}
-table{border-spacing:3px;}
 td{vertical-align: top;}
 
 /*Fancy bit copied from the Internet: generates header numbers. Don't we just love the internet*/
@@ -63,8 +63,10 @@ table .last, td:last-child { padding: 2px 24px 2px 0px;}
 /*
 .inputClass{border: solid; border-color: lightgrey; border-width: thin; background: transparent; width: 15em;}
 */
-.soria .dijitTextBox, .soria .dijitSelect, .soria .dijitSelect .dijitButtonContents {border: solid; border-color: lightgrey; border-width: thin; background: transparent; width: 15em;}
-input {border: solid; border-color: lightgrey; border-width: thin;  background: transparent; width: 15em;}
+.soria .dijitTextBox, .soria .dijitSelect, .soria .dijitSelect .dijitButtonContents, .soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper {border: solid; border-color: lightgrey; border-width: thin; background: transparent; width: 15em;}
+.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper {overflow:hidden}
+.dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper {height:inherit}
+/*input {border: solid; border-color: lightgrey; border-width: thin;  background: transparent; width: 15em;}*/
 
 
 .helpTextInvisable {color:navy; display:none;}

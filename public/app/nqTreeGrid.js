@@ -8,75 +8,73 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
         'dgrid/Selection',
         'dgrid/extensions/DnD',
         'dojo/dnd/Source',
+        'dgrid/Tree',
 
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins',
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
     function(declare, arrayUtil, Select, Toolbar, DateTextBox, NumberTextBox, Textarea,
              CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton, domConstruct, on,
              when, query, registry, nqWidgetBase, ContentPane, domGeometry, has, lang,
-             all, html, Memory, dom, domStyle, domAttr, JSON, OnDemandGrid, CheckedMultiSelect, Button, Grid, Keyboard, Selection, DnD, Source){
+             all, html, Memory, dom, domStyle, domAttr, JSON, OnDemandGrid, CheckedMultiSelect, Button, Grid, Keyboard, Selection, DnD, Source, Tree){
 
-        return declare("nqForm", [nqWidgetBase],{
+        return declare("nqTreeGrid", [nqWidgetBase],{
             postCreate: function(){
                 this.inherited(arguments);
                 var self = this;
                 if(!self.widget.viewRefs || self.widget.viewRefs.length<1) return;
                 var initialized = self.store.get(self.widget.viewRefs[0]).then(function(view){
-                    console.log(JSON.stringify(view));
+                    console.log('VIEW:',view);
+                    //console.log(JSON.stringify(view));
                     self.view = view;
                     self.headerDivNode.innerHTML = '<h1>'+view.name+'</h1>';
                     //domStyle.set(self.headerDivNode, 'display', 'block');//set the header node, created in the superclass,  to visible
                     self.pageHelpTextDiv.innerHTML = view.description;
-                    //return when(self.store.getInheritedSchema(self.viewId),function(schema) {
-                        self.schema = view;
-                        //self.enrichObjectWithDefaults(view, schema);
-                        var formNode = domConstruct.create('table', {style:{'border-spacing':'3px'}}, self.pane.containerNode);
-                        if(self.schema.oneOf){
-                            var par = domConstruct.create("tr", null, formNode);
-                            domConstruct.create("td", {innerHTML: 'Choose Page Type'}, par);
-                            var radioTd = domConstruct.create("td", null, par);
-                            /*var radioArr = [];
-                            self.schema.oneOf.forEach(function(typeOf){
-                                radioArr.push(typeOf.name);
-                            });
-                            self.radioButtonsOrSelect(radioTd, radioArr, self.schema.oneOf.default, function(isChecked){
-                                if(isChecked){console.dir(this.value)};
-                            });
-                            self.schema.oneOf.forEach(function(typeOf){
-                                //var par = domConstruct.create("tr", null, formNode);
-                                //domConstruct.create("label", {innerHTML: typeOf.name}, par);
-                                var dijit = new RadioButton({
-                                    checked: false,
-                                    value: typeOf.name,
-                                    name: "typeOf"
-                                }, domConstruct.create("div", {display: 'inline-block'}, radioTd));
-                                domConstruct.create("div", {innerHTML: typeOf.name, style:{display: 'inline-block'}}, radioTd);
-                                domConstruct.create("br", null, radioTd);
-                                dijit.startup();
-                            });*/
-                            self.schema.oneOf.forEach(function(typeOf){
-                                var oneOfTable = domConstruct.create("table", {style:{'border-spacing':'3px', display:'none'}}, self.pane.containerNode);
-                                var dijit = new RadioButton({
-                                    checked: false,
-                                    value: typeOf.name,
-                                    name: "typeOf"
-                                }, domConstruct.create("div", {display: 'inline-block'}, radioTd));
-                                domConstruct.create("div", {innerHTML: typeOf.name, style:{display: 'inline-block'}}, radioTd);
-                                domConstruct.create("br", null, radioTd);
-                                dijit.on('change', function(isChecked){
-                                    if(isChecked) domStyle.set(oneOfTable, 'display', 'block');
-                                    else domStyle.set(oneOfTable, 'display', 'none');
-                                });
-                                self.buildRowCols(typeOf.properties, oneOfTable, 1);
-                            });
-                        }
-                        else self.buildRowCols(self.schema.properties, formNode, 0);
 
-                    //});
+                    self.treeGrid = new (declare([ OnDemandGrid, Keyboard, Selection, Tree ]))({
+                        collection: self.store,
+                        loadingMessage: 'Loading data...',
+                        noDataMessage: 'No results found.',
+                        height: '',
+                        columns: {
+                            // Render expando icon and trigger expansion from first column
+                            name: {
+                                label: 'Name',
+                                renderExpando: true,
+                                sortable : false
+                            },
+                            properties: {
+                                label:'Properties',
+                                renderCell: lang.hitch(self, self.renderForm),
+                                sortable : false
+                            }
+                        }
+                    }, domConstruct.create("div", null, self.pane.containerNode));
+
+
+
+                    return true;
                 });
                 when(initialized, function(result){
                     self.createDeferred.resolve(self);//ready to be loaded with data
                 }, function(err){self.createDeferred.reject(err)});
+            },
+            renderForm: function(object, value, node, options){
+                var self = this;
+                //var par = domConstruct.create("code", {innerHTML:object}, node);
+                var formNode = domConstruct.create('table', {style:{'border-spacing':'3px'}}, node);
+                self.buildRowCols(self.view.properties, formNode, 0);
+                for(var attrName in self.view.properties) {
+                    //var attrProps = self.view.properties[attrName];
+                    var value = object[attrName];
+                    //if(attrProps.type == 'object') value = JSON.stringify(value, null, 4);
+                    var dijitId = self.view._id+':'+attrName;
+                    var wid = registry.byId(dijitId);
+                    if(wid) wid.set('value', value, false);// do not fire change
+                    else {
+                        var tdDom = dom.byId(dijitId);
+                        if(tdDom) tdDom.innerHTML = value;
+                    }
+                }
             },
             buildRowCols: function(properties, formNode, nestingLevel){
                 var self = this;
@@ -136,47 +134,47 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                         //Needed for auto sizing, found it in AlwaysShowToolbar in the dijit library
                                         //dijit.startup();//dijit has to be started before we can attach evens
                                         /*dijit.on("NormalizedDisplayChanged", function(event){
-                                            // summary:
-                                            //		Updates the height of the editor area to fit the contents.
-                                            var e = this.editorObject;
-                                            //if(!e.isLoaded) return;
-                                            if(e.height) return;
-                                            var height = domGeometry.getMarginSize(this.domNode).h;
-                                            if(has("opera"))height = e.editNode.scrollHeight;
-                                            // console.debug('height',height);
-                                            // alert(this.editNode);
-                                            //height maybe zero in some cases even though the content is not empty,
-                                            //we try the height of body instead
-                                            if(!height) height = domGeometry.getMarginSize(this.ownerDocumentBody).h;
-                                            if(this._fixEnabled){
-                                                // #16204: add toolbar height when it is fixed aka "stuck to the top of the screen" to prevent content from cutting off during autosizing.
-                                                // Seems like _updateHeight should be taking the intitial margin height from a more appropriate node that includes the marginTop set in globalOnScrollHandler.
-                                                height += domGeometry.getMarginSize(this.editor.header).h;
-                                            }
-                                            if(height == 0){
-                                                console.debug("Can not figure out the height of the editing area!");
-                                                return; //prevent setting height to 0
-                                            }
-                                            if(has("ie") <= 7 && this.editor.minHeight){
-                                                var min = parseInt(this.editor.minHeight);
-                                                if(height < min){
-                                                    height = min;
-                                                }
-                                            }
-                                            if(height != this._lastHeight){
-                                                this._lastHeight = height;
-                                                // this.editorObject.style.height = this._lastHeight + "px";
-                                                domGeometry.setMarginBox(this.iframe, { h: this._lastHeight });
-                                            }
-                                            /*var height = domGeometry.getMarginSize(this.domNode).h;
-                                            if(has("opera"))
-                                                height = this.editNode.scrollHeight;
-                                            }
-                                            //console.log('height',domGeometry.getMarginSize(this.editNode));
-                                            this.resize({h: height});
-                                            domGeometry.setMarginBox(this.iframe, { h: height });
-                                            * /
-                                        });*/
+                                         // summary:
+                                         //		Updates the height of the editor area to fit the contents.
+                                         var e = this.editorObject;
+                                         //if(!e.isLoaded) return;
+                                         if(e.height) return;
+                                         var height = domGeometry.getMarginSize(this.domNode).h;
+                                         if(has("opera"))height = e.editNode.scrollHeight;
+                                         // console.debug('height',height);
+                                         // alert(this.editNode);
+                                         //height maybe zero in some cases even though the content is not empty,
+                                         //we try the height of body instead
+                                         if(!height) height = domGeometry.getMarginSize(this.ownerDocumentBody).h;
+                                         if(this._fixEnabled){
+                                         // #16204: add toolbar height when it is fixed aka "stuck to the top of the screen" to prevent content from cutting off during autosizing.
+                                         // Seems like _updateHeight should be taking the intitial margin height from a more appropriate node that includes the marginTop set in globalOnScrollHandler.
+                                         height += domGeometry.getMarginSize(this.editor.header).h;
+                                         }
+                                         if(height == 0){
+                                         console.debug("Can not figure out the height of the editing area!");
+                                         return; //prevent setting height to 0
+                                         }
+                                         if(has("ie") <= 7 && this.editor.minHeight){
+                                         var min = parseInt(this.editor.minHeight);
+                                         if(height < min){
+                                         height = min;
+                                         }
+                                         }
+                                         if(height != this._lastHeight){
+                                         this._lastHeight = height;
+                                         // this.editorObject.style.height = this._lastHeight + "px";
+                                         domGeometry.setMarginBox(this.iframe, { h: this._lastHeight });
+                                         }
+                                         /*var height = domGeometry.getMarginSize(this.domNode).h;
+                                         if(has("opera"))
+                                         height = this.editNode.scrollHeight;
+                                         }
+                                         //console.log('height',domGeometry.getMarginSize(this.editNode));
+                                         this.resize({h: height});
+                                         domGeometry.setMarginBox(this.iframe, { h: height });
+                                         * /
+                                         });*/
                                     }
                                     else if(attrProps.media && attrProps.media.mediaType == 'image/jpg'){
                                     }
@@ -225,7 +223,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                         dijit = new CheckBox(attrProps, domConstruct.create("input", null, tdDom));
                                     }
                                 }
-                                else if(attrProps.type == 'array'){
+                                else if(attrProps.type == 'Xarray'){
                                     if(attrProps.items){
                                         var itemProperties = attrProps.items;
                                         if(itemProperties.properties) {
@@ -277,15 +275,15 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 
 
                                             /*grid = new OnDemandGrid({
-                                                selectionMode: 'single',
-                                                showHeader: false,
-                                                collection: self.nqStore, // a dstore store
-                                                columns: [
-                                                    { label: 'ID', field: '_id', sortable: false },
-                                                    { label: 'name', field: 'name' }
-                                                ]
-                                            }, domConstruct.create("div", null, tdDom));
-                                            //domConstruct.create("td", {innerHTML: 'TABLE'}, tdDom);*/
+                                             selectionMode: 'single',
+                                             showHeader: false,
+                                             collection: self.nqStore, // a dstore store
+                                             columns: [
+                                             { label: 'ID', field: '_id', sortable: false },
+                                             { label: 'name', field: 'name' }
+                                             ]
+                                             }, domConstruct.create("div", null, tdDom));
+                                             //domConstruct.create("td", {innerHTML: 'TABLE'}, tdDom);*/
                                         }
                                     }
                                     else if(attrProps.readOnly == true){
@@ -294,7 +292,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                                         dijit = new Select(attrProps.editorArgs, domConstruct.create("input", null, tdDom));
                                     }
                                 }
-                                else if(attrProps.type == 'object'){
+                                else if(attrProps.type == 'Xobject'){
                                     if(attrProps.patternProperties){
                                         var patPropObj = attrProps.patternProperties;
                                         for(var attrName in patPropObj) {
@@ -390,8 +388,9 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
             setSelectedObjIdPreviousLevel: function(value){
                 var self = this;
                 this.store.get(value).then(function(docObj){
-                    console.log(JSON.stringify(docObj));
-                    for(var attrName in self.schema.properties) {
+                    console.log('OBJECT:',docObj);
+                    //console.log(JSON.stringify(docObj));
+                    /*for(var attrName in self.schema.properties) {
                         var attrProps = self.schema.properties[attrName];
                         var value = docObj[attrName];
                         if(attrProps.type == 'object') value = JSON.stringify(value, null, 4);
@@ -402,8 +401,33 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                             var node = dom.byId(dijitId);
                             //if(node) node.innerHTML = value;
                         }
-                    }
+                    }*/
                 });
+
+                //var childrenCollection = self.store.filter(new self.store.Filter().contains('_children.emails', new self.store.Filter().eq('address', 'three@example.com')));
+
+                var storeFilter = new this.store.Filter();
+                var rootFilter = storeFilter.eq('_id', value);
+                var rootCollection = this.store.filter(rootFilter);
+                self.treeGrid.set('collection',rootCollection);
+
+
+                self.store
+                    .filter(new self.store.Filter().eq('_id', value))
+                    .select('tabs')
+                    .forEach(function(tab){
+                        console.log('tab',tab)
+                    });
+
+
+                return;
+
+                childrenQueryResult.forEach(function (item) {
+                    console.log(item);
+                });
+
+                rootFilter
+
                 var filter = new this.store.Filter();
                 var childrenFilter = filter.in('_id', parentItem.childDocs);
                 var childrenCollection = this.store.filter(childrenFilter);

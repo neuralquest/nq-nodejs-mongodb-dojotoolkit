@@ -68,6 +68,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
         },
 		setSelectedObjIdPreviousLevel: function(value){
             var self = this;
+            if(self.selectedObjIdPreviousLevel == value) return;
             if(self.widget.initialObject) value = self.widget.initialObject;
             self.selectedObjIdPreviousLevel = value; // need this to pass value to treemodel
 			if(self.tree) self.tree.destroy(); 
