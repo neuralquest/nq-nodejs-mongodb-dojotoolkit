@@ -15,8 +15,8 @@ html, body, #fullPage, #placholder {width: 100%;height: 100%;overflow: hidden;pa
 /* add padding to each contentpane inside the tab container, and scrollbar if necessary 
 .dojoTabPane {padding : 10px 10px 10px 10px; overflow: auto;}*/
 
-
 .backgroundClass{background: #FFFFFF url(img/Neuralquest/testsBodyBg.gif) repeat-x scroll left top;    }
+.helpTextInvisable {color:navy; display:none;}
 
 p,ul,ol {text-align: justify; margin-top: 0em; margin-bottom: 0em; font-family: sans-serif;}
 ul,ol {margin-left: -1em;}
@@ -27,58 +27,59 @@ code {border:none; font-size: 100%;}
 td{vertical-align: top;}
 
 /*Fancy bit copied from the Internet: generates header numbers. Don't we just love the internet*/
-  body {counter-reset: h2}
-  h2 {counter-reset: h3}
-  h3 {counter-reset: h4}
-  h4 {counter-reset: h5}
-  h5 {counter-reset: h6}
+body {counter-reset: h2}
+h2 {counter-reset: h3}
+h3 {counter-reset: h4}
+h4 {counter-reset: h5}
+h5 {counter-reset: h6}
+h2:before {counter-increment: h2; content: counter(h2) ". "}
+h3:before {counter-increment: h3; content: counter(h2) "." counter(h3) ". "}
+h4:before {counter-increment: h4; content: counter(h2) "." counter(h3) "." counter(h4) ". "}
+h5:before {counter-increment: h5; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". "}
+h6:before {counter-increment: h6; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". "}
+h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.nocount:before, h6.nocount:before { content: ""; counter-increment: none }
 
-  h2:before {counter-increment: h2; content: counter(h2) ". "}
-  h3:before {counter-increment: h3; content: counter(h2) "." counter(h3) ". "}
-  h4:before {counter-increment: h4; content: counter(h2) "." counter(h3) "." counter(h4) ". "}
-  h5:before {counter-increment: h5; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". "}
-  h6:before {counter-increment: h6; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". "}
 
-  h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.nocount:before, h6.nocount:before { content: ""; counter-increment: none } 
-
-/*dgrid*/
-.dgrid { height: auto;}
-/*.dgrid .dgrid-scroller {position: relative;overflow: visible;}*/
-.dgrid .dgrid-scroller {position: relative; max-height: 200px; overflow: auto;}
-
-.nqGrid .dgrid-cell-padding {padding: 0px;}
-.dgrid-content .ui-widget-content {background: none;}
+/*.nqGrid .dgrid-cell-padding {padding: 0px;}*/
 /*.field-classId {width:2em} icon column*/
-/*.nqGrid .dgrid-cell {border: none;}*/
-/*.nqGrid .dgrid-row-odd {background: #F2F5F9;}*/
-/*.dgrid-selected { background: #999; / * Make selected rows be gray * /}*/
 
-/*Make the child element the same size as to table cell
-table .last, td:last-child { padding: 2px 24px 2px 0px;}
-*/
+/*DGRID*/
+/*make dgrid transparent*/
+.soria .dgrid{background-color: transparent;} /*dosn't work*/
+/*fix silly row highlight in dgrid*/
+.soria .dgrid-row:hover{background-color: transparent;} /*dosn't work*/
+/*make selected rows be gra */
+/*.dgrid-selected{background: #999;}*/
 
+.dgrid-content .ui-widget-content {background: none;}
 
+/*DIJITS*/
+/*make dijits transparent with a thin border*/
+.soria .dijitTextBox,
+.soria .dijitSelect,
+.soria .dijitSelect .dijitButtonContents,
+.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper,
+.dijitEditor{
+    border: solid; border-color: #e6f2ff; border-width: thin; background: transparent;/*width: 15em;*/
+}
+/*give dijits a blue hover border*/
+.soria .dijitTextBox:hover,
+.soria .dijitSelect:hover,
+.soria .dijitSelect:hover .dijitButtonContents:hover,
+.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper:hover,
+.dijitEditor:hover{
+    border: solid; border-color: blue; border-width: thin;
+}
 
-/*make dijits transparent*/
-/*
-.inputClass{border: solid; border-color: lightgrey; border-width: thin; background: transparent; width: 15em;}
-*/
-.soria .dijitTextBox, .soria .dijitSelect, .soria .dijitSelect .dijitButtonContents, .soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper {border: solid; border-color: lightgrey; border-width: thin; background: transparent; width: 15em;}
-.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper {overflow:hidden}
-.dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper {height:inherit}
-/*input {border: solid; border-color: lightgrey; border-width: thin;  background: transparent; width: 15em;}*/
-
-
-.helpTextInvisable {color:navy; display:none;}
+/*MULTI SELECT*/
+/*remove overflow from checked multi select*/
+.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{overflow:hidden}
+/*checked multi select auto height*/
+.dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{height:inherit}
 
 /*reward*/
 .popUp {border: 2px solid gray;	border-radius: 5px; position: fixed; z-index: 2; opacity: 0;background-color: lime; top: 30%; left: 40%; width: 100px; height: 50px; font-weight: bold; font-size: 16px;}
 
-/*the startup page
-.pageOverlay {top: 0;left: 0;position: absolute;height: 100%;width: 100%;z-index: 1001;display: block;}
-#loadingOverlay {background:  #fff url('img/Neuralquest/loadingAnimation.gif') no-repeat 10px 23px;}
-.loadingMessage {padding: 25px 40px;color: #999;}
-*/
 /*our icons*/
 .editIcon {background-image: url('img/Neuralquest/edit.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
 .annoIcon {background-image: url('img/Neuralquest/anno.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
@@ -125,12 +126,7 @@ div.todofloatright p {font-size: 90%; background-color: rgb(252, 252, 181);}
 .nqtable td, .nqtable th{padding:3px; border-width:1px; border-color:gray; border-style:solid; vertical-align:top;}
 .nqtable th{text-align: center; font-weight: bold; background-color: silver; }
 */
-/*
-form  { display: table;      }
-p     { display: table-row;  }
-label { display: table-cell; white-space: nowrap; vertical-align: top; }
-input { display: table-cell; }/*width:5em;* /
-*/
+
 /* Gennerated by means of nqapp/nqSprites.css */
 /* You can also gennerate a sprite template using nqapp/nqSprites.png */
 .icondefault { background: transparent url('img/Neuralquest/nqSprites.png') no-repeat 0px -1264px; width: 16px; height: 16px;} /*  79 - page  */
