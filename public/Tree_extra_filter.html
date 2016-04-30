@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Test Tree Grid</title>
+    <meta name="viewport" content="width=570">
+    <style>
+        @import "https://cdn.rawgit.com/dojo/dojo/master/resources/dojo.css";
+        @import "https://cdn.rawgit.com/SitePen/dgrid/master/css/dgrid.css";
+        @import "https://cdn.rawgit.com/SitePen/dgrid/master/css/skins/claro.css";
+        .dgrid {
+            width: 500px;
+            margin: 10px;
+        }
+    </style>
+    <script>
+        dojoConfig = {
+            async: true,
+            packages: [
+                {
+                    name: 'dojo',
+                    location: 'https://cdn.rawgit.com/dojo/dojo/master'
+                },
+                {
+                    name: 'dgrid',
+                    location: 'https://cdn.rawgit.com/SitePen/dgrid/v1.0.0'
+                },
+                {
+                    name: 'dstore',
+                    location: 'https://cdn.rawgit.com/SitePen/dstore/1.1'
+                }
+            ]};
+    </script>
+    <script src="https://cdn.rawgit.com/dojo/dojo/master/dojo.js"></script>
+    <script>
+        require([
+            "dojo/_base/declare", "dojo/_base/lang", "dgrid/OnDemandGrid", "dgrid/Tree",
+            "dstore/Memory", 'dstore/QueryMethod', "dojo/domReady!"
+        ], function(declare, lang, OnDemandGrid, Tree, Memory, QueryMethod) {
+            var Grid = declare([OnDemandGrid, Tree]);
+            var items = [
+                {"id": '0', "name": "Page one",
+                    tabs: [
+                        {id: '0.0', name: 'tab one' ,
+                        widgets: [
+                            {id: '0.0.0', name: 'tab one widget one',
+                                views: [
+                                    {id: '0.0.0.0', name: 'tab three widget one view one'},
+                                    {id: '0.0.0.1', name: 'tab three widget one view two'},
+                                    {id: '0.0.0.2', name: 'tab three widget one view three'}]},
+                            {id: '0.0.1', name: 'tab one widget two',
+                                views: [
+                                    {id: '0.0.1.0', name: 'tab three widget two view one'},
+                                    {id: '0.0.1.1', name: 'tab three widget two view two'},
+                                    {id: '0.0.1.2', name: 'tab three widget two view three'}]},
+                            {id: '0.0.2', name: 'tab one widget three'}]
+                        },
+                        {id: '0.1', name: 'tab two',
+                            widgets: [
+                                {id: '0.1.0', name: 'tab two widget one'},
+                                {id: '0.1.1', name: 'tab two widget two'},
+                                {id: '0.1.2', name: 'tab two widget three'}]
+                        },
+                        {id: '0.2', name: 'tab three'
+                        }
+                    ]
+                }
+            ];
+            var store = new Memory({
+                data: items,
+                getChildren: function (parent) {
+                    var filter = {};
+                    for(var attrName in parent){
+                        var attrProps = parent[attrName];
+                        if(Array.isArray(attrProps)) {
+                            var childrenArr = parent[attrName];
+                            childrenArr.forEach(function(childObj){
+                                childObj.arrayNAme = attrName;
+                            });
+                            filter = {data: childrenArr}
+                        }
+                    }
+                    return this.dotArray(filter);
+
+                    var idArr = parent.id.split('.');
+                    if(idArr.length == 1) {
+                        return this.dotArray({id:parseInt(idArr[0]), arrayName:'tabs'});
+                    }
+                    else if(idArr.length == 2) {
+                        return this.dotArray({id:parseInt(idArr[0]), arrayName:'tabs'}).dotArray({id:parseInt(idArr[1]), arrayName:'widgets'});
+                    }
+                    else if(idArr.length == 3) {
+                        return this.dotArray({id:parseInt(idArr[0]), arrayName:'tabs'}).dotArray({id:parseInt(idArr[1]), arrayName:'widgets'}).dotArray({id:parseInt(idArr[2]), arrayName:'views'});
+                    }
+                },
+                mayHaveChildren: function (obj) {
+                    return true;
+                },
+                dotArray: new QueryMethod({
+                    type: 'dotArray',
+                    querierFactory: function(filter){
+                        return function (data) {
+                            return filter.data;
+                            return data[filter.id][filter.arrayName];
+                        };
+                    }
+                }),
+                _getQuerierFactory: function (type) {
+                    var uppercaseType = type[0].toUpperCase() + type.substr(1);
+                    var factory = '_create' + uppercaseType + 'Querier';
+                    var ret = this[factory];
+                    return this['_create' + uppercaseType + 'Querier'];
+                }
+            });
+            var rootColl = store.filter({id: '0'});
+            var treeGrid = new Grid({
+                collection: store,
+                columns: [
+                    {renderExpando: true, label: "Name", field: "name", sortable: false}
+                ],
+                removeRow: function (rowElement) {
+                    this.inherited(arguments);
+                }
+            }, "treeGrid");
+            treeGrid.set('collection', rootColl);
+        });
+    </script>
+</head>
+<body class="claro">
+<h2>Usind dStore and dGrid to interrogate a structured object</h2>
+<div id="treeGrid"></div>
+</body>
+</html>

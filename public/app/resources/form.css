@@ -1,0 +1,159 @@
+/****************************************************************************************************
+					Custom CSS for Dijit Forms
+									
+This CSS file can be used as a base for customizing the size of Dijit form elements. The settings
+here use certain sizes, but the real effort is in cross-browser targeting specific widgets and
+elements within them.
+
+This should provide you with a base that can be modfied and built upon to make it easier to achieve
+perfect layouts.
+
+Author: Mike Wilcox, SitePen Inc.
+
+*****************************************************************************************************
+*****************************************************************************************************
+*****************************************************************************************************/
+
+
+
+/****************************************************************************************************
+					Large Form Boxes
+*****************************************************************************************************/
+
+.soria .nqField.dijitTextBox,				/* TextBox, ValidationTextBox, Date Box */ 
+.soria .nqField.dijitSpinner,				/* Number Spinner			*/
+.nqField.dijitTextBox.dijitTimeTextBox,     /* Time Text Box 			*/
+.soria .nqField.dijitTextArea				/* TextArea 				*/
+{
+	width:200px !important;
+	margin:3px 0 0 0 !important;
+}
+.dj_ie6 .soria .nqField.dijitTextArea
+{		
+	width:200px !important;				/* TextArea is a different size in IE6	*/
+}
+.soria .nqField.dijitSpinner
+{
+	width:200px !important;				/* Number Spinner's different structure	*/
+}							            /* forces the padding in, reducing width*/
+
+.nqField.dijitTextBox,						
+.nqField.dijitTextBox.dijitTimeTextBox,		
+.soria .dijitTextArea.nqField
+{
+	padding:3px;					    /* General Text Padding			*/
+}
+.dijitSpinner{
+	padding:0px !important;				/* Prevent outter padding (in IE6)	*/
+}
+.nqField .dijitSpinnerButtonContainer
+{
+	line-height:23px;				    /* Making Spinner buttons taller	*/
+}
+.dj_ie .nqField .dijitSpinnerButtonContainer
+{
+	height:25px;					    /* A little taller in IE6		*/
+}
+.dijitInputLayoutContainer .dijitInputField input{
+	padding:5px 0px 0px 5px;			/* Centering text in Spinners		*/
+}
+.dj_webkit .dijitInputLayoutContainer .dijitInputField input{
+	padding:10px 0px 0px 5px;			/* Webkit has a funny padding collapse - 2x*/
+}
+
+
+/*****************************************************************************************************
+					Nq Additions
+******************************************************************************************************/
+
+.soria .dijitTextBox,
+.soria .dijitSelect,
+.soria .dijitSelect .dijitButtonContents,
+.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper,
+.dijitEditor{
+	border: solid; border-color: #e6f2ff; border-width: thin; background: transparent;/*width: 15em;*/
+}
+/*give dijits a blue hover border*/
+.soria .dijitTextBox:hover,
+.soria .dijitSelect:hover,
+.soria .dijitSelect:hover .dijitButtonContents:hover,
+.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper:hover,
+.dijitEditor:hover{
+	background: #fafcff;
+}
+
+/*MULTI SELECT*/
+/*remove overflow from checked multi select*/
+.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{overflow:hidden}
+/*checked multi select auto height*/
+.dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{height:inherit}
+
+/*DGRID*/
+/*make dgrid transparent*/
+.nqTransparent {
+	background-color: transparent !important;
+}
+.soria .dgrid{background-color: transparent;} /*dosn't work*/
+/*fix silly row highlight in dgrid*/
+.soria .dgrid-row:hover{background-color: transparent;} /*dosn't work*/
+/*make selected rows be gra */
+/*.dgrid-selected{background: #999;}*/
+
+.dgrid-content .ui-widget-content {background: none;}
+
+/*.nqGrid .dgrid-cell-padding {padding: 0px;}*/
+/*.field-classId {width:2em} icon column*/
+
+
+/*****************************************************************************************************
+					Small Form Boxes
+******************************************************************************************************/
+
+.soria .nqField.third,
+.soria .nqField.third
+{
+	width:100px !important;				/* Small Spinners and TimeBox		*/
+}
+
+/****************************************************************************************************
+					    Buttons
+*****************************************************************************************************/
+
+.myButton.dijitButton .dijitButtonNode
+{
+	width:151px !important;
+	margin:3px 0px 0px -2px !important;
+	line-height:30px;
+}
+.dj_ie .myButton.dijitButton .dijitButtonNode,
+.dj_webkit .myButton.dijitButton .dijitButtonNode
+{
+	width:153px !important;				/* Firefox's buttons are a few pixels smaller */
+}
+.myButton.dijitButton.save .dijitButtonNode
+{
+	margin-left:-1px;				/* Changes to save button		*/
+	font-weight:bold;
+}
+
+/**************************************************************************************************
+		 			  IE6 Surgery
+In IE6 (and IE7 to a lesser degree) adding padding or margins to the INPUT of the spinners causes
+major rendering errors. Left padding produced no harm though, and line-height was used to get the
+top padding. Set the overflow to visible so the text wouldn't be chopped.
+***************************************************************************************************/
+
+.dj_ie6 .dijitInputLayoutContainer{
+	padding:0px 0px 0px 5px;
+}
+.dj_ie6 .dijitInputLayoutContainer .dijitInputField input{
+	padding:0px;
+	line-height:22px;
+	overflow-y:visible;
+}
+
+
+
+
+
+

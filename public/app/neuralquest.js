@@ -90,6 +90,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                     });
                     widgetsArr.forEach(function (widget) {
                         widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel);
+
                         //widget.setSelectedObjIdThisLevel(state.selectedObjId);
                     });
                });
@@ -290,7 +291,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         var dlg = new dijit.Dialog({
             title: title,
             extractContent: true,//important in the case of server response, it'll screw up your css.
-            onClick: function (evt) {
+            onBlur: function (evt) {
                 this.hide();
             },//click anywhere to close
             content: content

@@ -6,7 +6,10 @@
 @import '../../dgrid/css/skins/soria.css';
 /*for the editor  */
 @import '../../dojox/editor/plugins/resources/editorPlugins.css';
+/*for the multi select  */
 @import "../../dojox/form/resources/CheckedMultiSelect.css";
+/*for our forms  */
+@import "form.css";
 
 /* NOTE: for a full screen layout, must set body size equal to the viewport.*/
 html, body, #fullPage, #placholder {width: 100%;height: 100%;overflow: hidden;padding: 0px;margin: 0px;}
@@ -40,42 +43,6 @@ h6:before {counter-increment: h6; content: counter(h2) "." counter(h3) "." count
 h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.nocount:before, h6.nocount:before { content: ""; counter-increment: none }
 
 
-/*.nqGrid .dgrid-cell-padding {padding: 0px;}*/
-/*.field-classId {width:2em} icon column*/
-
-/*DGRID*/
-/*make dgrid transparent*/
-.soria .dgrid{background-color: transparent;} /*dosn't work*/
-/*fix silly row highlight in dgrid*/
-.soria .dgrid-row:hover{background-color: transparent;} /*dosn't work*/
-/*make selected rows be gra */
-/*.dgrid-selected{background: #999;}*/
-
-.dgrid-content .ui-widget-content {background: none;}
-
-/*DIJITS*/
-/*make dijits transparent with a thin border*/
-.soria .dijitTextBox,
-.soria .dijitSelect,
-.soria .dijitSelect .dijitButtonContents,
-.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper,
-.dijitEditor{
-    border: solid; border-color: #e6f2ff; border-width: thin; background: transparent;/*width: 15em;*/
-}
-/*give dijits a blue hover border*/
-.soria .dijitTextBox:hover,
-.soria .dijitSelect:hover,
-.soria .dijitSelect:hover .dijitButtonContents:hover,
-.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper:hover,
-.dijitEditor:hover{
-    border: solid; border-color: blue; border-width: thin;
-}
-
-/*MULTI SELECT*/
-/*remove overflow from checked multi select*/
-.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{overflow:hidden}
-/*checked multi select auto height*/
-.dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{height:inherit}
 
 /*reward*/
 .popUp {border: 2px solid gray;	border-radius: 5px; position: fixed; z-index: 2; opacity: 0;background-color: lime; top: 30%; left: 40%; width: 100px; height: 50px; font-weight: bold; font-size: 16px;}
