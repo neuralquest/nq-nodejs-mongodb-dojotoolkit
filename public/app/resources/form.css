@@ -64,6 +64,7 @@ Author: Mike Wilcox, SitePen Inc.
 
 /*****************************************************************************************************
 					Nq Additions
+					TODO add nqField
 ******************************************************************************************************/
 
 .soria .dijitTextBox,
@@ -71,24 +72,29 @@ Author: Mike Wilcox, SitePen Inc.
 .soria .dijitSelect .dijitButtonContents,
 .soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper,
 .dijitEditor{
-	border: solid; border-color: #e6f2ff; border-width: thin; background: transparent;/*width: 15em;*/
+	border: solid;
+    border-color: #e6f2ff;              /*give dijits a blue border*/
+    border-width: thin;
+    background: transparent;
+    /*width: 15em;*/
 }
-/*give dijits a blue hover border*/
+
 .soria .dijitTextBox:hover,
 .soria .dijitSelect:hover,
 .soria .dijitSelect:hover .dijitButtonContents:hover,
 .soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper:hover,
 .dijitEditor:hover{
-	background: #fafcff;
+	background: #fafcff;                /*give dijits a blue hover background*/
+}
+                                        /*MULTI SELECT*/
+.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{
+    overflow:hidden                     /*remove overflow from checked multi select*/
+}
+.dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{
+    height:inherit                      /*checked multi select auto height*/
 }
 
-/*MULTI SELECT*/
-/*remove overflow from checked multi select*/
-.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{overflow:hidden}
-/*checked multi select auto height*/
-.dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{height:inherit}
-
-/*DGRID*/
+                                        /*DGRID*/
 /*make dgrid transparent*/
 .nqTransparent {
 	background-color: transparent !important;

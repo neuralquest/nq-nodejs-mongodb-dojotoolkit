@@ -50,13 +50,13 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                             name: {
                                 label: 'Name',
                                 renderExpando: true,
-                                //renderCell: self.renderTreeNode,
+                                //renderCell: lang.hitch(self, self.renderTreeNode),
                                 sortable : false,
                                 width: 150
                             },
                             properties: {
                                 label:'Properties',
-                                renderCell: lang.hitch(self, self.renderForm),
+                                renderCell: lang.hitch(self, self.renderTreeDetails),
                                 //set: lang.hitch(self, self.setForm),
                                 sortable : false
                             }
@@ -94,6 +94,26 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     self.createDeferred.resolve(self);//ready to be loaded with data
                 }, function(err){self.createDeferred.reject(err)});
             },
+            renderTreeNode: function(object, value, node, options) {
+                //<i class="fa fa-cloud">gtregfdg</i>
+                var labelNode = domConstruct.create("span",null, node);
+                //domConstruct.create('img', {style:{float: 'left'}, class: 'editIcon'}, labelNode);
+                domConstruct.create('div', {style:{float: 'left'}, innerHTML:object.arrayName}, labelNode);
+                domConstruct.create('div', {style:{float: 'left'}, innerHTML:object.name}, labelNode);
+            },
+            renderTreeDetails: function(object, value, node, options) {
+                var self = this;
+                var properties = self.view.properties;
+                var done = false;
+                if(self.subDocs) self.subDocs.forEach(function(subDoc){
+                    if(!done && subDoc.arrayName == object.arrayName){
+                        properties = subDoc.properties;
+                        done = true;
+                    }
+                });
+                self.renderForm(properties, node);
+                self.setFromValues(properties, object, node);
+            },
             setSelectedObjIdPreviousLevel: function(value){
                 // Create a delegate of the original store with a new getChildren method.
                 /*var rootCollection = lang.delegate(this.store.filter({_id: value}), {
@@ -114,16 +134,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 
                 });*/
                 this.treeGrid.set('collection', this.store.cachingStore.filter({_id: value}));
-                //this.pane.resize();
             },
-            renderTreeNode: function(object, value, node, options) {
-                //<i class="fa fa-cloud">gtregfdg</i>
-                var labelNode = domConstruct.create("span",null, node);
-                //domConstruct.create('img', {style:{float: 'left'}, class: 'editIcon'}, labelNode);
-                domConstruct.create('div', {style:{float: 'left'}, innerHTML:object.arrayName}, labelNode);
-                domConstruct.create('div', {style:{float: 'left'}, innerHTML:object.name}, labelNode);
-            },
-
             collectSubDocs: function(properties, arrayName){
                 var self = this;
                 for(var attrName in properties) {
