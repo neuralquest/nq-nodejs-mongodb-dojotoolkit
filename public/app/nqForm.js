@@ -22,7 +22,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                 var self = this;
                 if(!self.widget.viewRefs || self.widget.viewRefs.length<1) return;
                 var initialized = self.store.get(self.widget.viewRefs[0]).then(function(view){
-                    console.log(JSON.stringify(view));
+                    //console.log(JSON.stringify(view));
                     //return when(self.store.getInheritedSchema(self.viewId),function(schema) {
                     // });
                     self.view = view;

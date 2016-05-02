@@ -1,4 +1,4 @@
-define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/_base/lang",
+define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/_base/lang", 'dojo/on',
         'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", "dojo/promise/all", "dojo/when", 'dijit/registry', 'dojo/store/Memory', "dojo/dom-style",'dojo/query!css3',
         'dijit/form/Select',
         'dijit/form/DateTextBox',
@@ -23,7 +23,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         "dgrid/extensions/DijitRegistry",
 
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins'],
-	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, lang,
+	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, lang, on,
 			arrayUtil, domAttr, Deferred, all, when, registry, Memory, domStyle, css3, Select, DateTextBox, NumberTextBox, Textarea,
              CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton,
              Toolbar, OnDemandGrid, CheckedMultiSelect, Button, Grid, Keyboard,
@@ -128,10 +128,31 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 }
             }
         },
+        updateDoc: function(value){
+            console.log('event', value);
+            this.store.get('').then(function(doc){
+
+            });
+            /*{
+             var attrProps = properties[this.name];
+
+             if(newValue == attrProps.default) newValue.delete;
+             else{
+             if(attrProps.type == 'object') newValue = JSON.parse(newValue);
+             }
+             self.item._viewId = self.view._id;
+             self.item[this.name] = newValue;
+             self.store.put(self.item, {viewId: self.view._id});
+             console.log('self.item', self.item);
+
+             });*/
+        },
         renderForm: function(properties, node){
             var self = this;
             //console.log(JSON.stringify(object));
             var formNode = domConstruct.create('table', {style:{'border-spacing':'3px', 'padding-left': '5px'}}, node);
+
+
 
             //Collect the properties in a three dimensional array: [rows, columns, propNameArr]
             var rowColProperties = [];
@@ -352,24 +373,11 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                         var editorTdDom = domConstruct.create("td", {colspan: 2}, editorRowDom);
                                         dijit = new Textarea(attrProps, domConstruct.create("td", {class: 'inputClass'}, editorTdDom));
                                     }
-                                    else {
-                                    }
                                     if (dijit) {
                                         self.own(dijit);
                                         dijit.startup();
-                                        dijit.on('change', function (newValue) {
-                                            var attrProps = properties[this.name];
-                                            /*
-                                             if(newValue == attrProps.default) newValue.delete;
-                                             else{
-                                             if(attrProps.type == 'object') newValue = JSON.parse(newValue);
-                                             }
-                                             self.item._viewId = self.view._id;
-                                             self.item[this.name] = newValue;
-                                             self.store.put(self.item, {viewId: self.view._id});
-                                             console.log('self.item', self.item);
-                                             */
-                                        });
+                                        dijit.on('change', lang.hitch(self, self.updateDoc));
+                                        //dijit.on('change', self.updateDoc);
                                     }
                                 }
                             }

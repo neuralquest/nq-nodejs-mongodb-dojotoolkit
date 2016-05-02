@@ -35,7 +35,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 
                     self.subDocs = [];
                     self.collectSubDocs(view.properties);
-                    console.log('subDocs:', self.subDocs);
+                    //console.log('subDocs:', self.subDocs);
 
 
                     self.treeGrid = new (declare([ OnDemandGrid, Keyboard, Tree, ColumnResizer, DijitRegistry ]))({
@@ -114,26 +114,24 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                 self.renderForm(properties, node);
                 self.setFromValues(properties, object, node);
             },
-            setSelectedObjIdPreviousLevel: function(value){
+            setSelectedObjIdPreviousLevel: function(id){
                 // Create a delegate of the original store with a new getChildren method.
                 /*var rootCollection = lang.delegate(this.store.filter({_id: value}), {
                     getChildren: function(parent){
                         //var children = rootCollection.getChildren(parent);
                         return rootCollection.dotArray({id:parent._id, arrayName:'tabs'});
-                        var idArr = parent.id.split('.');
-                        if(idArr.length == 1) {
-                            return rootCollection.dotArray({id:parseInt(idArr[0]), arrayName:'tabs'});
-                        }
-                        else if(idArr.length == 2) {
-                            return rootCollection.dotArray({id:parseInt(idArr[0]), arrayName:'tabs'}).dotArray({id:parseInt(idArr[1]), arrayName:'widgets'});
-                        }
-                        else if(idArr.length == 3) {
-                            return rootCollection.dotArray({id:parseInt(idArr[0]), arrayName:'tabs'}).dotArray({id:parseInt(idArr[1]), arrayName:'widgets'}).dotArray({id:parseInt(idArr[2]), arrayName:'views'});
-                        }
                     }
-
                 });*/
-                this.treeGrid.set('collection', this.store.cachingStore.filter({_id: value}));
+                var self = this;
+                var docCol = this.store.filter({_id: id});
+                docCol.on('update', function(event){
+                    alert('doc update in treeGrid');
+                    /*var obj = event.target;
+                     self.onChange(obj);*/
+                });
+                this.treeGrid.set('collection', docCol);
+                //self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
+                //return this.setSelectedObjIdPreviousLevelDeferred.promise;
             },
             collectSubDocs: function(properties, arrayName){
                 var self = this;

@@ -17,6 +17,14 @@ function(declare, lang, array, when, all,
                         childrenArr.forEach(function(childObj){
                             childObj.arrayName = parent.arrayName?parent.arrayName+'.'+attrName:attrName;
                         });
+                        var idx = 0;
+                        childrenArr.forEach(function(childObj){
+                            var pathInObjArr = [];
+                            if(parent.pathInObjArr) pathInObjArr = parent.pathInObjArr.slice(0);//clone
+                            pathInObjArr.push({array:attrName,idx:idx});
+                            childObj.pathInObjArr = pathInObjArr;
+                            idx++;
+                        });
                         filter = {data: childrenArr}
                     }
                 }
