@@ -1,11 +1,7 @@
-define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox',  'dijit/form/NumberTextBox','dijit/form/Textarea',
-        'dijit/form/CheckBox', 'dijit/Editor', 'dijit/form/CurrencyTextBox', 'dijit/form/ValidationTextBox',"dijit/form/RadioButton", 'dojo/dom-construct', "dojo/on",
-        "dojo/when", "dojo/query", 'dijit/registry', "app/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/_base/lang",
-        "dojo/promise/all", "dojo/html", 'dojo/store/Memory', "dojo/dom", "dojo/dom-style","dojo/dom-attr", "dojo/json",
+define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/on",
+        "dojo/when", 'dijit/registry', "app/nqWidgetBase", "dojo/_base/lang",
+        "dojo/dom", "dojo/dom-style","dojo/dom-attr", "dojo/json",
         'dgrid/OnDemandGrid',
-        'dojox/form/CheckedMultiSelect',
-        "dijit/form/Button",
-        'dgrid/Grid',
         'dgrid/Keyboard',
         'dgrid/Selection',
         'dgrid/extensions/DnD',
@@ -16,10 +12,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
 
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins'
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
-    function(declare, arrayUtil, Select, Toolbar, DateTextBox, NumberTextBox, Textarea,
-             CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton, domConstruct, on,
-             when, query, registry, nqWidgetBase, ContentPane, domGeometry, has, lang,
-             all, html, Memory, dom, domStyle, domAttr, JSON, OnDemandGrid, CheckedMultiSelect, Button, Grid, Keyboard,
+    function(declare, domConstruct, on,
+             when, registry, nqWidgetBase, lang, dom, domStyle, domAttr, JSON, OnDemandGrid, Keyboard,
              Selection, DnD, Source, Tree, ColumnResizer, DijitRegistry){
 
         return declare("nqTreeGrid", [nqWidgetBase],{
@@ -32,12 +26,6 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     //console.log(JSON.stringify(view));
                     self.view = view;
                     self.pageHelpTextDiv.innerHTML = view.description;
-
-                    self.subDocs = [];
-                    self.collectSubDocs(view.properties);
-                    //console.log('subDocs:', self.subDocs);
-
-
                     self.treeGrid = new (declare([ OnDemandGrid, Keyboard, Tree, ColumnResizer, DijitRegistry ]))({
                         collection: self.store.filter({_id: 0}),//must return empty array
                         loadingMessage: 'Loading data...',
@@ -104,14 +92,19 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
             renderTreeDetails: function(object, value, node, options) {
                 var self = this;
                 var properties = self.view.properties;
-                var done = false;
-                if(self.subDocs) self.subDocs.forEach(function(subDoc){
-                    if(!done && subDoc.arrayName == object.arrayName){
-                        properties = subDoc.properties;
-                        done = true;
+                if(object.structuredDocPathArr) object.structuredDocPathArr.forEach(function(pathObj){
+                    properties = properties[pathObj.arrayName];
+                    if(properties.type == 'array' && properties.items && properties.items.type=='object') {
+                        var oneOfArr = properties.items.oneOf;
+                        if(oneOfArr) oneOfArr.forEach(function (oneOfobj) {
+                            //we have to determine which one we're dealing with
+                            //properties = oneOfobj.properties;
+                        });
+                        if(oneOfArr) properties = oneOfArr[0].properties;
+                        else properties = properties.items.properties;
                     }
                 });
-                self.renderForm(properties, node);
+                self.renderForm(properties, node, object.structuredDocPathArr);
                 self.setFromValues(properties, object, node);
             },
             setSelectedObjIdPreviousLevel: function(id){
@@ -132,27 +125,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                 this.treeGrid.set('collection', docCol);
                 //self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
                 //return this.setSelectedObjIdPreviousLevelDeferred.promise;
-            },
-            collectSubDocs: function(properties, arrayName){
-                var self = this;
-                for(var attrName in properties) {
-                    var newArrayName = arrayName?arrayName+'.'+attrName:attrName;
-                    var attrProps = properties[attrName];
-                    if(attrProps.type == 'array' && attrProps.items && attrProps.items.type=='object') {
-                        var oneOfArr = attrProps.items.oneOf;
-                        if(oneOfArr){
-                            oneOfArr.forEach(function (oneOfobj) {
-                                self.subDocs.push({arrayName: newArrayName, subType:oneOfobj.name, properties: oneOfobj.properties});
-                                self.collectSubDocs(oneOfobj.properties, newArrayName);
-                            });
-                        }
-                        else {
-                            self.subDocs.push({arrayName: newArrayName, properties: attrProps.items.properties});
-                            self.collectSubDocs(attrProps.items.properties, newArrayName);
-                        }
-                    }
-                }
-             }
+            }
         });
 
     });

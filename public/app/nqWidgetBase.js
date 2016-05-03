@@ -133,8 +133,6 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             //console.log(JSON.stringify(object));
             var formNode = domConstruct.create('table', {style:{'border-spacing':'3px', 'padding-left': '5px'}}, node);
 
-
-
             //Collect the properties in a three dimensional array: [rows, columns, propNameArr]
             var rowColProperties = [];
             for(var attrName in properties) {
@@ -173,17 +171,20 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 };
                                 // The label
                                 domConstruct.create("td", {innerHTML: attrProps.title, style: style},trDom);
-                                //The input field
+                                var tdDom = null;
+                                //The input td
+                                if (attrProps.type == 'object' || (attrProps.type == 'string' && attrProps.media && attrProps.media.mediaType == 'text/html')) {
+                                    domConstruct.create("td", null, trDom);//empty td
+                                    var editorRowDom = domConstruct.create("tr", null, formNode);
+                                    tdDom = domConstruct.create("td", {name:attrName, style:style, colspan: 2}, editorRowDom);
+                                }
+                                else tdDom = domConstruct.create("td", null, trDom);
                                 if(/*!attrProps.readOnly || */attrProps.readOnly == true){
-                                    if (attrProps.type == 'object' || (attrProps.type == 'string' && attrProps.media && attrProps.media.mediaType == 'text/html')) {
-                                        domConstruct.create("td", null, trDom);//empty td
-                                        var editorRowDom = domConstruct.create("tr", null, formNode);
-                                        domConstruct.create("td", {name:attrName, style:style, colspan: 2}, editorRowDom);
-                                    }
-                                    else domConstruct.create("td", {name:attrName, style:style}, trDom);
+                                    domAttr.set(tdDom, 'name', attrName); //give it a name so we know where to put the value
+                                    domAttr.set(tdDom, 'style', style);
                                 }
                                 else {
-                                    var tdDom = domConstruct.create("td", null, trDom);
+                                    //The input dijit
                                     attrProps.class = 'nqField';
                                     attrProps.name = attrName;
                                     var dijit = null;
@@ -327,9 +328,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                                         sortable: true
                                                     }
                                                 ];
-                                                // Now, create an instance of our custom grid which
-                                                // have the features we added!
                                                 dijit = new CustomGrid({
+                                                    name: attrName,
                                                     collection: self.store.filter({_id: 0}),//must return empty array
                                                     loadingMessage: 'Loading data...',
                                                     noDataMessage: 'No results found.',
@@ -365,7 +365,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                             self.store.get(self.selectedObjIdPreviousLevel).then(function(doc){
                                                 var docPart = doc;
                                                 if(structuredDocPathArr) structuredDocPathArr.forEach(function(pathObj){
-                                                    docPart = docPart[pathObj.arrName][pathObj.idx];
+                                                    docPart = docPart[pathObj.arrayName][pathObj.idx];
                                                 });
                                                 console.log(docPart);
                                                 if(docPart[attrName] !== value){

@@ -11,18 +11,18 @@ function(declare, lang, array, when, all,
             this.cachingStore.getChildren = function(parent){
                 var filter = {};
                 for(var attrName in parent){
+                    if(attrName == 'structuredDocPathArr') continue;
                     var attrProps = parent[attrName];
                     if(Array.isArray(attrProps)) {
                         var childrenArr = parent[attrName];
-                        childrenArr.forEach(function(childObj){
-                            childObj.arrayName = parent.arrayName?parent.arrayName+'.'+attrName:attrName;
-                        });
                         var idx = 0;
                         childrenArr.forEach(function(childObj){
-                            var pathInObjArr = [];
-                            if(parent.pathInObjArr) pathInObjArr = parent.pathInObjArr.slice(0);//clone
-                            pathInObjArr.push({array:attrName,idx:idx});
-                            childObj.pathInObjArr = pathInObjArr;
+                            childObj.arrayName = parent.arrayName?parent.arrayName+'.'+attrName:attrName;
+
+                            var structuredDocPathArr = [];
+                            if(parent.structuredDocPathArr) structuredDocPathArr = parent.structuredDocPathArr.slice(0);//clone
+                            structuredDocPathArr.push({arrayName:attrName,idx:idx});
+                            childObj.structuredDocPathArr = structuredDocPathArr;
                             idx++;
                         });
                         filter = {data: childrenArr}
