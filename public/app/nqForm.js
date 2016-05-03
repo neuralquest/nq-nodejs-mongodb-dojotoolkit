@@ -37,6 +37,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                 }, function(err){self.createDeferred.reject(err)});
             },
             setSelectedObjIdPreviousLevel: function(id){
+                this.selectedObjIdPreviousLevel = id;
                 var self = this;
                 var docCol = this.store.filter({_id: id});
                 docCol.on('update', function(event){

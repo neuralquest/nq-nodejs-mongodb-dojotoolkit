@@ -68,7 +68,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                             formWidgets.forEach(function(widget){
                                 //widget.destroyRecursive();
                             });
-                            console.log('formWidgets', formWidgets);
+                            console.log('removeRow', formWidgets);
                             //this.inherited(arguments);
                         }/*,
                         resize: function(){
@@ -79,10 +79,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                         }*/
                     }, domConstruct.create("div", null, self.pane.containerNode));
                     self.treeGrid.on("dgrid-error", function(event){nq.errorDialog(event.error);});
-                    self.treeGrid.on("dgrid-datachange", lang.hitch(self, function(evt) {
+                    /*self.treeGrid.on("dgrid-datachange", lang.hitch(self, function(evt) {
                         this.updateClient(evt.rowId, evt.value);
                     }));
-                    /*
+
                     self.treeGrid.on("refresh", lang.hitch(self, function(evt) {
                         this.pane.resize();
                     }));*/
@@ -115,6 +115,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                 self.setFromValues(properties, object, node);
             },
             setSelectedObjIdPreviousLevel: function(id){
+                this.selectedObjIdPreviousLevel = id;
                 // Create a delegate of the original store with a new getChildren method.
                 /*var rootCollection = lang.delegate(this.store.filter({_id: value}), {
                     getChildren: function(parent){
@@ -122,8 +123,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                         return rootCollection.dotArray({id:parent._id, arrayName:'tabs'});
                     }
                 });*/
-                var self = this;
-                var docCol = this.store.filter({_id: id});
+                var docCol = this.store.cachingStore.filter({_id: id});
                 docCol.on('update', function(event){
                     alert('doc update in treeGrid');
                     /*var obj = event.target;

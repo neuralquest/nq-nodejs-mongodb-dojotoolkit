@@ -128,26 +128,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 }
             }
         },
-        updateDoc: function(value){
-            console.log('event', value);
-            this.store.get('').then(function(doc){
-
-            });
-            /*{
-             var attrProps = properties[this.name];
-
-             if(newValue == attrProps.default) newValue.delete;
-             else{
-             if(attrProps.type == 'object') newValue = JSON.parse(newValue);
-             }
-             self.item._viewId = self.view._id;
-             self.item[this.name] = newValue;
-             self.store.put(self.item, {viewId: self.view._id});
-             console.log('self.item', self.item);
-
-             });*/
-        },
-        renderForm: function(properties, node){
+        renderForm: function(properties, node, structuredDocPathArr){
             var self = this;
             //console.log(JSON.stringify(object));
             var formNode = domConstruct.create('table', {style:{'border-spacing':'3px', 'padding-left': '5px'}}, node);
@@ -218,7 +199,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                             });
                                             domConstruct.place(toolbar.domNode, self.editorToolbarDivNode);
                                             dijit = new Editor({
-                                                value: '<p>Hi</p>',
+                                                value: "<p>You shouldn't be seeing this</p>",
                                                 toolbar: toolbar,
                                                 minHeight: '30px',
                                                 height: '',
@@ -376,8 +357,24 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                     if (dijit) {
                                         self.own(dijit);
                                         dijit.startup();
-                                        dijit.on('change', lang.hitch(self, self.updateDoc));
-                                        //dijit.on('change', self.updateDoc);
+                                        dijit.structuredDocPathArr = structuredDocPathArr;
+                                        dijit.on('change', function(value){
+                                            var attrName = this.name;
+                                            var attrDefault = this.default;
+                                            var structuredDocPathArr = this.structuredDocPathArr;
+                                            self.store.get(self.selectedObjIdPreviousLevel).then(function(doc){
+                                                var docPart = doc;
+                                                if(structuredDocPathArr) structuredDocPathArr.forEach(function(pathObj){
+                                                    docPart = docPart[pathObj.arrName][pathObj.idx];
+                                                });
+                                                console.log(docPart);
+                                                if(docPart[attrName] !== value){
+                                                    if(!value || value == attrDefault) docPart.delete(attrName);
+                                                    else docPart[attrName] = value;
+                                                    self.store.put(doc);
+                                                }
+                                            },nq.errorDialog);
+                                        });
                                     }
                                 }
                             }
