@@ -17,7 +17,7 @@ function(declare, lang, array, when, all,
                         var childrenArr = parent[attrName];
                         var idx = 0;
                         childrenArr.forEach(function(childObj){
-                            childObj.arrayName = parent.arrayName?parent.arrayName+'.'+attrName:attrName;
+                            //childObj.arrayName = parent.arrayName?parent.arrayName+'.'+attrName:attrName;
 
                             var structuredDocPathArr = [];
                             if(parent.structuredDocPathArr) structuredDocPathArr = parent.structuredDocPathArr.slice(0);//clone

@@ -9,16 +9,16 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		selectableObjects: [],
 		displayFPS: false,
 
-		selectedObjIdPreviousLevel: null,
+		docId: null,
 		selectedObjIdThisLevel: null,
 		
 		createDeferred: null,
-		setSelectedObjIdPreviousLevel: new Deferred(),
+		setDocId: new Deferred(),
 		setSelectedObjIdThisLevel: new Deferred(),
 		
-		setSelectedObjIdPreviousLevel: function(objectId){
-			if(objectId == this.selectedObjIdPreviousLevel) return this;
-			this.selectedObjIdPreviousLevel = objectId;
+		setDocId: function(objectId){
+			if(objectId == this.docId) return this;
+			this.docId = objectId;
 			
 			//goto selected object
 			var mesh = this.getMeshByName(objectId);
@@ -26,7 +26,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			return this;
 		},
 		_getSelectedObjIdPreviousLevelAttr: function(){ 
-			return this.selectedObjIdPreviousLevel;
+			return this.docId;
 		},
 		setSelectedObjIdThisLevel: function(value){
 			this.selectedObjIdThisLevel = value;

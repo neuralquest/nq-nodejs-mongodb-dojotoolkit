@@ -66,16 +66,87 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 });
             });
         },
-		setSelectedObjIdPreviousLevel: function(value){
+		setDocId: function(id){
             var self = this;
-            if(self.selectedObjIdPreviousLevel == value) return;
-            if(self.widget.initialObject) value = self.widget.initialObject;
-            self.selectedObjIdPreviousLevel = value; // need this to pass value to treemodel
-			if(self.tree) self.tree.destroy(); 
-			self.createTree();
-			self.treeModel.query = {parentId: value, viewId: this.view};
+            if( self.rootDocId == id ||  self.rootDocId == self.widget.rootDocId) return;
+            if(self.widget.rootDocId)  self.rootDocId = self.widget.rootDocId;
+            else self.rootDocId = id;
+			if(self.tree) self.tree.destroy();
+
+            var arrayNames = ['childDocs'];
+			this.treeModel = new nqObjectStoreModel({
+				childrenAttr: this.viewIdsArr,
+				store : this.store,
+                query: {_id:  self.rootDocId},
+                arrayNames: arrayNames
+			});
+			this.tree = new Tree({
+				store: this.store,
+                model: this.treeModel,
+				dndController: dndSource,
+				betweenThreshold: 5, 
+				persist: false,//doesnt deal well with recursion. Tends to expand everything
+                getLabel: function(item){
+                    if(!item) return 'no item';
+                    return item.name;
+                },
+				getIconClass: function(item, opened){
+					if(!item) return 'icondefault';
+                    if(item.type == 'object') return 'icon'+item._icon;
+					if(item.type == 'assoc') return 'icon'+item._icon;
+					return 'icon0';
+				},
+				getRowClass: function(item, opened){
+					if(!item) return '';
+					return 'css'+item._viewId;//used by tree menu to determine which menu to show
+				},
+				getTooltip: function(item, opened){
+					if(!item) return '';
+					//return item.id+' - '+item.viewId+' - '+item.classId;
+					if(dojo.config.isDebug) return item._id+' - '+item._viewId+' - '+item._icon;
+				},
+				onClick: function(item, node, evt){
+					self.inherited('onClick',arguments);
+					nq.setHashViewId(self.level, item._viewId, self.tabId, item._id);
+				},
+                /*mayHaveChildren: function(item){
+                    //return 'children' in item;
+                    return true;
+                },
+                checkItemAcceptance: function(target, source, position){
+					var targetItem = dijit.getEnclosingWidget(target).item;
+					var uViewObj = self.permittedClassesByViewObj[targetItem._viewId];
+					var sourceItemClassId = source.current.item._icon;
+                    var found = false;
+                    for(var uViewId in uViewObj) {
+                        var permClassesArr = uViewObj[uViewId].classes;
+                        permClassesArr.forEach(function(permClass){
+                            var permClassId = permClass._id;
+                            // Why the f doesnt this work?
+                            //if(permClassId == sourceItemClassId) return true;
+                            //if(permClassId == sourceItemClassId) console.log('sourceItemClassId', sourceItemClassId);
+                            if(permClassId == sourceItemClassId) found = true;
+                        });
+                    }
+ 					return found;
+				},
+
+				getRoot: function(onItem, onError){
+                    self.store.get( self.rootDocId).then(function(item) {
+                        onItem(item);
+                    });
+				},*/
+				onLoad: function(){
+					fullPage.resize();//need this for lazy loaded trees, some how the first tree lags behind
+					//console.dir(self.createDeferred.resolve(self));
+//					self.createDeferred.resolve(self);//ready to be loaded with data/
+//					self.setDocIdDeferred.resolve(self);
+				}
+			}, domConstruct.create('div'));
+			this.pane.containerNode.appendChild(this.tree.domNode);
+//			this.tree.startup();
 		},
-		setSelectedObjIdThisLevel: function(itemId){
+        setSelectedObjIdThisLevel: function(itemId){
             if(!itemId) return;
             var self = this;
             //var itemNode = this.tree.getNodesByItem[846];
@@ -122,163 +193,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     //self.tree.set('selectedItem', result[results.length-1]);
                 }, function(err){console.log('defect in set tree path');});
             }, nq.errorDialog);
-		},
-		createTree: function(){
-			var self = this;
-			this.treeModel = new nqObjectStoreModel({
-				childrenAttr: this.viewIdsArr,
-				store : this.store,
-                //query : {_id: this.selectedObjIdPreviousLevel, viewId: this.view._id}
-                query : {_id: this.selectedObjIdPreviousLevel} // the root query
-			});
-            /*
-            this.treeModel.getIdentity = function(item){
-                if(lang.isObject(item)) return item._id;
-                return item; //hack to get Tree to respect numeric ids
-            },
-			this.treeModel.getRoot = function(onItem, onError){
-				/*var collection = this.store.filter(this.query);
-				collection.on('remove, add', function(event){
-					var parent = event.parent;
-					var collection = self.childrenCache[parent.id];
-					if(collection){
-						var children = collection.fetch();
-						self.onChildrenChange(parent, children);
-					}
-				});	
-				collection.on('update', function(event){
-					var obj = event.target;
-					self.onChange(obj);
-				});	
-				var children = collection.fetch();* /
-                //this.store.getChildren({_id:self.selectedObjIdPreviousLevel, _viewId:self.widgetId}, onItem);
-
-                self.store.get(self.selectedObjIdPreviousLevel).then(function(item) {
-                    if(!item) onError('item not found');
-                    else {
-                        item._viewId = self.view._id;
-                        onItem(item);
-                    }
-                });
-			},
-			this.treeModel.getChildren = function(/*Object* / parentItem, /*function(items)* / onComplete, /*function* / onError){
-                var self = this;
-                //this.store.getChildren(parentItem, onComplete);
-                //return;
-
-				var id = this.store.getIdentity(parentItem);
-/*
-				if(this.childrenCache[id]){
-					// If this.childrenCache[id] is defined, then it always has the latest list of children
-					// (like a live collection), so just return it.
-					//TODO why aren't my collections like a live collection? something is wrong  
-					when(this.childrenCache[id], onComplete, onError);
-					return;
-				}
-				var children = this.childrenCache[id] = this.store.getChildren(parentItem, onComplete);
-                return;
-                * /
-				var collection = this.childrenCache[parentItem._id];
-				if(!collection) {
-                    var query = {parentId: parentItem._id, parentViewId:parentItem._viewId};
-                    collection = this.childrenCache[parentItem._id] = this.store.filter(query);
-                    //collection = this.childrenCache[id] = this.store.getChildren(parentItem);
-                    // Setup observer in case children list changes, or the item(s) in the children list are updated.
-                    collection.on('remove, add', function(event){
-                        var parent = event.directives.parent;
-                        if(!parent) parent = event.directives.oldParent;
-                        var query2 = {parentId: parent._id, parentViewId:parent._viewId};
-                        collection = self.store.filter(query2);
-                        var children = collection.fetch();
-                        self.onChildrenChange(parent, children);
-                        /*self.store.filter(query).fetch().then(function(children){
-                            self.onChildrenChange(parent, children);
-                        });
-                        var collection = self.childrenCache[parent._id];
-                        collection = self.store.filter(query);
-                        if(collection){
-                            var children = collection.fetch();
-                            self.onChildrenChange(parent, children);
-                        }* /
-                    });
-                    collection.on('update', function(event){
-                        var obj = event.target;
-                        self.onChange(obj);
-                    });
-                }
-				var children = collection.fetch();
-				return onComplete(children);
-			},*/
-			this.tree = new Tree({
-				//id: 'tree'+this.widgetId,
-				store: this.store,
-                //model: this.store,
-                model: this.treeModel,
-
-				dndController: dndSource,
-				betweenThreshold: 5, 
-				persist: false,//doesnt deal well with recursion. Tends to expand everything
-                getLabel: function(item){
-                    if(!item) return 'no item';
-                    return item.name;
-                },
-				getIconClass: function(item, opened){
-					if(!item) return 'icondefault';
-                    if(item.type == 'object') return 'icon'+item._icon;
-					if(item.type == 'assoc') return 'icon'+item._icon;
-					return 'icon0';
-				},
-				getRowClass: function(item, opened){
-					if(!item) return '';
-					return 'css'+item._viewId;//used by tree menu to determine which menu to show
-				},
-				getTooltip: function(item, opened){
-					if(!item) return '';
-					//return item.id+' - '+item.viewId+' - '+item.classId;
-					if(dojo.config.isDebug) return item._id+' - '+item._viewId+' - '+item._icon;
-				},
-				onClick: function(item, node, evt){
-					self.inherited('onClick',arguments);
-					nq.setHashViewId(self.level, item._viewId, self.tabId, item._id);
-				},
-                mayHaveChildren: function(item){
-                    //return 'children' in item;
-                    return true;
-                },
-                checkItemAcceptance: function(target, source, position){
-					var targetItem = dijit.getEnclosingWidget(target).item;
-					var uViewObj = self.permittedClassesByViewObj[targetItem._viewId];
-					var sourceItemClassId = source.current.item._icon;
-                    var found = false;
-                    for(var uViewId in uViewObj) {
-                        var permClassesArr = uViewObj[uViewId].classes;
-                        permClassesArr.forEach(function(permClass){
-                            var permClassId = permClass._id;
-                            // Why the f doesnt this work?
-                            //if(permClassId == sourceItemClassId) return true;
-                            //if(permClassId == sourceItemClassId) console.log('sourceItemClassId', sourceItemClassId);
-                            if(permClassId == sourceItemClassId) found = true;
-                        });
-                    }
- 					return found;
-				},
-                /*
-				getRoot: function(onItem, onError){
-                    self.store.get(self.selectedObjIdPreviousLevel).then(function(item) {
-                        onItem(item);
-                    });
-				},*/
-				onLoad: function(){
-					fullPage.resize();//need this for lazy loaded trees, some how the first tree lags behind
-					//console.dir(self.createDeferred.resolve(self));
-//					self.createDeferred.resolve(self);//ready to be loaded with data/
-//					self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
-				}
-			}, domConstruct.create('div'));
-			this.pane.containerNode.appendChild(this.tree.domNode);
-//			this.tree.startup();
-
-		},
+        },
 		createMenusForWidget: function(){
 			var self = this;
             for(var viewId in self.permittedClassesByViewObj) {

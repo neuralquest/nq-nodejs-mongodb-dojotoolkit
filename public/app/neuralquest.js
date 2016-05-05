@@ -89,9 +89,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                         return item.pageId == state.pageId && item.tabNum == state.tabNum && item.pageType == 'widget';
                     });
                     widgetsArr.forEach(function (widget) {
-                        widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel);
+                        widget.setDocId(state.docIdPreviousLevel);
 
-                        //widget.setSelectedObjIdThisLevel(state.selectedObjId);
+                        //widget.setSelectedObjIdThisLevel(state.docId);
                     });
                });
             }
@@ -268,11 +268,11 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             pageIdPreviousLevel: hashArr[level*4-3],
             tabNumPreviousLevel: parseInt(hashArr[level*4-2])?parseInt(hashArr[level*4-2]):0,
             widgetNumPreviousLevel: parseInt(hashArr[level*4-1])?parseInt(hashArr[level*4-1]):0,
-            selectedObjectIdPreviousLevel: hashArr[level*4-0],
+            docIdPreviousLevel: hashArr[level*4-0],
             pageId: hashArr[level*4+1],
             tabNum: parseInt(hashArr[level*4+2])?parseInt(hashArr[level*4+2]):0,
             widgetNum: parseInt(hashArr[level*4+3])?parseInt(hashArr[level*4+3]):0,
-            selectedObjId: hashArr[level*4+4]
+            docId: hashArr[level*4+4]
         };
     }
 
@@ -335,8 +335,8 @@ function XinterpretHash(_hash) {
             widgetsArrArr.forEach(function (widgetsArr) {
                 widgetsArr.forEach(function (widgetLevelObj) {
                     when(widgetLevelObj.widgetProm, function (widget) {
-                        widget.setSelectedObjIdPreviousLevel(getState(widgetLevelObj.level).selectedObjectIdPreviousLevel);
-                        //widget.setSelectedObjIdThisLevel(state.selectedObjId);
+                        widget.setSelectedObjIdPreviousLevel(getState(widgetLevelObj.level).docIdPreviousLevel);
+                        //widget.setSelectedObjIdThisLevel(state.docId);
                     }, errorDialog);
                 });
             });
@@ -434,8 +434,8 @@ function XdrawWidgets(tabObj, tabPane, level) {
                 widgetsArrArr.forEach(function(widgetsArr){
                     var state = getState(level);
                     widgetsArr.forEach(function(widget){
-                        widget.setSelectedObjIdPreviousLevel(state.selectedObjectIdPreviousLevel);
-                        widget.setSelectedObjIdThisLevel(state.selectedObjId);
+                        widget.setSelectedObjIdPreviousLevel(state.docIdPreviousLevel);
+                        widget.setSelectedObjIdThisLevel(state.docId);
                     });
                     level = level -1;
                 });
@@ -710,7 +710,7 @@ function XdrawWidgets(tabObj, tabPane, level) {
                 store: nqStore,
                 createDeferred: createDeferred, //tell us when your done by returning the widgetObj
                 widgetId: widget._id,
-                //selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//dgrid needs an initial query
+                //selectedObjIdPreviousLevel: state.docIdPreviousLevel,//dgrid needs an initial query
                 level: level, // used by onClick
                 tabId: tabId, // used by onClick
                 query: query
@@ -723,7 +723,7 @@ function XdrawWidgets(tabObj, tabPane, level) {
                 store: nqStore,
                 createDeferred: createDeferred, //tell us when your done by returning the widgetObj
                 widgetId: widget._id,
-                //selectedObjIdPreviousLevel: state.selectedObjectIdPreviousLevel,//tree needs an initial query
+                //selectedObjIdPreviousLevel: state.docIdPreviousLevel,//tree needs an initial query
                 level: level, // used by onClick
                 tabId: tabId, // used by onClick
             }, domConstruct.create('div'));
@@ -777,11 +777,11 @@ function XdrawWidgets(tabObj, tabPane, level) {
             pageIdPreviousLevel: hashArr[level*3-3],
             tabNumPreviousLevel: parseInt(hashArr[level*3-2]),
             widgetNumPreviousLevel: parseInt(hashArr[level*3-1]),
-            selectedObjectIdPreviousLevel: hashArr[level*3-0],
+            docIdPreviousLevel: hashArr[level*3-0],
             pageId: hashArr[level*3+1],
             tabNum: parseInt(hashArr[level*3+2]),
             widgetNum: parseInt(hashArr[level*3+3]),
-            selectedObjId: hashArr[level*3+4]
+            docId: hashArr[level*3+4]
 		};
 	}
 	function setHashTabId(level, tabId, viewId){
@@ -800,7 +800,7 @@ function XdrawWidgets(tabObj, tabPane, level) {
 		hash(newHash, true);// update history, instead of adding a new record			
 	}
 	lang.setObject("nq.setHashViewId", setHashViewId);//make the function globally accessable
-	function setHashViewId(level, viewId, tabId, selectedObjId){
+	function setHashViewId(level, viewId, tabId, docId){
 		//var tabPane = registry.byId('tab'+tabId);
 		//document.title = 'NQ - '+(tabPane?tabPane.title+' - ':'')+this.getLabel(item);
 
@@ -812,8 +812,8 @@ function XdrawWidgets(tabObj, tabPane, level) {
         cookie('tabId'+tabId, JSON.stringify(arrFromTab));
 		
 //		hashArr[level*3+2] = tabId;//it may have changed
-        //set our selectedObjId in the hash array
-		hashArr[level*3+3] = selectedObjId;//it will have changed
+        //set our docId in the hash array
+		hashArr[level*3+3] = docId;//it will have changed
 		if(hashArr[(level+1)*3+1] != viewId){//if its changed
 			//remove anything following this level in the hash since it is no longer valid
 			hashArr = hashArr.slice(0,(level+1)*3+1);

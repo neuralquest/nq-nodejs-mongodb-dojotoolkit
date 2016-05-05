@@ -35,7 +35,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                         viewId: self.view._id, //TODO what about more than one
                         classId: self.view.mapsTo
                     };
-                    var directives = {parent:{id:self.selectedObjIdPreviousLevel}};
+                    var directives = {parent:{id:self.docId}};
                     self.store.add(addObj, directives);
 		        },
 				style : {'margin-left':'5px'} 
@@ -51,7 +51,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 		        onClick: function(evt){
 		        	for(var rowid in self.grid.selection){ 
 		        		var item=self.grid.row(rowid).data; 
-						var directives = {parent:{id:self.selectedObjIdPreviousLevel}};
+						var directives = {parent:{id:self.docId}};
 	                    self.store.remove(item.id, item.viewId, directives);//what if there is more than one view?
 		        	}
 				}
@@ -221,10 +221,10 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                 self.createDeferred.resolve(self);//ready to be loaded with data
             }, function(err){self.createDeferred.reject(err)});
 		},
-		setSelectedObjIdPreviousLevel: function(value){
+		setDocId: function(value){
 			//load the data
-			if(this.selectedObjIdPreviousLevel == value) return this;
-			this.selectedObjIdPreviousLevel = value;
+			if(this.docId == value) return this;
+			this.docId = value;
 
             var collection = this.store.filter({parentId: value, parentViewId: this.widgetId});
             var children = collection.fetch();
@@ -234,7 +234,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			//this.grid.set('query',{parentId: value, widgetId: this.widgetId, join:true});
             //this.grid.refresh();
 			
-			this.setSelectedObjIdPreviousLevelDeferred.resolve(this);
+			this.setDocIdDeferred.resolve(this);
 		}
 
 	});

@@ -116,8 +116,7 @@ define([
 			// parentItem:
 			//		Item from the dojo/store
 
-            var filter = new this.store.Filter();
-            var childrenFilter = filter.in('_id', parentItem.childDocs);
+            var childrenFilter = this.store.Filter().in('_id', parentItem[this.arrayNames[0]]);
             var childrenCollection = this.store.filter(childrenFilter);
             childrenCollection.on('remove, add', function(event){
                 var parent = event.parent;
@@ -131,63 +130,9 @@ define([
                 var obj = event.target;
                 self.onChange(obj);
             });
-            var childrenQueryResult = childrenCollection.fetch();
-            var childObjects = [];
-            childrenQueryResult.forEach(function (item) {
-                childObjects.push(item);
-            });
-            onComplete(childObjects);
-
-            return;
-			// TODO:
-			// For 2.0, change getChildren(), getRoot(), etc. to return a cancelable promise, rather than taking
-			// onComplete() and onError() callbacks.   Also, probably get rid of the caching.
-			//
-			// But be careful if we continue to maintain ObjectStoreModel as a separate class
-			// from Tree, because in that case ObjectStoreModel can be shared by two trees, and destroying one tree
-			// should not interfere with an in-progress getChildren() call from another tree.  Also, need to make
-			// sure that multiple calls to getChildren() for the same parentItem don't trigger duplicate calls
-			// to onChildrenChange() and onChange().
-			//
-			// I think for 2.0 though that ObjectStoreModel should be rolled into Tree itself.
-
-			var id = this.store.getIdentity(parentItem);
-
-			if(this.childrenCache[id]){
-				// If this.childrenCache[id] is defined, then it always has the latest list of children
-				// (like a live collection), so just return it.
-				when(this.childrenCache[id], onComplete, onError);
-				return;
-			}
-
-			// Query the store.
-			// Cache result so that we can close the query on destroy(), and to avoid setting up multiple observers
-			// when getChildren() is called multiple times for the same parent.
-			// The only problem is that getChildren() on non-Observable stores may return a stale value.
-			var res = this.childrenCache[id] = this.store.getChildren(parentItem);
-			if(res.then){
-				this.own(res);	// in case app calls destroy() before query completes
-			}
-
-			// Setup observer in case children list changes, or the item(s) in the children list are updated.
-			if(res.observe){
-				this.own(res.observe(lang.hitch(this, function(obj, removedFrom, insertedInto){
-					//console.log("observe on children of ", id, ": ", obj, removedFrom, insertedInto);
-
-					// If removedFrom == insertedInto, this call indicates that the item has changed.
-					// Even if removedFrom != insertedInto, the item may have changed.
-					this.onChange(obj);
-
-					if(removedFrom != insertedInto){
-						// Indicates an item was added, removed, or re-parented.  The children[] array (returned from
-						// res.then(...)) has already been updated (like a live collection), so just use it.
-						when(res, lang.hitch(this, "onChildrenChange", parentItem));
-					}
-				}), true));	// true means to notify on item changes
-			}
-
-			// User callback
-			when(res, onComplete, onError);
+            childrenCollection.fetch().then(function(childObjects){
+				onComplete(childObjects);
+			});
 		},
 
 		// =======================================================================

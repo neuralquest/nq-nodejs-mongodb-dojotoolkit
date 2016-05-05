@@ -107,8 +107,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/on",
                 self.renderForm(properties, node, object.structuredDocPathArr);
                 self.setFromValues(properties, object, node);
             },
-            setSelectedObjIdPreviousLevel: function(id){
-                this.selectedObjIdPreviousLevel = id;
+            setDocId: function(id){
+                this.docId = id;
                 // Create a delegate of the original store with a new getChildren method.
                 /*var rootCollection = lang.delegate(this.store.filter({_id: value}), {
                     getChildren: function(parent){
@@ -123,8 +123,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/on",
                      self.onChange(obj);*/
                 });
                 this.treeGrid.set('collection', docCol);
-                //self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
-                //return this.setSelectedObjIdPreviousLevelDeferred.promise;
+                //self.setDocIdDeferred.resolve(self);
+                //return this.setDocIdDeferred.promise;
             }
         });
 

@@ -14,7 +14,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		postCreate: function(){
 			this.inherited(arguments);
 		},
-		setSelectedObjIdPreviousLevel: function(objId){
+		setDocId: function(objId){
 			var self = this;
 			//Clear the page
 			this.pane.destroyDescendants(false);//destroy all the widget but leave the pane intact
@@ -23,7 +23,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 				return self.generateNextLevelContents(obj, 1, null, false).then(function(obj){
 					registry.byId('tab'+self.tabId).resize();
 					//self.pane.resize();
-					self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
+					self.setDocIdDeferred.resolve(self);
 					return item;
 				});
 			}, nq.errorDialog);
@@ -183,14 +183,14 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 		XsetSelectedObjIdPreviousLevel: function(value){
 			//load the data
 			if(value){
-				if(this.selectedObjIdPreviousLevel == value) return this;
-				this.selectedObjIdPreviousLevel = value;
+				if(this.docId == value) return this;
+				this.docId = value;
 			}
 			this.pane.destroyDescendants(false);//destroy all the widget but leave the pane intact
 
 			var self = this;
 			var viewId = this.view._id;
-			/*var query = {itemId:this.selectedObjIdPreviousLevel, viewId:this.viewId};
+			/*var query = {itemId:this.docId, viewId:this.viewId};
 			var collection = this.store.filter(query);
 			collection.on('remove, add', function(event){
 				var parent = event.parent;
@@ -204,15 +204,15 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			});
 			var children = collection.fetch();
 			var item = children[0];*/
-            self.store.get(this.selectedObjIdPreviousLevel, viewId).then(function(item) {
+            self.store.get(this.docId, viewId).then(function(item) {
                 var promise = when(self.generateNextLevelContents(item, 1, null, false), function(item){
 					registry.byId('tab'+self.tabId).resize();
 	//				self.pane.resize();
-					self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
+					self.setDocIdDeferred.resolve(self);
 					return item;
                 });
 			}, nq.errorDialog);
- 			return this.setSelectedObjIdPreviousLevelDeferred.promise;
+ 			return this.setDocIdDeferred.promise;
 		},
 		//Create an ordinary HTML page recursivly by obtaining data from the server
 		XgenerateNextLevelContents: function(item, headerLevel, parentId, previousParagrphHasRightFloat){

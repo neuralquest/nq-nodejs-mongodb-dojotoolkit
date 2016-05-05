@@ -1,5 +1,6 @@
 define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/_base/lang", 'dojo/on',
         'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", "dojo/promise/all", "dojo/when", 'dijit/registry', 'dojo/store/Memory', "dojo/dom-style",'dojo/query!css3',
+        "dojo/sniff",
         'dijit/form/Select',
         'dijit/form/DateTextBox',
         'dijit/form/NumberTextBox',
@@ -24,7 +25,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins'],
 	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, lang, on,
-			arrayUtil, domAttr, Deferred, all, when, registry, Memory, domStyle, css3, Select, DateTextBox, NumberTextBox, Textarea,
+			arrayUtil, domAttr, Deferred, all, when, registry, Memory, domStyle, css3, has, Select, DateTextBox, NumberTextBox, Textarea,
              CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton,
              Toolbar, OnDemandGrid, CheckedMultiSelect, Button, Grid, Keyboard,
              Selection, DnD, Source, Tree, ColumnResizer, DijitRegistry){
@@ -34,12 +35,12 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         createDeferred: null,
         parentId: null,
 		schema: null,
-		selectedObjIdPreviousLevel: null,
+		docId: null,
 		selectedObjIdThisLevel: null,
-		setSelectedObjIdPreviousLevelDeferred: new Deferred(),
+		setDocIdDeferred: null,
 		
-		setSelectedObjIdPreviousLevel: function(value){
-			this.selectedObjIdPreviousLevel = value;
+		setDocId: function(value){
+			this.docId = value;
 			return this;
 		},
 		setSelectedObjIdThisLevel: function(value){
@@ -174,13 +175,19 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 var tdDom = null;
                                 //The input td
                                 if (attrProps.type == 'object' || (attrProps.type == 'string' && attrProps.media && attrProps.media.mediaType == 'text/html')) {
+                                    // certain input field get they're own row
                                     domConstruct.create("td", null, trDom);//empty td
                                     var editorRowDom = domConstruct.create("tr", null, formNode);
                                     tdDom = domConstruct.create("td", {name:attrName, style:style, colspan: 2}, editorRowDom);
                                 }
-                                else tdDom = domConstruct.create("td", null, trDom);
+                                else tdDom = domConstruct.create("td", null, trDom);//ordinary td
                                 if(/*!attrProps.readOnly || */attrProps.readOnly == true){
                                     domAttr.set(tdDom, 'name', attrName); //give it a name so we know where to put the value
+                                    if(attrProps.bold) {//TODO make these optional
+                                        //style['border-top-style'] = 'solid';
+                                        style['border-top-color'] = 'lightgrey';
+                                        style['padding-left'] = '30px';
+                                    }
                                     domAttr.set(tdDom, 'style', style);
                                 }
                                 else {
@@ -211,39 +218,39 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
                                             //Needed for auto sizing, found it in AlwaysShowToolbar in the dijit library
                                             //dijit.startup();//dijit has to be started before we can attach evens
-                                            /*dijit.on("NormalizedDisplayChanged", function(event){
-                                             // summary:
-                                             //		Updates the height of the editor area to fit the contents.
-                                             var e = this.editorObject;
-                                             //if(!e.isLoaded) return;
-                                             if(e.height) return;
-                                             var height = domGeometry.getMarginSize(this.domNode).h;
-                                             if(has("opera"))height = e.editNode.scrollHeight;
-                                             // console.debug('height',height);
-                                             // alert(this.editNode);
-                                             //height maybe zero in some cases even though the content is not empty,
-                                             //we try the height of body instead
-                                             if(!height) height = domGeometry.getMarginSize(this.ownerDocumentBody).h;
-                                             if(this._fixEnabled){
-                                             // #16204: add toolbar height when it is fixed aka "stuck to the top of the screen" to prevent content from cutting off during autosizing.
-                                             // Seems like _updateHeight should be taking the intitial margin height from a more appropriate node that includes the marginTop set in globalOnScrollHandler.
-                                             height += domGeometry.getMarginSize(this.editor.header).h;
-                                             }
-                                             if(height == 0){
-                                             console.debug("Can not figure out the height of the editing area!");
-                                             return; //prevent setting height to 0
-                                             }
-                                             if(has("ie") <= 7 && this.editor.minHeight){
-                                             var min = parseInt(this.editor.minHeight);
-                                             if(height < min){
-                                             height = min;
-                                             }
-                                             }
-                                             if(height != this._lastHeight){
-                                             this._lastHeight = height;
-                                             // this.editorObject.style.height = this._lastHeight + "px";
-                                             domGeometry.setMarginBox(this.iframe, { h: this._lastHeight });
-                                             }
+                                            dijit.on("NormalizedDisplayChanged", function(event){
+                                                // summary:
+                                                //		Updates the height of the editor area to fit the contents.
+                                                var e = this.editorObject;
+                                                //if(!e.isLoaded) return;
+                                                if(e.height) return;
+                                                var height = domGeometry.getMarginSize(this.domNode).h;
+                                                if(has("opera"))height = e.editNode.scrollHeight;
+                                                // console.debug('height',height);
+                                                // alert(this.editNode);
+                                                //height maybe zero in some cases even though the content is not empty,
+                                                //we try the height of body instead
+                                                if(!height) height = domGeometry.getMarginSize(this.ownerDocumentBody).h;
+                                                if(this._fixEnabled){
+                                                    // #16204: add toolbar height when it is fixed aka "stuck to the top of the screen" to prevent content from cutting off during autosizing.
+                                                    // Seems like _updateHeight should be taking the intitial margin height from a more appropriate node that includes the marginTop set in globalOnScrollHandler.
+                                                    height += domGeometry.getMarginSize(this.editor.header).h;
+                                                }
+                                                if(height == 0){
+                                                    console.debug("Can not figure out the height of the editing area!");
+                                                    return; //prevent setting height to 0
+                                                }
+                                                if(has("ie") <= 7 && this.editor.minHeight){
+                                                    var min = parseInt(this.editor.minHeight);
+                                                    if(height < min){
+                                                        height = min;
+                                                    }
+                                                }
+                                                if(height != this._lastHeight){
+                                                    this._lastHeight = height;
+                                                    // this.editorObject.style.height = this._lastHeight + "px";
+                                                    //domGeometry.setMarginBox(this.iframe, { h: this._lastHeight });
+                                                }
                                              /*var height = domGeometry.getMarginSize(this.domNode).h;
                                              if(has("opera"))
                                              height = this.editNode.scrollHeight;
@@ -251,8 +258,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                              //console.log('height',domGeometry.getMarginSize(this.editNode));
                                              this.resize({h: height});
                                              domGeometry.setMarginBox(this.iframe, { h: height });
-                                             * /
-                                             });*/
+                                             */
+                                             });
                                         }
                                         else if (attrProps.media && attrProps.media.mediaType == 'image/jpg') {
                                         }
@@ -321,13 +328,11 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                             else {
                                                 // Create a new constructor by mixing in the components
                                                 var CustomGrid = declare([OnDemandGrid, Keyboard, Selection, DnD, DijitRegistry]);
-                                                var columns = [
-                                                    {
+                                                var columns = [{
                                                         label: 'View Name',
                                                         field: 'title',
                                                         sortable: true
-                                                    }
-                                                ];
+                                                }];
                                                 dijit = new CustomGrid({
                                                     name: attrName,
                                                     collection: self.store.filter({_id: 0}),//must return empty array
@@ -362,12 +367,12 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                             var attrName = this.name;
                                             var attrDefault = this.default;
                                             var structuredDocPathArr = this.structuredDocPathArr;
-                                            self.store.get(self.selectedObjIdPreviousLevel).then(function(doc){
+                                            self.store.get(self.docId).then(function(doc){
                                                 var docPart = doc;
                                                 if(structuredDocPathArr) structuredDocPathArr.forEach(function(pathObj){
                                                     docPart = docPart[pathObj.arrayName][pathObj.idx];
                                                 });
-                                                console.log(docPart);
+                                                //console.log(docPart);
                                                 if(docPart[attrName] !== value){
                                                     if(!value || value == attrDefault) docPart.delete(attrName);
                                                     else docPart[attrName] = value;

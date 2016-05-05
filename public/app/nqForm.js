@@ -36,8 +36,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     self.createDeferred.resolve(self);//ready to be loaded with data
                 }, function(err){self.createDeferred.reject(err)});
             },
-            setSelectedObjIdPreviousLevel: function(id){
-                this.selectedObjIdPreviousLevel = id;
+            setDocId: function(id){
+                this.docId = id;
                 var self = this;
                 var docCol = this.store.filter({_id: id});
                 docCol.on('update', function(event){
@@ -49,8 +49,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     self.setFromValues(self.view.properties, doc, self.pane.containerNode)
                 });
 
-                //self.setSelectedObjIdPreviousLevelDeferred.resolve(self);
-                //return this.setSelectedObjIdPreviousLevelDeferred.promise;
+                //self.setDocIdDeferred.resolve(self);
+                //return this.setDocIdDeferred.promise;
             }
 
         });
