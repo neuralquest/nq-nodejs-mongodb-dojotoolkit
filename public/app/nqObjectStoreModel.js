@@ -91,32 +91,29 @@ define([
 			onItem(root);
 		},
 
-		mayHaveChildren: function(/*===== item =====*/){
-			// summary:
-			//		Tells if an item has or might have children.  Implementing logic here
-			//		avoids showing +/- expando icon for nodes that we know won't have children.
-			//		(For efficiency reasons we may not want to check if an element actually
-			//		has children until user clicks the expando node).
-			//
-			//		Application code should override this method based on the data, for example
-			//		it could be `return item.leaf == true;`.
-			//
-			//		Note that mayHaveChildren() must return true for an item if it could possibly
-			//		have children in the future, due to drag-an-drop or some other data store update.
-			//		Also note that it may return true if it's just too expensive to check during tree
-			//		creation whether or not the item has children.
-			// item: Object
-			//		Item from the dojo/store
+		mayHaveChildren: function(item){
+			//if(item[this.arrayNames[0]] && (item[this.arrayNames[0]]).length>0) return true;
 			return true;
 		},
-
 		getChildren: function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
 			// summary:
 			//		Calls onComplete() with array of child items of given parent item.
 			// parentItem:
 			//		Item from the dojo/store
+            var self = this;
+            var childrenFilter = null;
+            if(parentItem.viewId){
+                self.store.get(parentItem.viewId).then(function(childView){
+                    self.store.get(childView.rootDocId).then(function(classObj){
+                        childrenFilter = self.store.Filter().in('_id', classObj.children);
+                    });
+                });
+            }
+            else{
+                childrenFilter = this.store.Filter().in('_id', parentItem[this.arrayNames[0]]);
+            }
 
-            var childrenFilter = this.store.Filter().in('_id', parentItem[this.arrayNames[0]]);
+
             var childrenCollection = this.store.filter(childrenFilter);
             childrenCollection.on('remove, add', function(event){
                 var parent = event.parent;
@@ -133,6 +130,15 @@ define([
             childrenCollection.fetch().then(function(childObjects){
 				onComplete(childObjects);
 			});
+            /*
+             recordStoreFilter= new recordStore.Filter()
+             name1Filter= recordStoreFilter.eq({'name': 'Name1'})
+             age25Filter= recordStoreFilter.eq({'age', 25})
+             unionFilter= recordStoreFilter.or(name1Filter, age25Filter)
+             unionData= recordStore.filter(unionFilter)
+             //Set using the following
+             recordGrid.set('collection', unionData) //or intersectionData
+             */
 		},
 
 		// =======================================================================

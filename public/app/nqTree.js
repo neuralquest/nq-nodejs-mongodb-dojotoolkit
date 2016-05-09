@@ -12,16 +12,13 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 		postCreate: function(){
             this.inherited(arguments);
             var self = this;
-            if(!self.widget.viewRefs || self.widget.viewRefs.length<1) {
-                //self.createDeferred.reject({message:"could not open tree"});
-                self.createDeferred.resolve(self);
-                return;
-            }
-            var initialized = self.store.get(self.widget.viewRefs[0]).then(function(view){
+            var initialized = self.store.get(self.widget.viewId).then(function(view){
                 self.view = view;
                 self.headerDivNode.innerHTML = '<h1>'+view.name+'</h1>';
                 //domStyle.set(self.headerDivNode, 'display', 'block');//set the header node, created in the superclass,  to visible
                 self.pageHelpTextDiv.innerHTML = view.description;
+                self.arrayNames = view.childArrayNames;
+
                 return true;
                 /*return when(self.store.getInheritedSchema(view),function(schema){
                     self.schema = schema;
@@ -44,41 +41,18 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				self.createDeferred.resolve(self);//ready to be loaded with data
 			}, function(err){self.createDeferred.reject(err)});
 		},
-        permittedClassesForUniqueView: function(uView){
-            var self = this;
-            self.store.getItemsByAssocTypeAndDestClass(uView._id, 'manyToMany', VIEW_CLASS_TYPE).then(function(manyViewsArr){
-                var permClassesPromises = [];
-                manyViewsArr.forEach(function(manyView){
-                    if(manyView.mapsTo) permClassesPromises.push(self.store.collectAllByAssocType(manyView.mapsTo, 'subclasses'));
-                });
-                return all(permClassesPromises).then(function(permClassesArrArr){
-                    //console.log('permClassesArrArr',permClassesArrArr);
-                    var permObj = {};
-                    var count = 0;
-                    permClassesArrArr.forEach(function(permClassesArr){
-                        var manyView = manyViewsArr[count];
-                        permObj[manyView._id] = {view: manyView, classes: permClassesArr};
-                        count++;
-                    });
-                    self.permittedClassesByViewObj[uView._id] = permObj;
-                    //console.log('permObj',uView._id,permObj);
-                    return true;
-                });
-            });
-        },
 		setDocId: function(id){
             var self = this;
-            if( self.rootDocId == id ||  self.rootDocId == self.widget.rootDocId) return;
-            if(self.widget.rootDocId)  self.rootDocId = self.widget.rootDocId;
-            else self.rootDocId = id;
+            if(self.rootDocId == self.view.rootDocId) return;
+            self.rootDocId = self.view.rootDocId;
 			if(self.tree) self.tree.destroy();
 
-            var arrayNames = ['childDocs'];
+            var arrayNames = ['children'];
 			this.treeModel = new nqObjectStoreModel({
 				childrenAttr: this.viewIdsArr,
 				store : this.store,
                 query: {_id:  self.rootDocId},
-                arrayNames: arrayNames
+                arrayNames: self.arrayNames
 			});
 			this.tree = new Tree({
 				store: this.store,
@@ -88,13 +62,14 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				persist: false,//doesnt deal well with recursion. Tends to expand everything
                 getLabel: function(item){
                     if(!item) return 'no item';
+                    if(item.docType == 'class') return item.title;
                     return item.name;
                 },
 				getIconClass: function(item, opened){
 					if(!item) return 'icondefault';
-                    if(item.type == 'object') return 'icon'+item._icon;
-					if(item.type == 'assoc') return 'icon'+item._icon;
-					return 'icon0';
+                    if(item.docType == 'class') return 'icon0';
+					//if(item.type == 'assoc') return 'icon'+item._icon;
+					return 'icon1';
 				},
 				getRowClass: function(item, opened){
 					if(!item) return '';
@@ -107,7 +82,9 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				},
 				onClick: function(item, node, evt){
 					self.inherited('onClick',arguments);
-					nq.setHashViewId(self.level, item._viewId, self.tabId, item._id);
+                    var pageId = item.pageId;
+                    if(!pageId) pageId = self.view.pageId;
+                    if(pageId) nq.setHash(item._id, pageId, self.tabNum, self.widNum, self.level+1);
 				},
                 /*mayHaveChildren: function(item){
                     //return 'children' in item;
@@ -193,6 +170,28 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     //self.tree.set('selectedItem', result[results.length-1]);
                 }, function(err){console.log('defect in set tree path');});
             }, nq.errorDialog);
+        },
+        permittedClassesForUniqueView: function(uView){
+            var self = this;
+            self.store.getItemsByAssocTypeAndDestClass(uView._id, 'manyToMany', VIEW_CLASS_TYPE).then(function(manyViewsArr){
+                var permClassesPromises = [];
+                manyViewsArr.forEach(function(manyView){
+                    if(manyView.mapsTo) permClassesPromises.push(self.store.collectAllByAssocType(manyView.mapsTo, 'subclasses'));
+                });
+                return all(permClassesPromises).then(function(permClassesArrArr){
+                    //console.log('permClassesArrArr',permClassesArrArr);
+                    var permObj = {};
+                    var count = 0;
+                    permClassesArrArr.forEach(function(permClassesArr){
+                        var manyView = manyViewsArr[count];
+                        permObj[manyView._id] = {view: manyView, classes: permClassesArr};
+                        count++;
+                    });
+                    self.permittedClassesByViewObj[uView._id] = permObj;
+                    //console.log('permObj',uView._id,permObj);
+                    return true;
+                });
+            });
         },
 		createMenusForWidget: function(){
 			var self = this;

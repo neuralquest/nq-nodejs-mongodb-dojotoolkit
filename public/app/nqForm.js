@@ -20,8 +20,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
             postCreate: function(){
                 this.inherited(arguments);
                 var self = this;
-                if(!self.widget.viewRefs || self.widget.viewRefs.length<1) return;
-                var initialized = self.store.get(self.widget.viewRefs[0]).then(function(view){
+                var initialized = self.store.get(self.widget.viewId).then(function(view){
                     //console.log(JSON.stringify(view));
                     //return when(self.store.getInheritedSchema(self.viewId),function(schema) {
                     // });
@@ -45,8 +44,8 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
                     /*var obj = event.target;
                      self.onChange(obj);*/
                 });
-                docCol.fetch().then(function(doc){
-                    self.setFromValues(self.view.properties, doc, self.pane.containerNode)
+                docCol.fetch().then(function(docsArr){
+                    self.setFromValues(self.view.properties, docsArr[0], self.pane.containerNode)
                 });
 
                 //self.setDocIdDeferred.resolve(self);

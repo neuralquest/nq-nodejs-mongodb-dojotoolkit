@@ -173,8 +173,8 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		},
 		startup: function(){
 			//this.resize();
-			var pane = registry.byId('tab'+this.tabId);
-			pane.resize();
+			//var pane = registry.byId('tab'+this.tabId);
+			this.resize();
 			this.loadingMessage();
 			animate();
 		},

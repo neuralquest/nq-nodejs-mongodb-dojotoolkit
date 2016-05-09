@@ -20,8 +20,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/on",
             postCreate: function(){
                 this.inherited(arguments);
                 var self = this;
-                if(!self.widget.viewRefs || self.widget.viewRefs.length<1) return;
-                var initialized = self.store.get(self.widget.viewRefs[0]).then(function(view){
+                var initialized = self.store.get(self.widget.viewId).then(function(view){
                     //console.log('VIEW:',view);
                     //console.log(JSON.stringify(view));
                     self.view = view;
