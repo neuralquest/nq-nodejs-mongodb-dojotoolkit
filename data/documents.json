@@ -841,6 +841,10 @@
                 "object"
             ]
         }, 
+        "icon" : {
+            "title" : "Icon", 
+            "type" : "string"
+        }, 
         "description" : {
             "title" : "Description", 
             "type" : "string", 
@@ -850,15 +854,11 @@
                 "mediaType" : "text/html"
             }, 
             "default" : "<p>no text</p>"
-        }, 
-        "icon" : {
-            "title" : "Icon", 
-            "type" : "string"
         }
     }, 
     "required" : [
         "_id", 
-        "type"
+        "docType"
     ], 
     "additionalProperties" : false, 
     "children" : [
@@ -891,7 +891,8 @@
         }
     }, 
     "children" : [
-        "570064645dde184ccfb9fc84"
+        "57343c283c6d3cd598a5a2e9", 
+        "57343beb3c6d3cd598a5a2e7"
     ]
 }
 { 
@@ -904,10 +905,8 @@
 
     }, 
     "children" : [
-        "56f8a22e5dde184ccfb9fc78", 
-        "56f87ec55dde184ccfb9fc74", 
-        "56f89f625dde184ccfb9fc76", 
-        "56f8a22e5dde184ccfb9fc78"
+        "573435433c6d3cd598a5a2db", 
+        "573435803c6d3cd598a5a2dd"
     ]
 }
 { 
@@ -916,100 +915,86 @@
     "title" : "Pages", 
     "description" : "Describes the Tab-Widget-View Reference structure", 
     "type" : "object", 
-    "oneOf" : [
-        {
-            "name" : "SubTabs", 
-            "properties" : {
-                "name" : {
-                    "title" : "Name", 
-                    "type" : "string", 
-                    "maxLength" : NumberInt(1000), 
-                    "default" : "[unnamed]"
-                }, 
-                "description" : {
-                    "title" : "Description", 
-                    "type" : "string", 
-                    "maxLength" : NumberInt(10000), 
-                    "media" : {
-                        "mediaType" : "text/html"
-                    }, 
-                    "default" : "<p>[no text]</p>"
-                }, 
-                "subTabs" : {
-                    "title" : "Tabs", 
-                    "readOnly" : false, 
-                    "items" : {
-                        "type" : "string", 
-                        "maxLength" : NumberInt(1000), 
-                        "pattern" : "[a-f0-9]+$"
-                    }, 
-                    "query" : {
-                        "_id" : "560b1407434ec958241693e8", 
-                        "association" : "ordered"
-                    }, 
-                    "type" : "array", 
-                    "minItems" : NumberInt(0), 
-                    "uniqueItems" : true
-                }
-            }, 
-            "additionalProperties" : false
+    "properties" : {
+        "_id" : {
+            "title" : "_id", 
+            "readOnly" : true, 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]+$"
         }, 
-        {
-            "name" : "Widgets", 
-            "properties" : {
-                "title" : {
-                    "title" : "Title", 
-                    "type" : "string", 
-                    "maxLength" : NumberInt(1000), 
-                    "default" : "[unnamed]"
-                }, 
-                "description" : {
-                    "title" : "Description", 
-                    "type" : "string", 
-                    "maxLength" : NumberInt(10000), 
-                    "media" : {
-                        "mediaType" : "text/html"
-                    }, 
-                    "default" : "<p>[no text]</p>"
-                }, 
-                "widgets" : {
-                    "title" : "Widgets", 
-                    "description" : "", 
-                    "type" : "array", 
-                    "items" : {
-                        "type" : "object", 
+        "name" : {
+            "title" : "Name", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "default" : "[unnamed]"
+        }, 
+        "docType" : {
+            "title" : "Doument Type", 
+            "type" : "string", 
+            "readOnly" : true, 
+            "enum" : [
+                "object"
+            ]
+        }, 
+        "divider" : {
+            "title" : "Divider", 
+            "type" : "string", 
+            "enum" : [
+                "None", 
+                "Vertical", 
+                "Horizontal"
+            ], 
+            "default" : "None"
+        }, 
+        "accordionOrTab" : {
+            "title" : "Accordian or Tab", 
+            "type" : "string", 
+            "enum" : [
+                "Accordions", 
+                "Tabs"
+            ], 
+            "default" : "Tabs"
+        }, 
+        "description" : {
+            "title" : "Description", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>no text</p>"
+        }, 
+        "tabs" : {
+            "title" : "Tabs", 
+            "description" : "", 
+            "type" : "array", 
+            "items" : {
+                "type" : "object", 
+                "oneOf" : [
+                    {
+                        "name" : "widgets", 
                         "properties" : {
                             "name" : {
                                 "title" : "Name", 
                                 "type" : "string", 
-                                "maxLength" : NumberInt(1000), 
+                                "readOnly" : false, 
+                                "maxLength" : NumberInt(100000), 
                                 "default" : "[unnamed]"
                             }, 
                             "description" : {
                                 "title" : "Description", 
                                 "type" : "string", 
-                                "maxLength" : NumberInt(10000), 
+                                "readOnly" : false, 
+                                "maxLength" : NumberInt(100000), 
                                 "media" : {
                                     "mediaType" : "text/html"
                                 }, 
-                                "default" : "<p>[no text]</p>"
+                                "default" : "<p>no text</p>"
                             }, 
-                            "displayTypes" : {
-                                "title" : "Display Types", 
-                                "type" : "string", 
-                                "enum" : [
-                                    "Sub Tabs", 
-                                    "Tree", 
-                                    "Table", 
-                                    "3D Class Model", 
-                                    "Form"
-                                ], 
-                                "default" : "Form"
-                            }, 
-                            "viewRefs" : {
-                                "title" : "View References", 
-                                "name" : "View References", 
-                                "description" : "", 
+                            "widgets" : {
+                                "title" : "Widgets", 
                                 "type" : "array", 
                                 "items" : {
                                     "type" : "object", 
@@ -1029,58 +1014,29 @@
                                             }, 
                                             "default" : "<p>[no text]</p>"
                                         }, 
-                                        "divider" : {
-                                            "title" : "Divider", 
+                                        "displayType" : {
+                                            "title" : "Display Types", 
                                             "type" : "string", 
                                             "enum" : [
-                                                "None", 
-                                                "Vertical", 
-                                                "Horizontal"
+                                                "Sub Tabs", 
+                                                "Tree", 
+                                                "Table", 
+                                                "3D Class Model", 
+                                                "Form", 
+                                                "TreeGrid"
                                             ], 
-                                            "default" : "None"
+                                            "default" : "Form"
                                         }, 
-                                        "accordionOrTab" : {
-                                            "title" : "Accordian or Tab", 
-                                            "type" : "string", 
-                                            "enum" : [
-                                                "Accordions", 
-                                                "Tabs"
-                                            ], 
-                                            "default" : "Tabs"
-                                        }, 
-                                        "mapsToView" : {
-                                            "title" : "maps to view", 
-                                            "readOnly" : true, 
-                                            "type" : "string", 
-                                            "pattern" : "[a-f0-9]+$", 
-                                            "query" : {
-                                                "_id" : "560b1407434ec958241693e8", 
-                                                "association" : "mapsTo"
-                                            }
-                                        }, 
-                                        "tabs" : {
-                                            "title" : "Tabs", 
-                                            "readOnly" : false, 
+                                        "viewRefs" : {
+                                            "title" : "View References", 
+                                            "type" : "array", 
                                             "items" : {
                                                 "type" : "string", 
                                                 "maxLength" : NumberInt(1000), 
                                                 "pattern" : "[a-f0-9]+$"
                                             }, 
-                                            "query" : {
-                                                "_id" : "560b1407434ec958241693e8", 
-                                                "association" : "ordered"
-                                            }, 
-                                            "type" : "array", 
                                             "minItems" : NumberInt(0), 
                                             "uniqueItems" : true
-                                        }, 
-                                        "viewRefs" : {
-                                            "title" : "View References", 
-                                            "type" : "array"
-                                        }, 
-                                        "recursive" : {
-                                            "title" : "Recursive", 
-                                            "type" : "boolean"
                                         }
                                     }, 
                                     "additionalProperties" : false
@@ -1088,21 +1044,41 @@
                             }
                         }, 
                         "additionalProperties" : false
+                    }, 
+                    {
+                        "name" : "subtabs", 
+                        "properties" : {
+                            "tabs" : {
+                                "title" : "Tabs", 
+                                "type" : "array", 
+                                "items" : {
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "pattern" : "[a-f0-9]+$"
+                                }, 
+                                "minItems" : NumberInt(0), 
+                                "uniqueItems" : true
+                            }
+                        }, 
+                        "additionalProperties" : false
                     }
-                }
+                ]
             }
         }
-    ], 
+    }, 
+    "additionalProperties" : false, 
     "children" : [
         "56f89f625dde184ccfb9fc76", 
-        "56f8a22e5dde184ccfb9fc78"
+        "56f8a22e5dde184ccfb9fc78", 
+        "572b40443c6d3cd598a5a2d3", 
+        "572e6f973c6d3cd598a5a2d9"
     ]
 }
 { 
     "_id" : ObjectId("56f89f625dde184ccfb9fc76"), 
     "docType" : "object", 
     "name" : "Navigation Page", 
-    "description" : "Starting point for Neuralquest navigation", 
+    "description" : "<p>The navigation accordion</p>", 
     "divider" : "Vertical", 
     "accordionOrTab" : "Accordions", 
     "tabs" : [
@@ -1113,10 +1089,8 @@
                 {
                     "displayType" : "Tree", 
                     "name" : "The Document", 
-                    "initialObject" : "5700046f5dde184ccfb9fc7c", 
-                    "viewRefs" : [
-                        "57019b3c5dde184ccfb9fc88"
-                    ]
+                    "rootDocId" : "5700046f5dde184ccfb9fc7c", 
+                    "viewId" : "57019b3c5dde184ccfb9fc88"
                 }
             ]
         }, 
@@ -1127,9 +1101,8 @@
                 {
                     "displayType" : "Tree", 
                     "name" : "Class Model Tree", 
-                    "viewRefs" : [
-                        "57019b3c5dde184ccfb9fc88"
-                    ]
+                    "rootDocId" : "56f86c6a5dde184ccfb9fc6a", 
+                    "viewId" : "572b25ec3c6d3cd598a5a2d1"
                 }
             ]
         }
@@ -1139,10 +1112,54 @@
     "_id" : ObjectId("56f8a22e5dde184ccfb9fc78"), 
     "docType" : "object", 
     "name" : "Neuralquest Page", 
-    "description" : "Neuraquest.org Page", 
+    "description" : "<p>Neuralquest home page.</p>", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
+        {
+            "name" : "Home", 
+            "description" : "<p>Neuralquest home page.</p>", 
+            "widgets" : [
+                {
+                    "displayType" : "HomePage", 
+                    "name" : "Balance Sheet Form", 
+                    "viewId" : "570067985dde184ccfb9fc86"
+                }
+            ]
+        }, 
+        {
+            "name" : "Document", 
+            "description" : "Assets and Liabilities", 
+            "widgets" : [
+                {
+                    "displayType" : "Document", 
+                    "name" : "Home Page", 
+                    "viewId" : "570067985dde184ccfb9fc86"
+                }
+            ]
+        }, 
+        {
+            "name" : "Backlog", 
+            "description" : "Assets and Liabilities", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "Home Page", 
+                    "viewId" : "570067985dde184ccfb9fc86"
+                }
+            ]
+        }, 
+        {
+            "name" : "Members", 
+            "description" : "Neuralquest Members", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Home Page", 
+                    "viewId" : "570067985dde184ccfb9fc86"
+                }
+            ]
+        }, 
         {
             "name" : "Balance Sheet", 
             "description" : "Assets and Liabilities", 
@@ -1150,50 +1167,14 @@
                 {
                     "displayType" : "Form", 
                     "name" : "Balance Sheet Form", 
-                    "viewRefs" : [
-                        "570067985dde184ccfb9fc86"
-                    ]
+                    "viewId" : "570067985dde184ccfb9fc86"
                 }
             ]
         }, 
         {
-            "name" : "View Class Schema", 
-            "description" : "Welcome tab", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "placeholder widget", 
-                    "viewRefs" : [
-                        "56f863505dde184ccfb9fc62"
-                    ]
-                }
-            ]
-        }, 
-        {
-            "name" : "Problem Domain Schema", 
-            "description" : "The document", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Document tree widget", 
-                    "viewRefs" : [
-                        "56f86c6a5dde184ccfb9fc6a"
-                    ]
-                }
-            ]
-        }, 
-        {
-            "name" : "Page Schema", 
-            "description" : "The document", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Document tree widget", 
-                    "viewRefs" : [
-                        "56f87ec55dde184ccfb9fc74"
-                    ]
-                }
-            ]
+            "name" : "Resources", 
+            "description" : "Rsources owned by Neuralquest", 
+            "pageId" : "572e6f973c6d3cd598a5a2d9"
         }
     ]
 }
@@ -1228,9 +1209,7 @@
             }
         }
     ], 
-    "childDocs" : [
-
-    ]
+    "viewId" : "572c7f9e3c6d3cd598a5a2d7"
 }
 { 
     "_id" : ObjectId("570063855dde184ccfb9fc82"), 
@@ -1253,14 +1232,14 @@
     "_id" : ObjectId("570064645dde184ccfb9fc84"), 
     "docType" : "object", 
     "name" : "Neuralquest", 
-    "description" : "The Neuralquest organization", 
-    "page" : "56f8a22e5dde184ccfb9fc78"
+    "description" : "<p>The Neuralquest organization</p>", 
+    "pageId" : "56f8a22e5dde184ccfb9fc78"
 }
 { 
     "_id" : ObjectId("570067985dde184ccfb9fc86"), 
     "docType" : "object", 
-    "title" : "Balance Sheet View", 
-    "description" : "<p>Standard balance sheet view</p>", 
+    "name" : "Balance Sheet View", 
+    "description" : "<p>The Standard balance sheet view</p>", 
     "display" : "Form", 
     "type" : "object", 
     "properties" : {
@@ -1269,7 +1248,7 @@
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "size" : "1.5em", 
+            "size" : "1.2em", 
             "bold" : "true"
         }, 
         "currentAssets" : {
@@ -1281,6 +1260,7 @@
         }, 
         "pettyCash" : {
             "title" : "Petty Cash", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1292,6 +1272,7 @@
         }, 
         "temporaryInvestments" : {
             "title" : "Temporary Investments", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1303,6 +1284,7 @@
         }, 
         "accountReceivibale" : {
             "title" : "Accounts Receivible -net", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1314,6 +1296,7 @@
         }, 
         "inventory" : {
             "title" : "Inventory", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1325,6 +1308,7 @@
         }, 
         "supplies" : {
             "title" : "Supplies", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1336,6 +1320,7 @@
         }, 
         "prepaidInsurance" : {
             "title" : "Prepaid Insurance", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1347,6 +1332,7 @@
         }, 
         "totalCurrentAssests" : {
             "title" : "Total Current Assents", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1359,6 +1345,7 @@
         }, 
         "investments" : {
             "title" : "Investments", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1371,6 +1358,7 @@
         }, 
         "propertyPlantEquipment" : {
             "title" : "Property, Plant and Equipment", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
@@ -1378,6 +1366,7 @@
         }, 
         "land" : {
             "title" : "Land", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1389,6 +1378,7 @@
         }, 
         "landImprovements" : {
             "title" : "Land Improvements", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1400,6 +1390,7 @@
         }, 
         "buildings" : {
             "title" : "Buildings", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1411,6 +1402,7 @@
         }, 
         "equipment" : {
             "title" : "Equipment", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1422,6 +1414,7 @@
         }, 
         "lessAccumDeprecation" : {
             "title" : "Less: Accum Deprecation", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1433,6 +1426,7 @@
         }, 
         "totalPropPlantEquipment" : {
             "title" : "Total Property, Plant and Equipment", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1452,6 +1446,7 @@
         }, 
         "goodwill" : {
             "title" : "Goodwill", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1463,6 +1458,7 @@
         }, 
         "tradeNames" : {
             "title" : "Trade Names", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1474,6 +1470,7 @@
         }, 
         "totalIntangibleAssests" : {
             "title" : "Total Intabgible Assets", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1486,11 +1483,12 @@
         }, 
         "totalAssests" : {
             "title" : "Total Assests", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(2), 
             "col" : NumberInt(1), 
-            "size" : "1.5em", 
+            "size" : "1.2em", 
             "bold" : true, 
             "sum" : {
                 "_id" : "", 
@@ -1502,7 +1500,7 @@
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "size" : "1.5em", 
+            "size" : "1.2em", 
             "bold" : "true"
         }, 
         "currentLiabilities" : {
@@ -1514,6 +1512,7 @@
         }, 
         "notesPayable" : {
             "title" : "Notes Payable", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1525,6 +1524,7 @@
         }, 
         "accountsPayable" : {
             "title" : "Accounts Payable", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1536,6 +1536,7 @@
         }, 
         "wagesPayable" : {
             "title" : "Wages Payable", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1547,6 +1548,7 @@
         }, 
         "intrestPayable" : {
             "title" : "Intrest Payable", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1558,6 +1560,7 @@
         }, 
         "taxesPayable" : {
             "title" : "Taxes Payable", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1569,6 +1572,7 @@
         }, 
         "warantyLiability" : {
             "title" : "Waranty Liability", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1580,6 +1584,7 @@
         }, 
         "Unearned Revenues" : {
             "title" : "Unearned Revenues", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1591,6 +1596,7 @@
         }, 
         "totalCurrentLiabilities" : {
             "title" : "Total Current Liabilities", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1610,6 +1616,7 @@
         }, 
         "notesPayable2" : {
             "title" : "Notes Payable", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1621,6 +1628,7 @@
         }, 
         "bondsPayable" : {
             "title" : "Bonds Payable", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1633,6 +1641,7 @@
         "totalLongTermLiabilities" : {
             "title" : "Total Long-Term Liabilities", 
             "readOnly" : true, 
+            "default" : NumberInt(0), 
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
@@ -1644,6 +1653,7 @@
         }, 
         "totalLiabilities" : {
             "title" : "Total Liabilities", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1659,11 +1669,12 @@
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "size" : "1.5em", 
+            "size" : "1.2em", 
             "bold" : "true"
         }, 
         "commonStock" : {
             "title" : "Common Stock", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1675,6 +1686,7 @@
         }, 
         "retainedEarnings" : {
             "title" : "Retained Earnings", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1686,6 +1698,7 @@
         }, 
         "AccumOtherComprehesiveIncome" : {
             "title" : "Accum Other Comprehensive Income", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1697,6 +1710,7 @@
         }, 
         "lessTreasuryStock" : {
             "title" : "Less: Treasury Stock", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1708,6 +1722,7 @@
         }, 
         "totalStockholdersEquity" : {
             "title" : "Total Stockholders Equity", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
@@ -1720,11 +1735,12 @@
         }, 
         "totalLibilitiesAndStock" : {
             "title" : "Total Libilities and Stockholder's Equity", 
+            "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(2), 
             "col" : NumberInt(2), 
-            "size" : "1.5em", 
+            "size" : "1.2em", 
             "bold" : true, 
             "sum" : {
                 "_id" : "", 
@@ -1735,9 +1751,14 @@
 }
 { 
     "_id" : ObjectId("57019b3c5dde184ccfb9fc88"), 
-    "title" : "The Document View", 
-    "description" : "<p>public View used on navigation page</p>", 
+    "docType" : "object", 
+    "name" : "Document View", 
+    "description" : "<p>Descibes the document hierarchy, including a header, a paragraph parts array and a subdocuments array</p>", 
     "type" : "object", 
+    "rootDocId" : "5700046f5dde184ccfb9fc7c", 
+    "childArrayNames" : [
+        "childDocs"
+    ], 
     "properties" : {
         "_id" : {
 
@@ -1796,4 +1817,320 @@
         "name"
     ], 
     "additionalProperties" : false
+}
+{ 
+    "_id" : ObjectId("572b25ec3c6d3cd598a5a2d1"), 
+    "docType" : "object", 
+    "name" : "Class Model View", 
+    "description" : "<p>Descibes the class model hierarchy, including a children array</p>", 
+    "type" : "object", 
+    "rootDocId" : "56f86c6a5dde184ccfb9fc6a", 
+    "pageId" : "572b40443c6d3cd598a5a2d3", 
+    "childArrayNames" : [
+        "children"
+    ], 
+    "properties" : {
+        "_id" : {
+            "title" : "_id", 
+            "readOnly" : true, 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]+$"
+        }, 
+        "name" : {
+            "title" : "Name", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "default" : "[unnamed]"
+        }, 
+        "docType" : {
+            "title" : "Doument Type", 
+            "type" : "string", 
+            "readOnly" : true, 
+            "enum" : [
+                "object"
+            ]
+        }, 
+        "icon" : {
+            "title" : "Icon", 
+            "type" : "string"
+        }, 
+        "description" : {
+            "title" : "Description", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>no text</p>"
+        }, 
+        "children" : {
+            "label" : "Subclasses", 
+            "readOnly" : false, 
+            "items" : {
+                "type" : "string", 
+                "maxLength" : NumberInt(1000), 
+                "pattern" : "[a-f0-9]+$"
+            }, 
+            "query" : {
+                "_id" : "560b1407434ec958241693e8", 
+                "association" : "ordered"
+            }, 
+            "type" : "array", 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
+        }
+    }, 
+    "required" : [
+        "_id", 
+        "name"
+    ], 
+    "additionalProperties" : false
+}
+{ 
+    "_id" : ObjectId("572b40443c6d3cd598a5a2d3"), 
+    "docType" : "object", 
+    "name" : "Class Model Page", 
+    "description" : "<p>The class model page</p>", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Properties", 
+            "description" : "Class Properties", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Class Form", 
+                    "viewRefs" : [
+                        "572b25ec3c6d3cd598a5a2d1"
+                    ]
+                }
+            ]
+        }, 
+        {
+            "name" : "3D Class Model", 
+            "description" : "Realtime view against Jupiter atmosphere", 
+            "widgets" : [
+                {
+                    "displayType" : "3D Class Model", 
+                    "name" : "Class Model", 
+                    "viewRefs" : [
+                        "572b25ec3c6d3cd598a5a2d1"
+                    ]
+                }
+            ]
+        }
+    ]
+}
+{ 
+    "_id" : ObjectId("572c7f9e3c6d3cd598a5a2d7"), 
+    "docType" : "object", 
+    "name" : "Oganization View", 
+    "description" : "<p>Descibes the organization hierarchy, including a children array</p>", 
+    "type" : "object", 
+    "rootDocId" : "56f870a55dde184ccfb9fc6c", 
+    "childArrayNames" : [
+        "children"
+    ], 
+    "properties" : {
+        "_id" : {
+            "title" : "_id", 
+            "readOnly" : true, 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]+$"
+        }, 
+        "name" : {
+            "title" : "Name", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "default" : "[unnamed]"
+        }, 
+        "docType" : {
+            "title" : "Doument Type", 
+            "type" : "string", 
+            "readOnly" : true, 
+            "enum" : [
+                "object"
+            ]
+        }, 
+        "icon" : {
+            "title" : "Icon", 
+            "type" : "string"
+        }, 
+        "description" : {
+            "title" : "Description", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>no text</p>"
+        }, 
+        "children" : {
+            "label" : "Subclasses", 
+            "readOnly" : false, 
+            "items" : {
+                "type" : "string", 
+                "maxLength" : NumberInt(1000), 
+                "pattern" : "[a-f0-9]+$"
+            }, 
+            "query" : {
+                "_id" : "560b1407434ec958241693e8", 
+                "association" : "ordered"
+            }, 
+            "type" : "array", 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
+        }
+    }, 
+    "required" : [
+        "_id", 
+        "name"
+    ], 
+    "additionalProperties" : false
+}
+{ 
+    "_id" : ObjectId("572e6f973c6d3cd598a5a2d9"), 
+    "docType" : "object", 
+    "name" : "Resources Page", 
+    "description" : "<p>The resources page</p>", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Accordions", 
+    "tabs" : [
+        {
+            "name" : "Resources Tree", 
+            "description" : "This page provides an overview of users/organizations", 
+            "widgets" : [
+                {
+                    "displayType" : "Tree", 
+                    "name" : "Resources Tree", 
+                    "rootDocId" : "56f87bcc5dde184ccfb9fc70", 
+                    "viewId" : "572b25ec3c6d3cd598a5a2d1"
+                }
+            ]
+        }
+    ]
+}
+{ 
+    "_id" : ObjectId("573435433c6d3cd598a5a2db"), 
+    "docType" : "class", 
+    "title" : "Balanace Sheet", 
+    "description" : "<p>Balance sheet owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "children" : [
+        "57343b823c6d3cd598a5a2e3", 
+        "57343bba3c6d3cd598a5a2e5"
+    ]
+}
+{ 
+    "_id" : ObjectId("573435803c6d3cd598a5a2dd"), 
+    "docType" : "class", 
+    "title" : "Off Balance Sheet", 
+    "description" : "<p>Other things owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "children" : [
+        "56f87ec55dde184ccfb9fc74", 
+        "573435c23c6d3cd598a5a2df", 
+        "573435f03c6d3cd598a5a2e1"
+    ]
+}
+{ 
+    "_id" : ObjectId("573435c23c6d3cd598a5a2df"), 
+    "docType" : "class", 
+    "title" : "Views", 
+    "description" : "<p>Views owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "children" : [
+        "570067985dde184ccfb9fc86", 
+        "57019b3c5dde184ccfb9fc88", 
+        "572b25ec3c6d3cd598a5a2d1", 
+        "572c7f9e3c6d3cd598a5a2d7"
+    ]
+}
+{ 
+    "_id" : ObjectId("573435f03c6d3cd598a5a2e1"), 
+    "docType" : "class", 
+    "title" : "Paragraphs", 
+    "description" : "<p>Paragraphs owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "children" : [
+        "5700046f5dde184ccfb9fc7c", 
+        "570063755dde184ccfb9fc80", 
+        "570063855dde184ccfb9fc82"
+    ]
+}
+{ 
+    "_id" : ObjectId("57343b823c6d3cd598a5a2e3"), 
+    "docType" : "class", 
+    "title" : "Assets", 
+    "description" : "<p>Assets owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "children" : [
+
+    ]
+}
+{ 
+    "_id" : ObjectId("57343bba3c6d3cd598a5a2e5"), 
+    "docType" : "class", 
+    "title" : "Liabilities", 
+    "description" : "<p>Liabilities owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "children" : [
+
+    ]
+}
+{ 
+    "_id" : ObjectId("57343beb3c6d3cd598a5a2e7"), 
+    "docType" : "class", 
+    "title" : "Users", 
+    "description" : "<p>Users own resourses</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "children" : [
+        "57343cd13c6d3cd598a5a2eb"
+    ]
+}
+{ 
+    "_id" : ObjectId("57343c283c6d3cd598a5a2e9"), 
+    "docType" : "class", 
+    "title" : "Organizations", 
+    "description" : "<p>Organizations owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "children" : [
+        "570064645dde184ccfb9fc84"
+    ]
+}
+{ 
+    "_id" : ObjectId("57343cd13c6d3cd598a5a2eb"), 
+    "docType" : "object", 
+    "name" : "Platoscave", 
+    "description" : "<p>The Neuralquest organization</p>", 
+    "pageId" : "56f8a22e5dde184ccfb9fc78"
 }

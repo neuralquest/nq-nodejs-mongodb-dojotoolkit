@@ -43,8 +43,8 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 		},
 		setDocId: function(id){
             var self = this;
-            if(self.rootDocId == self.view.rootDocId) return;
-            self.rootDocId = self.view.rootDocId;
+            if(self.rootDocId == self.widget.rootDocId) return;
+            self.rootDocId = self.widget.rootDocId;
 			if(self.tree) self.tree.destroy();
 
             var arrayNames = ['children'];
