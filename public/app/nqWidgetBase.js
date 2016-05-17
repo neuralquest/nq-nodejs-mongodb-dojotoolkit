@@ -56,13 +56,18 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.pane = new ContentPane( {
 //				'class' : 'backgroundClass',
 				'doLayout' : 'true',
-				//'content': 'Loading...',
 				'style' : { 'overflow': 'auto', 'padding': '0px', 'margin': '0px', width: '100%', height: '100%', background:'transparent'}
 			},  domConstruct.create('div'));
 			this.domNode.appendChild(this.pane.domNode);
 			this.own(this.pane);
-
 		},
+        postCreate: function(){
+            if(this.schema){
+                this.headerDivNode.innerHTML = '<h1>'+this.schema.name+'</h1>';
+                //domStyle.set(self.headerDivNode, 'display', 'block');//set the header node, created in the superclass,  to visible
+                this.pageHelpTextDiv.innerHTML = this.schema.description;
+            }
+        },
 		resize: function(changeSize){
 			this.inherited(arguments);
 			if(!changeSize) return;

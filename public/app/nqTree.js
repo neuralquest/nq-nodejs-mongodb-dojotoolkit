@@ -5,61 +5,25 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			domConstruct, dndSource, Menu, MenuItem, PopupMenuItem, array){
 
 	return declare("nqTree", [nqWidgetBase], {
-		permittedClassesByViewObj: {},
-		attrRefByViewArr: [],
-		parentId: null,
-		
-		postCreate: function(){
-            this.inherited(arguments);
-            var self = this;
-            var initialized = self.store.get(self.widget.viewId).then(function(view){
-                self.view = view;
-                self.headerDivNode.innerHTML = '<h1>'+view.name+'</h1>';
-                //domStyle.set(self.headerDivNode, 'display', 'block');//set the header node, created in the superclass,  to visible
-                self.pageHelpTextDiv.innerHTML = view.description;
-                self.arrayNames = view.childArrayNames;
-
-                return true;
-                /*return when(self.store.getInheritedSchema(view),function(schema){
-                    self.schema = schema;
-                    self.enrichObjectWithDefaults(view, schema);
-                    self.schema = schema;
-
-                    var uViewsArr = [];
-                    return self.store.getUniqueViewsForWidget(self.widgetId, uViewsArr).then(function(uniqueViewsArr){
-                        //console.log('uViewsArr',uViewsArr);
-                        var viewPromises = [];
-                        uViewsArr.forEach(function(uView){
-                            viewPromises.push(self.permittedClassesForUniqueView(uView));
-                        });
-                        return all(viewPromises);
-					});
-				});*/
-			});
-            when(initialized, function(result){
-                //self.createMenusForWidget();
-				self.createDeferred.resolve(self);//ready to be loaded with data
-			}, function(err){self.createDeferred.reject(err)});
-		},
 		setDocId: function(id){
             var self = this;
             if(self.rootDocId == self.widget.rootDocId) return;
             self.rootDocId = self.widget.rootDocId;
 			if(self.tree) self.tree.destroy();
 
-            var arrayNames = ['children'];
 			this.treeModel = new nqObjectStoreModel({
-				childrenAttr: this.viewIdsArr,
+				//childrenAttr: this.viewIdsArr,
 				store : this.store,
                 query: {_id:  self.rootDocId},
-                arrayNames: self.arrayNames
-			});
+                arrayNames: self.schema.childArrayNames
+            });
 			this.tree = new Tree({
+                id: 'tree.'+self.id,
 				store: this.store,
                 model: this.treeModel,
 				dndController: dndSource,
 				betweenThreshold: 5, 
-				persist: false,//doesnt deal well with recursion. Tends to expand everything
+				persist: true,//doesnt deal well with recursion. Tends to expand everything
                 getLabel: function(item){
                     if(!item) return 'no item';
                     if(item.docType == 'class') return item.title;
@@ -83,7 +47,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				onClick: function(item, node, evt){
 					self.inherited('onClick',arguments);
                     var pageId = item.pageId;
-                    if(!pageId) pageId = self.view.pageId;
+                    if(!pageId) pageId = self.widget.pageId;
                     if(pageId) nq.setHash(item._id, pageId, self.tabNum, self.widNum, self.level+1);
 				},
                 /*mayHaveChildren: function(item){

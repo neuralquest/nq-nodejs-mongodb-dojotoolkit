@@ -42,55 +42,47 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         else interpretHash();
     });
     function interpretHash(_hash) {
-        var parentContentPane = registry.byId('placeholder');
-        //Recursively fill the parent content pane with border container and/or tabs/accordions and/or sub-pages
-        when(drawBorderContainer(parentContentPane, getState(0).pageId, 0), function(res){
-            //When the framework is done, start drawing the widgets and providing them with a docId (= selected obj previous level)
+        var slaveContentPane = registry.byId('placeholder');
+        var widPromise = drawBorderContainer(slaveContentPane, getState(0).pageId, 0);
+        when(widPromise, function(res){
             var hashArr = hash().split('.');
             var levels = Math.ceil(hashArr.length/4);//determine the number of levels, rounded to the highest integer
-            //For each level in the hash TODO reverse the order
-            for(var level = 0; level<levels; level++){
+            for(var level = 0; level<levels; level++) {
                 var state = getState(level);
+                //var tabPane = registry.byId(state.pageId+'.'+state.tabNum);
                 //Finding the right tab pane to draw in is hard.
                 //There may be multiple layers of sub-pages, each with their own tab/border containers.
                 //So we just ask dojo which deepest tab is currently selected (if any).
                 var tabPane = getSelectedTabRecursive(registry.byId(state.pageId));//This will poke through sub-pages
-                when(drawWidgets(tabPane, state.pageId, level), function(res){
-                    var widgetsArr = array.filter(registry.toArray(), function(item){
-                        return item.pageId == state.pageId && item.tabNum == state.tabNum && item.widNum != undefined;
-                    });
-                    var widgetsArr = registry.findWidgets(tabPane.containerNode);
-                    widgetsArr.forEach(function (widget) {
-                        widget.setDocId(state.docIdPreviousLevel);
-                        //widget.setSelectedObjIdThisLevel(state.docId);
-                    });
-                },nq.errorDialog);
+                var widgetsArr = registry.findWidgets(tabPane.containerNode);
+                widgetsArr.forEach(function (widget) {
+                    widget.setDocId(state.docIdPreviousLevel);
+                    //widget.setSelectedObjIdThisLevel(state.docId);
+                });
             }
         },nq.errorDialog);
     }
     function drawBorderContainer(parentContentPane, pageId, level) {
-        if(!pageId) return true;
-        if(registry.byId(pageId)){
-            var slaveContentPane = registry.byId('slave.'+pageId);
-            if(slaveContentPane) return drawBorderContainer(slaveContentPane, getState(level+1).pageId, level+1);
-            else return true;
-        }
-        parentContentPane.destroyDescendants(false);
-        //var state = getState(level);
-        //console.log('page level', level);
+        if(!pageId) return false;
         return nqStore.get(pageId).then(function (pageObj) {
+            if(registry.byId(pageId)){
+                if(pageObj.divider == 'Horizontal' || pageObj.divider == 'Vertical'){
+                    var slaveContentPane = registry.byId('slave.'+pageId);
+                    return drawBorderContainer(slaveContentPane,  getState(level+1).pageId, level + 1);//Draw the next level into the center pane
+                }
+                else return true;
+            }
+            parentContentPane.destroyDescendants(false);
+            var tabsPromisies = [];
             if(pageObj.divider == 'Horizontal' || pageObj.divider == 'Vertical') {
                 var borderContainer = new BorderContainer({
-                    //'id' : pageId,
                     'region': 'center',
                     'design': pageObj.divider == 'Vertical' ? 'sidebar' : 'headline',
                     'persist': true,
                     //'class': 'noOverFlow'
                     'style': {width: '100%', height: '100%', overflow: 'hidden', padding: '0px', margin: '0px'}
                 });
-                //borderContainer.startup();
                 var leftPane = new ContentPane({
-                    //'id' : 'master'+parentViewOrTabId,
                     'region': pageObj.divider == 'Vertical' ? 'leading' : 'top',
                     'class': 'backgroundClass',
                     'splitter': true,
@@ -102,7 +94,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                     //slaveOf: pageId,
                     'region': 'center',
                     'class': 'backgroundClass',
-                    //'content' : '<p>Loading...</p>',
                     //'class': 'noOverFlow'
                     'style': {overflow: 'hidden', padding: '0px', margin: '0px'}
                 });
@@ -111,30 +102,39 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 parentContentPane.containerNode.appendChild(borderContainer.domNode); //appendChild works better than attaching through create
                 borderContainer.startup();//this is a must
                 parentContentPane.resize();//this is a must
-                drawAccordionsOrTabs(pageObj, leftPane, level);//Fill the left pane with tabs/accordions as needed
-                return drawBorderContainer(centerPane,  getState(level+1).pageId, level + 1);//Draw the next level into the center pane
+                tabsPromisies.push(drawAccordionsOrTabs(pageObj, leftPane, level));//Fill the left pane with tabs/accordions as needed
+                tabsPromisies.push(drawBorderContainer(centerPane,  getState(level+1).pageId, level + 1));//Draw the next level into the center pane
             }
             else {
                 //There is no border container at this level, so go ahead and use the parent content pane
-                drawAccordionsOrTabs(pageObj, parentContentPane, level);//Fill the parent content pane with tabs/accordions as needed
-                return true;
+                tabsPromisies.push(drawAccordionsOrTabs(pageObj, parentContentPane, level));//Fill the parent content pane with tabs/accordions as needed
+                //return true;
             }
+            return all(tabsPromisies);
         });
     }
-
     function drawAccordionsOrTabs(pageObj, parentContentPane, level) {
+        var tabsPromises = [];
         //Is there only one tab? skip the tab container and just use the parent content pane
         if (pageObj.tabs.length <= 1) {
-            parentContentPane.id = pageObj._id;
-            parentContentPane.level = level;
-            parentContentPane.tabNum = 0;
+            var tabPane = new ContentPane({
+                id: pageObj._id,
+                level: level,
+                tabNum: 0,
+                title: pageObj.tabs[0].name,
+                'class': 'backgroundClass',
+                style: {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
+            });
+            parentContentPane.addChild(tabPane);
+            //parentContentPane.id = pageObj._id;
+            //parentContentPane.level = level;
+            //parentContentPane.tabNum = 0;
+            tabsPromises.push(drawWidgets(tabPane));
         }
         else {
             var container = null;
             var props = {
-                //pageId: state.pageId,
                 id : pageObj._id,
-                //pageType: 'tabContainer',
                 region: 'center',
                 //'class': 'noOverFlow',
                 style: {width: '100%', height: '100%', overflow: 'hidden', padding: '0px', margin: '0px'}
@@ -154,14 +154,14 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                     level: level,
                     tabNum: num,
                     title: tabObj.name,
-                    //'content' : '<p>Loading...</p>',
                     'class': 'backgroundClass',
                     style: {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
                 });
                 container.addChild(tabPane);
                 if (num == state.tabNum) container.selectChild(tabPane, false);
                 num++;
-                if(tabObj.pageId) drawBorderContainer(tabPane, tabObj.pageId, level);
+                if(tabObj.pageId) tabsPromises.push(drawBorderContainer(tabPane, tabObj.pageId, level));
+                else tabsPromises.push(drawWidgets(tabPane));
             });
 
             container.watch("selectedChildWidget", function(name, oval, nval){
@@ -169,59 +169,54 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 nq.setHash(null, pageObj._id, nval.tabNum, null, level);
             });
         }
+        return all(tabsPromises);
     }
-
-    function drawWidgets(tabPane, pageId) {
-        //var state = getState(level);
+    function drawWidgets(tabPane) {
         var pageId = tabPane.id.split('.')[0];
         return nqStore.get(pageId).then(function(pageObj){
             var widgetPromises = [];
             var widNum = 0;
             var tabObj = pageObj.tabs[tabPane.tabNum];
-            //if(tabObj.pageId) return drawWidgets(tabPane, tabObj.pageId, tabPane.level);
-            if(tabObj.widgets){
-                tabObj.widgets.forEach(function (widget) {
-                    if(!registry.byId(pageId+'.'+tabPane.tabNum+'.'+widNum)) {
-                        var createDeferred = new Deferred();
-                        widgetPromises.push(createDeferred.promise);
-                        var parms = {
-                            id: pageId + '.' + tabPane.tabNum + '.' + widNum,
-                            pageId: pageId,
-                            tabNum: tabPane.tabNum,
-                            widNum: widNum,
-                            level: tabPane.level,
-                            widget: widget,
-                            store: nqStore,
-                            createDeferred: createDeferred
-                        };
-                        if (widget.displayType == 'Document') {
-                            var widgetObj = new nqDocument(parms, domConstruct.create('div'));
-                            tabPane.addChild(widgetObj);
-                        }
-                        else if (widget.displayType == 'Form') {
-                            var widgetObj = new nqForm(parms, domConstruct.create('div'));
-                            tabPane.addChild(widgetObj);
-                        }
-                        else if (widget.displayType == 'TreeGrid') {
-                            var widgetObj = new nqTreeGrid(parms, domConstruct.create('div'));
-                            tabPane.addChild(widgetObj);
-                        }
-                        else if (widget.displayType == 'Table') {
-                            var widgetObj = new nqTable(parms, domConstruct.create('div'));
-                            tabPane.addChild(widgetObj);
-                        }
-                        else if (widget.displayType == 'Tree') {
-                            var widgetObj = new nqTree(parms, domConstruct.create('div'));
-                            tabPane.addChild(widgetObj);
-                        }
-                        else if (widget.displayType == '3D Class Model') {
-                            var widgetObj = new nqClassChart(parms, domConstruct.create('div'));
-                            tabPane.addChild(widgetObj);
-                        }
-                        widNum++;
+            if(!tabObj.widgets) return false;
+            tabObj.widgets.forEach(function (widget) {
+                widgetPromises.push(nqStore.get(widget.viewId).then(function(schema){
+                    var parms = {
+                        id: pageId + '.' + tabPane.tabNum + '.' + widNum,
+                        pageId: pageId,
+                        tabNum: tabPane.tabNum,
+                        widNum: widNum,
+                        level: tabPane.level,
+                        widget: widget,
+                        store: nqStore,
+                        schema: schema
+                    };
+                    if (widget.displayType == 'Document') {
+                        var widgetObj = new nqDocument(parms, domConstruct.create('div'));
+                        tabPane.addChild(widgetObj);
                     }
-                });
-            }
+                    else if (widget.displayType == 'Form') {
+                        var widgetObj = new nqForm(parms, domConstruct.create('div'));
+                        tabPane.addChild(widgetObj);
+                    }
+                    else if (widget.displayType == 'TreeGrid') {
+                        var widgetObj = new nqTreeGrid(parms, domConstruct.create('div'));
+                        tabPane.addChild(widgetObj);
+                    }
+                    else if (widget.displayType == 'Table') {
+                        var widgetObj = new nqTable(parms, domConstruct.create('div'));
+                        tabPane.addChild(widgetObj);
+                    }
+                    else if (widget.displayType == 'Tree') {
+                        var widgetObj = new nqTree(parms, domConstruct.create('div'));
+                        tabPane.addChild(widgetObj);
+                    }
+                    else if (widget.displayType == '3D Class Model') {
+                        var widgetObj = new nqClassChart(parms, domConstruct.create('div'));
+                        tabPane.addChild(widgetObj);
+                    }
+                    widNum++;
+                }));
+            });
             return all(widgetPromises);
         });
     }
@@ -256,10 +251,12 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             title = 'Client Error';
             content = err.message;
         }
-        var dlg = new dijit.Dialog({
+        var dlg = new Dialog({
             title: title,
             extractContent: true,//important in the case of server response, it'll screw up your css.
-            onBlur: this.hide(),//click anywhere to close
+            onBlur: function() {
+                this.hide();
+            },
             content: content
         });
         dlg.show();
@@ -296,7 +293,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         hashArr = hashArr.concat(parsedArr);
 
         var newHash = hashArr.join('.');
-        //var newHash = newHash.replace(/.0./g, "..");//Replace any '.0.' with '..'
+        var newHash = newHash.replace(/[.]0[.]/g, "..");//Replace any '.0.' with '..'
         //var newHash = newHash.replace(/.0(?!.*?.0)/, "");//Remove ending '.0'
         //var newHash = newHash.replace(/.(?!.*?.)/, "");//Remove ending '.'doesn't work!
         cookie('neuralquestState', newHash);
@@ -304,7 +301,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     }
     function getSelectedTabRecursive(wid0, indent){
         indent = indent?indent:'';
-        //console.log(indent, wid0.id, wid0.declaredClass, wid0.region);
+        console.log(indent, wid0.id, wid0.declaredClass, wid0.region);
         if(wid0.declaredClass=='dijit.layout.BorderContainer'){
             var w0Arr = registry.findWidgets(wid0.containerNode);
             var wid2 = null;

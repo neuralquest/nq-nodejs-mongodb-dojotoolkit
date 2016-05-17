@@ -11,43 +11,67 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			nqClassChart, domStyle, query, mouse){
 
 	return declare("nqDocument", [nqWidgetBase], {
-		postCreate: function(){
-			this.inherited(arguments);
-		},
-		setDocId: function(objId){
+		setDocId: function(id){
+			if(id.length == 0) return;
 			var self = this;
 			//Clear the page
 			this.pane.destroyDescendants(false);//destroy all the widget but leave the pane intact
 			//load the data
-			return self.store.get(objId).then(function(obj){
-				return self.generateNextLevelContents(obj, 1, null, false).then(function(obj){
+			self.store.get(id).then(function(obj){
+				self.generateNextLevelContents(obj, 1, null, false).then(function(obj){
 					registry.byId('tab'+self.tabId).resize();
 					//self.pane.resize();
-					self.setDocIdDeferred.resolve(self);
-					return item;
+					//self.setDocIdDeferred.resolve(self);
 				});
 			}, nq.errorDialog);
 		},
 		//Create an ordinary HTML page recursively by obtaining data from the server
-		generateNextLevelContents: function(item, headerLevel, parentId, previousParagrphHasRightFloat){
+		generateNextLevelContents: function(item, headerLevel, parentId, previousParagraphHasRightFloat){
 			var self = this;
+            //Header
+            var divDom = domConstruct.create(
+                'div',
+                {
+                    id: item._id,
+                    onclick: function(event){
+                        var pageId = self.widget.pageId;
+                        if(pageId) nq.setHash(item._id, pageId, self.tabNum, self.widNum, self.level+1);
+                    }
+                },
+                this.pane.containerNode);
+
 			//Header
 			domConstruct.create(
 				'h'+headerLevel,
-				{innerHTML: obj.name, style: {'clear': previousParagrphHasRightFloat?'both':'none'}},
-				this.pane.containerNode
+				{innerHTML: item.name, style: {'clear': previousParagraphHasRightFloat?'both':'none'}},
+                divDom
 			);
-			//Paragraph
-			domConstruct.create("p", {innerHTML: obj.description}, this.pane.containerNode);
+            if(item.paragraphParts){
+                item.paragraphParts.forEach(function(paragraphPart){
+                    if(paragraphPart.mediaType){
+                        if(paragraphPart.mediaType.media == 'text/html'){
+                            //Paragraph
+                            domConstruct.create("p", {innerHTML: paragraphPart.content}, divDom);
+                        }
+                    }
+                });
+            }
 
+            if(item[this.schema.childArrayNames[0]]){
+                var childrenFilter = this.store.Filter().in('_id', item[this.schema.childArrayNames[0]]);
+                var childrenCollection = this.store.filter(childrenFilter);
+                childrenCollection.on('update', function(event){
+                    var obj = event.target;
+                    alert('doc change');
+                    //self.onChange(obj);
+                });
+                childrenCollection.forEach(function(childItem){
+                    var previousParagraphHasRightFloat = false;
+                    self.generateNextLevelContents(childItem, headerLevel+1, item._id, previousParagraphHasRightFloat);
+                    //previousParagraphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
+                });
+            }
 
-			this.store.getChildren(item, function(children){
-				children.forEach(function(childItem){
-					var previousParagrphHasRightFloat = false;
-					self.generateNextLevelContents(childItem, headerLevel+1, item.id, previousParagrphHasRightFloat);
-					previousParagrphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
-				})
-			});
 		},
 
 
@@ -215,7 +239,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
  			return this.setDocIdDeferred.promise;
 		},
 		//Create an ordinary HTML page recursivly by obtaining data from the server
-		XgenerateNextLevelContents: function(item, headerLevel, parentId, previousParagrphHasRightFloat){
+		XgenerateNextLevelContents: function(item, headerLevel, parentId, previousParagraphHasRightFloat){
 			//console.log('do item',item[2535]);
 			var self = this;
 			//var hearderObj = item['attrRef'+this.HEADER_ATTRREF];
@@ -224,7 +248,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			//Header
 			var headerNode = domConstruct.create(
 					'h'+headerLevel,
-					{style: {'clear': previousParagrphHasRightFloat?'both':'none'}},
+					{style: {'clear': previousParagraphHasRightFloat?'both':'none'}},
 					this.pane.containerNode
 				);
 			var textDijit = new ValidationTextBox({
@@ -362,9 +386,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			var children = collection.fetch();*/
 			this.store.getChildren(item, function(children){
 				children.forEach(function(childItem){
-					var previousParagrphHasRightFloat = false;
-					self.generateNextLevelContents(childItem, headerLevel+1, item.id, previousParagrphHasRightFloat);
-					previousParagrphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
+					var previousParagraphHasRightFloat = false;
+					self.generateNextLevelContents(childItem, headerLevel+1, item.id, previousParagraphHasRightFloat);
+					previousParagraphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
 				})
 			});
 		},

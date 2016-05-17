@@ -1027,16 +1027,11 @@
                                             ], 
                                             "default" : "Form"
                                         }, 
-                                        "viewRefs" : {
-                                            "title" : "View References", 
-                                            "type" : "array", 
-                                            "items" : {
-                                                "type" : "string", 
-                                                "maxLength" : NumberInt(1000), 
-                                                "pattern" : "[a-f0-9]+$"
-                                            }, 
-                                            "minItems" : NumberInt(0), 
-                                            "uniqueItems" : true
+                                        "viewId" : {
+                                            "title" : "View Reference", 
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "pattern" : "[a-f0-9]+$"
                                         }
                                     }, 
                                     "additionalProperties" : false
@@ -1071,7 +1066,8 @@
         "56f89f625dde184ccfb9fc76", 
         "56f8a22e5dde184ccfb9fc78", 
         "572b40443c6d3cd598a5a2d3", 
-        "572e6f973c6d3cd598a5a2d9"
+        "572e6f973c6d3cd598a5a2d9", 
+        "573445203c6d3cd598a5a2ed"
     ]
 }
 { 
@@ -1102,7 +1098,8 @@
                     "displayType" : "Tree", 
                     "name" : "Class Model Tree", 
                     "rootDocId" : "56f86c6a5dde184ccfb9fc6a", 
-                    "viewId" : "572b25ec3c6d3cd598a5a2d1"
+                    "viewId" : "572b25ec3c6d3cd598a5a2d1", 
+                    "pageId" : "572b40443c6d3cd598a5a2d3"
                 }
             ]
         }
@@ -1130,13 +1127,7 @@
         {
             "name" : "Document", 
             "description" : "Assets and Liabilities", 
-            "widgets" : [
-                {
-                    "displayType" : "Document", 
-                    "name" : "Home Page", 
-                    "viewId" : "570067985dde184ccfb9fc86"
-                }
-            ]
+            "pageId" : "573445203c6d3cd598a5a2ed"
         }, 
         {
             "name" : "Backlog", 
@@ -1182,7 +1173,6 @@
     "_id" : ObjectId("5700046f5dde184ccfb9fc7c"), 
     "docType" : "object", 
     "name" : "The Document", 
-    "description" : "Explore published material", 
     "paragraphParts" : [
         {
             "content" : "<p>Example</p>", 
@@ -1200,7 +1190,6 @@
     "_id" : ObjectId("570063755dde184ccfb9fc80"), 
     "docType" : "object", 
     "name" : "Organizations", 
-    "description" : "Explore organizations", 
     "paragraphParts" : [
         {
             "content" : "<p>Example</p>", 
@@ -1215,7 +1204,6 @@
     "_id" : ObjectId("570063855dde184ccfb9fc82"), 
     "docType" : "object", 
     "name" : "Users", 
-    "description" : "Explore users", 
     "paragraphParts" : [
         {
             "content" : "<p>Example</p>", 
@@ -1239,7 +1227,7 @@
     "_id" : ObjectId("570067985dde184ccfb9fc86"), 
     "docType" : "object", 
     "name" : "Balance Sheet View", 
-    "description" : "<p>The Standard balance sheet view</p>", 
+    "description" : "<p>The standard balance sheet view</p>", 
     "display" : "Form", 
     "type" : "object", 
     "properties" : {
@@ -1755,22 +1743,22 @@
     "name" : "Document View", 
     "description" : "<p>Descibes the document hierarchy, including a header, a paragraph parts array and a subdocuments array</p>", 
     "type" : "object", 
-    "rootDocId" : "5700046f5dde184ccfb9fc7c", 
     "childArrayNames" : [
         "childDocs"
     ], 
     "properties" : {
         "_id" : {
-
-        }, 
-        "docType" : {
-
+            "title" : "_id", 
+            "readOnly" : true, 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]+$"
         }, 
         "name" : {
-
-        }, 
-        "description" : {
-
+            "title" : "Header", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "default" : "[unnamed]"
         }, 
         "paragraphParts" : {
             "type" : "array", 
@@ -1778,6 +1766,7 @@
                 "type" : "object", 
                 "properties" : {
                     "content" : {
+                        "title" : "Content", 
                         "type" : "string", 
                         "maxLength" : NumberInt(10000), 
                         "media" : {
@@ -1785,6 +1774,7 @@
                         }
                     }, 
                     "mediaType" : {
+                        "title" : "Media Type", 
                         "type" : "object"
                     }
                 }, 
@@ -1901,11 +1891,8 @@
             "description" : "Class Properties", 
             "widgets" : [
                 {
-                    "displayType" : "Form", 
-                    "name" : "Class Form", 
-                    "viewRefs" : [
-                        "572b25ec3c6d3cd598a5a2d1"
-                    ]
+                    "displayType" : "TreeGrid", 
+                    "name" : "Class TreeGrid"
                 }
             ]
         }, 
@@ -1915,10 +1902,7 @@
             "widgets" : [
                 {
                     "displayType" : "3D Class Model", 
-                    "name" : "Class Model", 
-                    "viewRefs" : [
-                        "572b25ec3c6d3cd598a5a2d1"
-                    ]
+                    "name" : "Class Model"
                 }
             ]
         }
@@ -1930,7 +1914,7 @@
     "name" : "Oganization View", 
     "description" : "<p>Descibes the organization hierarchy, including a children array</p>", 
     "type" : "object", 
-    "rootDocId" : "56f870a55dde184ccfb9fc6c", 
+    "rootDocId" : "57343c283c6d3cd598a5a2e9", 
     "childArrayNames" : [
         "children"
     ], 
@@ -2009,7 +1993,8 @@
                     "displayType" : "Tree", 
                     "name" : "Resources Tree", 
                     "rootDocId" : "56f87bcc5dde184ccfb9fc70", 
-                    "viewId" : "572b25ec3c6d3cd598a5a2d1"
+                    "viewId" : "572b25ec3c6d3cd598a5a2d1", 
+                    "pageId" : "572b40443c6d3cd598a5a2d3"
                 }
             ]
         }
@@ -2131,6 +2116,142 @@
     "_id" : ObjectId("57343cd13c6d3cd598a5a2eb"), 
     "docType" : "object", 
     "name" : "Platoscave", 
-    "description" : "<p>The Neuralquest organization</p>", 
+    "description" : "<p>Platos Cave user</p>", 
     "pageId" : "56f8a22e5dde184ccfb9fc78"
+}
+{ 
+    "_id" : ObjectId("573445203c6d3cd598a5a2ed"), 
+    "docType" : "object", 
+    "name" : "Document Page", 
+    "description" : "<p>The document page</p>", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Accordions", 
+    "tabs" : [
+        {
+            "name" : "Document Tree", 
+            "description" : "<p>Docuement owned by user/organizations</p>", 
+            "widgets" : [
+                {
+                    "displayType" : "Tree", 
+                    "name" : "Document Tree", 
+                    "rootDocId" : "5737875b3c6d3cd598a5a2f3", 
+                    "viewId" : "57019b3c5dde184ccfb9fc88", 
+                    "pageId" : "573797cb3c6d3cd598a5a2fd"
+                }
+            ]
+        }
+    ]
+}
+{ 
+    "_id" : ObjectId("5737875b3c6d3cd598a5a2f3"), 
+    "docType" : "object", 
+    "name" : "The Neuralquest Document", 
+    "paragraphParts" : [
+        {
+            "content" : "<p>Example</p>", 
+            "mediaType" : {
+                "media" : "text/html"
+            }
+        }
+    ], 
+    "childDocs" : [
+        "573787b13c6d3cd598a5a2f5", 
+        "573788493c6d3cd598a5a2f9"
+    ]
+}
+{ 
+    "_id" : ObjectId("573787b13c6d3cd598a5a2f5"), 
+    "docType" : "object", 
+    "name" : "Par 1", 
+    "paragraphParts" : [
+        {
+            "content" : "<p>Example</p>", 
+            "mediaType" : {
+                "media" : "text/html"
+            }
+        }
+    ]
+}
+{ 
+    "_id" : ObjectId("573788493c6d3cd598a5a2f9"), 
+    "docType" : "object", 
+    "name" : "Par 2", 
+    "paragraphParts" : [
+        {
+            "content" : "<p>Example</p>", 
+            "mediaType" : {
+                "media" : "text/html"
+            }
+        }
+    ]
+}
+{ 
+    "_id" : ObjectId("573797cb3c6d3cd598a5a2fd"), 
+    "docType" : "object", 
+    "name" : "Document Page", 
+    "description" : "<p>The document page</p>", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Read", 
+            "description" : "Document Page", 
+            "widgets" : [
+                {
+                    "displayType" : "Document", 
+                    "name" : "Document Page", 
+                    "viewId" : "57019b3c5dde184ccfb9fc88"
+                }
+            ]
+        }, 
+        {
+            "name" : "Update", 
+            "description" : "Document Page", 
+            "pageId" : "573a40e43c6d3cd598a5a2ff"
+        }
+    ]
+}
+{ 
+    "_id" : ObjectId("573a40e43c6d3cd598a5a2ff"), 
+    "docType" : "object", 
+    "name" : "Update Document Page", 
+    "description" : "<p>The document page</p>", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Accordions", 
+    "tabs" : [
+        {
+            "name" : "Document Tree", 
+            "description" : "<p>Docuement owned by user/organizations</p>", 
+            "widgets" : [
+                {
+                    "displayType" : "Document", 
+                    "name" : "Document Tree", 
+                    "rootDocId" : "5737875b3c6d3cd598a5a2f3", 
+                    "viewId" : "57019b3c5dde184ccfb9fc88", 
+                    "pageId" : "573a45583c6d3cd598a5a301"
+                }
+            ]
+        }
+    ]
+}
+{ 
+    "_id" : ObjectId("573a45583c6d3cd598a5a301"), 
+    "docType" : "object", 
+    "name" : "Update Paragraph Page", 
+    "description" : "<p>Update paragraph page</p>", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Properties", 
+            "description" : "Pargraph Properties", 
+            "widgets" : [
+                {
+                    "displayType" : "TreeGrid", 
+                    "name" : "Praragrph TreeGrid", 
+                    "viewId" : "57019b3c5dde184ccfb9fc88"
+                }
+            ]
+        }
+    ]
 }

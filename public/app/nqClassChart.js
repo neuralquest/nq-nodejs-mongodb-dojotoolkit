@@ -19,11 +19,13 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		postCreate: function(){
 			this.inherited(arguments);//create the scene
 			var self = this;
-			// load any meshes, return a defered so that selecting the object can wait
+
+return;
+            // load any meshes, return a defered so that selecting the object can wait
 			var loader = new THREE.JSONLoader(true);			
 			loader.load("app/resources/img/Neuralquest/mesh/classMesh.js", function(geometry, materials) {
 				self.classGeometry = geometry;
-				/*when(self.buildHierarchy(self.XYAXISROOTID), function(res){
+				when(self.buildHierarchy(self.XYAXISROOTID), function(res){
 					console.dir(cellPostionsStore);
 					var newPos = new THREE.Vector3( 0, 0, 0 );
 					self.postionObjectsXY(self.XYAXISROOTID, newPos);
@@ -51,10 +53,10 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 						self.drawAssociations();
 						self.createDeferred.resolve(self);//tell the caller that the diagram is done	
 						//console.dir(cellPostionsStore);
-					},nq.errorDialog);* /
+					},nq.errorDialog);*/
                     self.drawAssociations();
                     self.createDeferred.resolve(self);//tell the caller that the diagram is done
-				},nq.errorDialog);*/
+				},nq.errorDialog);
 			});
 		},
 		buildHierarchy: function(id){

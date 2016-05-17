@@ -19,23 +19,10 @@ define(['dojo/_base/declare', 'dojo/_base/array', 'dijit/form/Select', 'dijit/To
         return declare("nqForm", [nqWidgetBase],{
             postCreate: function(){
                 this.inherited(arguments);
-                var self = this;
-                var initialized = self.store.get(self.widget.viewId).then(function(view){
-                    //console.log(JSON.stringify(view));
-                    //return when(self.store.getInheritedSchema(self.viewId),function(schema) {
-                    // });
-                    self.view = view;
-                    self.headerDivNode.innerHTML = '<h1>'+view.name+'</h1>';
-                    //domStyle.set(self.headerDivNode, 'display', 'block');//set the header node, created in the superclass,  to visible
-                    self.pageHelpTextDiv.innerHTML = view.description;
-                    self.renderForm(view.properties, self.pane.containerNode);
-                    return true;
-                });
-                when(initialized, function(result){
-                    self.createDeferred.resolve(self);//ready to be loaded with data
-                }, function(err){self.createDeferred.reject(err)});
+                this.renderForm(this.schema.properties, this.pane.containerNode);
             },
             setDocId: function(id){
+                if(id.length == 0) return;
                 this.docId = id;
                 var self = this;
                 var docCol = this.store.filter({_id: id});
