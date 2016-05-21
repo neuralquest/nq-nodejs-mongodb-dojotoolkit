@@ -64,7 +64,6 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/on",
                 /*self.treeGrid.on("dgrid-datachange", lang.hitch(self, function(evt) {
                     this.updateClient(evt.rowId, evt.value);
                 }));
-
                 self.treeGrid.on("refresh", lang.hitch(self, function(evt) {
                     this.pane.resize();
                 }));*/

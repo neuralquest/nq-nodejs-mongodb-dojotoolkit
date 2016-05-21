@@ -1,13 +1,13 @@
 define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry', 'dijit/layout/ContentPane', 
         'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "app/nqWidgetBase", "dojo/on", "dojo/dom-geometry", 
-        "dojo/sniff", "dijit/form/ToggleButton", 'dijit/registry', "dojo/dom", "dojo/dom-attr",
+        "dojo/sniff", "dijit/form/ToggleButton", "dojo/dom", "dojo/dom-attr",
         'app/nqClassChart', "dojo/dom-style", "dojo/query", "dojo/mouse", 
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 'dijit/WidgetSet', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, domConstruct, when, registry, ContentPane, 
 			Toolbar, ValidationTextBox, Editor, nqWidgetBase, on, domGeometry, 
-			has, ToggleButton, registry, dom, domAttr,
+			has, ToggleButton, dom, domAttr,
 			nqClassChart, domStyle, query, mouse){
 
 	return declare("nqDocument", [nqWidgetBase], {
@@ -52,6 +52,10 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
                         if(paragraphPart.mediaType.media == 'text/html'){
                             //Paragraph
                             domConstruct.create("p", {innerHTML: paragraphPart.content}, divDom);
+                        }
+                        else if(paragraphPart.mediaType.media == 'img/png'){
+                            //Paragraph
+                            domConstruct.create("img", {style:{float :'right'}, src: paragraphPart.url, width: 300}, divDom);
                         }
                     }
                 });

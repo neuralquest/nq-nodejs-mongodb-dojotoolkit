@@ -65,12 +65,20 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     function drawBorderContainer(parentContentPane, pageId, level) {
         if(!pageId) return false;
         return nqStore.get(pageId).then(function (pageObj) {
-            if(registry.byId(pageId)){
+            if(registry.byId(pageId)){// this page is already drawn, but the next level might need drawing
+                var tabsPromises = [];
                 if(pageObj.divider == 'Horizontal' || pageObj.divider == 'Vertical'){
                     var slaveContentPane = registry.byId('slave.'+pageId);
-                    return drawBorderContainer(slaveContentPane,  getState(level+1).pageId, level + 1);//Draw the next level into the center pane
+                    tabsPromises.push(drawBorderContainer(slaveContentPane,  getState(level+1).pageId, level + 1));//Draw the next level into the center pane
                 }
-                else return true;
+                var tabNum = 0;
+                if(pageObj.tabs) pageObj.tabs.forEach(function (tabObj) {
+                    //Does the tabObj have a pageId (instead of widgets)?. It wont be empty but the next level might be. Let drawBorderContainer find out.
+                    var tabPane = registry.byId(pageId+'.'+tabNum);
+                    if(tabObj.pageId) tabsPromises.push(drawBorderContainer(tabPane, tabObj.pageId, level));
+                    tabNum++;
+                });
+                return all(tabsPromises);
             }
             parentContentPane.destroyDescendants(false);
             var tabsPromisies = [];
@@ -179,7 +187,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             var tabObj = pageObj.tabs[tabPane.tabNum];
             if(!tabObj.widgets) return false;
             tabObj.widgets.forEach(function (widget) {
-                widgetPromises.push(nqStore.get(widget.viewId).then(function(schema){
+                widgetPromises.push(nqStore.getSchemaForView(widget.viewId).then(function(schema){
                     var parms = {
                         id: pageId + '.' + tabPane.tabNum + '.' + widNum,
                         pageId: pageId,
@@ -312,7 +320,6 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         }
         else if(wid0.declaredClass=='dijit.layout.AccordionContainer' || wid0.declaredClass == 'dijit.layout.TabContainer'){
             var wid1 = wid0.selectedChildWidget;
-            //console.log(indent, 'selected', wid1.id, wid1.declaredClass, wid1.region);
             return getSelectedTabRecursive(wid1, indent+'-');
         }
         else if(wid0.containerNode){
