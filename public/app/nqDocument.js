@@ -11,6 +11,11 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			nqClassChart, domStyle, query, mouse){
 
 	return declare("nqDocument", [nqWidgetBase], {
+        buildRendering: function(){
+            this.inherited(arguments);
+            domStyle.set(this.pane.containerNode, 'margin-left' , '10px');
+            domStyle.set(this.pane.containerNode, 'margin-right' , '10px');
+        },
 		setDocId: function(id){
 			if(id.length == 0) return;
 			var self = this;
@@ -47,18 +52,20 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
                 divDom
 			);
             if(item.paragraphParts){
+                var paragraphContent = null;
                 item.paragraphParts.forEach(function(paragraphPart){
                     if(paragraphPart.mediaType){
                         if(paragraphPart.mediaType.media == 'text/html'){
                             //Paragraph
-                            domConstruct.create("p", {innerHTML: paragraphPart.content}, divDom);
+                            paragraphContent =  paragraphPart.content;
                         }
                         else if(paragraphPart.mediaType.media == 'img/png'){
-                            //Paragraph
-                            domConstruct.create("img", {style:{float :'right'}, src: paragraphPart.url, width: 300}, divDom);
+                            //image
+                            domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: paragraphPart.url, width: 300}, divDom);
                         }
                     }
                 });
+                if(paragraphContent) domConstruct.place(paragraphContent, divDom, 'last');
             }
 
             if(item[this.schema.childArrayNames[0]]){

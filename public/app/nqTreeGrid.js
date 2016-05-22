@@ -110,28 +110,15 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/on",
                 //Get parent
                 this.store.get(id).then(function(doc){
                     if(doc.docType == 'object'){
-                        var parentFilter = self.store.Filter().contains('children', [id]);
-                        var parentCollection = self.store.filter(parentFilter);
-                        parentCollection.fetch().then(function(parentDocArr){
-                            if(parentDocArr.length>1) throw new Error('More than one parent');
-                            if(parentDocArr.length==1) {
-                                console.log('parentDoc', parentDocArr[0]);
-                                self.schema = parentDocArr[0];
-                            }
+                        self.store.getParentClass(id).then(function(parentClassObj){
+                            var inheritedClassSchema = {properties:{}, required:[]};
+                            if(parentClassObj) self.collectClassSchemas(parentClassObj, inheritedClassSchema).then(function(res){
+                                self.schema = inheritedClassSchema;
+                                self.treeGrid.set('collection', doc);
+                            });
                         });
                     }
                 });
-
-
-                var docCol = this.store.cachingStore.filter({_id: id});
-                docCol.on('update', function(event){
-                    alert('doc update in treeGrid');
-                    /*var obj = event.target;
-                     self.onChange(obj);*/
-                });
-                this.treeGrid.set('collection', docCol);
-                //self.setDocIdDeferred.resolve(self);
-                //return this.setDocIdDeferred.promise;
             }
         });
 

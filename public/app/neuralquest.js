@@ -187,7 +187,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             var tabObj = pageObj.tabs[tabPane.tabNum];
             if(!tabObj.widgets) return false;
             tabObj.widgets.forEach(function (widget) {
-                widgetPromises.push(nqStore.getSchemaForView(widget.viewId).then(function(schema){
+                widgetPromises.push(when(nqStore.getSchemaForView(widget.viewId), function(schema){
                     var parms = {
                         id: pageId + '.' + tabPane.tabNum + '.' + widNum,
                         pageId: pageId,

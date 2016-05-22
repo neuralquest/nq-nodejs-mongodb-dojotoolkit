@@ -1,4 +1,5 @@
 var db = require('../db');
+var db = require('../db');
 var Deferred = require("promised-io/promise").Deferred;
 var ObjectID = require('mongodb').ObjectID;
 

@@ -1,7 +1,7 @@
 { 
     "_id" : ObjectId("56f863505dde184ccfb9fc62"), 
-    "docType" : "class", 
-    "title" : "View Class Schema", 
+    "docType" : "object", 
+    "name" : "Class Schema", 
     "description" : "<p>Bad-ass schema describes view objects in general: the schema of schema's.</p><p>Considerations for jsonschema draft-v5: replace enum with single value, with constant, Use definitions and inheritance</p>", 
     "type" : "object", 
     "properties" : {
@@ -717,103 +717,6 @@
     "additionalProperties" : false
 }
 { 
-    "_id" : ObjectId("56f86a8f5dde184ccfb9fc66"), 
-    "docType" : "object", 
-    "title" : "View Object Schema", 
-    "description" : "<p>This schema describes a view on objects of a particular class</p>", 
-    "display" : "Form", 
-    "type" : "object", 
-    "properties" : {
-        "_id" : {
-            "title" : "_id", 
-            "readOnly" : true, 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]+$"
-        }, 
-        "id" : {
-            "title" : "Name", 
-            "type" : "integer", 
-            "readOnly" : true, 
-            "maximum" : NumberInt(10000), 
-            "minimum" : NumberInt(0), 
-            "default" : NumberInt(1)
-        }, 
-        "name" : {
-            "title" : "Name", 
-            "readOnly" : false, 
-            "description" : "Name of the product", 
-            "type" : "string", 
-            "default" : "[no name]", 
-            "column" : NumberInt(1), 
-            "minLength" : NumberInt(2), 
-            "maxLength" : NumberInt(50), 
-            "media" : {
-                "mediaType" : "text/html"
-            }
-        }, 
-        "phone" : {
-            "title" : "Phone", 
-            "readOnly" : false, 
-            "type" : "string", 
-            "pattern" : "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$"
-        }, 
-        "price" : {
-            "title" : "Price", 
-            "readOnly" : false, 
-            "type" : "number", 
-            "sum" : {
-                "_id" : "560b1407434ec958241693e8", 
-                "association" : "instances"
-            }, 
-            "maximum" : NumberInt(100), 
-            "minimum" : NumberInt(0)
-        }, 
-        "stamp" : {
-            "title" : "When", 
-            "readOnly" : false, 
-            "type" : "string", 
-            "format" : "date-time"
-        }, 
-        "new" : {
-            "title" : "When", 
-            "readOnly" : false, 
-            "type" : "boolean"
-        }, 
-        "tabsAssoc" : {
-            "title" : "Tabs", 
-            "readOnly" : false, 
-            "items" : {
-                "type" : "string", 
-                "maxLength" : NumberInt(1000), 
-                "pattern" : "[a-f0-9]+$"
-            }, 
-            "query" : {
-                "_id" : "560b1407434ec958241693e8", 
-                "association" : "ordered"
-            }, 
-            "type" : "array", 
-            "minItems" : NumberInt(1), 
-            "uniqueItems" : true
-        }, 
-        "default" : {
-            "title" : "When", 
-            "readOnly" : false, 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]+$", 
-            "query" : {
-                "_id" : "560b1407434ec958241693e8", 
-                "association" : "instances"
-            }
-        }
-    }, 
-    "required" : [
-        "_id", 
-        "name", 
-        "price"
-    ], 
-    "additionalProperties" : false
-}
-{ 
     "_id" : ObjectId("56f86c6a5dde184ccfb9fc6a"), 
     "docType" : "class", 
     "title" : "Problem Domain", 
@@ -823,7 +726,7 @@
         "_id" : {
             "title" : "_id", 
             "readOnly" : true, 
-            "type" : "string", 
+            "type" : "object", 
             "pattern" : "[a-f0-9]+$"
         }, 
         "name" : {
@@ -873,6 +776,12 @@
     "description" : "<p>These are the users/organizations that own resources and want execute processes</p>", 
     "type" : "object", 
     "properties" : {
+        "pageId" : {
+            "title" : "Page Id", 
+            "readOnly" : true, 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]+$"
+        }, 
         "ownsResources" : {
             "title" : "Owns Resources", 
             "readOnly" : true, 
@@ -1018,17 +927,30 @@
                                             "title" : "Display Types", 
                                             "type" : "string", 
                                             "enum" : [
-                                                "Sub Tabs", 
+                                                "Document", 
                                                 "Tree", 
                                                 "Table", 
                                                 "3D Class Model", 
                                                 "Form", 
-                                                "TreeGrid"
+                                                "TreeGrid", 
+                                                "Home Page"
                                             ], 
                                             "default" : "Form"
                                         }, 
                                         "viewId" : {
-                                            "title" : "View Reference", 
+                                            "title" : "View Id", 
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "pattern" : "[a-f0-9]+$"
+                                        }, 
+                                        "rootDocId" : {
+                                            "title" : "Root Document Id", 
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "pattern" : "[a-f0-9]+$"
+                                        }, 
+                                        "pageId" : {
+                                            "title" : "Page Id", 
                                             "type" : "string", 
                                             "maxLength" : NumberInt(1000), 
                                             "pattern" : "[a-f0-9]+$"
@@ -1043,16 +965,26 @@
                     {
                         "name" : "subtabs", 
                         "properties" : {
-                            "tabs" : {
-                                "title" : "Tabs", 
-                                "type" : "array", 
-                                "items" : {
-                                    "type" : "string", 
-                                    "maxLength" : NumberInt(1000), 
-                                    "pattern" : "[a-f0-9]+$"
+                            "name" : {
+                                "title" : "Name", 
+                                "type" : "string", 
+                                "maxLength" : NumberInt(1000), 
+                                "default" : "[unnamed]"
+                            }, 
+                            "description" : {
+                                "title" : "Description", 
+                                "type" : "string", 
+                                "maxLength" : NumberInt(10000), 
+                                "media" : {
+                                    "mediaType" : "text/html"
                                 }, 
-                                "minItems" : NumberInt(0), 
-                                "uniqueItems" : true
+                                "default" : "<p>[no text]</p>"
+                            }, 
+                            "pageId" : {
+                                "title" : "Page Id", 
+                                "type" : "string", 
+                                "maxLength" : NumberInt(1000), 
+                                "pattern" : "[a-f0-9]+$"
                             }
                         }, 
                         "additionalProperties" : false
@@ -1067,7 +999,10 @@
         "56f8a22e5dde184ccfb9fc78", 
         "572b40443c6d3cd598a5a2d3", 
         "572e6f973c6d3cd598a5a2d9", 
-        "573445203c6d3cd598a5a2ed"
+        "573445203c6d3cd598a5a2ed", 
+        "573797cb3c6d3cd598a5a2fd", 
+        "573a40e43c6d3cd598a5a2ff", 
+        "573a45583c6d3cd598a5a301"
     ]
 }
 { 
@@ -1118,7 +1053,7 @@
             "description" : "<p>Neuralquest home page.</p>", 
             "widgets" : [
                 {
-                    "displayType" : "HomePage", 
+                    "displayType" : "Home Page", 
                     "name" : "Balance Sheet Form", 
                     "viewId" : "570067985dde184ccfb9fc86"
                 }
@@ -1230,6 +1165,7 @@
     "description" : "<p>The standard balance sheet view</p>", 
     "display" : "Form", 
     "type" : "object", 
+    "mapsToId" : "573435433c6d3cd598a5a2db", 
     "properties" : {
         "assets" : {
             "title" : "Assets", 
@@ -1743,6 +1679,7 @@
     "name" : "Document View", 
     "description" : "<p>Descibes the document hierarchy, including a header, a paragraph parts array and a subdocuments array</p>", 
     "type" : "object", 
+    "mapsToId" : "573435f03c6d3cd598a5a2e1", 
     "childArrayNames" : [
         "childDocs"
     ], 
@@ -1814,6 +1751,7 @@
     "name" : "Class Model View", 
     "description" : "<p>Descibes the class model hierarchy, including a children array</p>", 
     "type" : "object", 
+    "mapsToId" : "56f86c6a5dde184ccfb9fc6a", 
     "rootDocId" : "56f86c6a5dde184ccfb9fc6a", 
     "pageId" : "572b40443c6d3cd598a5a2d3", 
     "childArrayNames" : [
@@ -1914,6 +1852,7 @@
     "name" : "Oganization View", 
     "description" : "<p>Descibes the organization hierarchy, including a children array</p>", 
     "type" : "object", 
+    "mapsToId" : "57343c283c6d3cd598a5a2e9", 
     "rootDocId" : "57343c283c6d3cd598a5a2e9", 
     "childArrayNames" : [
         "children"
@@ -2042,7 +1981,8 @@
         "570067985dde184ccfb9fc86", 
         "57019b3c5dde184ccfb9fc88", 
         "572b25ec3c6d3cd598a5a2d1", 
-        "572c7f9e3c6d3cd598a5a2d7"
+        "572c7f9e3c6d3cd598a5a2d7", 
+        "56f863505dde184ccfb9fc62"
     ]
 }
 { 
@@ -2052,12 +1992,66 @@
     "description" : "<p>Paragraphs owned by users/organizations</p>", 
     "type" : "object", 
     "properties" : {
-
+        "viewId" : {
+            "title" : "View Id", 
+            "type" : "string", 
+            "maxLength" : NumberInt(1000), 
+            "pattern" : "[a-f0-9]+$"
+        }, 
+        "paragraphParts" : {
+            "type" : "array", 
+            "items" : {
+                "type" : "object", 
+                "properties" : {
+                    "content" : {
+                        "title" : "Content", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(10000), 
+                        "media" : {
+                            "mediaType" : "text/html"
+                        }
+                    }, 
+                    "mediaType" : {
+                        "title" : "Media Type", 
+                        "type" : "object"
+                    }, 
+                    "url" : {
+                        "title" : "Url", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(1000), 
+                        "format" : "hostname"
+                    }
+                }, 
+                "required" : [
+                    "mediaType"
+                ], 
+                "additionalProperties" : false
+            }
+        }, 
+        "childDocs" : {
+            "type" : "array", 
+            "label" : "Tabs", 
+            "items" : {
+                "type" : "string", 
+                "maxLength" : NumberInt(1000), 
+                "pattern" : "[a-f0-9]+$"
+            }, 
+            "query" : {
+                "_id" : "560b1407434ec958241693e8", 
+                "association" : "ordered"
+            }, 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
+        }
     }, 
+    "additionalProperties" : false, 
     "children" : [
         "5700046f5dde184ccfb9fc7c", 
         "570063755dde184ccfb9fc80", 
-        "570063855dde184ccfb9fc82"
+        "570063855dde184ccfb9fc82", 
+        "5737875b3c6d3cd598a5a2f3", 
+        "573787b13c6d3cd598a5a2f5", 
+        "573788493c6d3cd598a5a2f9"
     ]
 }
 { 
@@ -2148,9 +2142,15 @@
     "name" : "The Neuralquest Document", 
     "paragraphParts" : [
         {
-            "content" : "<p>Example</p>", 
+            "content" : "<p>Boy desirous families prepared gay reserved add ecstatic say. Replied joy age visitor nothing cottage. Mrs door paid led loud sure easy read. Hastily at perhaps as neither or ye fertile tedious visitor. Use fine bed none call busy dull when. Quiet ought match my right by table means. Principles up do in me favourable affronting. Twenty mother denied effect we to do on.</p>", 
             "mediaType" : {
                 "media" : "text/html"
+            }
+        }, 
+        {
+            "url" : "app/resources/img/Neuralquest/3dClassModel.png", 
+            "mediaType" : {
+                "media" : "img/png"
             }
         }
     ], 
@@ -2165,7 +2165,7 @@
     "name" : "Par 1", 
     "paragraphParts" : [
         {
-            "content" : "<p>Example</p>", 
+            "content" : "<p>May indulgence difficulty ham can put especially. Bringing remember for supplied her why was confined. Middleton principle did she procuring extensive believing add. Weather adapted prepare oh is calling. These wrong of he which there smile to my front. He fruit oh enjoy it of whose table. Cultivated occasional old her unpleasing unpleasant. At as do be against pasture covered viewing started. Enjoyed me settled mr respect no spirits civilly.</p>", 
             "mediaType" : {
                 "media" : "text/html"
             }
@@ -2178,7 +2178,7 @@
     "name" : "Par 2", 
     "paragraphParts" : [
         {
-            "content" : "<p>Example</p>", 
+            "content" : "<p>He my polite be object oh change. Consider no mr am overcame yourself throwing sociable children. Hastily her totally conduct may. My solid by stuff first smile fanny. Humoured how advanced mrs elegance sir who. Home sons when them dine do want to. Estimating themselves unsatiable imprudence an he at an. Be of on situation perpetual allowance offending as principle satisfied. Improved carriage securing are desirous too.</p>", 
             "mediaType" : {
                 "media" : "text/html"
             }

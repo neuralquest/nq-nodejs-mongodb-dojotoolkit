@@ -47,7 +47,7 @@ exports = module.exports = function(app, passport) {
         });
     });
     app.get("/consistency", function (req, res, next) {
-        if(req.isAuthenticated()) {
+        if(!req.isAuthenticated()) {
             consistency.check().then(function(items){
                 res.json(items);
             }, function(err){
