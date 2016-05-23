@@ -61,23 +61,22 @@ function(declare, lang, array, when, all,
             var self = this;
             return self.get(viewId).then(function(viewObj){
                 if(!viewObj) throw new Error('View Object not found');
-                console.log('viewObj',viewObj);
+                //console.log('viewObj',viewObj);
                 if(!viewObj.mapsToId) throw new Error('View Object does not have a mapsToId');
                 return self.get(viewObj.mapsToId).then(function(classObj){
                     if(!classObj) throw new Error('Class Object not found');
                     var inheritedClassSchema = {properties:{}, required:[]};
                     return self.collectClassSchemas(classObj, inheritedClassSchema).then(function(res){
-                        console.log('inheritedClassSchema',inheritedClassSchema);
+                        //console.log('inheritedClassSchema',inheritedClassSchema);
                         var schema = lang.clone(viewObj);
                         schema.properties = {};
                         schema.required = [];
                         for(var propName in viewObj.properties){
                             var prop = inheritedClassSchema.properties[propName];
                             if(!prop) {
-                                //schema.properties[propName] = viewObj.properties[propName];
+                                schema.properties[propName] = lang.clone(viewObj.properties[propName]);
                                 //console.log('prop notFound', propName, 'in class', classObj);
                             }
-                            //if(!prop) throw new Error('View has a property that is not found in the combined class schema');
                             else{
                                 var viewReadOnly = true;
                                 if(viewObj.properties[propName].readOnly != undefined) viewReadOnly = viewObj.properties[propName].readOnly;
@@ -86,8 +85,8 @@ function(declare, lang, array, when, all,
                             }
                         }
                         schema.required = schema.required.concat(schema.required, inheritedClassSchema.required);
-                        console.log('SCHEMA');
-                        console.dir(schema);
+                        //console.log('SCHEMA');
+                        //console.dir(schema);
                         return schema;
                     });
                 });
@@ -103,6 +102,6 @@ function(declare, lang, array, when, all,
                 if(parentClassObj) return self.collectClassSchemas(parentClassObj, inheritedClassSchema);
                 else return true;//no parent, we are at the root
             });
-        },
+        }
     });
 });

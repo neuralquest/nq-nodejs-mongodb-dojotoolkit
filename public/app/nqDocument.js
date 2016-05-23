@@ -1,11 +1,11 @@
-define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry', 'dijit/layout/ContentPane', 
+define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/when', 'dijit/registry', 'dijit/layout/ContentPane',
         'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "app/nqWidgetBase", "dojo/on", "dojo/dom-geometry", 
         "dojo/sniff", "dijit/form/ToggleButton", "dojo/dom", "dojo/dom-attr",
         'app/nqClassChart', "dojo/dom-style", "dojo/query", "dojo/mouse", 
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 'dijit/WidgetSet', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
-	function(declare, domConstruct, when, registry, ContentPane, 
+	function(declare, domConstruct, all, when, registry, ContentPane,
 			Toolbar, ValidationTextBox, Editor, nqWidgetBase, on, domGeometry, 
 			has, ToggleButton, dom, domAttr,
 			nqClassChart, domStyle, query, mouse){
@@ -13,8 +13,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 	return declare("nqDocument", [nqWidgetBase], {
         buildRendering: function(){
             this.inherited(arguments);
-            domStyle.set(this.pane.containerNode, 'margin-left' , '10px');
-            domStyle.set(this.pane.containerNode, 'margin-right' , '10px');
+            domStyle.set(this.pane.containerNode, 'padding-left' , '10px');
+            domStyle.set(this.pane.containerNode, 'padding-right' , '10px');
         },
 		setDocId: function(id){
 			if(id.length == 0) return;
@@ -24,9 +24,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
 			//load the data
 			self.store.get(id).then(function(obj){
 				self.generateNextLevelContents(obj, 1, null, false).then(function(obj){
-					registry.byId('tab'+self.tabId).resize();
-					//self.pane.resize();
-					//self.setDocIdDeferred.resolve(self);
+					//registry.byId('tab'+self.tabId).resize();
+					self.pane.resize();
 				});
 			}, nq.errorDialog);
 		},
@@ -67,22 +66,22 @@ define(['dojo/_base/declare', 'dojo/dom-construct', 'dojo/when', 'dijit/registry
                 });
                 if(paragraphContent) domConstruct.place(paragraphContent, divDom, 'last');
             }
-
-            if(item[this.schema.childArrayNames[0]]){
-                var childrenFilter = this.store.Filter().in('_id', item[this.schema.childArrayNames[0]]);
-                var childrenCollection = this.store.filter(childrenFilter);
-                childrenCollection.on('update', function(event){
-                    var obj = event.target;
-                    alert('doc change');
-                    //self.onChange(obj);
-                });
-                childrenCollection.forEach(function(childItem){
-                    var previousParagraphHasRightFloat = false;
-                    self.generateNextLevelContents(childItem, headerLevel+1, item._id, previousParagraphHasRightFloat);
-                    //previousParagraphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
-                });
-            }
-
+            var childrenArr = item[this.schema.childArrayNames[0]];
+            if(!childrenArr) return true;
+            var childrenFilter = this.store.Filter().in('_id', childrenArr);
+            var childrenCollection = this.store.filter(childrenFilter);
+            childrenCollection.on('update', function(event){
+                var obj = event.target;
+                alert('doc change');
+                //self.onChange(obj);
+            });
+            var childDocPromises = []
+            childrenCollection.forEach(function(childItem){
+                var previousParagraphHasRightFloat = false;
+                childDocPromises.push(self.generateNextLevelContents(childItem, headerLevel+1, item._id, previousParagraphHasRightFloat));
+                //previousParagraphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
+            });
+            return all(childDocPromises);
 		},
 
 

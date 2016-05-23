@@ -78,7 +78,7 @@ exports.getParentClass = function(id) {
                 if(parentsArr.length>1) deferred.reject(new Error('More than one parent found'));
                 else if(parentsArr.length==1) deferred.resolve(parentsArr[0]);
                 else if(parentsArr.length==0  && id == "56f86c6a5dde184ccfb9fc6a") deferred.resolve(null);
-                else deferred.reject(new Error('doc is an orphan'));
+                else deferred.reject(new Error('doc '+id+' is an orphan'));
             }
         });
     return deferred.promise;

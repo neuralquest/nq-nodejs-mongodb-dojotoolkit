@@ -107,19 +107,25 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/on",
                         return rootCollection.dotArray({id:parent._id, arrayName:'tabs'});
                     }
                 });*/
-                //Get parent
-                this.store.get(id).then(function(doc){
+                var docCol = this.store.filter({_id: id});
+                docCol.on('update', function(event){
+                    alert('doc update in Tree Grid');
+                    /*var obj = event.target;
+                     self.onChange(obj);*/
+                });
+                docCol.fetch().then(function(docsArr){
+                    var doc = docsArr[0];
                     if(doc.docType == 'object'){
                         self.store.getParentClass(id).then(function(parentClassObj){
                             var inheritedClassSchema = {properties:{}, required:[]};
-                            if(parentClassObj) self.collectClassSchemas(parentClassObj, inheritedClassSchema).then(function(res){
+                            if(parentClassObj) self.store.collectClassSchemas(parentClassObj, inheritedClassSchema).then(function(res){
                                 self.schema = inheritedClassSchema;
-                                self.treeGrid.set('collection', doc);
+                                self.treeGrid.set('collection', docCol);
                             });
                         });
                     }
                 });
             }
         });
-
-    });
+    }
+);

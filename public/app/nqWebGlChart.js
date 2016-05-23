@@ -17,7 +17,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		setSelectedObjIdThisLevel: new Deferred(),
 		
 		setDocId: function(objectId){
-            if(id.length == 0) return;
+            if(objectId.length == 0) return;
             if(objectId == this.docId) return this;
 			this.docId = objectId;
 			
