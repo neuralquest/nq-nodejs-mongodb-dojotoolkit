@@ -1,10 +1,14 @@
 var db = require('../db');
 var Deferred = require("promised-io/promise").Deferred;
+var ObjectID = require('mongodb').ObjectID;
+var merge = require('merge'), original, cloned;
+
 
 exports.findById = function(id) {
     var collection = db.get().collection('documents');
     var deferred = new Deferred();
-    collection.findOne({_id: id}, function(err, doc) {
+    var _id = ObjectID.createFromHexString(id);
+    collection.findOne({_id: _id}, function(err, doc) {
         if (err) deferred.reject(err);
         else deferred.resolve(doc);
     });
@@ -40,7 +44,7 @@ exports.update = function(doc, unset) {
     delete doc._id;
     var updateObj = {};
     if(unset) updateObj = {$set:doc, $unset: unset};
-    updateObj = {$set:doc};
+    else updateObj = {$set:doc};
     collection.update({_id: id}, updateObj,
         function(err, value) {
             if (err) deferred.reject(err);
@@ -68,18 +72,30 @@ exports.find = function(query) {
         });
     return deferred.promise;
 };
-exports.getParentClass = function(id) {
-    var collection = db.get().collection('documents');
-    var deferred = new Deferred();
-    collection.find({docType:'class', children: id}).toArray(
-        function(err, parentsArr) {
-            if(err) deferred.reject(err);
-            else {
-                if(parentsArr.length>1) deferred.reject(new Error('More than one parent found'));
-                else if(parentsArr.length==1) deferred.resolve(parentsArr[0]);
-                else if(parentsArr.length==0  && id == "56f86c6a5dde184ccfb9fc6a") deferred.resolve(null);
-                else deferred.reject(new Error('doc '+id+' is an orphan'));
-            }
+exports.getAncestors = function(id) {
+    var self = this;
+    return this.findById(id).then(function(classObj){
+        if(classObj.parentId) return self.getAncestors(classObj.parentId).then(function(ancestorsArr){
+            ancestorsArr.unshift(classObj);//add to the beginning
+            return ancestorsArr;
         });
-    return deferred.promise;
+        else return [classObj];//no parent, we are at the root
+    });
+};
+exports.getInheritedClassSchema = function(id){
+    return this.getAncestors(id).then(function(ancestorsArr){
+        var inheritedClassSchema = {
+            $schema: "http://json-schema.org/draft-04/schema#",
+            properties:{},
+            required:[],
+            additionalProperties: false
+        };
+        ancestorsArr.forEach(function(ancestor){
+            //combine the the two class.properties, there should be no overlap. If there is, the parent is leading
+            merge.recursive(inheritedClassSchema.properties, ancestor.properties);
+            //combine the to class.required arrays. There should be no overlap
+            if(ancestor.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(inheritedClassSchema.required, ancestor.required);
+        });
+        return inheritedClassSchema;
+    });
 };

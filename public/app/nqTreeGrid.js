@@ -107,7 +107,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/on",
                         return rootCollection.dotArray({id:parent._id, arrayName:'tabs'});
                     }
                 });*/
-                var docCol = this.store.filter({_id: id});
+                var docCol = this.store.cachingStore.filter({_id: id});
                 docCol.on('update', function(event){
                     alert('doc update in Tree Grid');
                     /*var obj = event.target;
@@ -116,12 +116,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/on",
                 docCol.fetch().then(function(docsArr){
                     var doc = docsArr[0];
                     if(doc.docType == 'object'){
-                        self.store.getParentClass(id).then(function(parentClassObj){
-                            var inheritedClassSchema = {properties:{}, required:[]};
-                            if(parentClassObj) self.store.collectClassSchemas(parentClassObj, inheritedClassSchema).then(function(res){
-                                self.schema = inheritedClassSchema;
-                                self.treeGrid.set('collection', docCol);
-                            });
+                        self.store.getInheritedClassSchema(doc._id).then(function(inheritedClassSchema){
+                            self.schema = inheritedClassSchema;
+                            self.treeGrid.set('collection', docCol);
                         });
                     }
                 });

@@ -102,6 +102,43 @@ function(declare, lang, array, when, all,
                 if(parentClassObj) return self.collectClassSchemas(parentClassObj, inheritedClassSchema);
                 else return true;//no parent, we are at the root
             });
-        }
+        },
+        getAncestors: function(id) {
+            var self = this;
+            return this.get(id).then(function(classObj){
+                if(classObj.parentId) return self.getAncestors(classObj.parentId).then(function(ancestorsArr){
+                    ancestorsArr.unshift(classObj);//add to the beginning
+                    return ancestorsArr;
+                });
+                else return [classObj];//no parent, we are at the root
+            });
+        },
+        getInheritedClassSchema: function(id){
+            return this.getAncestors(id).then(function(ancestorsArr){
+                var inheritedClassSchema = {
+                    $schema: "http://json-schema.org/draft-04/schema#",
+                    properties:{},
+                    required:[],
+                    additionalProperties: false
+                };
+                ancestorsArr.forEach(function(ancestor){
+                    //combine the the two class.properties, there should be no overlap. If there is, the parent is leading
+                    lang.mixin(inheritedClassSchema.properties, ancestor.properties);
+                    //merge.recursive(inheritedClassSchema.properties, ancestor.properties);
+                    //combine the to class.required arrays. There should be no overlap
+                    if(ancestor.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(inheritedClassSchema.required, ancestor.required);
+                });
+                return inheritedClassSchema;
+            });
+        },
+        iaA: function(id) {
+
+        },
+        getInstances: function(id) {
+
+        },
+        getSubclasses: function(id) {
+
+        },
     });
 });

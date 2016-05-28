@@ -1,0 +1,717 @@
+{ 
+    "_id" : ObjectId("574966fa3c6d3cd598a5a381"), 
+    "docType" : "object", 
+    "name" : "Class Schema", 
+    "description" : "<p>Bad-ass schema describes view objects in general: the schema of schema's.</p><p>Considerations for jsonschema draft-v5: replace enum with single value, with constant, Use definitions and inheritance</p>", 
+    "type" : "object", 
+    "properties" : {
+        "title" : {
+            "title" : "Title", 
+            "type" : "string", 
+            "maxLength" : NumberInt(1000), 
+            "default" : "[unnamed]"
+        }, 
+        "description" : {
+            "title" : "Description", 
+            "type" : "string", 
+            "maxLength" : NumberInt(10000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>[no text]</p>"
+        }, 
+        "display" : {
+            "title" : "Display", 
+            "type" : "string", 
+            "enum" : [
+                "Form", 
+                "Paragraph"
+            ], 
+            "default" : "Form"
+        }, 
+        "type" : {
+            "title" : "Type", 
+            "type" : "string", 
+            "enum" : [
+                "object"
+            ]
+        }, 
+        "properties" : {
+            "title" : "Properties", 
+            "type" : "object", 
+            "patternProperties" : {
+                "^[a-z0-9]+$" : {
+                    "anyOf" : [
+                        {
+                            "name" : "string", 
+                            "type" : "object", 
+                            "properties" : {
+                                "title" : {
+                                    "title" : "Label", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "title" : "Description", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "title" : "Read Only", 
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "title" : "Type", 
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "string"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "title" : "Row Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "title" : "Column Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "default" : {
+                                    "title" : "Default Value", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "minLength" : {
+                                    "title" : "Minimum Length", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(10000), 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(0)
+                                }, 
+                                "maxLength" : {
+                                    "title" : "Maximum Length", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(10000), 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(10000)
+                                }, 
+                                "width" : {
+                                    "title" : "Width", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(10000), 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(0)
+                                }, 
+                                "pattern" : {
+                                    "title" : "Patern", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : ""
+                                }, 
+                                "media" : {
+                                    "title" : "Media", 
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "mediaType" : {
+                                            "title" : "Media Type", 
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "text/plain", 
+                                                "text/html", 
+                                                "text/json", 
+                                                "text/javascript"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false, 
+                                    "default" : {
+                                        "mediaType" : "text/plain"
+                                    }
+                                }, 
+                                "format" : {
+                                    "title" : "Format", 
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "date-time", 
+                                        "hostname", 
+                                        "uri", 
+                                        "email"
+                                    ], 
+                                    "default" : ""
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "name" : "image", 
+                            "type" : "object", 
+                            "properties" : {
+                                "title" : {
+                                    "title" : "Label", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "title" : "Description", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "title" : "Read Only", 
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "title" : "Type", 
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "string"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "title" : "Row Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "title" : "Column Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "height" : {
+                                    "title" : "Height", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(10000), 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(0)
+                                }, 
+                                "width" : {
+                                    "title" : "Width", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(10000), 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(300)
+                                }, 
+                                "url" : {
+                                    "title" : "Url", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "format" : "hostname"
+                                }, 
+                                "media" : {
+                                    "title" : "Media", 
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "mediaType" : {
+                                            "title" : "Media Type", 
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "image/jpg", 
+                                                "image/webgl"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false, 
+                                    "default" : {
+                                        "mediaType" : "image/jpg"
+                                    }
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "description" : "number", 
+                            "type" : "object", 
+                            "properties" : {
+                                "title" : {
+                                    "title" : "Label", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "title" : "Description", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "title" : "Read Only", 
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "title" : "Type", 
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "number"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "title" : "Row Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "title" : "Column Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "default" : {
+                                    "title" : "Default Value", 
+                                    "type" : "number", 
+                                    "maximum" : NumberLong(9223372036854775807), 
+                                    "minimum" : NumberLong(-9223372036854775807), 
+                                    "default" : null
+                                }, 
+                                "maximum" : {
+                                    "title" : "Maximum Value", 
+                                    "type" : "number", 
+                                    "maximum" : NumberLong(9223372036854775807), 
+                                    "minimum" : NumberLong(-9223372036854775807), 
+                                    "default" : NumberLong(9223372036854775807)
+                                }, 
+                                "minimum" : {
+                                    "title" : "Minimum Value", 
+                                    "type" : "number", 
+                                    "maximum" : NumberLong(9223372036854775807), 
+                                    "minimum" : NumberLong(-9223372036854775807), 
+                                    "default" : NumberLong(-9223372036854775807)
+                                }, 
+                                "sum" : {
+                                    "title" : "Height", 
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "_id" : {
+                                            "title" : "ID", 
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "pattern" : "[a-f0-9]+$"
+                                        }, 
+                                        "association" : {
+                                            "title" : "Association Type", 
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "ordered", 
+                                                "oneToMany", 
+                                                "instances"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "description" : "integer", 
+                            "type" : "object", 
+                            "properties" : {
+                                "title" : {
+                                    "title" : "Label", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "title" : "Description", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "title" : "Read Only", 
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "title" : "Type", 
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "integer"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "title" : "Row Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "title" : "Column Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "default" : {
+                                    "title" : "Column Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(2147483647), 
+                                    "minimum" : NumberInt(-2147483647), 
+                                    "default" : "[null]"
+                                }, 
+                                "maximum" : {
+                                    "title" : "Maximum Value", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(2147483647), 
+                                    "minimum" : NumberInt(-2147483647), 
+                                    "default" : NumberInt(2147483647)
+                                }, 
+                                "minimum" : {
+                                    "title" : "Minimum Value", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(2147483647), 
+                                    "minimum" : NumberInt(-2147483647), 
+                                    "default" : NumberInt(-2147483647)
+                                }, 
+                                "sum" : {
+                                    "title" : "Sum Query", 
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "_id" : {
+                                            "title" : "ID", 
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "pattern" : "[a-f0-9]+$"
+                                        }, 
+                                        "association" : {
+                                            "title" : "Association Type", 
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "ordered", 
+                                                "oneToMany", 
+                                                "instances"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "description" : "boolean", 
+                            "type" : "object", 
+                            "properties" : {
+                                "title" : {
+                                    "title" : "Label", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "title" : "Description", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "title" : "Read Only", 
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "title" : "Type", 
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "boolean"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "title" : "Row Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "title" : "Column Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "default" : {
+                                    "title" : "Defsult Value", 
+                                    "type" : "boolean", 
+                                    "default" : false
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "description" : "toMany", 
+                            "type" : "object", 
+                            "properties" : {
+                                "title" : {
+                                    "title" : "Label", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "title" : "Description", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "title" : "Read Only", 
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "title" : "Type", 
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "array"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "title" : "Row Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "title" : "Column Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "query" : {
+                                    "title" : "Query", 
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "_id" : {
+                                            "title" : "ID", 
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "pattern" : "[a-f0-9]+$"
+                                        }, 
+                                        "association" : {
+                                            "title" : "Association Type", 
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "ordered", 
+                                                "oneToMany", 
+                                                "instances"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false
+                                }, 
+                                "minItems" : {
+                                    "title" : "Minimum Number of Items", 
+                                    "type" : "integer", 
+                                    "minimum" : NumberInt(0), 
+                                    "default" : NumberInt(0)
+                                }, 
+                                "uniqueItems" : {
+                                    "title" : "Unique Items", 
+                                    "type" : "boolean", 
+                                    "enum" : [
+                                        true
+                                    ]
+                                }, 
+                                "items" : {
+                                    "title" : "Items", 
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "type" : {
+                                            "title" : "Type", 
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000)
+                                        }, 
+                                        "maxLength" : {
+                                            "title" : "Maximum Length", 
+                                            "type" : "integer", 
+                                            "enum" : [
+                                                NumberInt(1000)
+                                            ]
+                                        }, 
+                                        "pattern" : {
+                                            "title" : "Partern", 
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "[a-f0-9]+$"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }, 
+                        {
+                            "description" : "toOne", 
+                            "type" : "object", 
+                            "properties" : {
+                                "title" : {
+                                    "title" : "Label", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "title" : "Description", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "readOnly" : {
+                                    "title" : "Read Only", 
+                                    "type" : "boolean", 
+                                    "default" : true
+                                }, 
+                                "type" : {
+                                    "title" : "Type", 
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "string"
+                                    ]
+                                }, 
+                                "row" : {
+                                    "title" : "Row Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(0), 
+                                    "minimum" : NumberInt(5), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "column" : {
+                                    "title" : "Column Number", 
+                                    "type" : "integer", 
+                                    "maximum" : NumberInt(1), 
+                                    "minimum" : NumberInt(3), 
+                                    "default" : NumberInt(1)
+                                }, 
+                                "query" : {
+                                    "title" : "Query", 
+                                    "type" : "object", 
+                                    "properties" : {
+                                        "_id" : {
+                                            "title" : "ID", 
+                                            "type" : "string", 
+                                            "maxLength" : NumberInt(1000), 
+                                            "pattern" : "[a-f0-9]+$"
+                                        }, 
+                                        "title" : "Association Type", 
+                                        "association" : {
+                                            "type" : "string", 
+                                            "enum" : [
+                                                "ordered", 
+                                                "oneToMany", 
+                                                "instances"
+                                            ]
+                                        }
+                                    }, 
+                                    "additionalProperties" : false
+                                }, 
+                                "pattern" : {
+                                    "title" : "Patern", 
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "[a-f0-9]+$"
+                                    ]
+                                }
+                            }, 
+                            "additionalProperties" : false, 
+                            "required" : [
+                                "label", 
+                                "readOnly", 
+                                "type"
+                            ]
+                        }
+                    ]
+                }
+            }
+        }, 
+        "required" : {
+            "title" : "Required", 
+            "type" : "array", 
+            "items" : {
+                "type" : "string"
+            }
+        }, 
+        "additionalProperties" : {
+            "title" : "Additional Properties", 
+            "type" : "boolean", 
+            "enum" : [
+                false
+            ]
+        }
+    }
+}

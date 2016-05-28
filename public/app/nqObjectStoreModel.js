@@ -94,6 +94,10 @@ define([
 		mayHaveChildren: function(item){
 			//if(item[this.arrayNames[0]] && (item[this.arrayNames[0]]).length>0) return true;
 			return true;
+            this.getChildren(item, function(children){
+                if(children.length>0) return true;
+                return false;
+            });
 		},
 		getChildren: function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
 			// summary:
@@ -105,9 +109,12 @@ define([
             if(parentItem.viewId){
                 self.store.get(parentItem.viewId).then(function(childView){
                     self.store.get(childView.rootDocId).then(function(classObj){
-                        childrenFilter = self.store.Filter().in('_id', classObj.children);
+                        childrenFilter = self.store.Filter({parentId: classObj._id});
                     });
                 });
+            }
+            else if(this.arrayNames[0] == 'children'){
+                childrenFilter = self.store.Filter({parentId: parentItem._id});
             }
             else{
                 childrenFilter = this.store.Filter().in('_id', parentItem[this.arrayNames[0]]);

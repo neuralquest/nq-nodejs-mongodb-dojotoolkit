@@ -713,7 +713,8 @@
                 false
             ]
         }
-    }
+    }, 
+    "parentId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("56f86c6a5dde184ccfb9fc6a"), 
@@ -726,6 +727,12 @@
             "title" : "_id", 
             "readOnly" : true, 
             "type" : "object", 
+            "pattern" : "[a-f0-9]+$"
+        }, 
+        "parentId" : {
+            "title" : "_id", 
+            "readOnly" : true, 
+            "type" : "string", 
             "pattern" : "[a-f0-9]+$"
         }, 
         "name" : {
@@ -760,15 +767,10 @@
     }, 
     "required" : [
         "_id", 
-        "docType"
+        "docType", 
+        "parentId"
     ], 
-    "additionalProperties" : false, 
-    "children" : [
-        "56f870a55dde184ccfb9fc6c", 
-        "56f87bcc5dde184ccfb9fc70", 
-        "574225cb3c6d3cd598a5a305", 
-        "574234113c6d3cd598a5a30b"
-    ]
+    "additionalProperties" : false
 }
 { 
     "_id" : ObjectId("56f870a55dde184ccfb9fc6c"), 
@@ -800,10 +802,7 @@
             "uniqueItems" : true
         }
     }, 
-    "children" : [
-        "57343c283c6d3cd598a5a2e9", 
-        "57343beb3c6d3cd598a5a2e7"
-    ]
+    "parentId" : "56f86c6a5dde184ccfb9fc6a"
 }
 { 
     "_id" : ObjectId("56f87bcc5dde184ccfb9fc70"), 
@@ -814,10 +813,7 @@
     "properties" : {
 
     }, 
-    "children" : [
-        "573435433c6d3cd598a5a2db", 
-        "573435803c6d3cd598a5a2dd"
-    ]
+    "parentId" : "56f86c6a5dde184ccfb9fc6a"
 }
 { 
     "_id" : ObjectId("56f87ec55dde184ccfb9fc74"), 
@@ -995,18 +991,7 @@
         }
     }, 
     "additionalProperties" : false, 
-    "children" : [
-        "56f89f625dde184ccfb9fc76", 
-        "56f8a22e5dde184ccfb9fc78", 
-        "572b40443c6d3cd598a5a2d3", 
-        "572e6f973c6d3cd598a5a2d9", 
-        "573445203c6d3cd598a5a2ed", 
-        "573797cb3c6d3cd598a5a2fd", 
-        "573a40e43c6d3cd598a5a2ff", 
-        "573a45583c6d3cd598a5a301", 
-        "574237d23c6d3cd598a5a30f", 
-        "574237e13c6d3cd598a5a311"
-    ]
+    "parentId" : "573435803c6d3cd598a5a2dd"
 }
 { 
     "_id" : ObjectId("56f89f625dde184ccfb9fc76"), 
@@ -1022,9 +1007,9 @@
             "widgets" : [
                 {
                     "displayType" : "Tree", 
-                    "name" : "The Document", 
-                    "rootDocId" : "5700046f5dde184ccfb9fc7c", 
-                    "viewId" : "57019b3c5dde184ccfb9fc88"
+                    "name" : "Owners Tree", 
+                    "rootDocId" : "56f870a55dde184ccfb9fc6c", 
+                    "viewId" : "572b25ec3c6d3cd598a5a2d1"
                 }
             ]
         }, 
@@ -1041,7 +1026,8 @@
                 }
             ]
         }
-    ]
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("56f8a22e5dde184ccfb9fc78"), 
@@ -1105,61 +1091,16 @@
             "description" : "Rsources owned by Neuralquest", 
             "pageId" : "572e6f973c6d3cd598a5a2d9"
         }
-    ]
-}
-{ 
-    "_id" : ObjectId("5700046f5dde184ccfb9fc7c"), 
-    "docType" : "object", 
-    "name" : "The Document", 
-    "paragraphParts" : [
-        {
-            "content" : "<p>Example</p>", 
-            "mediaType" : {
-                "media" : "text/html"
-            }
-        }
     ], 
-    "childDocs" : [
-        "570063755dde184ccfb9fc80", 
-        "570063855dde184ccfb9fc82"
-    ]
-}
-{ 
-    "_id" : ObjectId("570063755dde184ccfb9fc80"), 
-    "docType" : "object", 
-    "name" : "Organizations", 
-    "paragraphParts" : [
-        {
-            "content" : "<p>Example</p>", 
-            "mediaType" : {
-                "media" : "text/html"
-            }
-        }
-    ], 
-    "viewId" : "572c7f9e3c6d3cd598a5a2d7"
-}
-{ 
-    "_id" : ObjectId("570063855dde184ccfb9fc82"), 
-    "docType" : "object", 
-    "name" : "Users", 
-    "paragraphParts" : [
-        {
-            "content" : "<p>Example</p>", 
-            "mediaType" : {
-                "media" : "text/html"
-            }
-        }
-    ], 
-    "childDocs" : [
-
-    ]
+    "parentId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("570064645dde184ccfb9fc84"), 
     "docType" : "object", 
     "name" : "Neuralquest", 
     "description" : "<p>The Neuralquest organization</p>", 
-    "pageId" : "56f8a22e5dde184ccfb9fc78"
+    "pageId" : "56f8a22e5dde184ccfb9fc78", 
+    "parentId" : "574243d23c6d3cd598a5a31b"
 }
 { 
     "_id" : ObjectId("570067985dde184ccfb9fc86"), 
@@ -1673,7 +1614,8 @@
                 "association" : "instances"
             }
         }
-    }
+    }, 
+    "parentId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57019b3c5dde184ccfb9fc88"), 
@@ -1736,7 +1678,8 @@
     "required" : [
         "_id", 
         "name"
-    ]
+    ], 
+    "parentId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("572b25ec3c6d3cd598a5a2d1"), 
@@ -1806,7 +1749,8 @@
     "required" : [
         "_id", 
         "name"
-    ]
+    ], 
+    "parentId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("572b40443c6d3cd598a5a2d3"), 
@@ -1836,56 +1780,25 @@
                 }
             ]
         }
-    ]
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("572c7f9e3c6d3cd598a5a2d7"), 
     "docType" : "object", 
-    "name" : "Oganization View", 
-    "description" : "<p>Descibes the organization hierarchy, including a children array</p>", 
+    "name" : "Oganizational Unit View", 
+    "description" : "<p>Descibes the organizational unit hierarchy, including a children array</p>", 
     "type" : "object", 
     "mapsToId" : "57343c283c6d3cd598a5a2e9", 
-    "rootDocId" : "57343c283c6d3cd598a5a2e9", 
     "childArrayNames" : [
-        "children"
+        "subUnits"
     ], 
     "properties" : {
-        "_id" : {
-            "title" : "_id", 
-            "readOnly" : true, 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]+$"
-        }, 
-        "name" : {
-            "title" : "Name", 
-            "type" : "string", 
-            "readOnly" : false, 
-            "maxLength" : NumberInt(100000), 
-            "default" : "[unnamed]"
-        }, 
-        "docType" : {
-            "title" : "Doument Type", 
-            "type" : "string", 
-            "readOnly" : true, 
-            "enum" : [
-                "object"
-            ]
-        }, 
         "icon" : {
             "title" : "Icon", 
             "type" : "string"
         }, 
-        "description" : {
-            "title" : "Description", 
-            "type" : "string", 
-            "readOnly" : false, 
-            "maxLength" : NumberInt(100000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>no text</p>"
-        }, 
-        "children" : {
+        "subUnits" : {
             "label" : "Subclasses", 
             "readOnly" : false, 
             "items" : {
@@ -1905,7 +1818,8 @@
     "required" : [
         "_id", 
         "name"
-    ]
+    ], 
+    "parentId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("572e6f973c6d3cd598a5a2d9"), 
@@ -1928,7 +1842,8 @@
                 }
             ]
         }
-    ]
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("573435433c6d3cd598a5a2db"), 
@@ -1945,10 +1860,7 @@
             "maxLength" : NumberInt(3)
         }
     }, 
-    "children" : [
-        "57343b823c6d3cd598a5a2e3", 
-        "57343bba3c6d3cd598a5a2e5"
-    ]
+    "parentId" : "56f87bcc5dde184ccfb9fc70"
 }
 { 
     "_id" : ObjectId("573435803c6d3cd598a5a2dd"), 
@@ -1959,12 +1871,7 @@
     "properties" : {
 
     }, 
-    "children" : [
-        "56f87ec55dde184ccfb9fc74", 
-        "573435c23c6d3cd598a5a2df", 
-        "573435f03c6d3cd598a5a2e1", 
-        "574237133c6d3cd598a5a30d"
-    ]
+    "parentId" : "56f87bcc5dde184ccfb9fc70"
 }
 { 
     "_id" : ObjectId("573435c23c6d3cd598a5a2df"), 
@@ -2016,13 +1923,7 @@
             }
         }
     }, 
-    "children" : [
-        "570067985dde184ccfb9fc86", 
-        "57019b3c5dde184ccfb9fc88", 
-        "572b25ec3c6d3cd598a5a2d1", 
-        "572c7f9e3c6d3cd598a5a2d7", 
-        "56f863505dde184ccfb9fc62"
-    ]
+    "parentId" : "573435803c6d3cd598a5a2dd"
 }
 { 
     "_id" : ObjectId("573435f03c6d3cd598a5a2e1"), 
@@ -2084,14 +1985,7 @@
         }
     }, 
     "additionalProperties" : false, 
-    "children" : [
-        "5700046f5dde184ccfb9fc7c", 
-        "570063755dde184ccfb9fc80", 
-        "570063855dde184ccfb9fc82", 
-        "5737875b3c6d3cd598a5a2f3", 
-        "573787b13c6d3cd598a5a2f5", 
-        "573788493c6d3cd598a5a2f9"
-    ]
+    "parentId" : "573435803c6d3cd598a5a2dd"
 }
 { 
     "_id" : ObjectId("57343b823c6d3cd598a5a2e3"), 
@@ -2102,12 +1996,7 @@
     "properties" : {
 
     }, 
-    "children" : [
-        "5742561f3c6d3cd598a5a327", 
-        "574256493c6d3cd598a5a335", 
-        "5742564c3c6d3cd598a5a337", 
-        "574256643c6d3cd598a5a345"
-    ]
+    "parentId" : "573435433c6d3cd598a5a2db"
 }
 { 
     "_id" : ObjectId("57343bba3c6d3cd598a5a2e5"), 
@@ -2118,11 +2007,7 @@
     "properties" : {
 
     }, 
-    "children" : [
-        "574256743c6d3cd598a5a34f", 
-        "574256923c6d3cd598a5a361", 
-        "5742616e3c6d3cd598a5a367"
-    ]
+    "parentId" : "573435433c6d3cd598a5a2db"
 }
 { 
     "_id" : ObjectId("57343beb3c6d3cd598a5a2e7"), 
@@ -2133,9 +2018,7 @@
     "properties" : {
 
     }, 
-    "children" : [
-        "57343cd13c6d3cd598a5a2eb"
-    ]
+    "parentId" : "56f870a55dde184ccfb9fc6c"
 }
 { 
     "_id" : ObjectId("57343c283c6d3cd598a5a2e9"), 
@@ -2169,17 +2052,15 @@
             "default" : "<p>[Which opportunity are you taking advantage off?]</p>"
         }
     }, 
-    "children" : [
-        "5742439f3c6d3cd598a5a319", 
-        "574243d23c6d3cd598a5a31b"
-    ]
+    "parentId" : "56f870a55dde184ccfb9fc6c"
 }
 { 
     "_id" : ObjectId("57343cd13c6d3cd598a5a2eb"), 
     "docType" : "object", 
     "name" : "Platoscave", 
     "description" : "<p>Platos Cave user</p>", 
-    "pageId" : "56f8a22e5dde184ccfb9fc78"
+    "pageId" : "56f8a22e5dde184ccfb9fc78", 
+    "parentId" : "57343beb3c6d3cd598a5a2e7"
 }
 { 
     "_id" : ObjectId("573445203c6d3cd598a5a2ed"), 
@@ -2202,7 +2083,8 @@
                 }
             ]
         }
-    ]
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("5737875b3c6d3cd598a5a2f3"), 
@@ -2225,7 +2107,8 @@
     "childDocs" : [
         "573787b13c6d3cd598a5a2f5", 
         "573788493c6d3cd598a5a2f9"
-    ]
+    ], 
+    "parentId" : "573435f03c6d3cd598a5a2e1"
 }
 { 
     "_id" : ObjectId("573787b13c6d3cd598a5a2f5"), 
@@ -2238,7 +2121,8 @@
                 "media" : "text/html"
             }
         }
-    ]
+    ], 
+    "parentId" : "573435f03c6d3cd598a5a2e1"
 }
 { 
     "_id" : ObjectId("573788493c6d3cd598a5a2f9"), 
@@ -2251,7 +2135,8 @@
                 "media" : "text/html"
             }
         }
-    ]
+    ], 
+    "parentId" : "573435f03c6d3cd598a5a2e1"
 }
 { 
     "_id" : ObjectId("573797cb3c6d3cd598a5a2fd"), 
@@ -2277,7 +2162,8 @@
             "description" : "Document Page", 
             "pageId" : "573a40e43c6d3cd598a5a2ff"
         }
-    ]
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("573a40e43c6d3cd598a5a2ff"), 
@@ -2300,7 +2186,8 @@
                 }
             ]
         }
-    ]
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("573a45583c6d3cd598a5a301"), 
@@ -2321,7 +2208,8 @@
                 }
             ]
         }
-    ]
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("574225cb3c6d3cd598a5a305"), 
@@ -2365,12 +2253,7 @@
             "uniqueItems" : true
         }
     }, 
-    "children" : [
-        "574232a53c6d3cd598a5a307", 
-        "574232b83c6d3cd598a5a309", 
-        "57424f1b3c6d3cd598a5a321", 
-        "57424f7b3c6d3cd598a5a325"
-    ]
+    "parentId" : "56f86c6a5dde184ccfb9fc6a"
 }
 { 
     "_id" : ObjectId("574232a53c6d3cd598a5a307"), 
@@ -2398,9 +2281,7 @@
             "pattern" : "[a-f0-9]+$"
         }
     }, 
-    "children" : [
-
-    ]
+    "parentId" : "574225cb3c6d3cd598a5a305"
 }
 { 
     "_id" : ObjectId("574232b83c6d3cd598a5a309"), 
@@ -2428,9 +2309,7 @@
             "pattern" : "[a-f0-9]+$"
         }
     }, 
-    "children" : [
-
-    ]
+    "parentId" : "574225cb3c6d3cd598a5a305"
 }
 { 
     "_id" : ObjectId("574234113c6d3cd598a5a30b"), 
@@ -2450,7 +2329,8 @@
             "type" : "string", 
             "format" : "date-time"
         }
-    }
+    }, 
+    "parentId" : "56f86c6a5dde184ccfb9fc6a"
 }
 { 
     "_id" : ObjectId("574237133c6d3cd598a5a30d"), 
@@ -2500,10 +2380,7 @@
             "default" : "<p>[How are you doing it?]</p>"
         }
     }, 
-    "children" : [
-        "574239993c6d3cd598a5a315", 
-        "574239b23c6d3cd598a5a317"
-    ]
+    "parentId" : "573435803c6d3cd598a5a2dd"
 }
 { 
     "_id" : ObjectId("574237d23c6d3cd598a5a30f"), 
@@ -2567,7 +2444,8 @@
             "description" : "Rsources owned by Neuralquest", 
             "pageId" : "572e6f973c6d3cd598a5a2d9"
         }
-    ]
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("574237e13c6d3cd598a5a311"), 
@@ -2631,21 +2509,24 @@
             "description" : "Rsources owned by Neuralquest", 
             "pageId" : "572e6f973c6d3cd598a5a2d9"
         }
-    ]
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("574239993c6d3cd598a5a315"), 
     "docType" : "object", 
     "name" : "Server", 
     "description" : "<p>The Neuralquest server</p>", 
-    "pageId" : "574237d23c6d3cd598a5a30f"
+    "pageId" : "574237d23c6d3cd598a5a30f", 
+    "parentId" : "574237133c6d3cd598a5a30d"
 }
 { 
     "_id" : ObjectId("574239b23c6d3cd598a5a317"), 
     "docType" : "object", 
     "name" : "Client", 
     "description" : "<p>The Neuralquest client</p>", 
-    "pageId" : "574237e13c6d3cd598a5a311"
+    "pageId" : "574237e13c6d3cd598a5a311", 
+    "parentId" : "574237133c6d3cd598a5a30d"
 }
 { 
     "_id" : ObjectId("5742439f3c6d3cd598a5a319"), 
@@ -2656,9 +2537,7 @@
     "properties" : {
 
     }, 
-    "children" : [
-        "574244ab3c6d3cd598a5a31d"
-    ]
+    "parentId" : "57343c283c6d3cd598a5a2e9"
 }
 { 
     "_id" : ObjectId("574243d23c6d3cd598a5a31b"), 
@@ -2669,24 +2548,23 @@
     "properties" : {
 
     }, 
-    "children" : [
-        "570064645dde184ccfb9fc84", 
-        "5742454a3c6d3cd598a5a31f"
-    ]
+    "parentId" : "57343c283c6d3cd598a5a2e9"
 }
 { 
     "_id" : ObjectId("574244ab3c6d3cd598a5a31d"), 
     "docType" : "object", 
     "name" : "ACME Bicycle Shop", 
     "description" : "<p>The ACME Bicycle Shop</p>", 
-    "pageId" : ""
+    "pageId" : "", 
+    "parentId" : "5742439f3c6d3cd598a5a319"
 }
 { 
     "_id" : ObjectId("5742454a3c6d3cd598a5a31f"), 
     "docType" : "object", 
     "name" : "ACME Health Care Clinic", 
     "description" : "<p>The ACME Health Care Clinic</p>", 
-    "pageId" : ""
+    "pageId" : "", 
+    "parentId" : "574243d23c6d3cd598a5a31b"
 }
 { 
     "_id" : ObjectId("57424f1b3c6d3cd598a5a321"), 
@@ -2714,9 +2592,7 @@
             "pattern" : "[a-f0-9]+$"
         }
     }, 
-    "children" : [
-
-    ]
+    "parentId" : "574225cb3c6d3cd598a5a305"
 }
 { 
     "_id" : ObjectId("57424f7b3c6d3cd598a5a325"), 
@@ -2744,9 +2620,7 @@
             "pattern" : "[a-f0-9]+$"
         }
     }, 
-    "children" : [
-
-    ]
+    "parentId" : "574225cb3c6d3cd598a5a305"
 }
 { 
     "_id" : ObjectId("5742561f3c6d3cd598a5a327"), 
@@ -2754,63 +2628,63 @@
     "title" : "Current Assets", 
     "description" : "<p>Current Assets owned by users/organizations</p>", 
     "type" : "object", 
-    "children" : [
-        "574256343c6d3cd598a5a329", 
-        "574256373c6d3cd598a5a32b", 
-        "5742563a3c6d3cd598a5a32d", 
-        "5742563e3c6d3cd598a5a32f", 
-        "574256413c6d3cd598a5a331", 
-        "574256453c6d3cd598a5a333"
-    ]
+    "parentId" : "57343b823c6d3cd598a5a2e3"
 }
 { 
     "_id" : ObjectId("574256343c6d3cd598a5a329"), 
     "docType" : "class", 
     "title" : "Petty Cash", 
     "description" : "<p>Petty Cash owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
 }
 { 
     "_id" : ObjectId("574256373c6d3cd598a5a32b"), 
     "docType" : "class", 
     "title" : "Temporary Investments", 
     "description" : "<p>Temporary Investments owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
 }
 { 
     "_id" : ObjectId("5742563a3c6d3cd598a5a32d"), 
     "docType" : "class", 
     "title" : "Accounts Receivible -net", 
     "description" : "<p>Accounts Receivible -net owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
 }
 { 
     "_id" : ObjectId("5742563e3c6d3cd598a5a32f"), 
     "docType" : "class", 
     "title" : "Inventory", 
     "description" : "<p>Inventory owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
 }
 { 
     "_id" : ObjectId("574256413c6d3cd598a5a331"), 
     "docType" : "class", 
     "title" : "Supplies", 
     "description" : "<p>Supplies owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
 }
 { 
     "_id" : ObjectId("574256453c6d3cd598a5a333"), 
     "docType" : "class", 
     "title" : "Prepaid Insurance", 
     "description" : "<p>Prepaid Insurance owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
 }
 { 
     "_id" : ObjectId("574256493c6d3cd598a5a335"), 
     "docType" : "class", 
     "title" : "Investments", 
     "description" : "<p>Investments owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "57343b823c6d3cd598a5a2e3"
 }
 { 
     "_id" : ObjectId("5742564c3c6d3cd598a5a337"), 
@@ -2818,48 +2692,47 @@
     "title" : "Property, Plant and Equipment", 
     "description" : "<p>Property, Plant and Equipment owned by users/organizations</p>", 
     "type" : "object", 
-    "children" : [
-        "5742564f3c6d3cd598a5a339", 
-        "574256573c6d3cd598a5a33d", 
-        "5742565b3c6d3cd598a5a33f", 
-        "5742565e3c6d3cd598a5a341", 
-        "574256613c6d3cd598a5a343"
-    ]
+    "parentId" : "57343b823c6d3cd598a5a2e3"
 }
 { 
     "_id" : ObjectId("5742564f3c6d3cd598a5a339"), 
     "docType" : "class", 
     "title" : "Land", 
     "description" : "<p>Land owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742564c3c6d3cd598a5a337"
 }
 { 
     "_id" : ObjectId("574256573c6d3cd598a5a33d"), 
     "docType" : "class", 
     "title" : "Land Improvements", 
     "description" : "<p>Land Improvements owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742564c3c6d3cd598a5a337"
 }
 { 
     "_id" : ObjectId("5742565b3c6d3cd598a5a33f"), 
     "docType" : "class", 
     "title" : "Buildings", 
     "description" : "<p>Buildings owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742564c3c6d3cd598a5a337"
 }
 { 
     "_id" : ObjectId("5742565e3c6d3cd598a5a341"), 
     "docType" : "class", 
     "title" : "Equipment", 
     "description" : "<p>Equipment owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742564c3c6d3cd598a5a337"
 }
 { 
     "_id" : ObjectId("574256613c6d3cd598a5a343"), 
     "docType" : "class", 
     "title" : "Less: Accum Deprecation", 
     "description" : "<p>Less: Accum Deprecation owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742564c3c6d3cd598a5a337"
 }
 { 
     "_id" : ObjectId("574256643c6d3cd598a5a345"), 
@@ -2867,24 +2740,23 @@
     "title" : "Intangible Assets", 
     "description" : "<p>Intangible Assets owned by users/organizations</p>", 
     "type" : "object", 
-    "children" : [
-        "5742566a3c6d3cd598a5a349", 
-        "574256713c6d3cd598a5a34d"
-    ]
+    "parentId" : "57343b823c6d3cd598a5a2e3"
 }
 { 
     "_id" : ObjectId("5742566a3c6d3cd598a5a349"), 
     "docType" : "class", 
     "title" : "Goodwill", 
     "description" : "<p>Goodwill owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "574256643c6d3cd598a5a345"
 }
 { 
     "_id" : ObjectId("574256713c6d3cd598a5a34d"), 
     "docType" : "class", 
     "title" : "Trade Names", 
     "description" : "<p>Trade Names owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "574256643c6d3cd598a5a345"
 }
 { 
     "_id" : ObjectId("574256743c6d3cd598a5a34f"), 
@@ -2892,64 +2764,63 @@
     "title" : "Current Libilities", 
     "description" : "<p>Current Libilities owned by users/organizations</p>", 
     "type" : "object", 
-    "children" : [
-        "574256773c6d3cd598a5a351", 
-        "5742567a3c6d3cd598a5a353", 
-        "5742567d3c6d3cd598a5a355", 
-        "574256833c6d3cd598a5a359", 
-        "574256863c6d3cd598a5a35b", 
-        "574256893c6d3cd598a5a35d", 
-        "5742568e3c6d3cd598a5a35f"
-    ]
+    "parentId" : "57343bba3c6d3cd598a5a2e5"
 }
 { 
     "_id" : ObjectId("574256773c6d3cd598a5a351"), 
     "docType" : "class", 
     "title" : "Notes Payable", 
     "description" : "<p>Notes Payable owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
 }
 { 
     "_id" : ObjectId("5742567a3c6d3cd598a5a353"), 
     "docType" : "class", 
     "title" : "Accounts Payable", 
     "description" : "<p>Accounts Payable owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
 }
 { 
     "_id" : ObjectId("5742567d3c6d3cd598a5a355"), 
     "docType" : "class", 
     "title" : "Wages Payable", 
     "description" : "<p>Wages Payable owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
 }
 { 
     "_id" : ObjectId("574256833c6d3cd598a5a359"), 
     "docType" : "class", 
     "title" : "Intrest Payable", 
     "description" : "<p>Intrest Payable owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
 }
 { 
     "_id" : ObjectId("574256863c6d3cd598a5a35b"), 
     "docType" : "class", 
     "title" : "Taxes Payable", 
     "description" : "<p>Taxes Payable owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
 }
 { 
     "_id" : ObjectId("574256893c6d3cd598a5a35d"), 
     "docType" : "class", 
     "title" : "Waranty Liability", 
     "description" : "<p>Waranty Liability owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
 }
 { 
     "_id" : ObjectId("5742568e3c6d3cd598a5a35f"), 
     "docType" : "class", 
     "title" : "Unearned Revenues", 
     "description" : "<p>Unearned Revenues owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
 }
 { 
     "_id" : ObjectId("574256923c6d3cd598a5a361"), 
@@ -2957,24 +2828,23 @@
     "title" : "Long-Term Libilities", 
     "description" : "<p>Long-Term Libilities owned by users/organizations</p>", 
     "type" : "object", 
-    "children" : [
-        "574261583c6d3cd598a5a363", 
-        "574261633c6d3cd598a5a365"
-    ]
+    "parentId" : "57343bba3c6d3cd598a5a2e5"
 }
 { 
     "_id" : ObjectId("574261583c6d3cd598a5a363"), 
     "docType" : "class", 
     "title" : "Notes Payable", 
     "description" : "<p>Notes Payable owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "574256923c6d3cd598a5a361"
 }
 { 
     "_id" : ObjectId("574261633c6d3cd598a5a365"), 
     "docType" : "class", 
     "title" : "Bonds Payable", 
     "description" : "<p>Bonds Payable owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "574256923c6d3cd598a5a361"
 }
 { 
     "_id" : ObjectId("5742616e3c6d3cd598a5a367"), 
@@ -2982,38 +2852,101 @@
     "title" : "Stockholder's Equity", 
     "description" : "<p>Stockholder's Equity owned by users/organizations</p>", 
     "type" : "object", 
-    "children" : [
-        "574261743c6d3cd598a5a369", 
-        "574261793c6d3cd598a5a36b", 
-        "5742617f3c6d3cd598a5a36d", 
-        "574261843c6d3cd598a5a36f"
-    ]
+    "parentId" : "57343bba3c6d3cd598a5a2e5"
 }
 { 
     "_id" : ObjectId("574261743c6d3cd598a5a369"), 
     "docType" : "class", 
     "title" : "Common Stock", 
     "description" : "<p>Common Stock owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742616e3c6d3cd598a5a367"
 }
 { 
     "_id" : ObjectId("574261793c6d3cd598a5a36b"), 
     "docType" : "class", 
     "title" : "Retained Earnings", 
     "description" : "<p>Retained Earnings owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742616e3c6d3cd598a5a367"
 }
 { 
     "_id" : ObjectId("5742617f3c6d3cd598a5a36d"), 
     "docType" : "class", 
     "title" : "Accum Other Comprehensive Income", 
     "description" : "<p>Accum Other Comprehensive Income owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742616e3c6d3cd598a5a367"
 }
 { 
     "_id" : ObjectId("574261843c6d3cd598a5a36f"), 
     "docType" : "class", 
     "title" : "Less: Treasury Stock", 
     "description" : "<p>Less: Treasury Stock owned by users/organizations</p>", 
-    "type" : "object"
+    "type" : "object", 
+    "parentId" : "5742616e3c6d3cd598a5a367"
+}
+{ 
+    "_id" : ObjectId("5745eaa53c6d3cd598a5a371"), 
+    "docType" : "class", 
+    "title" : "States", 
+    "description" : "<p>States</p>", 
+    "type" : "object", 
+    "parentId" : "573435803c6d3cd598a5a2dd"
+}
+{ 
+    "_id" : ObjectId("574724823c6d3cd598a5a373"), 
+    "docType" : "class", 
+    "title" : "Open", 
+    "description" : "<p>Open</p>", 
+    "type" : "object", 
+    "parentId" : "5745eaa53c6d3cd598a5a371"
+}
+{ 
+    "_id" : ObjectId("574724b43c6d3cd598a5a375"), 
+    "docType" : "class", 
+    "title" : "Closed", 
+    "description" : "<p>Closed</p>", 
+    "type" : "object", 
+    "parentId" : "5745eaa53c6d3cd598a5a371"
+}
+{ 
+    "_id" : ObjectId("5747251e3c6d3cd598a5a377"), 
+    "docType" : "class", 
+    "title" : "Buyer", 
+    "description" : "<p>Buyer</p>", 
+    "type" : "object", 
+    "parentId" : "574724823c6d3cd598a5a373"
+}
+{ 
+    "_id" : ObjectId("5747254b3c6d3cd598a5a379"), 
+    "docType" : "class", 
+    "title" : "Seller", 
+    "description" : "<p>Seller</p>", 
+    "type" : "object", 
+    "parentId" : "574724823c6d3cd598a5a373"
+}
+{ 
+    "_id" : ObjectId("574725673c6d3cd598a5a37b"), 
+    "docType" : "class", 
+    "title" : "Rejected", 
+    "description" : "<p>Rejected</p>", 
+    "type" : "object", 
+    "parentId" : "574724b43c6d3cd598a5a375"
+}
+{ 
+    "_id" : ObjectId("574725843c6d3cd598a5a37d"), 
+    "docType" : "class", 
+    "title" : "Fulfilled", 
+    "description" : "<p>Fulfilled</p>", 
+    "type" : "object", 
+    "parentId" : "574724b43c6d3cd598a5a375"
+}
+{ 
+    "_id" : ObjectId("574726f43c6d3cd598a5a37f"), 
+    "docType" : "class", 
+    "title" : "Withdrawn", 
+    "description" : "<p>Withdrawn</p>", 
+    "type" : "object", 
+    "parentId" : "574724b43c6d3cd598a5a375"
 }

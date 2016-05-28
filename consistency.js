@@ -5,38 +5,29 @@ var utils = require('./public/app/utils');
 var Documents = require('./models/documents');
 var tv4 = require("tv4");
 var ObjectID = require('mongodb').ObjectID;
-var merge = require('merge'), original, cloned;
 
 function check(){
     var checkPromises = [];
     //checkPromises.push(cleanup());
     checkPromises.push(findOrphans());
     checkPromises.push(validateObjects());
-    //checkPromises.push(validateAssocs());
-    //checkPromises.push(assocsUnique());
-    //checkPromises.push(validateObjectAssoc());
     return all(checkPromises).then(function(checkArr){
         return {consistencyCheck:checkArr};
     });
 }
 function findOrphans(){
     return Documents.find().then(function(objectsArr){
+        var results = [];
         var classPromises = [];
         objectsArr.forEach(function(doc) {
             var docId = ObjectID(doc._id).toString();
-            classPromises.push(Documents.getParentClass(docId));
+            classPromises.push(Documents.getAncestors(docId).then(function(ancestorsArr){
+                var parentId = ObjectID(ancestorsArr[ancestorsArr.length-1]._id).toString();
+                if(parentId != "56f86c6a5dde184ccfb9fc6a") results.push({"chainToTheRootIsBroken":ancestorsArr});
+                return true;
+            }));
         });
-        return all(classPromises).then(function(classPromisesArr){
-            var results = [];
-            var index = 0;
-            classPromisesArr.forEach(function(parent) {
-                var doc = objectsArr[index];
-                var docId = ObjectID(doc._id).toString();
-                if(docId != "56f86c6a5dde184ccfb9fc6a"){//do not check 'Problem Domain'
-                    if(!parent) results.push({noParentFound:doc});
-                }
-                index++;
-            });
+        return all(classPromises).then(function(res){
             return {
                 id: 1,
                 name: 'Find Orphans',
@@ -53,30 +44,22 @@ function validateObjects(){
         var results = [];
         objectsArr.forEach(function(objDoc) {
             var docId = ObjectID(objDoc._id).toString();
-            classPromises.push(Documents.getParentClass(docId).then(function(parentClass){
-                var inheritedClassSchema = {
-                    $schema: "http://json-schema.org/draft-04/schema#",
-                    properties:{},
-                    required:[],
-                    additionalProperties: false
-                };
-                return collectClassSchemas(parentClass, inheritedClassSchema).then(function(res){
-                    var validations = tv4.validateMultiple(objDoc, inheritedClassSchema);
-                    if(!validations.valid) {
-                        var errors = [];
-                        validations.errors.forEach(function (error) {
-                            errors.push({
-                                message: error.message,
-                                dataPath: error.dataPath,
-                                schemaPath: error.schemaPath,
-                                expected: error.params.expected,
-                                type: error.params.type
-                            });
+            classPromises.push(Documents.getInheritedClassSchema(docId).then(function(inheritedClassSchema){
+                var validations = tv4.validateMultiple(objDoc, inheritedClassSchema);
+                if(!validations.valid) {
+                    var errors = [];
+                    validations.errors.forEach(function (error) {
+                        errors.push({
+                            message: error.message,
+                            dataPath: error.dataPath,
+                            schemaPath: error.schemaPath,
+                            expected: error.params.expected,
+                            type: error.params.type
                         });
-                        results.push({object: objDoc, schema: inheritedClassSchema, results: errors});
-                    }
-                    return true;
-                });
+                    });
+                    results.push({object: objDoc, schema: inheritedClassSchema, results: errors});
+                }
+                return true;
             }));
         });
         return all(classPromises).then(function(res){
@@ -90,18 +73,34 @@ function validateObjects(){
         });
     });
 }
-function collectClassSchemas(classObj, inheritedClassSchema) {
-    //combine the the two class.properties, there should be no overlap. If there is, the parent is leading
-    merge.recursive(inheritedClassSchema.properties, classObj.properties);
-    //combine the to class.required arrays. There should be no overlap
-    if(classObj.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(inheritedClassSchema.required, classObj.required);
-    var docId = ObjectID(classObj._id).toString();
-    return Documents.getParentClass(docId).then(function(parentClass){
-        if(parentClass) return collectClassSchemas(parentClass, inheritedClassSchema);
-        else return true;//no parent, we are at the root
-    });
-}
+/**/
+function cleanup(){
 
+    return Documents.find({docType:'class'}).then(function(classesArr){
+        var classPromises = [];
+        var results = [];
+        classesArr.forEach(function(classDoc) {
+            if(classDoc.children) {
+                delete classDoc.children;
+                //console.log(classDoc);
+                classPromises.push(Documents.update(classDoc, {children:""}));
+            }
+            /*if(classDoc.children){
+                classDoc.children.forEach(function(childObjId){
+                    Documents.findById(childObjId).then(function(childObj){
+                        var docId = ObjectID(classDoc._id).toString();
+                        childObj.parentId = docId;
+                        console.log(childObj);
+                        Documents.update(childObj);
+                    });
+                });
+            }*/
+        });
+        return all(classPromises);
+    });
+
+
+}
 
 
 
@@ -241,45 +240,7 @@ function validateAssocByClassModel(assoc){
     });
 }
 
-function cleanup(){
-    //var db = require('./db');
-    //var newitems = db.get().collection('newitems');
-    return Items.find({type:'class'}).then(function(itemsArr){
-        itemsArr.forEach(function(item) {
-            var newClass = {_id: item._id, type:'class', name:item.name};
-            var properties = JSON.parse(JSON.stringify(item));
-            var required = [];
-            var propsFound = false;
-            for(var attrName in properties){
-                if(attrName.charAt(0) == '_') delete properties[attrName];
-                else {
-                    propsFound = true;
-                    var itemProp = properties[attrName];
-                    itemProp.type = itemProp.type.toLowerCase();
-                    if (itemProp.required) {
-                        required.push(attrName);
-                        delete itemProp.attrName;
-                    }
-                }
-            }
-            var schema = {};
-            if(propsFound){
-                schema.properties = properties;
-                if(required.length>0) schema.required = required;
-            }
-            if(propsFound) newClass.schema = schema;
-            console.log(newClass);
-            //Items.remove({_id: newClass._id});
-            //Items.insert(newClass);
-            var id = newClass._id;
-            delete newClass._id;
-            Items.update({_id: id}, newClass);
 
-        });
-        return {success:true};
-    });
-
-}
 /*function cleanup(){
     var removeArr = [59,60,66,69,77,91,94,100,101,102,106,107,109,63];
     var collectedPromises = [];
