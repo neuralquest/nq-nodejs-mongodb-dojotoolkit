@@ -309,7 +309,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     }
     function getSelectedTabRecursive(wid0, indent){
         indent = indent?indent:'';
-        console.log(indent, wid0.id, wid0.declaredClass, wid0.region);
+        //console.log(indent, wid0.id, wid0.declaredClass, wid0.region);
         if(wid0.declaredClass=='dijit.layout.BorderContainer'){
             var w0Arr = registry.findWidgets(wid0.containerNode);
             var wid2 = null;

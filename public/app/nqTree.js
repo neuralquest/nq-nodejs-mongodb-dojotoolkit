@@ -15,7 +15,8 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				//childrenAttr: this.viewIdsArr,
 				store : this.store,
                 query: {_id:  self.rootDocId},
-                arrayNames: self.schema.childArrayNames
+                arrayNames: self.schema.childArrayNames,
+                view: self.schema
             });
 			this.tree = new Tree({
                 id: 'tree.'+self.id,

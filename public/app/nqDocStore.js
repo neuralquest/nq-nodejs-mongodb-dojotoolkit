@@ -131,8 +131,19 @@ function(declare, lang, array, when, all,
                 return inheritedClassSchema;
             });
         },
-        iaA: function(id) {
-
+        isA: function(doc, id) {
+            if(doc._id == id) return true;
+            if(!doc.parentId) return false;
+            var parentDoc =  this.cachingStore.getSync(doc.parentId);
+            return this.isA(parentDoc, id);
+        },
+        XisA: function(doc, id) {
+            var self = this;
+            if(doc._id == id) return true;
+            if(!doc.parentId) return false;
+            return this.get(doc.parentId).then(function(parentDoc){
+                return self.isA(parentDoc, id);
+            });
         },
         getInstances: function(id) {
 
