@@ -66,22 +66,23 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
                 });
                 if(paragraphContent) domConstruct.place(paragraphContent, divDom, 'last');
             }
-            var childrenArr = item[this.schema.childArrayNames[0]];
-            if(!childrenArr) return true;
-            var childrenFilter = this.store.Filter().in('_id', childrenArr);
-            var childrenCollection = this.store.filter(childrenFilter);
-            childrenCollection.on('update', function(event){
-                var obj = event.target;
-                alert('doc change');
-                //self.onChange(obj);
-            });
-            var childDocPromises = []
-            childrenCollection.forEach(function(childItem){
-                var previousParagraphHasRightFloat = false;
-                childDocPromises.push(self.generateNextLevelContents(childItem, headerLevel+1, item._id, previousParagraphHasRightFloat));
-                //previousParagraphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
-            });
-            return all(childDocPromises);
+			var childrenFilter = this.store.buildFilter(item, this.schema.childrenFilter);
+			if(childrenFilter){
+				var childrenCollection = this.store.filter(childrenFilter);
+				childrenCollection.on('update', function(event){
+					var obj = event.target;
+					alert('doc change');
+					//self.onChange(obj);
+				});
+				var childDocPromises = [];
+				childrenCollection.forEach(function(childItem){
+					var previousParagraphHasRightFloat = false;
+					childDocPromises.push(self.generateNextLevelContents(childItem, headerLevel+1, item._id, previousParagraphHasRightFloat));
+					//previousParagraphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
+				});
+				return all(childDocPromises);
+			}
+			return true;
 		},
 
 

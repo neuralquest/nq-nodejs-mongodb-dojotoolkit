@@ -62,8 +62,13 @@ function(declare, lang, array, when, all,
             return self.get(viewId).then(function(viewObj){
                 if(!viewObj) throw new Error('View Object not found');
                 //console.log('viewObj',viewObj);
-                if(!viewObj.mapsToId) throw new Error('View Object does not have a mapsToId');
-                return self.get(viewObj.mapsToId).then(function(classObj){
+                var classPromise = null;
+                if(viewObj.filter && viewObj.filter.type && viewObj.filter.type == 'isA'){
+                    var mapsToId = viewObj.filter.args[0];//TODO should be able to deal with multiple levels
+                    classPromise = self.get(mapsToId);
+                }
+                else classPromise = {};
+                return when(classPromise, function(classObj){
                     if(!classObj) throw new Error('Class Object not found');
                     var inheritedClassSchema = {properties:{}, required:[]};
                     return self.collectClassSchemas(classObj, inheritedClassSchema).then(function(res){
@@ -197,8 +202,8 @@ function(declare, lang, array, when, all,
                 case 'view':
                     var subViewId = docFilter.args[0];
                     var subView = this.cachingStore.getSync(subViewId);
-                    if(subView && subView.conditions && subView.conditions.filter){
-                        var subViewFilter = subView.conditions.filter;
+                    if(subView  && subView.filter){
+                        var subViewFilter = subView.filter;
                         return this.buildFilter(parentObj, subViewFilter);
                     }
                     break;

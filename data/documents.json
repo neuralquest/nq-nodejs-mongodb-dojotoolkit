@@ -112,7 +112,7 @@
             "title" : "Name", 
             "type" : "string", 
             "readOnly" : false, 
-            "maxLength" : NumberInt(100000), 
+            "maxLength" : NumberInt(1000), 
             "default" : "[unnamed]"
         }, 
         "docType" : {
@@ -166,14 +166,14 @@
                                 "title" : "Name", 
                                 "type" : "string", 
                                 "readOnly" : false, 
-                                "maxLength" : NumberInt(100000), 
+                                "maxLength" : NumberInt(1000), 
                                 "default" : "[unnamed]"
                             }, 
                             "description" : {
                                 "title" : "Description", 
                                 "type" : "string", 
                                 "readOnly" : false, 
-                                "maxLength" : NumberInt(100000), 
+                                "maxLength" : NumberInt(10000), 
                                 "media" : {
                                     "mediaType" : "text/html"
                                 }, 
@@ -217,19 +217,16 @@
                                         "viewId" : {
                                             "title" : "View Id", 
                                             "type" : "string", 
-                                            "maxLength" : NumberInt(1000), 
                                             "pattern" : "[a-f0-9]{24}"
                                         }, 
                                         "rootDocId" : {
                                             "title" : "Root Document Id", 
                                             "type" : "string", 
-                                            "maxLength" : NumberInt(1000), 
                                             "pattern" : "[a-f0-9]{24}"
                                         }, 
                                         "pageId" : {
                                             "title" : "Page Id", 
                                             "type" : "string", 
-                                            "maxLength" : NumberInt(1000), 
                                             "pattern" : "[a-f0-9]{24}"
                                         }
                                     }, 
@@ -260,7 +257,6 @@
                             "pageId" : {
                                 "title" : "Page Id", 
                                 "type" : "string", 
-                                "maxLength" : NumberInt(1000), 
                                 "pattern" : "[a-f0-9]{24}"
                             }
                         }, 
@@ -391,7 +387,6 @@
     "name" : "Balance Sheet View", 
     "description" : "<p>The standard balance sheet view</p>", 
     "type" : "object", 
-    "mapsToId" : "573435433c6d3cd598a5a2db", 
     "properties" : {
         "assets" : {
             "title" : "Assets", 
@@ -906,23 +901,18 @@
     "name" : "Document View", 
     "description" : "<p>Descibes the document hierarchy, including a header, a paragraph parts array and a subdocuments array</p>", 
     "type" : "object", 
-    "mapsToId" : "573435f03c6d3cd598a5a2e1", 
-    "childArrayNames" : [
-        "childDocs"
-    ], 
-    "childrenFilters" : [
-        {
-            "arrayFilter" : "childDocs"
-        }
-    ], 
-    "conditions" : {
-        "childrenFilter" : {
-            "type" : "in", 
-            "args" : [
-                "_id", 
-                "childDocs"
-            ]
-        }
+    "filter" : {
+        "type" : "isA", 
+        "args" : [
+            "573435f03c6d3cd598a5a2e1"
+        ]
+    }, 
+    "childrenFilter" : {
+        "type" : "in", 
+        "args" : [
+            "_id", 
+            "childDocs"
+        ]
     }, 
     "properties" : {
         "_id" : {
@@ -984,25 +974,13 @@
     "name" : "Class Model View", 
     "description" : "<p>Descibes the class model hierarchy, including a children array</p>", 
     "type" : "object", 
-    "mapsToId" : "56f86c6a5dde184ccfb9fc6a", 
-    "rootDocId" : "56f86c6a5dde184ccfb9fc6a", 
     "pageId" : "572b40443c6d3cd598a5a2d3", 
-    "childArrayNames" : [
-        "children"
-    ], 
-    "childrenFilters" : [
-        {
-            "foreignKey" : "parentId"
-        }
-    ], 
-    "conditions" : {
-        "childrenFilter" : {
-            "type" : "eq", 
-            "args" : [
-                "parentId", 
-                "_id"
-            ]
-        }
+    "childrenFilter" : {
+        "type" : "eq", 
+        "args" : [
+            "parentId", 
+            "_id"
+        ]
     }, 
     "properties" : {
         "_id" : {
@@ -1100,37 +1078,23 @@
     "name" : "Owners View", 
     "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
     "type" : "object", 
-    "mapsToId" : "57343c283c6d3cd598a5a2e9", 
-    "childArrayNames" : [
-        "children"
-    ], 
-    "childrenFilters" : [
-        {
-            "foreignKey" : "parentId"
-        }, 
-        {
-            "viewId" : "5749751d3c6d3cd598a5a383"
-        }
-    ], 
-    "conditions" : {
-        "childrenFilter" : {
-            "type" : "or", 
-            "args" : [
-                {
-                    "type" : "eq", 
-                    "args" : [
-                        "parentId", 
-                        "_id"
-                    ]
-                }, 
-                {
-                    "type" : "view", 
-                    "args" : [
-                        "5749751d3c6d3cd598a5a383"
-                    ]
-                }
-            ]
-        }
+    "childrenFilter" : {
+        "type" : "or", 
+        "args" : [
+            {
+                "type" : "eq", 
+                "args" : [
+                    "parentId", 
+                    "_id"
+                ]
+            }, 
+            {
+                "type" : "view", 
+                "args" : [
+                    "5749751d3c6d3cd598a5a383"
+                ]
+            }
+        ]
     }, 
     "properties" : {
         "icon" : {
@@ -1215,37 +1179,58 @@
     "description" : "<p>Views owned by users/organizations</p>", 
     "type" : "object", 
     "properties" : {
+        "filter" : {
+            "title" : "Filter", 
+            "type" : "object", 
+            "properties" : {
+                "condition" : {
+                    "title" : "Condition", 
+                    "type" : "string", 
+                    "enum" : [
+                        "eq", 
+                        "and", 
+                        "or", 
+                        "in", 
+                        "isA", 
+                        "view"
+                    ]
+                }, 
+                "args" : {
+                    "title" : "Arguments", 
+                    "type" : "array"
+                }
+            }
+        }, 
+        "childrenFilter" : {
+            "title" : "Children Filter", 
+            "type" : "object", 
+            "properties" : {
+                "condition" : {
+                    "title" : "Condition", 
+                    "type" : "string", 
+                    "enum" : [
+                        "eq", 
+                        "and", 
+                        "or", 
+                        "in", 
+                        "isA", 
+                        "view"
+                    ]
+                }, 
+                "args" : {
+                    "title" : "Arguments", 
+                    "type" : "array"
+                }
+            }
+        }, 
         "type" : {
-            "title" : "Type", 
-            "type" : "string", 
-            "enum" : [
-                "object"
-            ]
-        }, 
-        "mapsToId" : {
-            "title" : "Maps to Id", 
-            "type" : "string", 
-            "maxLength" : NumberInt(1000), 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "rootDocId" : {
-            "title" : "Root Document Id", 
-            "type" : "string", 
-            "maxLength" : NumberInt(1000), 
-            "pattern" : "[a-f0-9]{24}"
+
         }, 
         "pageId" : {
             "title" : "Page Id", 
             "type" : "string", 
             "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
-        }, 
-        "childArrayNames" : {
-            "title" : "Child Array Names", 
-            "type" : "array", 
-            "items" : {
-                "type" : "string"
-            }
         }, 
         "properties" : {
             "type" : "object"
@@ -2289,45 +2274,31 @@
     "name" : "Oganizational Unit View", 
     "description" : "<p>Descibes the organizational unit hierarchy, including a children array</p>", 
     "type" : "object", 
-    "mapsToId" : "574237133c6d3cd598a5a30d", 
-    "childArrayNames" : [
-        "owns"
-    ], 
-    "childrenFilters" : [
-        {
-            "arrayFilter" : "owns"
-        }, 
-        {
-            "arrayFilter" : "subUnits"
-        }
-    ], 
-    "conditions" : {
-        "filter" : {
-            "type" : "in", 
-            "args" : [
-                "_id", 
-                "owns"
-            ]
-        }, 
-        "childrenFilter" : {
-            "type" : "and", 
-            "args" : [
-                {
-                    "type" : "in", 
-                    "args" : [
-                        "$selectedObj._id", 
-                        "owns"
-                    ]
-                }, 
-                {
-                    "type" : "in", 
-                    "args" : [
-                        "_id", 
-                        "subUnits"
-                    ]
-                }
-            ]
-        }
+    "filter" : {
+        "type" : "in", 
+        "args" : [
+            "_id", 
+            "owns"
+        ]
+    }, 
+    "childrenFilter" : {
+        "type" : "and", 
+        "args" : [
+            {
+                "type" : "in", 
+                "args" : [
+                    "$selectedObj._id", 
+                    "owns"
+                ]
+            }, 
+            {
+                "type" : "in", 
+                "args" : [
+                    "_id", 
+                    "subUnits"
+                ]
+            }
+        ]
     }, 
     "properties" : {
         "icon" : {
@@ -2337,105 +2308,6 @@
         "subUnits" : {
             "label" : "Subclasses", 
             "readOnly" : false, 
-            "items" : {
-                "type" : "string", 
-                "maxLength" : NumberInt(1000), 
-                "pattern" : "[a-f0-9]{24}"
-            }, 
-            "query" : {
-                "_id" : "560b1407434ec958241693e8", 
-                "association" : "ordered"
-            }, 
-            "type" : "array", 
-            "minItems" : NumberInt(0), 
-            "uniqueItems" : true
-        }
-    }, 
-    "required" : [
-        "_id", 
-        "name"
-    ], 
-    "parentId" : "573435c23c6d3cd598a5a2df"
-}
-{ 
-    "_id" : ObjectId("5752c3df3c6d3cd598a5a385"), 
-    "docType" : "object", 
-    "name" : "Document View", 
-    "description" : "<p>Descibes the document hierarchy, including a header, a paragraph parts array and a subdocuments array</p>", 
-    "type" : "object", 
-    "conditions" : {
-        "rootFilter" : {
-            "_id" : "$slectedObj"
-        }, 
-        "filter" : {
-            "type" : "and", 
-            "args" : [
-                {
-                    "type" : "isA", 
-                    "args" : [
-                        "573435f03c6d3cd598a5a2e1"
-                    ]
-                }, 
-                {
-                    "type" : "in", 
-                    "args" : [
-                        "_id", 
-                        "$slectedObj.owns"
-                    ]
-                }
-            ]
-        }, 
-        "childrenFilter" : {
-            "type" : "in", 
-            "args" : [
-                "_id", 
-                "$parentObj.childDocs"
-            ]
-        }, 
-        "modifyAllowed" : {
-            "add" : {
-                "parentId" : "isA"
-            }, 
-            "update" : {
-
-            }, 
-            "delete" : true
-        }
-    }, 
-    "properties" : {
-        "_id" : {
-
-        }, 
-        "name" : {
-            "readOnly" : false
-        }, 
-        "paragraphParts" : {
-            "type" : "array", 
-            "items" : {
-                "type" : "object", 
-                "properties" : {
-                    "content" : {
-                        "title" : "Content", 
-                        "type" : "string", 
-                        "maxLength" : NumberInt(10000), 
-                        "media" : {
-                            "mediaType" : "text/html"
-                        }
-                    }, 
-                    "mediaType" : {
-                        "title" : "Media Type", 
-                        "type" : "object"
-                    }
-                }, 
-                "required" : [
-                    "content", 
-                    "mediaType"
-                ]
-            }
-        }, 
-        "childDocs" : {
-            "label" : "Sub Paragraphs", 
-            "sort" : false, 
             "items" : {
                 "type" : "string", 
                 "maxLength" : NumberInt(1000), 

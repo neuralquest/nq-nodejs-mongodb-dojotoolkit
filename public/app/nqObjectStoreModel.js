@@ -92,8 +92,8 @@ define([
 		},
 
 		mayHaveChildren: function(item){
-            /*if(this.view && this.view.conditions && this.view.conditions.childrenFilter) {
-                var docFilter = this.view.conditions.childrenFilter;
+            /*if(this.view && this.view.childrenFilter) {
+                var docFilter = this.view.childrenFilter;
                 var childrenFilter = this.store.buildFilter(item, docFilter);
                 var childrenCollection = this.store.filter(childrenFilter);
                 childrenCollection.fetch().then(function(childObjects){
@@ -109,8 +109,8 @@ define([
 			// parentItem:
 			//		Item from the dojo/store
             var self = this;
-            if(this.view && this.view.conditions && this.view.conditions.childrenFilter){
-                var docFilter = this.view.conditions.childrenFilter;
+            if(this.view && this.view.childrenFilter){
+                var docFilter = this.view.childrenFilter;
                 var childrenFilter = this.store.buildFilter(parentItem, docFilter);
                 var childrenCollection = this.store.filter(childrenFilter);
                 /*childrenCollection.fetch().then(function(childObjects){
