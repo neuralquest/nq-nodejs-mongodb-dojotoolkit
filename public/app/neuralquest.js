@@ -334,4 +334,21 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         }
         return wid0;
     }
+    lang.setObject("nq.test", test);//make the function globally accessible
+    function test(){
+        var filter = {
+            "type" : "eq",
+            "args" : [
+                "_id",
+                "57343c283c6d3cd598a5a2e9"
+            ]
+        };
+        var parentDoc = nqStore.cachingStore.getSync("5737875b3c6d3cd598a5a2f3");
+        var childrenFilter = nqStore.buildFilter(parentDoc, filter);
+        var childrenCollection = nqStore.filter(childrenFilter);
+        childrenCollection.fetch().then(function(childObjects) {
+            console.log('childrenFilter', childrenFilter);
+            console.dir(childObjects);
+        });
+    }
 });

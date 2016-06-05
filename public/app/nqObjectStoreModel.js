@@ -92,106 +92,49 @@ define([
 		},
 
 		mayHaveChildren: function(item){
-			//if(item[this.arrayNames[0]] && (item[this.arrayNames[0]]).length>0) return true;
+            /*if(this.view && this.view.conditions && this.view.conditions.childrenFilter) {
+                var docFilter = this.view.conditions.childrenFilter;
+                var childrenFilter = this.store.buildFilter(item, docFilter);
+                var childrenCollection = this.store.filter(childrenFilter);
+                childrenCollection.fetch().then(function(childObjects){
+                    if(childObjects.length>0) return true;
+                });
+            }*/
 			return true;
 		},
-		getChildrenCollection: function(parentObj, childView){
-			var self = this;
-            var firstFilter = null;
-            var secondFilter = null;
 
-            var num = 0;
-            if(childView.childrenFilters) childView.childrenFilters.forEach(function(childrenDef){
-                var childrenDefFilter = null;
-                //if childrenDef calls for child view, get it and use it's properties
-                if(childrenDef.viewId){
-                    var subView = self.store.cachingStore.getSync(childrenDef.viewId);
-                    childrenDefFilter = self.getChildrenCollection(parentObj, subView);
-                }
-                else{
-                    //Filter objects based on the class that class that the view maps to
-                    var isAFilter;
-                    if(childView.mapsToId && self.view.mapsToId != "57343c283c6d3cd598a5a2e9"){//TODO mapsto schould not be mandatory
-                        isAFilter = self.store.Filter(function(obj){
-                            if(obj.docType == 'class') return false;
-                            return self.store.isA(obj, self.view.mapsToId);
-                        });
-                        var isACollection = self.store.filter(isAFilter);
-                        /*isACollection.fetch().then(function(childObjects){
-                            console.log('isAFilter of', parentObj.title?parentObj.title:parentObj.name, self.view.mapsToId);
-                            console.dir(childObjects);
-                        });*/
-                    }
-                    else isAFilter = self.store.Filter();
-                    //Filter objects by foreignKey equals our id
-                    if(childrenDef.foreignKey){
-                        childrenDefFilter = isAFilter.eq(childrenDef.foreignKey,parentObj._id);
-                    }
-                    //Filter objects where their id is in our array
-                    if(childrenDef.arrayFilter && parentObj[childrenDef.arrayFilter]){
-                        childrenDefFilter = isAFilter.in('_id', parentObj[childrenDef.arrayFilter]);
-                    }
-
-                    /*var childrenCollection = self.store.filter(childrenDefFilter);
-                    childrenCollection.fetch().then(function(childObjects){
-                        console.log('childObjects of', parentObj.title?parentObj.title:parentObj.name, childrenDef);
-                        console.dir(childObjects);
-                    });*/
-                }
-                if(num==0) firstFilter = childrenDefFilter;
-                else secondFilter = childrenDefFilter;
-                num++;
-            });
-            if(secondFilter) return self.store.Filter().or(firstFilter, secondFilter);
-            else return firstFilter;
-		},
 		getChildren: function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
 			// summary:
 			//		Calls onComplete() with array of child items of given parent item.
 			// parentItem:
 			//		Item from the dojo/store
-            var childrenFilter = this.getChildrenCollection(parentItem, this.view);
-            var childrenCollection = this.store.filter(childrenFilter);
-            childrenCollection.fetch().then(function(childObjects){
-                console.log('childObjects of', parentItem.title?parentItem.title:parentItem.name);
-                console.dir(childObjects);
-            });
-
-
-
             var self = this;
-            var childrenFilter = null;
-            if(parentItem.viewId){
-                self.store.get(parentItem.viewId).then(function(childView){
-                    self.store.get(childView.rootDocId).then(function(classObj){
-                        childrenFilter = self.store.Filter({parentId: classObj._id});
-                    });
+            if(this.view && this.view.conditions && this.view.conditions.childrenFilter){
+                var docFilter = this.view.conditions.childrenFilter;
+                var childrenFilter = this.store.buildFilter(parentItem, docFilter);
+                var childrenCollection = this.store.filter(childrenFilter);
+                /*childrenCollection.fetch().then(function(childObjects){
+                    //onComplete(childObjects);
+                    console.log('childObjects of', parentItem.title ? parentItem.title : parentItem.name, childrenFilter);
+                    console.dir(childObjects);
+                });*/
+                childrenCollection.on('remove, add', function(event){
+                    var parent = event.parent;
+                    var collection = self.childrenCache[parent.id];
+                    if(collection){
+                        var children = collection.fetch();
+                        self.onChildrenChange(parent, children);
+                    }
+                });
+                childrenCollection.on('update', function(event){
+                    var obj = event.target;
+                    self.onChange(obj);
+                });
+                childrenCollection.fetch().then(function(childObjects){
+                    onComplete(childObjects);
                 });
             }
-            else if(this.arrayNames[0] == 'children'){
-                childrenFilter = self.store.Filter({parentId: parentItem._id});
-            }
-            else{
-                childrenFilter = this.store.Filter().in('_id', parentItem[this.arrayNames[0]]);
-            }
 
-
-            var childrenCollection = this.store.filter(childrenFilter);
-            childrenCollection.on('remove, add', function(event){
-                var parent = event.parent;
-                var collection = self.childrenCache[parent.id];
-                if(collection){
-                    var children = collection.fetch();
-                    self.onChildrenChange(parent, children);
-                }
-            });
-            childrenCollection.on('update', function(event){
-                var obj = event.target;
-                self.onChange(obj);
-            });
-            childrenCollection.fetch().then(function(childObjects){
-				onComplete(childObjects);
-			});
             /*
              recordStoreFilter= new recordStore.Filter()
              name1Filter= recordStoreFilter.eq({'name': 'Name1'})
