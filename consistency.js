@@ -76,27 +76,18 @@ function validateObjects(){
 /**/
 function cleanup(){
 
-    return Documents.find({docType:'class'}).then(function(classesArr){
+    return Documents.find({docType:'object'}).then(function(objectssArr){
         var classPromises = [];
         var results = [];
-        classesArr.forEach(function(classDoc) {
-            if(classDoc.children) {
-                delete classDoc.children;
-                //console.log(classDoc);
-                classPromises.push(Documents.update(classDoc, {children:""}));
-            }
-            /*if(classDoc.children){
-                classDoc.children.forEach(function(childObjId){
-                    Documents.findById(childObjId).then(function(childObj){
-                        var docId = ObjectID(classDoc._id).toString();
-                        childObj.parentId = docId;
-                        console.log(childObj);
-                        Documents.update(childObj);
-                    });
-                });
-            }*/
+        objectssArr.forEach(function(objDoc) {
+            results.push(objDoc._id);
         });
-        return all(classPromises);
+        Documents.findById("570064645dde184ccfb9fc84").then(function(nqObj){
+            nqObj.owns = results;
+            console.log(nqObj);
+            Documents.update(nqObj);
+        });
+        return true;
     });
 
 

@@ -210,6 +210,17 @@ function(declare, lang, array, when, all,
                 default:
                     break;
             }
+        },
+        updateAllowed: function(doc){
+            var userId = "570064645dde184ccfb9fc84";
+            var ownerFilter = this.Filter().contains('owns', [doc._id]);
+            var ownerCollection = this.filter(ownerFilter);
+            return ownerCollection.fetch().then(function(owners){
+                console.log('owner of', doc.name, ownerFilter);
+                console.dir(owners);
+                if(owners[0]._id == userId) return true;
+                return false;
+            });
         }
     });
 });

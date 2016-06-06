@@ -16,7 +16,11 @@ define(['dojo/_base/declare', "app/nqWidgetBase"],
                      self.onChange(obj);*/
                 });
                 docCol.fetch().then(function(docsArr){
-                    self.setFromValues(self.schema.properties, docsArr[0], self.pane.containerNode)
+                    var doc = docsArr[0];
+                    self.store.updateAllowed(doc).then(function(updateAllowed){
+                        self.schema.updateAllowed = updateAllowed;
+                        self.setFromValues(self.schema.properties, doc, self.pane.containerNode);
+                    });
                 });
             }
         });

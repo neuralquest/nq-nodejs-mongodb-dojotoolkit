@@ -19,14 +19,12 @@
         "name" : {
             "title" : "Name", 
             "type" : "string", 
-            "readOnly" : false, 
             "maxLength" : NumberInt(100), 
             "default" : "[unnamed]"
         }, 
         "docType" : {
             "title" : "Doument Type", 
             "type" : "string", 
-            "readOnly" : true, 
             "enum" : [
                 "object"
             ]
@@ -38,8 +36,7 @@
         "description" : {
             "title" : "Description", 
             "type" : "string", 
-            "readOnly" : false, 
-            "maxLength" : NumberInt(100000), 
+            "maxLength" : NumberInt(10000), 
             "media" : {
                 "mediaType" : "text/html"
             }, 
@@ -71,7 +68,6 @@
             "type" : "array", 
             "items" : {
                 "type" : "string", 
-                "maxLength" : NumberInt(1000), 
                 "pattern" : "[a-f0-9]{24}"
             }, 
             "query" : {
@@ -90,9 +86,6 @@
     "title" : "Resources", 
     "description" : "<p>Things owned by users/organizations</p>", 
     "type" : "object", 
-    "properties" : {
-
-    }, 
     "parentId" : "56f86c6a5dde184ccfb9fc6a"
 }
 { 
@@ -102,27 +95,6 @@
     "description" : "<p>Describes the Tab-Widget-View Reference structure</p>", 
     "type" : "object", 
     "properties" : {
-        "_id" : {
-            "title" : "_id", 
-            "readOnly" : true, 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "name" : {
-            "title" : "Name", 
-            "type" : "string", 
-            "readOnly" : false, 
-            "maxLength" : NumberInt(1000), 
-            "default" : "[unnamed]"
-        }, 
-        "docType" : {
-            "title" : "Doument Type", 
-            "type" : "string", 
-            "readOnly" : true, 
-            "enum" : [
-                "object"
-            ]
-        }, 
         "divider" : {
             "title" : "Divider", 
             "type" : "string", 
@@ -141,16 +113,6 @@
                 "Tabs"
             ], 
             "default" : "Tabs"
-        }, 
-        "description" : {
-            "title" : "Description", 
-            "type" : "string", 
-            "readOnly" : false, 
-            "maxLength" : NumberInt(100000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>no text</p>"
         }, 
         "tabs" : {
             "title" : "Tabs", 
@@ -377,8 +339,34 @@
     "pageId" : "56f8a22e5dde184ccfb9fc78", 
     "parentId" : "574243d23c6d3cd598a5a31b", 
     "owns" : [
+        "56f89f625dde184ccfb9fc76", 
+        "56f8a22e5dde184ccfb9fc78", 
+        "570064645dde184ccfb9fc84", 
+        "570067985dde184ccfb9fc86", 
+        "57019b3c5dde184ccfb9fc88", 
+        "572b25ec3c6d3cd598a5a2d1", 
+        "572b40443c6d3cd598a5a2d3", 
+        "572c7f9e3c6d3cd598a5a2d7", 
+        "572e6f973c6d3cd598a5a2d9", 
+        "57343cd13c6d3cd598a5a2eb", 
+        "573445203c6d3cd598a5a2ed", 
+        "5737875b3c6d3cd598a5a2f3", 
+        "573787b13c6d3cd598a5a2f5", 
+        "573788493c6d3cd598a5a2f9", 
+        "573797cb3c6d3cd598a5a2fd", 
+        "573a40e43c6d3cd598a5a2ff", 
+        "573a45583c6d3cd598a5a301", 
+        "574237d23c6d3cd598a5a30f", 
+        "574237e13c6d3cd598a5a311", 
         "574239993c6d3cd598a5a315", 
-        "574239b23c6d3cd598a5a317"
+        "574239b23c6d3cd598a5a317", 
+        "574244ab3c6d3cd598a5a31d", 
+        "5742454a3c6d3cd598a5a31f", 
+        "5749751d3c6d3cd598a5a383"
+    ], 
+    "subUnits" : [
+        "574239993c6d3cd598a5a315", 
+        "574237e13c6d3cd598a5a311"
     ]
 }
 { 
@@ -1167,9 +1155,6 @@
     "title" : "Off Balance Sheet", 
     "description" : "<p>Other things owned by users/organizations</p>", 
     "type" : "object", 
-    "properties" : {
-
-    }, 
     "parentId" : "56f87bcc5dde184ccfb9fc70"
 }
 { 
@@ -1179,6 +1164,17 @@
     "description" : "<p>Views owned by users/organizations</p>", 
     "type" : "object", 
     "properties" : {
+        "type" : {
+            "title" : "Schema Type", 
+            "type" : "string", 
+            "enum" : [
+                "object"
+            ]
+        }, 
+        "properties" : {
+            "title" : "Schema Properties", 
+            "type" : "object"
+        }, 
         "filter" : {
             "title" : "Filter", 
             "type" : "object", 
@@ -1223,17 +1219,11 @@
                 }
             }
         }, 
-        "type" : {
-
-        }, 
         "pageId" : {
             "title" : "Page Id", 
             "type" : "string", 
             "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
-        }, 
-        "properties" : {
-            "type" : "object"
         }, 
         "required" : {
             "title" : "Required", 
@@ -1255,7 +1245,6 @@
         "viewId" : {
             "title" : "View Id", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "paragraphParts" : {
@@ -1292,7 +1281,6 @@
             "label" : "Sub Paragraphs", 
             "items" : {
                 "type" : "string", 
-                "maxLength" : NumberInt(1000), 
                 "pattern" : "[a-f0-9]{24}"
             }, 
             "query" : {
@@ -1311,9 +1299,6 @@
     "title" : "Assets", 
     "description" : "<p>Assets owned by users/organizations</p>", 
     "type" : "object", 
-    "properties" : {
-
-    }, 
     "parentId" : "573435433c6d3cd598a5a2db"
 }
 { 
@@ -1322,9 +1307,6 @@
     "title" : "Liabilities", 
     "description" : "<p>Liabilities owned by users/organizations</p>", 
     "type" : "object", 
-    "properties" : {
-
-    }, 
     "parentId" : "573435433c6d3cd598a5a2db"
 }
 { 
@@ -1353,21 +1335,45 @@
             "title" : "What", 
             "type" : "string", 
             "readOnly" : false, 
-            "maxLength" : NumberInt(100000), 
+            "maxLength" : NumberInt(10000), 
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "default" : "<p>[How are you doing it?]</p>"
+            "default" : "<p>[What are you doing that is diffrent?]</p>"
         }, 
         "why" : {
             "title" : "Why", 
             "type" : "string", 
             "readOnly" : false, 
-            "maxLength" : NumberInt(100000), 
+            "maxLength" : NumberInt(10000), 
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "default" : "<p>[Which opportunity are you taking advantage off?]</p>"
+            "default" : "<p>[Which opportunity are you taking advantage of?]</p>"
+        }, 
+        "how" : {
+            "title" : "How", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(10000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>[How are you doing it?]</p>"
+        }, 
+        "subUnits" : {
+            "title" : "Organizational Units", 
+            "type" : "array", 
+            "items" : {
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}"
+            }, 
+            "query" : {
+                "_id" : "56f87bcc5dde184ccfb9fc70", 
+                "association" : "owns"
+            }, 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
         }
     }, 
     "parentId" : "56f870a55dde184ccfb9fc6c"
@@ -1539,19 +1545,16 @@
         "buyerId" : {
             "title" : "Buyer", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "sellerId" : {
             "title" : "Seller", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "assetId" : {
             "title" : "Asset", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "stateHistory" : {
@@ -1560,7 +1563,6 @@
             "type" : "array", 
             "items" : {
                 "type" : "string", 
-                "maxLength" : NumberInt(1000), 
                 "pattern" : "[a-f0-9]{24}"
             }, 
             "query" : {
@@ -1583,19 +1585,16 @@
         "userId" : {
             "title" : "User", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "organizationId" : {
             "title" : "Organization", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "organizationalUnitId" : {
             "title" : "Organizational Unit", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }
     }, 
@@ -1611,19 +1610,16 @@
         "buyerId" : {
             "title" : "Buyer", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "sellerId" : {
             "title" : "Seller", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "assetId" : {
             "title" : "Asset", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }
     }, 
@@ -1639,7 +1635,6 @@
         "stateId" : {
             "title" : "State", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "changeDate" : {
@@ -1894,19 +1889,16 @@
         "buyerId" : {
             "title" : "Buyer", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "sellerId" : {
             "title" : "Seller", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "assetId" : {
             "title" : "Asset", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }
     }, 
@@ -1922,19 +1914,16 @@
         "buyerId" : {
             "title" : "Buyer", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "sellerId" : {
             "title" : "Seller", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "assetId" : {
             "title" : "Asset", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
             "pattern" : "[a-f0-9]{24}"
         }
     }, 
@@ -2278,7 +2267,7 @@
         "type" : "in", 
         "args" : [
             "_id", 
-            "owns"
+            "subUnits"
         ]
     }, 
     "childrenFilter" : {
