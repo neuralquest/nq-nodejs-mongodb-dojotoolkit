@@ -1,6 +1,6 @@
-define(['dojo/_base/declare', "dojo/_base/lang", "dojo/_base/array", "dojo/when", "dojo/promise/all",
+define(['dojo/_base/declare', "dojo/_base/lang", "dojo/_base/array", "dojo/when", "dojo/promise/all", 'dijit/registry',
 		'dstore/RequestMemory', 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/QueryResults'],
-function(declare, lang, array, when, all,
+function(declare, lang, array, when, all, registry,
 		 RequestMemory, SimpleQuery, QueryMethod, QueryResults){
 
     return declare("nqDocStore", [RequestMemory], {
@@ -43,6 +43,93 @@ function(declare, lang, array, when, all,
                 return true;
             }
         },
+        add: function (_item, directives) {
+            this.enableTransactionButtons();
+            var item = {};
+            if(_item) item = _item;
+            else if(directives.schema){
+                item._id = this.makeObjectId();
+                for(var propName in directives.schema.properties){
+                    var prop = directives.schema.properties[propName];
+                    if(prop.default){
+                        item[propName]= prop.default;
+                    }
+                }
+                if(directives.schema.filter){
+                    var docFilter = directives.schema.filter;
+                    if(docFilter.type == 'isA') item.parentId = docFilter.args[0];
+                }
+                if(directives.schema.childrenFilter){
+                    var docFilter = directives.schema.childrenFilter;
+                    if(docFilter.type == 'in') {
+                        var key = docFilter.args[0];
+                        var arrayName = docFilter.args[1];
+                        var parentObj = this.cachingStore.getSync(directives.parentId);
+                        var fkArray = parentObj[arrayName];
+                        if(!fkArray) fkArray = [];
+                        fkArray.push(item[key]);
+                        parentObj[arrayName] = fkArray;
+                        this.cachingStore.put(parentObj);
+                    }
+                }
+            }
+            this.cachingStore.add(item);
+            //this.processDirectives(item, directives);
+            //this.emit('add', {target:item, directives:directives});
+        },
+        put: function (item, directives) {
+            this.enableTransactionButtons();
+            if(!directives.viewId) directives.viewId = item._viewId;//TODO pastItem should send viewID in directives
+            this.itemsColl.put(item, directives);
+            this.processDirectives(item, directives);
+            //this.emit('update', {target:item, directives:directives});
+        },
+        remove: function (item, directives) {
+            this.enableTransactionButtons();
+            if(directives) this.processDirectives(item, directives);
+            this.itemsColl.remove(item._id, directives);
+            this.emit('remove', {target:item, directives:directives});
+        },
+        processDirectives: function(object, directives){
+            if(!directives) return;
+            var self = this;
+            var viewId = directives.viewId;
+            var movingObjectId = object._id;
+            var oldParentId = directives.oldParent?directives.oldParent._id:undefined;
+            var newParentId = directives.parent?directives.parent._id:undefined;
+            //var newParentId = directives.parent.id;
+            var beforeId = directives.before?directives.before._id:undefined;
+
+            return this.get(viewId).then(function(view){
+                //TODO must merge
+                var assocType = view.toManyAssociations;
+                if(!assocType) assocType = view.toOneAssociations;
+                var destClassId = view.mapsTo;
+                if(assocType == 'ordered'){
+                    if(oldParentId){
+                        if(newParentId){
+                        }
+                        else{//no new parent means we are deleting the association
+                        }
+                    }
+                    else{//no oldParent means we're creating a new cell with a new association
+                        if(newParentId) {
+                        }
+                    }
+                }
+                else{
+                    if(oldParentId == newParentId) return;
+                    if(oldParentId){
+                        if(newParentId){
+                        }
+                        else{//no new parent means we are deleting the association
+                        }
+                    }
+                    else if(newParentId){//new assoc
+                    }
+                }
+            });
+        },
         getRootCollection: function () {
 
         },
@@ -62,50 +149,35 @@ function(declare, lang, array, when, all,
             return self.get(viewId).then(function(viewObj){
                 if(!viewObj) throw new Error('View Object not found');
                 //console.log('viewObj',viewObj);
-                var classPromise = null;
+                var inheritedClassSchemaPromise = {};
                 if(viewObj.filter && viewObj.filter.type && viewObj.filter.type == 'isA'){
                     var mapsToId = viewObj.filter.args[0];//TODO should be able to deal with multiple levels
-                    classPromise = self.get(mapsToId);
+                    inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
                 }
-                else classPromise = {};
-                return when(classPromise, function(classObj){
-                    if(!classObj) throw new Error('Class Object not found');
-                    var inheritedClassSchema = {properties:{}, required:[]};
-                    return self.collectClassSchemas(classObj, inheritedClassSchema).then(function(res){
-                        //console.log('inheritedClassSchema',inheritedClassSchema);
-                        var schema = lang.clone(viewObj);
-                        schema.properties = {};
-                        schema.required = [];
-                        for(var propName in viewObj.properties){
-                            var prop = inheritedClassSchema.properties[propName];
-                            if(!prop) {
-                                schema.properties[propName] = lang.clone(viewObj.properties[propName]);
-                                //console.log('prop notFound', propName, 'in class', classObj);
-                            }
-                            else{
-                                var viewReadOnly = true;
-                                if(viewObj.properties[propName].readOnly != undefined) viewReadOnly = viewObj.properties[propName].readOnly;
-                                prop.readOnly = viewReadOnly;
-                                schema.properties[propName] = prop;
-                            }
+                return when(inheritedClassSchemaPromise, function(inheritedClassSchema){
+                    var schema = lang.clone(viewObj);
+                    schema.properties = {};
+                    schema.templateObj = {};
+                    schema.required = [];
+                    for(var propName in viewObj.properties){
+                        var viewObjProp = viewObj.properties[propName];
+                        var classProp = inheritedClassSchema.properties?inheritedClassSchema.properties[propName]:null;
+                        if(!classProp) {
+                            schema.properties[propName] = lang.clone(viewObj.properties[propName]);
                         }
-                        schema.required = schema.required.concat(schema.required, inheritedClassSchema.required);
-                        //console.log('SCHEMA');
-                        //console.dir(schema);
-                        return schema;
-                    });
+                        else{
+                            var viewReadOnly = true;
+                            if(classProp.readOnly != undefined) viewReadOnly = classProp.readOnly;
+                            else if(viewObjProp.readOnly != undefined) viewReadOnly = viewObjProp.readOnly;
+                            classProp.readOnly = viewReadOnly;
+                            schema.properties[propName] = classProp;
+                       }
+                    }
+                    schema.required = schema.required.concat(schema.required, inheritedClassSchema.required);
+                    //console.log('SCHEMA');
+                    //console.dir(schema);
+                    return schema;
                 });
-            });
-        },
-        collectClassSchemas: function (classObj, inheritedClassSchema) {
-            var self = this;
-            //combine the the two class.properties, there should be no overlap. If there is, the parent is leading
-            lang.mixin(inheritedClassSchema.properties, classObj.properties);
-            //combine the to class.required arrays. There should be no overlap
-            if(classObj.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(inheritedClassSchema.required, classObj.required);
-            return self.getParentClass(classObj._id).then(function(parentClassObj){
-                if(parentClassObj) return self.collectClassSchemas(parentClassObj, inheritedClassSchema);
-                else return true;//no parent, we are at the root
             });
         },
         getAncestors: function(id) {
@@ -211,6 +283,61 @@ function(declare, lang, array, when, all,
                     break;
             }
         },
+        getFilterValue: function(docFilter, filterType) {
+            var self = this;
+            var filterType = docFilter.type;
+            switch (filterType) {
+                case 'eq':
+                    var key = docFilter.args[0];
+                    var propName = docFilter.args[1];
+                    var value = parentObj[propName];
+                    return self.Filter().eq(key, value);
+                    break;
+                case 'and':
+                    var firstDocFilter = docFilter.args[0];
+                    var secondDocFilter = docFilter.args[1];
+                    var firstFilter = this.buildFilter(parentObj, firstDocFilter);
+                    var secondFilter = this.buildFilter(parentObj, secondDocFilter);
+                    if(firstFilter && secondFilter) return self.Filter().and(firstFilter, secondFilter);
+                    break;
+                case 'or':
+                    var firstDocFilter = docFilter.args[0];
+                    var secondDocFilter = docFilter.args[1];
+                    var firstFilter = this.buildFilter(parentObj, firstDocFilter);
+                    var secondFilter = this.buildFilter(parentObj, secondDocFilter);
+                    if(firstFilter && secondFilter) return self.Filter().or(firstFilter, secondFilter);
+                    if(firstFilter) return firstFilter;
+                    if(secondFilter) return secondFilter;
+                    break;
+                case 'in':
+                    var foreignKey = docFilter.args[0];
+                    var idArrName = docFilter.args[1];
+                    if(idArrName.substr(0,1) == '$'){
+                        debugger;
+                    }
+                    var idArr = parentObj[idArrName];
+                    if(!idArr) return;
+                    return this.Filter().in(foreignKey, idArr);
+                    break;
+                case 'isA':
+                    return this.Filter(function(obj){
+                        if(obj.docType == 'class') return false;
+                        var classId = docFilter.args[0];
+                        return self.isASync(obj, classId);
+                    });
+                    break;
+                case 'view':
+                    var subViewId = docFilter.args[0];
+                    var subView = this.cachingStore.getSync(subViewId);
+                    if(subView  && subView.filter){
+                        var subViewFilter = subView.filter;
+                        return this.buildFilter(parentObj, subViewFilter);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        },
         updateAllowed: function(doc){
             var userId = "570064645dde184ccfb9fc84";
             var ownerFilter = this.Filter().contains('owns', [doc._id]);
@@ -221,6 +348,16 @@ function(declare, lang, array, when, all,
                 if(owners[0]._id == userId) return true;
                 return false;
             });
+        },
+        makeObjectId: function() {
+            var timestamp = (new Date().getTime() / 1000 | 0).toString(16);
+            return timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, function() {
+                    return (Math.random() * 16 | 0).toString(16);
+                }).toLowerCase();
+        },
+        enableTransactionButtons: function () {
+            registry.byId('cancelButtonId').set('disabled', false);
+            registry.byId('saveButtonId').set('disabled', false);
         }
     });
 });

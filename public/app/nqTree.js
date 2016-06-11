@@ -5,6 +5,10 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 			domConstruct, dndSource, Menu, MenuItem, PopupMenuItem, array){
 
 	return declare("nqTree", [nqWidgetBase], {
+        postCreate: function(){
+            this.inherited(arguments);
+            this.createMenusForWidget();
+        },
 		setDocId: function(id){
             var self = this;
             if(self.rootDocId == self.widget.rootDocId) return;
@@ -16,7 +20,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				store : this.store,
                 query: {_id:  self.rootDocId},
                 arrayNames: self.schema.childArrayNames,
-                view: self.schema
+                schema: self.schema
             });
 			this.tree = new Tree({
                 id: 'tree.'+self.id,
@@ -38,7 +42,8 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				},
 				getRowClass: function(item, opened){
 					if(!item) return '';
-					return 'css'+item._viewId;//used by tree menu to determine which menu to show
+                    //TODO if(!this.schema.updateAllowed(item)) return;
+					return 'css'+self.schema._id;//used by tree menu to determine which menu to show
 				},
 				getTooltip: function(item, opened){
 					if(!item) return '';
@@ -160,22 +165,51 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
         },
 		createMenusForWidget: function(){
 			var self = this;
-            for(var viewId in self.permittedClassesByViewObj) {
-                var parentMenu = new Menu({targetNodeIds: [this.pane.containerNode], selector: ".css"+viewId});
-                //var parentMenu = new Menu({targetNodeIds: [self.tree.domNode], selector: ".css"+viewId});
-                var addMenu = new Menu({parentMenu: parentMenu});
-                parentMenu.addChild(new PopupMenuItem({
-                    label:"Add New",
-                    iconClass:"addIcon",
-                    popup: addMenu,
-                    viewId: viewId
-                }));
-                var uViewObj = self.permittedClassesByViewObj[viewId];
+            var parentMenu = new Menu({targetNodeIds: [this.pane.containerNode], selector: ".css" + self.schema._id});
+            //this.parentMenu = parentMenu;
+            //var parentMenu = new Menu({targetNodeIds: [self.tree.domNode], selector: ".css"+viewId});
+            var addMenu = new Menu({parentMenu: parentMenu});
+            parentMenu.addChild(new MenuItem({
+                label: "Add New",
+                iconClass: "addIcon",
+                //popup: addMenu,
+               // viewId: viewId,
+                onClick: function(){
+                    var selectedItem = self.tree.get("selectedItem");
+                    var directives = {parent: selectedItem, viewId: this.viewId, classId:this.classId};
+                    var directives = {parentId: selectedItem._id, schema: self.schema};
+                    var newObj = self.store.add(null, directives);
+
+                    var selectedNodes = self.tree.getNodesByItem(selectedItem);
+                    if(!selectedNodes[0].isExpanded){
+                        self.tree._expandNode(selectedNodes[0]);
+                    }
+                    self.tree.set('selectedItem', newObj._id);
+                }
+            }));
+/*            for(var viewId in self.schema.permittedClassesByViewObj) {
+
+
+            }*/
+            parentMenu.addChild(new MenuItem({
+                label:"Delete",
+                iconClass:"removeIcon",
+                //viewId: viewId,
+                onClick: function(){
+                    var pathArr = self.tree.path;
+                    var selectedItem = pathArr[pathArr.length-1];
+                    var parentItem = pathArr[pathArr.length-2];
+                    var directives = {oldParent:parentItem, viewId: this.viewId};
+                    self.store.remove(selectedItem, directives);
+                }
+            }));
+                /*var uViewObj = self.permittedClassesByViewObj[viewId];
                 if(viewId!=844){
                     parentMenu.addChild(new MenuItem({
                         label:"Delete",
                         iconClass:"removeIcon",
                         viewId: viewId,
+                        disabled: self.store.updateAllowed(self.tree.get("selectedItem")),
                         onClick: function(){
                             var pathArr = self.tree.path;
                             var selectedItem = pathArr[pathArr.length-1];
@@ -269,7 +303,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     });
                     addMenu.addChild(objectMenuItem);
                 }
-            }
+            }*/
 		}
 	});
 });

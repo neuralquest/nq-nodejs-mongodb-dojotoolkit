@@ -348,7 +348,6 @@
         "572b40443c6d3cd598a5a2d3", 
         "572c7f9e3c6d3cd598a5a2d7", 
         "572e6f973c6d3cd598a5a2d9", 
-        "57343cd13c6d3cd598a5a2eb", 
         "573445203c6d3cd598a5a2ed", 
         "5737875b3c6d3cd598a5a2f3", 
         "573787b13c6d3cd598a5a2f5", 
@@ -360,8 +359,6 @@
         "574237e13c6d3cd598a5a311", 
         "574239993c6d3cd598a5a315", 
         "574239b23c6d3cd598a5a317", 
-        "574244ab3c6d3cd598a5a31d", 
-        "5742454a3c6d3cd598a5a31f", 
         "5749751d3c6d3cd598a5a383"
     ], 
     "subUnits" : [
@@ -910,50 +907,12 @@
             "readOnly" : false
         }, 
         "paragraphParts" : {
-            "type" : "array", 
-            "items" : {
-                "type" : "object", 
-                "properties" : {
-                    "content" : {
-                        "title" : "Content", 
-                        "type" : "string", 
-                        "maxLength" : NumberInt(10000), 
-                        "media" : {
-                            "mediaType" : "text/html"
-                        }
-                    }, 
-                    "mediaType" : {
-                        "title" : "Media Type", 
-                        "type" : "object"
-                    }
-                }, 
-                "required" : [
-                    "content", 
-                    "mediaType"
-                ]
-            }
+            "readOnly" : false
         }, 
         "childDocs" : {
-            "label" : "Tabs", 
-            "readOnly" : false, 
-            "items" : {
-                "type" : "string", 
-                "maxLength" : NumberInt(1000), 
-                "pattern" : "[a-f0-9]{24}"
-            }, 
-            "query" : {
-                "_id" : "560b1407434ec958241693e8", 
-                "association" : "ordered"
-            }, 
-            "type" : "array", 
-            "minItems" : NumberInt(0), 
-            "uniqueItems" : true
+            "readOnly" : false
         }
     }, 
-    "required" : [
-        "_id", 
-        "name"
-    ], 
     "parentId" : "573435c23c6d3cd598a5a2df"
 }
 { 
@@ -1241,6 +1200,10 @@
     "title" : "Paragraphs", 
     "description" : "<p>Paragraphs owned by users/organizations</p>", 
     "type" : "object", 
+    "onNew" : {
+        "parentId" : "", 
+        "owns" : ""
+    }, 
     "properties" : {
         "viewId" : {
             "title" : "View Id", 
@@ -1283,10 +1246,7 @@
                 "type" : "string", 
                 "pattern" : "[a-f0-9]{24}"
             }, 
-            "query" : {
-                "_id" : "560b1407434ec958241693e8", 
-                "association" : "ordered"
-            }, 
+            "isA" : "573435f03c6d3cd598a5a2e1", 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
         }

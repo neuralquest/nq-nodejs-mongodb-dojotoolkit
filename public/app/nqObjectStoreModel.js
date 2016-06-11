@@ -109,8 +109,8 @@ define([
 			// parentItem:
 			//		Item from the dojo/store
             var self = this;
-            if(this.view && this.view.childrenFilter){
-                var docFilter = this.view.childrenFilter;
+            if(this.schema && this.schema.childrenFilter){
+                var docFilter = this.schema.childrenFilter;
                 var childrenFilter = this.store.buildFilter(parentItem, docFilter);
                 var childrenCollection = this.store.filter(childrenFilter);
                 /*childrenCollection.fetch().then(function(childObjects){
@@ -131,6 +131,9 @@ define([
                     self.onChange(obj);
                 });
                 childrenCollection.fetch().then(function(childObjects){
+                    childObjects.forEach(function(childObj){
+                        childObj.viewId = self.schema._id;
+                    });
                     onComplete(childObjects);
                 });
             }
