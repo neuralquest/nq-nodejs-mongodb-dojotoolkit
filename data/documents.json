@@ -14,7 +14,12 @@
         "parentId" : {
             "title" : "_id", 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
+            "pattern" : "[a-f0-9]{24}", 
+            "filter" : {
+                "eq" : {
+                    "docType" : "class"
+                }
+            }
         }, 
         "name" : {
             "title" : "Name", 
@@ -61,21 +66,6 @@
             "readOnly" : true, 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}"
-        }, 
-        "owns" : {
-            "title" : "Owns Resources", 
-            "readOnly" : true, 
-            "type" : "array", 
-            "items" : {
-                "type" : "string", 
-                "pattern" : "[a-f0-9]{24}"
-            }, 
-            "query" : {
-                "_id" : "56f87bcc5dde184ccfb9fc70", 
-                "association" : "owns"
-            }, 
-            "minItems" : NumberInt(0), 
-            "uniqueItems" : true
         }
     }, 
     "parentId" : "56f86c6a5dde184ccfb9fc6a"
@@ -86,6 +76,16 @@
     "title" : "Resources", 
     "description" : "<p>Things owned by users/organizations</p>", 
     "type" : "object", 
+    "properties" : {
+        "ownerId" : {
+            "title" : "Owner Id", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}", 
+            "filter" : {
+                "isA" : "56f870a55dde184ccfb9fc6c"
+            }
+        }
+    }, 
     "parentId" : "56f86c6a5dde184ccfb9fc6a"
 }
 { 
@@ -231,7 +231,820 @@
     "parentId" : "573435803c6d3cd598a5a2dd"
 }
 { 
-    "_id" : ObjectId("56f89f625dde184ccfb9fc76"), 
+    "_id" : ObjectId("573435433c6d3cd598a5a2db"), 
+    "docType" : "class", 
+    "title" : "Balanace Sheet", 
+    "description" : "<p>Balance sheet owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+        "value" : {
+            "type" : "number"
+        }, 
+        "curency" : {
+            "type" : "string", 
+            "maxLength" : NumberInt(3)
+        }
+    }, 
+    "parentId" : "56f87bcc5dde184ccfb9fc70"
+}
+{ 
+    "_id" : ObjectId("573435803c6d3cd598a5a2dd"), 
+    "docType" : "class", 
+    "title" : "Off Balance Sheet", 
+    "description" : "<p>Other things owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "56f87bcc5dde184ccfb9fc70"
+}
+{ 
+    "_id" : ObjectId("573435c23c6d3cd598a5a2df"), 
+    "docType" : "class", 
+    "title" : "Views", 
+    "description" : "<p>Views owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+        "type" : {
+            "title" : "Schema Type", 
+            "type" : "string", 
+            "enum" : [
+                "object"
+            ]
+        }, 
+        "properties" : {
+            "title" : "Schema Properties", 
+            "type" : "object"
+        }, 
+        "query" : {
+            "title" : "Filter", 
+            "type" : "object", 
+            "properties" : {
+                "condition" : {
+                    "title" : "Condition", 
+                    "type" : "string", 
+                    "enum" : [
+                        "eq", 
+                        "and", 
+                        "or", 
+                        "in", 
+                        "isA", 
+                        "view"
+                    ]
+                }, 
+                "args" : {
+                    "title" : "Arguments", 
+                    "type" : "array"
+                }
+            }
+        }, 
+        "childrenQuery" : {
+            "title" : "Children Filter", 
+            "type" : "object", 
+            "properties" : {
+                "condition" : {
+                    "title" : "Condition", 
+                    "type" : "string", 
+                    "enum" : [
+                        "eq", 
+                        "and", 
+                        "or", 
+                        "in", 
+                        "isA", 
+                        "view"
+                    ]
+                }, 
+                "args" : {
+                    "title" : "Arguments", 
+                    "type" : "array"
+                }
+            }
+        }, 
+        "pageId" : {
+            "title" : "Page Id", 
+            "type" : "string", 
+            "maxLength" : NumberInt(1000), 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "required" : {
+            "title" : "Required", 
+            "type" : "array", 
+            "items" : {
+                "type" : "string"
+            }
+        }
+    }, 
+    "parentId" : "573435803c6d3cd598a5a2dd"
+}
+{ 
+    "_id" : ObjectId("573435f03c6d3cd598a5a2e1"), 
+    "docType" : "class", 
+    "title" : "Paragraphs", 
+    "description" : "<p>Paragraphs owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+        "viewId" : {
+            "title" : "View Id", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "paragraphParts" : {
+            "type" : "array", 
+            "items" : {
+                "type" : "object", 
+                "properties" : {
+                    "content" : {
+                        "title" : "Content", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(10000), 
+                        "media" : {
+                            "mediaType" : "text/html"
+                        }
+                    }, 
+                    "mediaType" : {
+                        "title" : "Media Type", 
+                        "type" : "object"
+                    }, 
+                    "url" : {
+                        "title" : "Url", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(1000), 
+                        "format" : "hostname"
+                    }
+                }, 
+                "required" : [
+                    "mediaType"
+                ]
+            }
+        }, 
+        "childDocs" : {
+            "type" : "array", 
+            "label" : "Sub Paragraphs", 
+            "items" : {
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}"
+            }, 
+            "isA" : "573435f03c6d3cd598a5a2e1", 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
+        }
+    }, 
+    "parentId" : "573435803c6d3cd598a5a2dd"
+}
+{ 
+    "_id" : ObjectId("57343b823c6d3cd598a5a2e3"), 
+    "docType" : "class", 
+    "title" : "Assets", 
+    "description" : "<p>Assets owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "573435433c6d3cd598a5a2db"
+}
+{ 
+    "_id" : ObjectId("57343bba3c6d3cd598a5a2e5"), 
+    "docType" : "class", 
+    "title" : "Liabilities", 
+    "description" : "<p>Liabilities owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "573435433c6d3cd598a5a2db"
+}
+{ 
+    "_id" : ObjectId("57343beb3c6d3cd598a5a2e7"), 
+    "docType" : "class", 
+    "title" : "Users", 
+    "description" : "<p>Users own resourses</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "parentId" : "56f870a55dde184ccfb9fc6c"
+}
+{ 
+    "_id" : ObjectId("57343c283c6d3cd598a5a2e9"), 
+    "docType" : "class", 
+    "title" : "Organizations", 
+    "description" : "<p>Organizations owned by users/organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+        "banner" : {
+            "title" : "Banner", 
+            "type" : "string"
+        }, 
+        "what" : {
+            "title" : "What", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(10000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>[What are you doing that is diffrent?]</p>"
+        }, 
+        "why" : {
+            "title" : "Why", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(10000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>[Which opportunity are you taking advantage of?]</p>"
+        }, 
+        "how" : {
+            "title" : "How", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(10000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>[How are you doing it?]</p>"
+        }, 
+        "subUnits" : {
+            "title" : "Organizational Units", 
+            "type" : "array", 
+            "items" : {
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}"
+            }, 
+            "query" : {
+                "_id" : "56f87bcc5dde184ccfb9fc70", 
+                "association" : "owns"
+            }, 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
+        }
+    }, 
+    "parentId" : "56f870a55dde184ccfb9fc6c"
+}
+{ 
+    "_id" : ObjectId("574225cb3c6d3cd598a5a305"), 
+    "docType" : "class", 
+    "title" : "Agreements", 
+    "description" : "<p>Agreements between owners</p>", 
+    "type" : "object", 
+    "properties" : {
+        "buyerId" : {
+            "title" : "Buyer", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "sellerId" : {
+            "title" : "Seller", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "assetId" : {
+            "title" : "Asset", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "stateHistory" : {
+            "title" : "State History", 
+            "readOnly" : true, 
+            "type" : "array", 
+            "items" : {
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}"
+            }, 
+            "query" : {
+                "_id" : "56f87bcc5dde184ccfb9fc70", 
+                "association" : "history"
+            }, 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
+        }
+    }, 
+    "parentId" : "56f86c6a5dde184ccfb9fc6a"
+}
+{ 
+    "_id" : ObjectId("574232a53c6d3cd598a5a307"), 
+    "docType" : "class", 
+    "title" : "Membership", 
+    "description" : "<p>Menbership Agreements between user and organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+        "userId" : {
+            "title" : "User", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "organizationId" : {
+            "title" : "Organization", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "organizationalUnitId" : {
+            "title" : "Organizational Unit", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }
+    }, 
+    "parentId" : "574225cb3c6d3cd598a5a305"
+}
+{ 
+    "_id" : ObjectId("574232b83c6d3cd598a5a309"), 
+    "docType" : "class", 
+    "title" : "Purchase", 
+    "description" : "<p>Purchase Agreements between owners</p>", 
+    "type" : "object", 
+    "properties" : {
+        "buyerId" : {
+            "title" : "Buyer", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "sellerId" : {
+            "title" : "Seller", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "assetId" : {
+            "title" : "Asset", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }
+    }, 
+    "parentId" : "574225cb3c6d3cd598a5a305"
+}
+{ 
+    "_id" : ObjectId("574234113c6d3cd598a5a30b"), 
+    "docType" : "class", 
+    "title" : "State History", 
+    "description" : "<p>State History</p>", 
+    "type" : "object", 
+    "properties" : {
+        "stateId" : {
+            "title" : "State", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "changeDate" : {
+            "title" : "Stamp", 
+            "type" : "string", 
+            "format" : "date-time"
+        }
+    }, 
+    "parentId" : "56f86c6a5dde184ccfb9fc6a"
+}
+{ 
+    "_id" : ObjectId("574237133c6d3cd598a5a30d"), 
+    "docType" : "class", 
+    "title" : "Organizational Units", 
+    "description" : "<p>Organizational units owned by organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+        "pageId" : {
+            "title" : "Page Id", 
+            "readOnly" : true, 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "banner" : {
+            "title" : "Banner", 
+            "type" : "string"
+        }, 
+        "what" : {
+            "title" : "What", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>[What are you doing, how is it different?]</p>"
+        }, 
+        "why" : {
+            "title" : "Why", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>[Which opportunity are you taking advantage of?]</p>"
+        }, 
+        "how" : {
+            "title" : "How", 
+            "type" : "string", 
+            "readOnly" : false, 
+            "maxLength" : NumberInt(100000), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>[How are you doing it?]</p>"
+        }, 
+        "parentOrgId" : {
+            "title" : "Parent Organization Id", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}", 
+            "filter" : {
+                "or" : {
+                    "isA" : "57343c283c6d3cd598a5a2e9"
+                }
+            }
+        }
+    }, 
+    "parentId" : "573435803c6d3cd598a5a2dd"
+}
+{ 
+    "_id" : ObjectId("5742439f3c6d3cd598a5a319"), 
+    "docType" : "class", 
+    "title" : "Commercial", 
+    "description" : "<p>Comercial organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "parentId" : "57343c283c6d3cd598a5a2e9"
+}
+{ 
+    "_id" : ObjectId("574243d23c6d3cd598a5a31b"), 
+    "docType" : "class", 
+    "title" : "Non-Profit", 
+    "description" : "<p>Non-profit organizations</p>", 
+    "type" : "object", 
+    "properties" : {
+
+    }, 
+    "parentId" : "57343c283c6d3cd598a5a2e9"
+}
+{ 
+    "_id" : ObjectId("57424f1b3c6d3cd598a5a321"), 
+    "docType" : "class", 
+    "title" : "Service", 
+    "description" : "<p>Service Agreements between owners</p>", 
+    "type" : "object", 
+    "properties" : {
+        "buyerId" : {
+            "title" : "Buyer", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "sellerId" : {
+            "title" : "Seller", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "assetId" : {
+            "title" : "Asset", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }
+    }, 
+    "parentId" : "574225cb3c6d3cd598a5a305"
+}
+{ 
+    "_id" : ObjectId("57424f7b3c6d3cd598a5a325"), 
+    "docType" : "class", 
+    "title" : "Rental", 
+    "description" : "<p>Rental Agreements between owners</p>", 
+    "type" : "object", 
+    "properties" : {
+        "buyerId" : {
+            "title" : "Buyer", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "sellerId" : {
+            "title" : "Seller", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }, 
+        "assetId" : {
+            "title" : "Asset", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}"
+        }
+    }, 
+    "parentId" : "574225cb3c6d3cd598a5a305"
+}
+{ 
+    "_id" : ObjectId("5742561f3c6d3cd598a5a327"), 
+    "docType" : "class", 
+    "title" : "Current Assets", 
+    "description" : "<p>Current Assets owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "57343b823c6d3cd598a5a2e3"
+}
+{ 
+    "_id" : ObjectId("574256343c6d3cd598a5a329"), 
+    "docType" : "class", 
+    "title" : "Petty Cash", 
+    "description" : "<p>Petty Cash owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
+}
+{ 
+    "_id" : ObjectId("574256373c6d3cd598a5a32b"), 
+    "docType" : "class", 
+    "title" : "Temporary Investments", 
+    "description" : "<p>Temporary Investments owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
+}
+{ 
+    "_id" : ObjectId("5742563a3c6d3cd598a5a32d"), 
+    "docType" : "class", 
+    "title" : "Accounts Receivible -net", 
+    "description" : "<p>Accounts Receivible -net owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
+}
+{ 
+    "_id" : ObjectId("5742563e3c6d3cd598a5a32f"), 
+    "docType" : "class", 
+    "title" : "Inventory", 
+    "description" : "<p>Inventory owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
+}
+{ 
+    "_id" : ObjectId("574256413c6d3cd598a5a331"), 
+    "docType" : "class", 
+    "title" : "Supplies", 
+    "description" : "<p>Supplies owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
+}
+{ 
+    "_id" : ObjectId("574256453c6d3cd598a5a333"), 
+    "docType" : "class", 
+    "title" : "Prepaid Insurance", 
+    "description" : "<p>Prepaid Insurance owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742561f3c6d3cd598a5a327"
+}
+{ 
+    "_id" : ObjectId("574256493c6d3cd598a5a335"), 
+    "docType" : "class", 
+    "title" : "Investments", 
+    "description" : "<p>Investments owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "57343b823c6d3cd598a5a2e3"
+}
+{ 
+    "_id" : ObjectId("5742564c3c6d3cd598a5a337"), 
+    "docType" : "class", 
+    "title" : "Property, Plant and Equipment", 
+    "description" : "<p>Property, Plant and Equipment owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "57343b823c6d3cd598a5a2e3"
+}
+{ 
+    "_id" : ObjectId("5742564f3c6d3cd598a5a339"), 
+    "docType" : "class", 
+    "title" : "Land", 
+    "description" : "<p>Land owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742564c3c6d3cd598a5a337"
+}
+{ 
+    "_id" : ObjectId("574256573c6d3cd598a5a33d"), 
+    "docType" : "class", 
+    "title" : "Land Improvements", 
+    "description" : "<p>Land Improvements owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742564c3c6d3cd598a5a337"
+}
+{ 
+    "_id" : ObjectId("5742565b3c6d3cd598a5a33f"), 
+    "docType" : "class", 
+    "title" : "Buildings", 
+    "description" : "<p>Buildings owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742564c3c6d3cd598a5a337"
+}
+{ 
+    "_id" : ObjectId("5742565e3c6d3cd598a5a341"), 
+    "docType" : "class", 
+    "title" : "Equipment", 
+    "description" : "<p>Equipment owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742564c3c6d3cd598a5a337"
+}
+{ 
+    "_id" : ObjectId("574256613c6d3cd598a5a343"), 
+    "docType" : "class", 
+    "title" : "Less: Accum Deprecation", 
+    "description" : "<p>Less: Accum Deprecation owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742564c3c6d3cd598a5a337"
+}
+{ 
+    "_id" : ObjectId("574256643c6d3cd598a5a345"), 
+    "docType" : "class", 
+    "title" : "Intangible Assets", 
+    "description" : "<p>Intangible Assets owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "57343b823c6d3cd598a5a2e3"
+}
+{ 
+    "_id" : ObjectId("5742566a3c6d3cd598a5a349"), 
+    "docType" : "class", 
+    "title" : "Goodwill", 
+    "description" : "<p>Goodwill owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "574256643c6d3cd598a5a345"
+}
+{ 
+    "_id" : ObjectId("574256713c6d3cd598a5a34d"), 
+    "docType" : "class", 
+    "title" : "Trade Names", 
+    "description" : "<p>Trade Names owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "574256643c6d3cd598a5a345"
+}
+{ 
+    "_id" : ObjectId("574256743c6d3cd598a5a34f"), 
+    "docType" : "class", 
+    "title" : "Current Libilities", 
+    "description" : "<p>Current Libilities owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "57343bba3c6d3cd598a5a2e5"
+}
+{ 
+    "_id" : ObjectId("574256773c6d3cd598a5a351"), 
+    "docType" : "class", 
+    "title" : "Notes Payable", 
+    "description" : "<p>Notes Payable owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
+}
+{ 
+    "_id" : ObjectId("5742567a3c6d3cd598a5a353"), 
+    "docType" : "class", 
+    "title" : "Accounts Payable", 
+    "description" : "<p>Accounts Payable owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
+}
+{ 
+    "_id" : ObjectId("5742567d3c6d3cd598a5a355"), 
+    "docType" : "class", 
+    "title" : "Wages Payable", 
+    "description" : "<p>Wages Payable owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
+}
+{ 
+    "_id" : ObjectId("574256833c6d3cd598a5a359"), 
+    "docType" : "class", 
+    "title" : "Intrest Payable", 
+    "description" : "<p>Intrest Payable owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
+}
+{ 
+    "_id" : ObjectId("574256863c6d3cd598a5a35b"), 
+    "docType" : "class", 
+    "title" : "Taxes Payable", 
+    "description" : "<p>Taxes Payable owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
+}
+{ 
+    "_id" : ObjectId("574256893c6d3cd598a5a35d"), 
+    "docType" : "class", 
+    "title" : "Waranty Liability", 
+    "description" : "<p>Waranty Liability owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
+}
+{ 
+    "_id" : ObjectId("5742568e3c6d3cd598a5a35f"), 
+    "docType" : "class", 
+    "title" : "Unearned Revenues", 
+    "description" : "<p>Unearned Revenues owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "574256743c6d3cd598a5a34f"
+}
+{ 
+    "_id" : ObjectId("574256923c6d3cd598a5a361"), 
+    "docType" : "class", 
+    "title" : "Long-Term Libilities", 
+    "description" : "<p>Long-Term Libilities owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "57343bba3c6d3cd598a5a2e5"
+}
+{ 
+    "_id" : ObjectId("574261583c6d3cd598a5a363"), 
+    "docType" : "class", 
+    "title" : "Notes Payable", 
+    "description" : "<p>Notes Payable owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "574256923c6d3cd598a5a361"
+}
+{ 
+    "_id" : ObjectId("574261633c6d3cd598a5a365"), 
+    "docType" : "class", 
+    "title" : "Bonds Payable", 
+    "description" : "<p>Bonds Payable owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "574256923c6d3cd598a5a361"
+}
+{ 
+    "_id" : ObjectId("5742616e3c6d3cd598a5a367"), 
+    "docType" : "class", 
+    "title" : "Stockholder's Equity", 
+    "description" : "<p>Stockholder's Equity owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "57343bba3c6d3cd598a5a2e5"
+}
+{ 
+    "_id" : ObjectId("574261743c6d3cd598a5a369"), 
+    "docType" : "class", 
+    "title" : "Common Stock", 
+    "description" : "<p>Common Stock owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742616e3c6d3cd598a5a367"
+}
+{ 
+    "_id" : ObjectId("574261793c6d3cd598a5a36b"), 
+    "docType" : "class", 
+    "title" : "Retained Earnings", 
+    "description" : "<p>Retained Earnings owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742616e3c6d3cd598a5a367"
+}
+{ 
+    "_id" : ObjectId("5742617f3c6d3cd598a5a36d"), 
+    "docType" : "class", 
+    "title" : "Accum Other Comprehensive Income", 
+    "description" : "<p>Accum Other Comprehensive Income owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742616e3c6d3cd598a5a367"
+}
+{ 
+    "_id" : ObjectId("574261843c6d3cd598a5a36f"), 
+    "docType" : "class", 
+    "title" : "Less: Treasury Stock", 
+    "description" : "<p>Less: Treasury Stock owned by users/organizations</p>", 
+    "type" : "object", 
+    "parentId" : "5742616e3c6d3cd598a5a367"
+}
+{ 
+    "_id" : ObjectId("5745eaa53c6d3cd598a5a371"), 
+    "docType" : "class", 
+    "title" : "States", 
+    "description" : "<p>States</p>", 
+    "type" : "object", 
+    "parentId" : "573435803c6d3cd598a5a2dd"
+}
+{ 
+    "_id" : ObjectId("574724823c6d3cd598a5a373"), 
+    "docType" : "class", 
+    "title" : "Open", 
+    "description" : "<p>Open</p>", 
+    "type" : "object", 
+    "parentId" : "5745eaa53c6d3cd598a5a371"
+}
+{ 
+    "_id" : ObjectId("574724b43c6d3cd598a5a375"), 
+    "docType" : "class", 
+    "title" : "Closed", 
+    "description" : "<p>Closed</p>", 
+    "type" : "object", 
+    "parentId" : "5745eaa53c6d3cd598a5a371"
+}
+{ 
+    "_id" : ObjectId("5747251e3c6d3cd598a5a377"), 
+    "docType" : "class", 
+    "title" : "Buyer", 
+    "description" : "<p>Buyer</p>", 
+    "type" : "object", 
+    "parentId" : "574724823c6d3cd598a5a373"
+}
+{ 
+    "_id" : ObjectId("5747254b3c6d3cd598a5a379"), 
+    "docType" : "class", 
+    "title" : "Seller", 
+    "description" : "<p>Seller</p>", 
+    "type" : "object", 
+    "parentId" : "574724823c6d3cd598a5a373"
+}
+{ 
+    "_id" : ObjectId("574725673c6d3cd598a5a37b"), 
+    "docType" : "class", 
+    "title" : "Rejected", 
+    "description" : "<p>Rejected</p>", 
+    "type" : "object", 
+    "parentId" : "574724b43c6d3cd598a5a375"
+}
+{ 
+    "_id" : ObjectId("574725843c6d3cd598a5a37d"), 
+    "docType" : "class", 
+    "title" : "Fulfilled", 
+    "description" : "<p>Fulfilled</p>", 
+    "type" : "object", 
+    "parentId" : "574724b43c6d3cd598a5a375"
+}
+{ 
+    "_id" : ObjectId("574726f43c6d3cd598a5a37f"), 
+    "docType" : "class", 
+    "title" : "Withdrawn", 
+    "description" : "<p>Withdrawn</p>", 
+    "type" : "object", 
+    "parentId" : "574724b43c6d3cd598a5a375"
+}
+{ 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83146"), 
     "docType" : "object", 
     "name" : "Navigation Page", 
     "description" : "<p>The navigation accordion</p>", 
@@ -246,7 +1059,7 @@
                     "displayType" : "Tree", 
                     "name" : "Owners Tree", 
                     "rootDocId" : "56f870a55dde184ccfb9fc6c", 
-                    "viewId" : "572c7f9e3c6d3cd598a5a2d7"
+                    "viewId" : "575d4c3f2cf3d6dc3ed8314d"
                 }
             ]
         }, 
@@ -258,16 +1071,17 @@
                     "displayType" : "Tree", 
                     "name" : "Class Model Tree", 
                     "rootDocId" : "56f86c6a5dde184ccfb9fc6a", 
-                    "viewId" : "572b25ec3c6d3cd598a5a2d1", 
-                    "pageId" : "572b40443c6d3cd598a5a2d3"
+                    "viewId" : "575d4c3f2cf3d6dc3ed8314b", 
+                    "pageId" : "575d4c3f2cf3d6dc3ed8314c"
                 }
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74"
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("56f8a22e5dde184ccfb9fc78"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83147"), 
     "docType" : "object", 
     "name" : "Neuralquest Page", 
     "description" : "<p>Neuralquest home page.</p>", 
@@ -281,14 +1095,14 @@
                 {
                     "displayType" : "Home Page", 
                     "name" : "Balance Sheet Form", 
-                    "viewId" : "570067985dde184ccfb9fc86"
+                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
                 }
             ]
         }, 
         {
             "name" : "Document", 
             "description" : "Assets and Liabilities", 
-            "pageId" : "573445203c6d3cd598a5a2ed"
+            "pageId" : "575d4c3f2cf3d6dc3ed83150"
         }, 
         {
             "name" : "Backlog", 
@@ -297,7 +1111,7 @@
                 {
                     "displayType" : "Table", 
                     "name" : "Home Page", 
-                    "viewId" : "570067985dde184ccfb9fc86"
+                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
                 }
             ]
         }, 
@@ -308,7 +1122,7 @@
                 {
                     "displayType" : "Form", 
                     "name" : "Home Page", 
-                    "viewId" : "570067985dde184ccfb9fc86"
+                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
                 }
             ]
         }, 
@@ -319,55 +1133,29 @@
                 {
                     "displayType" : "Form", 
                     "name" : "Balance Sheet Form", 
-                    "viewId" : "570067985dde184ccfb9fc86"
+                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
                 }
             ]
         }, 
         {
             "name" : "Resources", 
             "description" : "Rsources owned by Neuralquest", 
-            "pageId" : "572e6f973c6d3cd598a5a2d9"
+            "pageId" : "575d4c3f2cf3d6dc3ed8314e"
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74"
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("570064645dde184ccfb9fc84"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83148"), 
     "docType" : "object", 
     "name" : "Neuralquest", 
     "description" : "<p>The Neuralquest organization</p>", 
-    "pageId" : "56f8a22e5dde184ccfb9fc78", 
-    "parentId" : "574243d23c6d3cd598a5a31b", 
-    "owns" : [
-        "56f89f625dde184ccfb9fc76", 
-        "56f8a22e5dde184ccfb9fc78", 
-        "570064645dde184ccfb9fc84", 
-        "570067985dde184ccfb9fc86", 
-        "57019b3c5dde184ccfb9fc88", 
-        "572b25ec3c6d3cd598a5a2d1", 
-        "572b40443c6d3cd598a5a2d3", 
-        "572c7f9e3c6d3cd598a5a2d7", 
-        "572e6f973c6d3cd598a5a2d9", 
-        "573445203c6d3cd598a5a2ed", 
-        "5737875b3c6d3cd598a5a2f3", 
-        "573787b13c6d3cd598a5a2f5", 
-        "573788493c6d3cd598a5a2f9", 
-        "573797cb3c6d3cd598a5a2fd", 
-        "573a40e43c6d3cd598a5a2ff", 
-        "573a45583c6d3cd598a5a301", 
-        "574237d23c6d3cd598a5a30f", 
-        "574237e13c6d3cd598a5a311", 
-        "574239993c6d3cd598a5a315", 
-        "574239b23c6d3cd598a5a317", 
-        "5749751d3c6d3cd598a5a383"
-    ], 
-    "subUnits" : [
-        "574239993c6d3cd598a5a315", 
-        "574237e13c6d3cd598a5a311"
-    ]
+    "pageId" : "575d4c3f2cf3d6dc3ed83147", 
+    "parentId" : "574243d23c6d3cd598a5a31b"
 }
 { 
-    "_id" : ObjectId("570067985dde184ccfb9fc86"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83149"), 
     "docType" : "object", 
     "name" : "Balance Sheet View", 
     "description" : "<p>The standard balance sheet view</p>", 
@@ -878,26 +1666,31 @@
             }
         }
     }, 
-    "parentId" : "573435c23c6d3cd598a5a2df"
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("57019b3c5dde184ccfb9fc88"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314a"), 
     "docType" : "object", 
     "name" : "Document View", 
     "description" : "<p>Descibes the document hierarchy, including a header, a paragraph parts array and a subdocuments array</p>", 
     "type" : "object", 
-    "filter" : {
-        "type" : "isA", 
-        "args" : [
-            "573435f03c6d3cd598a5a2e1"
+    "query" : {
+        "and" : [
+            {
+                "isA" : "573435f03c6d3cd598a5a2e1"
+            }, 
+            {
+                "eq" : {
+                    "ownerId" : "$selectedObj"
+                }
+            }
         ]
     }, 
-    "childrenFilter" : {
-        "type" : "in", 
-        "args" : [
-            "_id", 
-            "childDocs"
-        ]
+    "childrenQuery" : {
+        "in" : {
+            "_id" : "childDocs"
+        }
     }, 
     "properties" : {
         "_id" : {
@@ -913,21 +1706,25 @@
             "readOnly" : false
         }
     }, 
-    "parentId" : "573435c23c6d3cd598a5a2df"
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("572b25ec3c6d3cd598a5a2d1"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314b"), 
     "docType" : "object", 
     "name" : "Class Model View", 
     "description" : "<p>Descibes the class model hierarchy, including a children array</p>", 
     "type" : "object", 
-    "pageId" : "572b40443c6d3cd598a5a2d3", 
-    "childrenFilter" : {
-        "type" : "eq", 
-        "args" : [
-            "parentId", 
-            "_id"
-        ]
+    "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
+    "query" : {
+        "eq" : {
+            "docType" : "class"
+        }
+    }, 
+    "childrenQuery" : {
+        "eq" : {
+            "parentId" : "_id"
+        }
     }, 
     "properties" : {
         "_id" : {
@@ -986,10 +1783,11 @@
         "_id", 
         "name"
     ], 
-    "parentId" : "573435c23c6d3cd598a5a2df"
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("572b40443c6d3cd598a5a2d3"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314c"), 
     "docType" : "object", 
     "name" : "Class Model Page", 
     "description" : "<p>The class model page</p>", 
@@ -1017,337 +1815,40 @@
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74"
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("572c7f9e3c6d3cd598a5a2d7"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314d"), 
     "docType" : "object", 
     "name" : "Owners View", 
     "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
     "type" : "object", 
-    "childrenFilter" : {
-        "type" : "or", 
-        "args" : [
+    "childrenQuery" : {
+        "or" : [
             {
-                "type" : "eq", 
-                "args" : [
-                    "parentId", 
-                    "_id"
-                ]
+                "eq" : {
+                    "parentId" : "_id"
+                }
             }, 
             {
-                "type" : "view", 
-                "args" : [
-                    "5749751d3c6d3cd598a5a383"
-                ]
+                "view" : "575d4c3f2cf3d6dc3ed8315d"
             }
         ]
     }, 
     "properties" : {
         "icon" : {
-            "title" : "Icon", 
-            "type" : "string"
+            "readOnly" : false
         }, 
         "subUnits" : {
-            "label" : "Subclasses", 
-            "readOnly" : false, 
-            "items" : {
-                "type" : "string", 
-                "maxLength" : NumberInt(1000), 
-                "pattern" : "[a-f0-9]{24}"
-            }, 
-            "query" : {
-                "_id" : "560b1407434ec958241693e8", 
-                "association" : "ordered"
-            }, 
-            "type" : "array", 
-            "minItems" : NumberInt(0), 
-            "uniqueItems" : true
+            "readOnly" : false
         }
     }, 
-    "parentId" : "573435c23c6d3cd598a5a2df"
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("572e6f973c6d3cd598a5a2d9"), 
-    "docType" : "object", 
-    "name" : "Resources Page", 
-    "description" : "<p>The resources page</p>", 
-    "divider" : "Vertical", 
-    "accordionOrTab" : "Accordions", 
-    "tabs" : [
-        {
-            "name" : "Resources Tree", 
-            "description" : "This page provides an overview of users/organizations", 
-            "widgets" : [
-                {
-                    "displayType" : "Tree", 
-                    "name" : "Resources Tree", 
-                    "rootDocId" : "56f87bcc5dde184ccfb9fc70", 
-                    "viewId" : "572b25ec3c6d3cd598a5a2d1", 
-                    "pageId" : "572b40443c6d3cd598a5a2d3"
-                }
-            ]
-        }
-    ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74"
-}
-{ 
-    "_id" : ObjectId("573435433c6d3cd598a5a2db"), 
-    "docType" : "class", 
-    "title" : "Balanace Sheet", 
-    "description" : "<p>Balance sheet owned by users/organizations</p>", 
-    "type" : "object", 
-    "properties" : {
-        "value" : {
-            "type" : "number"
-        }, 
-        "curency" : {
-            "type" : "string", 
-            "maxLength" : NumberInt(3)
-        }
-    }, 
-    "parentId" : "56f87bcc5dde184ccfb9fc70"
-}
-{ 
-    "_id" : ObjectId("573435803c6d3cd598a5a2dd"), 
-    "docType" : "class", 
-    "title" : "Off Balance Sheet", 
-    "description" : "<p>Other things owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "56f87bcc5dde184ccfb9fc70"
-}
-{ 
-    "_id" : ObjectId("573435c23c6d3cd598a5a2df"), 
-    "docType" : "class", 
-    "title" : "Views", 
-    "description" : "<p>Views owned by users/organizations</p>", 
-    "type" : "object", 
-    "properties" : {
-        "type" : {
-            "title" : "Schema Type", 
-            "type" : "string", 
-            "enum" : [
-                "object"
-            ]
-        }, 
-        "properties" : {
-            "title" : "Schema Properties", 
-            "type" : "object"
-        }, 
-        "filter" : {
-            "title" : "Filter", 
-            "type" : "object", 
-            "properties" : {
-                "condition" : {
-                    "title" : "Condition", 
-                    "type" : "string", 
-                    "enum" : [
-                        "eq", 
-                        "and", 
-                        "or", 
-                        "in", 
-                        "isA", 
-                        "view"
-                    ]
-                }, 
-                "args" : {
-                    "title" : "Arguments", 
-                    "type" : "array"
-                }
-            }
-        }, 
-        "childrenFilter" : {
-            "title" : "Children Filter", 
-            "type" : "object", 
-            "properties" : {
-                "condition" : {
-                    "title" : "Condition", 
-                    "type" : "string", 
-                    "enum" : [
-                        "eq", 
-                        "and", 
-                        "or", 
-                        "in", 
-                        "isA", 
-                        "view"
-                    ]
-                }, 
-                "args" : {
-                    "title" : "Arguments", 
-                    "type" : "array"
-                }
-            }
-        }, 
-        "pageId" : {
-            "title" : "Page Id", 
-            "type" : "string", 
-            "maxLength" : NumberInt(1000), 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "required" : {
-            "title" : "Required", 
-            "type" : "array", 
-            "items" : {
-                "type" : "string"
-            }
-        }
-    }, 
-    "parentId" : "573435803c6d3cd598a5a2dd"
-}
-{ 
-    "_id" : ObjectId("573435f03c6d3cd598a5a2e1"), 
-    "docType" : "class", 
-    "title" : "Paragraphs", 
-    "description" : "<p>Paragraphs owned by users/organizations</p>", 
-    "type" : "object", 
-    "onNew" : {
-        "parentId" : "", 
-        "owns" : ""
-    }, 
-    "properties" : {
-        "viewId" : {
-            "title" : "View Id", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "paragraphParts" : {
-            "type" : "array", 
-            "items" : {
-                "type" : "object", 
-                "properties" : {
-                    "content" : {
-                        "title" : "Content", 
-                        "type" : "string", 
-                        "maxLength" : NumberInt(10000), 
-                        "media" : {
-                            "mediaType" : "text/html"
-                        }
-                    }, 
-                    "mediaType" : {
-                        "title" : "Media Type", 
-                        "type" : "object"
-                    }, 
-                    "url" : {
-                        "title" : "Url", 
-                        "type" : "string", 
-                        "maxLength" : NumberInt(1000), 
-                        "format" : "hostname"
-                    }
-                }, 
-                "required" : [
-                    "mediaType"
-                ]
-            }
-        }, 
-        "childDocs" : {
-            "type" : "array", 
-            "label" : "Sub Paragraphs", 
-            "items" : {
-                "type" : "string", 
-                "pattern" : "[a-f0-9]{24}"
-            }, 
-            "isA" : "573435f03c6d3cd598a5a2e1", 
-            "minItems" : NumberInt(0), 
-            "uniqueItems" : true
-        }
-    }, 
-    "parentId" : "573435803c6d3cd598a5a2dd"
-}
-{ 
-    "_id" : ObjectId("57343b823c6d3cd598a5a2e3"), 
-    "docType" : "class", 
-    "title" : "Assets", 
-    "description" : "<p>Assets owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "573435433c6d3cd598a5a2db"
-}
-{ 
-    "_id" : ObjectId("57343bba3c6d3cd598a5a2e5"), 
-    "docType" : "class", 
-    "title" : "Liabilities", 
-    "description" : "<p>Liabilities owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "573435433c6d3cd598a5a2db"
-}
-{ 
-    "_id" : ObjectId("57343beb3c6d3cd598a5a2e7"), 
-    "docType" : "class", 
-    "title" : "Users", 
-    "description" : "<p>Users own resourses</p>", 
-    "type" : "object", 
-    "properties" : {
-
-    }, 
-    "parentId" : "56f870a55dde184ccfb9fc6c"
-}
-{ 
-    "_id" : ObjectId("57343c283c6d3cd598a5a2e9"), 
-    "docType" : "class", 
-    "title" : "Organizations", 
-    "description" : "<p>Organizations owned by users/organizations</p>", 
-    "type" : "object", 
-    "properties" : {
-        "banner" : {
-            "title" : "Banner", 
-            "type" : "string"
-        }, 
-        "what" : {
-            "title" : "What", 
-            "type" : "string", 
-            "readOnly" : false, 
-            "maxLength" : NumberInt(10000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[What are you doing that is diffrent?]</p>"
-        }, 
-        "why" : {
-            "title" : "Why", 
-            "type" : "string", 
-            "readOnly" : false, 
-            "maxLength" : NumberInt(10000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[Which opportunity are you taking advantage of?]</p>"
-        }, 
-        "how" : {
-            "title" : "How", 
-            "type" : "string", 
-            "readOnly" : false, 
-            "maxLength" : NumberInt(10000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[How are you doing it?]</p>"
-        }, 
-        "subUnits" : {
-            "title" : "Organizational Units", 
-            "type" : "array", 
-            "items" : {
-                "type" : "string", 
-                "pattern" : "[a-f0-9]{24}"
-            }, 
-            "query" : {
-                "_id" : "56f87bcc5dde184ccfb9fc70", 
-                "association" : "owns"
-            }, 
-            "minItems" : NumberInt(0), 
-            "uniqueItems" : true
-        }
-    }, 
-    "parentId" : "56f870a55dde184ccfb9fc6c"
-}
-{ 
-    "_id" : ObjectId("57343cd13c6d3cd598a5a2eb"), 
-    "docType" : "object", 
-    "name" : "Platoscave", 
-    "description" : "<p>Platos Cave user</p>", 
-    "pageId" : "56f8a22e5dde184ccfb9fc78", 
-    "parentId" : "57343beb3c6d3cd598a5a2e7"
-}
-{ 
-    "_id" : ObjectId("573445203c6d3cd598a5a2ed"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83150"), 
     "docType" : "object", 
     "name" : "Document Page", 
     "description" : "<p>The document page</p>", 
@@ -1361,17 +1862,18 @@
                 {
                     "displayType" : "Tree", 
                     "name" : "Document Tree", 
-                    "rootDocId" : "5737875b3c6d3cd598a5a2f3", 
-                    "viewId" : "57019b3c5dde184ccfb9fc88", 
-                    "pageId" : "573797cb3c6d3cd598a5a2fd"
+                    "rootDocId" : "575d4c3f2cf3d6dc3ed83151", 
+                    "viewId" : "575d4c3f2cf3d6dc3ed8314a", 
+                    "pageId" : "575d4c3f2cf3d6dc3ed83154"
                 }
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74"
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("5737875b3c6d3cd598a5a2f3"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83151"), 
     "docType" : "object", 
     "name" : "The Neuralquest Document", 
     "paragraphParts" : [
@@ -1389,13 +1891,14 @@
         }
     ], 
     "childDocs" : [
-        "573787b13c6d3cd598a5a2f5", 
-        "573788493c6d3cd598a5a2f9"
+        "575d4c3f2cf3d6dc3ed83152", 
+        "575d4c3f2cf3d6dc3ed83153"
     ], 
-    "parentId" : "573435f03c6d3cd598a5a2e1"
+    "parentId" : "573435f03c6d3cd598a5a2e1", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("573787b13c6d3cd598a5a2f5"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83152"), 
     "docType" : "object", 
     "name" : "Par 1", 
     "paragraphParts" : [
@@ -1406,10 +1909,115 @@
             }
         }
     ], 
-    "parentId" : "573435f03c6d3cd598a5a2e1"
+    "parentId" : "573435f03c6d3cd598a5a2e1", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("573788493c6d3cd598a5a2f9"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83155"), 
+    "docType" : "object", 
+    "name" : "Update Document Page", 
+    "description" : "<p>The document page</p>", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Accordions", 
+    "tabs" : [
+        {
+            "name" : "Document Tree", 
+            "description" : "<p>Docuement owned by user/organizations</p>", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "Paragraph Parts Table", 
+                    "pageId" : "575d4c3f2cf3d6dc3ed83156"
+                }
+            ]
+        }
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83156"), 
+    "docType" : "object", 
+    "name" : "Update Paragraph Page", 
+    "description" : "<p>Update paragraph page</p>", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Properties", 
+            "description" : "Pargraph Properties", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Praragraph Part Form"
+                }
+            ]
+        }
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315a"), 
+    "docType" : "object", 
+    "name" : "Client", 
+    "description" : "<p>The Neuralquest client</p>", 
+    "pageId" : "", 
+    "parentId" : "574237133c6d3cd598a5a30d", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "parentOrgId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315b"), 
+    "docType" : "object", 
+    "name" : "ACME Bicycle Shop", 
+    "description" : "<p>The ACME Bicycle Shop</p>", 
+    "pageId" : "", 
+    "parentId" : "5742439f3c6d3cd598a5a319"
+}
+{ 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315c"), 
+    "docType" : "object", 
+    "name" : "ACME Health Care Clinic", 
+    "description" : "<p>The ACME Health Care Clinic</p>", 
+    "pageId" : "", 
+    "parentId" : "574243d23c6d3cd598a5a31b"
+}
+{ 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314e"), 
+    "docType" : "object", 
+    "name" : "Resources Page", 
+    "description" : "<p>The resources page</p>", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Accordions", 
+    "tabs" : [
+        {
+            "name" : "Resources Tree", 
+            "description" : "This page provides an overview of users/organizations", 
+            "widgets" : [
+                {
+                    "displayType" : "Tree", 
+                    "name" : "Resources Tree", 
+                    "rootDocId" : "56f87bcc5dde184ccfb9fc70", 
+                    "viewId" : "575d4c3f2cf3d6dc3ed8314b", 
+                    "pageId" : "575d4c3f2cf3d6dc3ed8314c"
+                }
+            ]
+        }
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314f"), 
+    "docType" : "object", 
+    "name" : "Platoscave", 
+    "description" : "<p>Platos Cave user</p>", 
+    "pageId" : "575d4c3f2cf3d6dc3ed83147", 
+    "parentId" : "57343beb3c6d3cd598a5a2e7"
+}
+{ 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83153"), 
     "docType" : "object", 
     "name" : "Par 2", 
     "paragraphParts" : [
@@ -1420,10 +2028,11 @@
             }
         }
     ], 
-    "parentId" : "573435f03c6d3cd598a5a2e1"
+    "parentId" : "573435f03c6d3cd598a5a2e1", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("573797cb3c6d3cd598a5a2fd"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83154"), 
     "docType" : "object", 
     "name" : "Document Page", 
     "description" : "<p>The document page</p>", 
@@ -1437,843 +2046,64 @@
                 {
                     "displayType" : "Document", 
                     "name" : "Document Page", 
-                    "viewId" : "57019b3c5dde184ccfb9fc88"
+                    "viewId" : "575d4c3f2cf3d6dc3ed8314a"
                 }
             ]
         }, 
         {
             "name" : "Update", 
             "description" : "Document Page", 
-            "pageId" : "573a40e43c6d3cd598a5a2ff"
+            "pageId" : "575d4c3f2cf3d6dc3ed83155"
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74"
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("573a40e43c6d3cd598a5a2ff"), 
-    "docType" : "object", 
-    "name" : "Update Document Page", 
-    "description" : "<p>The document page</p>", 
-    "divider" : "Vertical", 
-    "accordionOrTab" : "Accordions", 
-    "tabs" : [
-        {
-            "name" : "Document Tree", 
-            "description" : "<p>Docuement owned by user/organizations</p>", 
-            "widgets" : [
-                {
-                    "displayType" : "Document", 
-                    "name" : "Document Tree", 
-                    "rootDocId" : "5737875b3c6d3cd598a5a2f3", 
-                    "viewId" : "57019b3c5dde184ccfb9fc88", 
-                    "pageId" : "573a45583c6d3cd598a5a301"
-                }
-            ]
-        }
-    ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74"
-}
-{ 
-    "_id" : ObjectId("573a45583c6d3cd598a5a301"), 
-    "docType" : "object", 
-    "name" : "Update Paragraph Page", 
-    "description" : "<p>Update paragraph page</p>", 
-    "divider" : "None", 
-    "accordionOrTab" : "Tabs", 
-    "tabs" : [
-        {
-            "name" : "Properties", 
-            "description" : "Pargraph Properties", 
-            "widgets" : [
-                {
-                    "displayType" : "TreeGrid", 
-                    "name" : "Praragrph TreeGrid", 
-                    "viewId" : "57019b3c5dde184ccfb9fc88"
-                }
-            ]
-        }
-    ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74"
-}
-{ 
-    "_id" : ObjectId("574225cb3c6d3cd598a5a305"), 
-    "docType" : "class", 
-    "title" : "Agreements", 
-    "description" : "<p>Agreements between owners</p>", 
-    "type" : "object", 
-    "properties" : {
-        "buyerId" : {
-            "title" : "Buyer", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "sellerId" : {
-            "title" : "Seller", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "assetId" : {
-            "title" : "Asset", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "stateHistory" : {
-            "title" : "State History", 
-            "readOnly" : true, 
-            "type" : "array", 
-            "items" : {
-                "type" : "string", 
-                "pattern" : "[a-f0-9]{24}"
-            }, 
-            "query" : {
-                "_id" : "56f87bcc5dde184ccfb9fc70", 
-                "association" : "history"
-            }, 
-            "minItems" : NumberInt(0), 
-            "uniqueItems" : true
-        }
-    }, 
-    "parentId" : "56f86c6a5dde184ccfb9fc6a"
-}
-{ 
-    "_id" : ObjectId("574232a53c6d3cd598a5a307"), 
-    "docType" : "class", 
-    "title" : "Membership", 
-    "description" : "<p>Menbership Agreements between user and organizations</p>", 
-    "type" : "object", 
-    "properties" : {
-        "userId" : {
-            "title" : "User", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "organizationId" : {
-            "title" : "Organization", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "organizationalUnitId" : {
-            "title" : "Organizational Unit", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }
-    }, 
-    "parentId" : "574225cb3c6d3cd598a5a305"
-}
-{ 
-    "_id" : ObjectId("574232b83c6d3cd598a5a309"), 
-    "docType" : "class", 
-    "title" : "Purchase", 
-    "description" : "<p>Purchase Agreements between owners</p>", 
-    "type" : "object", 
-    "properties" : {
-        "buyerId" : {
-            "title" : "Buyer", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "sellerId" : {
-            "title" : "Seller", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "assetId" : {
-            "title" : "Asset", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }
-    }, 
-    "parentId" : "574225cb3c6d3cd598a5a305"
-}
-{ 
-    "_id" : ObjectId("574234113c6d3cd598a5a30b"), 
-    "docType" : "class", 
-    "title" : "State History", 
-    "description" : "<p>State History</p>", 
-    "type" : "object", 
-    "properties" : {
-        "stateId" : {
-            "title" : "State", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "changeDate" : {
-            "title" : "Stamp", 
-            "type" : "string", 
-            "format" : "date-time"
-        }
-    }, 
-    "parentId" : "56f86c6a5dde184ccfb9fc6a"
-}
-{ 
-    "_id" : ObjectId("574237133c6d3cd598a5a30d"), 
-    "docType" : "class", 
-    "title" : "Organizational Units", 
-    "description" : "<p>Organizational units owned by organizations</p>", 
-    "type" : "object", 
-    "properties" : {
-        "pageId" : {
-            "title" : "Page Id", 
-            "readOnly" : true, 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "banner" : {
-            "title" : "Banner", 
-            "type" : "string"
-        }, 
-        "what" : {
-            "title" : "What", 
-            "type" : "string", 
-            "readOnly" : false, 
-            "maxLength" : NumberInt(100000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[What are you doing, how is it different?]</p>"
-        }, 
-        "why" : {
-            "title" : "Why", 
-            "type" : "string", 
-            "readOnly" : false, 
-            "maxLength" : NumberInt(100000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[Which opportunity are you taking advantage of?]</p>"
-        }, 
-        "how" : {
-            "title" : "How", 
-            "type" : "string", 
-            "readOnly" : false, 
-            "maxLength" : NumberInt(100000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[How are you doing it?]</p>"
-        }
-    }, 
-    "parentId" : "573435803c6d3cd598a5a2dd"
-}
-{ 
-    "_id" : ObjectId("574237d23c6d3cd598a5a30f"), 
-    "docType" : "object", 
-    "name" : "Server Page", 
-    "description" : "<p>Neuralquest server home page.</p>", 
-    "divider" : "None", 
-    "accordionOrTab" : "Tabs", 
-    "tabs" : [
-        {
-            "name" : "Home", 
-            "description" : "<p>Neuralquest home page.</p>", 
-            "widgets" : [
-                {
-                    "displayType" : "Home Page", 
-                    "name" : "Balance Sheet Form", 
-                    "viewId" : "570067985dde184ccfb9fc86"
-                }
-            ]
-        }, 
-        {
-            "name" : "Document", 
-            "description" : "Assets and Liabilities", 
-            "pageId" : "573445203c6d3cd598a5a2ed"
-        }, 
-        {
-            "name" : "Backlog", 
-            "description" : "Assets and Liabilities", 
-            "widgets" : [
-                {
-                    "displayType" : "Table", 
-                    "name" : "Home Page", 
-                    "viewId" : "570067985dde184ccfb9fc86"
-                }
-            ]
-        }, 
-        {
-            "name" : "Members", 
-            "description" : "Neuralquest Members", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Home Page", 
-                    "viewId" : "570067985dde184ccfb9fc86"
-                }
-            ]
-        }, 
-        {
-            "name" : "Balance Sheet", 
-            "description" : "Assets and Liabilities", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Balance Sheet Form", 
-                    "viewId" : "570067985dde184ccfb9fc86"
-                }
-            ]
-        }, 
-        {
-            "name" : "Resources", 
-            "description" : "Rsources owned by Neuralquest", 
-            "pageId" : "572e6f973c6d3cd598a5a2d9"
-        }
-    ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74"
-}
-{ 
-    "_id" : ObjectId("574237e13c6d3cd598a5a311"), 
-    "docType" : "object", 
-    "name" : "Client Page", 
-    "description" : "<p>Neuralquest client home page.</p>", 
-    "divider" : "None", 
-    "accordionOrTab" : "Tabs", 
-    "tabs" : [
-        {
-            "name" : "Home", 
-            "description" : "<p>Neuralquest home page.</p>", 
-            "widgets" : [
-                {
-                    "displayType" : "Home Page", 
-                    "name" : "Balance Sheet Form", 
-                    "viewId" : "570067985dde184ccfb9fc86"
-                }
-            ]
-        }, 
-        {
-            "name" : "Document", 
-            "description" : "Assets and Liabilities", 
-            "pageId" : "573445203c6d3cd598a5a2ed"
-        }, 
-        {
-            "name" : "Backlog", 
-            "description" : "Assets and Liabilities", 
-            "widgets" : [
-                {
-                    "displayType" : "Table", 
-                    "name" : "Home Page", 
-                    "viewId" : "570067985dde184ccfb9fc86"
-                }
-            ]
-        }, 
-        {
-            "name" : "Members", 
-            "description" : "Neuralquest Members", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Home Page", 
-                    "viewId" : "570067985dde184ccfb9fc86"
-                }
-            ]
-        }, 
-        {
-            "name" : "Balance Sheet", 
-            "description" : "Assets and Liabilities", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Balance Sheet Form", 
-                    "viewId" : "570067985dde184ccfb9fc86"
-                }
-            ]
-        }, 
-        {
-            "name" : "Resources", 
-            "description" : "Rsources owned by Neuralquest", 
-            "pageId" : "572e6f973c6d3cd598a5a2d9"
-        }
-    ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74"
-}
-{ 
-    "_id" : ObjectId("574239993c6d3cd598a5a315"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83159"), 
     "docType" : "object", 
     "name" : "Server", 
     "description" : "<p>The Neuralquest server</p>", 
-    "pageId" : "574237d23c6d3cd598a5a30f", 
-    "parentId" : "574237133c6d3cd598a5a30d"
+    "pageId" : "575d4c3f2cf3d6dc3ed83157", 
+    "parentId" : "574237133c6d3cd598a5a30d", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "parentOrgId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("574239b23c6d3cd598a5a317"), 
-    "docType" : "object", 
-    "name" : "Client", 
-    "description" : "<p>The Neuralquest client</p>", 
-    "pageId" : "574237e13c6d3cd598a5a311", 
-    "parentId" : "574237133c6d3cd598a5a30d"
-}
-{ 
-    "_id" : ObjectId("5742439f3c6d3cd598a5a319"), 
-    "docType" : "class", 
-    "title" : "Commercial", 
-    "description" : "<p>Comercial organizations</p>", 
-    "type" : "object", 
-    "properties" : {
-
-    }, 
-    "parentId" : "57343c283c6d3cd598a5a2e9"
-}
-{ 
-    "_id" : ObjectId("574243d23c6d3cd598a5a31b"), 
-    "docType" : "class", 
-    "title" : "Non-Profit", 
-    "description" : "<p>Non-profit organizations</p>", 
-    "type" : "object", 
-    "properties" : {
-
-    }, 
-    "parentId" : "57343c283c6d3cd598a5a2e9"
-}
-{ 
-    "_id" : ObjectId("574244ab3c6d3cd598a5a31d"), 
-    "docType" : "object", 
-    "name" : "ACME Bicycle Shop", 
-    "description" : "<p>The ACME Bicycle Shop</p>", 
-    "pageId" : "", 
-    "parentId" : "5742439f3c6d3cd598a5a319"
-}
-{ 
-    "_id" : ObjectId("5742454a3c6d3cd598a5a31f"), 
-    "docType" : "object", 
-    "name" : "ACME Health Care Clinic", 
-    "description" : "<p>The ACME Health Care Clinic</p>", 
-    "pageId" : "", 
-    "parentId" : "574243d23c6d3cd598a5a31b"
-}
-{ 
-    "_id" : ObjectId("57424f1b3c6d3cd598a5a321"), 
-    "docType" : "class", 
-    "title" : "Service", 
-    "description" : "<p>Service Agreements between owners</p>", 
-    "type" : "object", 
-    "properties" : {
-        "buyerId" : {
-            "title" : "Buyer", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "sellerId" : {
-            "title" : "Seller", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "assetId" : {
-            "title" : "Asset", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }
-    }, 
-    "parentId" : "574225cb3c6d3cd598a5a305"
-}
-{ 
-    "_id" : ObjectId("57424f7b3c6d3cd598a5a325"), 
-    "docType" : "class", 
-    "title" : "Rental", 
-    "description" : "<p>Rental Agreements between owners</p>", 
-    "type" : "object", 
-    "properties" : {
-        "buyerId" : {
-            "title" : "Buyer", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "sellerId" : {
-            "title" : "Seller", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "assetId" : {
-            "title" : "Asset", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }
-    }, 
-    "parentId" : "574225cb3c6d3cd598a5a305"
-}
-{ 
-    "_id" : ObjectId("5742561f3c6d3cd598a5a327"), 
-    "docType" : "class", 
-    "title" : "Current Assets", 
-    "description" : "<p>Current Assets owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "57343b823c6d3cd598a5a2e3"
-}
-{ 
-    "_id" : ObjectId("574256343c6d3cd598a5a329"), 
-    "docType" : "class", 
-    "title" : "Petty Cash", 
-    "description" : "<p>Petty Cash owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742561f3c6d3cd598a5a327"
-}
-{ 
-    "_id" : ObjectId("574256373c6d3cd598a5a32b"), 
-    "docType" : "class", 
-    "title" : "Temporary Investments", 
-    "description" : "<p>Temporary Investments owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742561f3c6d3cd598a5a327"
-}
-{ 
-    "_id" : ObjectId("5742563a3c6d3cd598a5a32d"), 
-    "docType" : "class", 
-    "title" : "Accounts Receivible -net", 
-    "description" : "<p>Accounts Receivible -net owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742561f3c6d3cd598a5a327"
-}
-{ 
-    "_id" : ObjectId("5742563e3c6d3cd598a5a32f"), 
-    "docType" : "class", 
-    "title" : "Inventory", 
-    "description" : "<p>Inventory owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742561f3c6d3cd598a5a327"
-}
-{ 
-    "_id" : ObjectId("574256413c6d3cd598a5a331"), 
-    "docType" : "class", 
-    "title" : "Supplies", 
-    "description" : "<p>Supplies owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742561f3c6d3cd598a5a327"
-}
-{ 
-    "_id" : ObjectId("574256453c6d3cd598a5a333"), 
-    "docType" : "class", 
-    "title" : "Prepaid Insurance", 
-    "description" : "<p>Prepaid Insurance owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742561f3c6d3cd598a5a327"
-}
-{ 
-    "_id" : ObjectId("574256493c6d3cd598a5a335"), 
-    "docType" : "class", 
-    "title" : "Investments", 
-    "description" : "<p>Investments owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "57343b823c6d3cd598a5a2e3"
-}
-{ 
-    "_id" : ObjectId("5742564c3c6d3cd598a5a337"), 
-    "docType" : "class", 
-    "title" : "Property, Plant and Equipment", 
-    "description" : "<p>Property, Plant and Equipment owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "57343b823c6d3cd598a5a2e3"
-}
-{ 
-    "_id" : ObjectId("5742564f3c6d3cd598a5a339"), 
-    "docType" : "class", 
-    "title" : "Land", 
-    "description" : "<p>Land owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742564c3c6d3cd598a5a337"
-}
-{ 
-    "_id" : ObjectId("574256573c6d3cd598a5a33d"), 
-    "docType" : "class", 
-    "title" : "Land Improvements", 
-    "description" : "<p>Land Improvements owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742564c3c6d3cd598a5a337"
-}
-{ 
-    "_id" : ObjectId("5742565b3c6d3cd598a5a33f"), 
-    "docType" : "class", 
-    "title" : "Buildings", 
-    "description" : "<p>Buildings owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742564c3c6d3cd598a5a337"
-}
-{ 
-    "_id" : ObjectId("5742565e3c6d3cd598a5a341"), 
-    "docType" : "class", 
-    "title" : "Equipment", 
-    "description" : "<p>Equipment owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742564c3c6d3cd598a5a337"
-}
-{ 
-    "_id" : ObjectId("574256613c6d3cd598a5a343"), 
-    "docType" : "class", 
-    "title" : "Less: Accum Deprecation", 
-    "description" : "<p>Less: Accum Deprecation owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742564c3c6d3cd598a5a337"
-}
-{ 
-    "_id" : ObjectId("574256643c6d3cd598a5a345"), 
-    "docType" : "class", 
-    "title" : "Intangible Assets", 
-    "description" : "<p>Intangible Assets owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "57343b823c6d3cd598a5a2e3"
-}
-{ 
-    "_id" : ObjectId("5742566a3c6d3cd598a5a349"), 
-    "docType" : "class", 
-    "title" : "Goodwill", 
-    "description" : "<p>Goodwill owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "574256643c6d3cd598a5a345"
-}
-{ 
-    "_id" : ObjectId("574256713c6d3cd598a5a34d"), 
-    "docType" : "class", 
-    "title" : "Trade Names", 
-    "description" : "<p>Trade Names owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "574256643c6d3cd598a5a345"
-}
-{ 
-    "_id" : ObjectId("574256743c6d3cd598a5a34f"), 
-    "docType" : "class", 
-    "title" : "Current Libilities", 
-    "description" : "<p>Current Libilities owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "57343bba3c6d3cd598a5a2e5"
-}
-{ 
-    "_id" : ObjectId("574256773c6d3cd598a5a351"), 
-    "docType" : "class", 
-    "title" : "Notes Payable", 
-    "description" : "<p>Notes Payable owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "574256743c6d3cd598a5a34f"
-}
-{ 
-    "_id" : ObjectId("5742567a3c6d3cd598a5a353"), 
-    "docType" : "class", 
-    "title" : "Accounts Payable", 
-    "description" : "<p>Accounts Payable owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "574256743c6d3cd598a5a34f"
-}
-{ 
-    "_id" : ObjectId("5742567d3c6d3cd598a5a355"), 
-    "docType" : "class", 
-    "title" : "Wages Payable", 
-    "description" : "<p>Wages Payable owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "574256743c6d3cd598a5a34f"
-}
-{ 
-    "_id" : ObjectId("574256833c6d3cd598a5a359"), 
-    "docType" : "class", 
-    "title" : "Intrest Payable", 
-    "description" : "<p>Intrest Payable owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "574256743c6d3cd598a5a34f"
-}
-{ 
-    "_id" : ObjectId("574256863c6d3cd598a5a35b"), 
-    "docType" : "class", 
-    "title" : "Taxes Payable", 
-    "description" : "<p>Taxes Payable owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "574256743c6d3cd598a5a34f"
-}
-{ 
-    "_id" : ObjectId("574256893c6d3cd598a5a35d"), 
-    "docType" : "class", 
-    "title" : "Waranty Liability", 
-    "description" : "<p>Waranty Liability owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "574256743c6d3cd598a5a34f"
-}
-{ 
-    "_id" : ObjectId("5742568e3c6d3cd598a5a35f"), 
-    "docType" : "class", 
-    "title" : "Unearned Revenues", 
-    "description" : "<p>Unearned Revenues owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "574256743c6d3cd598a5a34f"
-}
-{ 
-    "_id" : ObjectId("574256923c6d3cd598a5a361"), 
-    "docType" : "class", 
-    "title" : "Long-Term Libilities", 
-    "description" : "<p>Long-Term Libilities owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "57343bba3c6d3cd598a5a2e5"
-}
-{ 
-    "_id" : ObjectId("574261583c6d3cd598a5a363"), 
-    "docType" : "class", 
-    "title" : "Notes Payable", 
-    "description" : "<p>Notes Payable owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "574256923c6d3cd598a5a361"
-}
-{ 
-    "_id" : ObjectId("574261633c6d3cd598a5a365"), 
-    "docType" : "class", 
-    "title" : "Bonds Payable", 
-    "description" : "<p>Bonds Payable owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "574256923c6d3cd598a5a361"
-}
-{ 
-    "_id" : ObjectId("5742616e3c6d3cd598a5a367"), 
-    "docType" : "class", 
-    "title" : "Stockholder's Equity", 
-    "description" : "<p>Stockholder's Equity owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "57343bba3c6d3cd598a5a2e5"
-}
-{ 
-    "_id" : ObjectId("574261743c6d3cd598a5a369"), 
-    "docType" : "class", 
-    "title" : "Common Stock", 
-    "description" : "<p>Common Stock owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742616e3c6d3cd598a5a367"
-}
-{ 
-    "_id" : ObjectId("574261793c6d3cd598a5a36b"), 
-    "docType" : "class", 
-    "title" : "Retained Earnings", 
-    "description" : "<p>Retained Earnings owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742616e3c6d3cd598a5a367"
-}
-{ 
-    "_id" : ObjectId("5742617f3c6d3cd598a5a36d"), 
-    "docType" : "class", 
-    "title" : "Accum Other Comprehensive Income", 
-    "description" : "<p>Accum Other Comprehensive Income owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742616e3c6d3cd598a5a367"
-}
-{ 
-    "_id" : ObjectId("574261843c6d3cd598a5a36f"), 
-    "docType" : "class", 
-    "title" : "Less: Treasury Stock", 
-    "description" : "<p>Less: Treasury Stock owned by users/organizations</p>", 
-    "type" : "object", 
-    "parentId" : "5742616e3c6d3cd598a5a367"
-}
-{ 
-    "_id" : ObjectId("5745eaa53c6d3cd598a5a371"), 
-    "docType" : "class", 
-    "title" : "States", 
-    "description" : "<p>States</p>", 
-    "type" : "object", 
-    "parentId" : "573435803c6d3cd598a5a2dd"
-}
-{ 
-    "_id" : ObjectId("574724823c6d3cd598a5a373"), 
-    "docType" : "class", 
-    "title" : "Open", 
-    "description" : "<p>Open</p>", 
-    "type" : "object", 
-    "parentId" : "5745eaa53c6d3cd598a5a371"
-}
-{ 
-    "_id" : ObjectId("574724b43c6d3cd598a5a375"), 
-    "docType" : "class", 
-    "title" : "Closed", 
-    "description" : "<p>Closed</p>", 
-    "type" : "object", 
-    "parentId" : "5745eaa53c6d3cd598a5a371"
-}
-{ 
-    "_id" : ObjectId("5747251e3c6d3cd598a5a377"), 
-    "docType" : "class", 
-    "title" : "Buyer", 
-    "description" : "<p>Buyer</p>", 
-    "type" : "object", 
-    "parentId" : "574724823c6d3cd598a5a373"
-}
-{ 
-    "_id" : ObjectId("5747254b3c6d3cd598a5a379"), 
-    "docType" : "class", 
-    "title" : "Seller", 
-    "description" : "<p>Seller</p>", 
-    "type" : "object", 
-    "parentId" : "574724823c6d3cd598a5a373"
-}
-{ 
-    "_id" : ObjectId("574725673c6d3cd598a5a37b"), 
-    "docType" : "class", 
-    "title" : "Rejected", 
-    "description" : "<p>Rejected</p>", 
-    "type" : "object", 
-    "parentId" : "574724b43c6d3cd598a5a375"
-}
-{ 
-    "_id" : ObjectId("574725843c6d3cd598a5a37d"), 
-    "docType" : "class", 
-    "title" : "Fulfilled", 
-    "description" : "<p>Fulfilled</p>", 
-    "type" : "object", 
-    "parentId" : "574724b43c6d3cd598a5a375"
-}
-{ 
-    "_id" : ObjectId("574726f43c6d3cd598a5a37f"), 
-    "docType" : "class", 
-    "title" : "Withdrawn", 
-    "description" : "<p>Withdrawn</p>", 
-    "type" : "object", 
-    "parentId" : "574724b43c6d3cd598a5a375"
-}
-{ 
-    "_id" : ObjectId("5749751d3c6d3cd598a5a383"), 
+    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315d"), 
     "docType" : "object", 
     "name" : "Oganizational Unit View", 
     "description" : "<p>Descibes the organizational unit hierarchy, including a children array</p>", 
     "type" : "object", 
-    "filter" : {
-        "type" : "in", 
-        "args" : [
-            "_id", 
-            "subUnits"
-        ]
-    }, 
-    "childrenFilter" : {
-        "type" : "and", 
-        "args" : [
+    "query" : {
+        "and" : [
             {
-                "type" : "in", 
-                "args" : [
-                    "$selectedObj._id", 
-                    "owns"
-                ]
+                "isA" : "574237133c6d3cd598a5a30d"
             }, 
             {
-                "type" : "in", 
-                "args" : [
-                    "_id", 
-                    "subUnits"
-                ]
+                "in" : {
+                    "_id" : "subUnits"
+                }
             }
         ]
     }, 
+    "childrenQuery" : {
+        "eq" : {
+            "parentOrgId" : "_id"
+        }
+    }, 
     "properties" : {
         "icon" : {
-            "title" : "Icon", 
-            "type" : "string"
+            "readOnly" : false
         }, 
         "subUnits" : {
-            "label" : "Subclasses", 
-            "readOnly" : false, 
-            "items" : {
-                "type" : "string", 
-                "maxLength" : NumberInt(1000), 
-                "pattern" : "[a-f0-9]{24}"
-            }, 
-            "query" : {
-                "_id" : "560b1407434ec958241693e8", 
-                "association" : "ordered"
-            }, 
-            "type" : "array", 
-            "minItems" : NumberInt(0), 
-            "uniqueItems" : true
+            "readOnly" : false
         }
     }, 
     "required" : [
         "_id", 
         "name"
     ], 
-    "parentId" : "573435c23c6d3cd598a5a2df"
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }

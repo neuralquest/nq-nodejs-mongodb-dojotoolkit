@@ -23,7 +23,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
 			this.pane.destroyDescendants(false);//destroy all the widget but leave the pane intact
 			//load the data
 			self.store.get(id).then(function(obj){
-				self.generateNextLevelContents(obj, 1, null, false).then(function(obj){
+				when(self.generateNextLevelContents(obj, 1, null, false), function(obj){
 					//registry.byId('tab'+self.tabId).resize();
 					self.pane.resize();
 				});
@@ -66,7 +66,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
                 });
                 if(paragraphContent) domConstruct.place(paragraphContent, divDom, 'last');
             }
-			var childrenFilter = this.store.buildFilter(item, this.schema.childrenFilter);
+			var childrenFilter = this.store.buildFilterFromQuery(item, this.schema.childrenQuery);
 			if(childrenFilter){
 				var childrenCollection = this.store.filter(childrenFilter);
 				childrenCollection.on('update', function(event){

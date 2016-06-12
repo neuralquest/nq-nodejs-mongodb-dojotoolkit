@@ -1,5 +1,5 @@
-define(['dojo/_base/declare', "app/nqWidgetBase"],
-    function(declare, nqWidgetBase){
+define(['dojo/_base/declare', "app/nqWidgetBase","dojo/when"],
+    function(declare, nqWidgetBase, when){
         return declare("nqForm", [nqWidgetBase],{
             postCreate: function(){
                 this.inherited(arguments);
@@ -17,7 +17,7 @@ define(['dojo/_base/declare', "app/nqWidgetBase"],
                 });
                 docCol.fetch().then(function(docsArr){
                     var doc = docsArr[0];
-                    self.store.updateAllowed(doc).then(function(updateAllowed){
+                    when(self.store.updateAllowed(doc), function(updateAllowed){
                         self.schema.updateAllowed = updateAllowed;
                         self.setFromValues(self.schema.properties, doc, self.pane.containerNode);
                     });

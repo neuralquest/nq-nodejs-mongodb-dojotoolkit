@@ -5,8 +5,9 @@ define([
 	"dojo/Deferred",
 	"dojo/_base/lang", // lang.hitch
 	"dojo/when",
+    "dojo/promise/all",
 	"dijit/Destroyable"
-], function(array, aspect, declare, Deferred, lang, when, Destroyable){
+], function(array, aspect, declare, Deferred, lang, when, all, Destroyable){
 
 	// module:
 	//		dijit/tree/ObjectStoreModel
@@ -92,15 +93,7 @@ define([
 		},
 
 		mayHaveChildren: function(item){
-            /*if(this.view && this.view.childrenFilter) {
-                var docFilter = this.view.childrenFilter;
-                var childrenFilter = this.store.buildFilter(item, docFilter);
-                var childrenCollection = this.store.filter(childrenFilter);
-                childrenCollection.fetch().then(function(childObjects){
-                    if(childObjects.length>0) return true;
-                });
-            }*/
-			return true;
+			return item.hasChildren;
 		},
 
 		getChildren: function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
@@ -109,15 +102,54 @@ define([
 			// parentItem:
 			//		Item from the dojo/store
             var self = this;
+
+            if(this.schema && this.schema.childrenQuery){
+                var docFilter = this.schema.childrenQuery;
+                var childrenFilter = this.store.buildFilterFromQuery(parentItem, docFilter);
+                var childrenCollection = this.store.filter(childrenFilter);
+                /*childrenCollection.fetch().then(function(childObjects){
+                    //onComplete(childObjects);
+                    console.log('NEW of', parentItem.title ? parentItem.title : parentItem.name, childrenFilter);
+                    console.dir(childObjects);
+                });*/
+                childrenCollection.on('remove, add', function(event){
+                    var parent = event.parent;
+                    var collection = self.childrenCache[parent.id];
+                    if(collection){
+                        var children = collection.fetch();
+                        self.onChildrenChange(parent, children);
+                    }
+                });
+                childrenCollection.on('update', function(event){
+                    var obj = event.target;
+                    self.onChange(obj);
+                });
+                childrenCollection.fetch().then(function(childObjects){
+                    var grandChildrenPromises = [];
+                    childObjects.forEach(function(childObj){
+                        var grandChildrenFilter = self.store.buildFilterFromQuery(childObj, docFilter);
+                        var grandChildrenCollection = self.store.filter(grandChildrenFilter);
+                        grandChildrenPromises.push(grandChildrenCollection.fetch().then(function(grandChildrenObjects){
+                            if(grandChildrenObjects.length>0) childObj.hasChildren = true;
+                            return true;
+                        }));
+                    });
+                    all(grandChildrenPromises).then(function(res){
+                        onComplete(childObjects);
+                    });
+                });
+            }
+
+/*
             if(this.schema && this.schema.childrenFilter){
                 var docFilter = this.schema.childrenFilter;
                 var childrenFilter = this.store.buildFilter(parentItem, docFilter);
                 var childrenCollection = this.store.filter(childrenFilter);
-                /*childrenCollection.fetch().then(function(childObjects){
+                childrenCollection.fetch().then(function(childObjects){
                     //onComplete(childObjects);
-                    console.log('childObjects of', parentItem.title ? parentItem.title : parentItem.name, childrenFilter);
+                    console.log('OLD of', parentItem.title ? parentItem.title : parentItem.name, childrenFilter);
                     console.dir(childObjects);
-                });*/
+                });
                 childrenCollection.on('remove, add', function(event){
                     var parent = event.parent;
                     var collection = self.childrenCache[parent.id];
@@ -137,7 +169,7 @@ define([
                     onComplete(childObjects);
                 });
             }
-
+*/
             /*
              recordStoreFilter= new recordStore.Filter()
              name1Filter= recordStoreFilter.eq({'name': 'Name1'})

@@ -80,13 +80,15 @@ function cleanup(){
         var classPromises = [];
         var results = [];
         objectssArr.forEach(function(objDoc) {
-            results.push(objDoc._id);
+            delete objDoc._id;
+            Documents.insert(objDoc);
+            //results.push(objDoc._id);
         });
-        Documents.findById("570064645dde184ccfb9fc84").then(function(nqObj){
+        /*Documents.findById("570064645dde184ccfb9fc84").then(function(nqObj){
             nqObj.owns = results;
             console.log(nqObj);
             Documents.update(nqObj);
-        });
+        });*/
         return true;
     });
 

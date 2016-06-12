@@ -72,6 +72,9 @@ function(declare, lang, array, when, all, registry,
                         this.cachingStore.put(parentObj);
                     }
                 }
+                if(directives.ownerId){
+                    item.ownerId = directives.ownerId;
+                }
             }
             this.cachingStore.add(item);
             //this.processDirectives(item, directives);
@@ -228,7 +231,61 @@ function(declare, lang, array, when, all, registry,
         getSubclasses: function(id) {
 
         },
-        buildFilter: function(parentObj, docFilter) {
+        buildFilterFromQuery: function(parentObj, docQuery) {
+            var self = this;
+            for(var filterType in docQuery){
+                var docFilter = docQuery[filterType];
+                switch (filterType) {
+                    case 'eq':
+                        for(var key in docFilter){
+                            var propName = docFilter[key];
+                            var value = parentObj[propName];
+                            return self.Filter().eq(key, value);
+                        }
+                        break;
+                    case 'and':
+                        var firstDocQuery = docFilter[0];
+                        var secondDocQuery = docFilter[1];
+                        var firstFilter = this.buildFilterFromQuery(parentObj, firstDocQuery);
+                        var secondFilter = this.buildFilterFromQuery(parentObj, secondDocQuery);
+                        if (firstFilter && secondFilter) return self.Filter().and(firstFilter, secondFilter);
+                        break;
+                    case 'or':
+                        var firstDocQuery = docFilter[0];
+                        var secondDocQuery = docFilter[1];
+                        var firstFilter = this.buildFilterFromQuery(parentObj, firstDocQuery);
+                        var secondFilter = this.buildFilterFromQuery(parentObj, secondDocQuery);
+                        if (firstFilter && secondFilter) return self.Filter().or(firstFilter, secondFilter);
+                        if (firstFilter) return firstFilter;
+                        if (secondFilter) return secondFilter;
+                        break;
+                    case 'in':
+                        for(var key in docFilter){
+                            var idArrName = docFilter[key];
+                            var idArr = parentObj[idArrName];
+                            if(!idArr) return;
+                            return this.Filter().in(key, idArr);
+                        }
+                        break;
+                    case 'isA':
+                        return this.Filter(function (obj) {
+                            if(obj.docType == 'class') return false;
+                            var classId = docFilter[key];
+                            return self.isASync(obj, classId);
+                        });
+                        break;
+                    case 'view':
+                        var subView = this.cachingStore.getSync(docFilter);
+                        if (subView && subView.childrenQuery) {
+                            return this.buildFilterFromQuery(parentObj, subView.childrenQuery);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        },
+        /*buildFilter: function(parentObj, docFilter) {
             var self = this;
             var filterType = docFilter.type;
             switch (filterType) {
@@ -282,64 +339,10 @@ function(declare, lang, array, when, all, registry,
                 default:
                     break;
             }
-        },
-        getFilterValue: function(docFilter, filterType) {
-            var self = this;
-            var filterType = docFilter.type;
-            switch (filterType) {
-                case 'eq':
-                    var key = docFilter.args[0];
-                    var propName = docFilter.args[1];
-                    var value = parentObj[propName];
-                    return self.Filter().eq(key, value);
-                    break;
-                case 'and':
-                    var firstDocFilter = docFilter.args[0];
-                    var secondDocFilter = docFilter.args[1];
-                    var firstFilter = this.buildFilter(parentObj, firstDocFilter);
-                    var secondFilter = this.buildFilter(parentObj, secondDocFilter);
-                    if(firstFilter && secondFilter) return self.Filter().and(firstFilter, secondFilter);
-                    break;
-                case 'or':
-                    var firstDocFilter = docFilter.args[0];
-                    var secondDocFilter = docFilter.args[1];
-                    var firstFilter = this.buildFilter(parentObj, firstDocFilter);
-                    var secondFilter = this.buildFilter(parentObj, secondDocFilter);
-                    if(firstFilter && secondFilter) return self.Filter().or(firstFilter, secondFilter);
-                    if(firstFilter) return firstFilter;
-                    if(secondFilter) return secondFilter;
-                    break;
-                case 'in':
-                    var foreignKey = docFilter.args[0];
-                    var idArrName = docFilter.args[1];
-                    if(idArrName.substr(0,1) == '$'){
-                        debugger;
-                    }
-                    var idArr = parentObj[idArrName];
-                    if(!idArr) return;
-                    return this.Filter().in(foreignKey, idArr);
-                    break;
-                case 'isA':
-                    return this.Filter(function(obj){
-                        if(obj.docType == 'class') return false;
-                        var classId = docFilter.args[0];
-                        return self.isASync(obj, classId);
-                    });
-                    break;
-                case 'view':
-                    var subViewId = docFilter.args[0];
-                    var subView = this.cachingStore.getSync(subViewId);
-                    if(subView  && subView.filter){
-                        var subViewFilter = subView.filter;
-                        return this.buildFilter(parentObj, subViewFilter);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        },
+        },*/
         updateAllowed: function(doc){
-            var userId = "570064645dde184ccfb9fc84";
+            return true;
+            var userId = "575d4c3f2cf3d6dc3ed83148";
             var ownerFilter = this.Filter().contains('owns', [doc._id]);
             var ownerCollection = this.filter(ownerFilter);
             return ownerCollection.fetch().then(function(owners){
