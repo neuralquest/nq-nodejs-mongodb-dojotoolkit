@@ -6,7 +6,9 @@ function(declare, lang, array, when, all, registry,
     return declare("nqDocStore", [RequestMemory], {
         target: '/documents',
         idProperty: '_id',
+        autoEmitEvents: false,
         constructor: function () {
+
             this.root = this;
             this.cachingStore.getChildren = function(parent){
                 var filter = {};
@@ -44,6 +46,7 @@ function(declare, lang, array, when, all, registry,
             }
         },
         add: function (_item, directives) {
+            var self = this;
             this.enableTransactionButtons();
             var item = {};
             if(_item) item = _item;
@@ -58,7 +61,6 @@ function(declare, lang, array, when, all, registry,
                 if(directives.schema.query && 'isA' in directives.schema.query){
                     var mapsToId = directives.schema.query['isA'];
                     item.parentId = mapsToId;
-                    if(mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
                 }
                 else if(directives.schema.query && 'and' in directives.schema.query){
                     var queryArray = directives.schema.query['and'];
@@ -67,38 +69,55 @@ function(declare, lang, array, when, all, registry,
                     else if('isA' in queryArray[1]) mapsToId = queryArray[0]['isA'];
                     item.parentId = mapsToId;
                 }
-                if(directives.schema.childrenQuery){
-                    var docFilter = directives.schema.childrenQuery;
-                    if(docFilter.type == 'in') {
-                        var key = docFilter.args[0];
-                        var arrayName = docFilter.args[1];
+                this.cachingStore.add(item, directives);
+
+                if(directives.schema.childrenQuery && 'in' in directives.schema.childrenQuery){
+                    var inObj = directives.schema.childrenQuery['in'];
+                    for(var key in inObj){
+                        var arrayName = inObj[key];
                         var parentObj = this.cachingStore.getSync(directives.parentId);
                         var fkArray = parentObj[arrayName];
                         if(!fkArray) fkArray = [];
                         fkArray.push(item[key]);
                         parentObj[arrayName] = fkArray;
-                        this.cachingStore.put(parentObj);
+                        //parentObj.hasChildren = true;
+                        this.put(parentObj).then(function(){
+                            self.emit('update', {target:item, directives:directives});
+                        });
                     }
+                }
+                else if(directives.schema.childrenQuery && 'and' in directives.schema.childrenQuery){
+                    var queryArray = directives.schema.childrenQuery['and'];
+                    debugger;
+                    var arrayName = null;
+                    if('in' in queryArray[0]) arrayName = queryArray[0]['in'];
+                    else if('in' in queryArray[1]) arrayName = queryArray[0]['in'];
+                    var parentObj = this.cachingStore.getSync(directives.parentId);
+                    var fkArray = parentObj[arrayName];
+                    if(!fkArray) fkArray = [];
+                    fkArray.push(item[key]);
+                    parentObj[arrayName] = fkArray;
+                    this.cachingStore.put(parentObj);
                 }
                 if(directives.ownerId){
                     item.ownerId = directives.ownerId;
                 }
             }
-            this.cachingStore.add(item);
             //this.processDirectives(item, directives);
             //this.emit('add', {target:item, directives:directives});
+            return item;
         },
-        put: function (item, directives) {
+        Xput: function (item, directives) {
             this.enableTransactionButtons();
-            if(!directives.viewId) directives.viewId = item._viewId;//TODO pastItem should send viewID in directives
-            this.itemsColl.put(item, directives);
-            this.processDirectives(item, directives);
-            //this.emit('update', {target:item, directives:directives});
+            //if(!directives.viewId) directives.viewId = item._viewId;//TODO pastItem should send viewID in directives
+            //this.processDirectives(item, directives);
+            this.cachingStore.put(item, directives);
+            this.emit('update', {target:item, directives:directives});
         },
         remove: function (item, directives) {
             this.enableTransactionButtons();
-            if(directives) this.processDirectives(item, directives);
-            this.itemsColl.remove(item._id, directives);
+            //if(directives) this.processDirectives(item, directives);
+            //this.itemsColl.remove(item._id, directives);
             this.emit('remove', {target:item, directives:directives});
         },
         processDirectives: function(object, directives){

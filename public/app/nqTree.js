@@ -32,7 +32,8 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 getLabel: function(item){
                     if(!item) return 'no item';
                     if(item.docType == 'class') return item.title;
-                    return item.name;
+                    if(item.name) return item.name;
+                    return '[unnamed]';
                 },
 				getIconClass: function(item, opened){
 					if(!item) return 'icondefault';
@@ -165,7 +166,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
         },
 		createMenusForWidget: function(){
 			var self = this;
-            var parentMenu = new Menu({targetNodeIds: [this.pane.containerNode], selector: ".css" + self.schema._id});
+            var parentMenu = new Menu({targetNodeIds: [this.pane.containerNode], selector: ".css" + self.schema._id});//selector: '.dijitTreeNode'
             //this.parentMenu = parentMenu;
             //var parentMenu = new Menu({targetNodeIds: [self.tree.domNode], selector: ".css"+viewId});
             var addMenu = new Menu({parentMenu: parentMenu});
@@ -175,10 +176,10 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 //popup: addMenu,
                // viewId: viewId,
                 onClick: function(evt){
-                    var node = this.getParent().currentTarget;
-                    var target = dijit.getEnclosingWidget(evt.target);
-                    var tn = dijit.byNode(this.getParent().currentTarget);
-                    var selectedItem = tn.item;
+                    //var node = this.getParent().currentTarget;
+                    //var target = dijit.getEnclosingWidget(evt.target);
+                    //var tn = dijit.byNode(this.getParent().currentTarget);
+                    //var selectedItem = tn.item;
                     var selectedItem = self.tree.get("selectedItem");
                     var directives = {parentId: selectedItem._id, ownerId: self.rootDocId, schema: self.schema};
                     var newObj = self.store.add(null, directives);

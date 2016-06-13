@@ -69,38 +69,29 @@ define([
 		// Methods for traversing hierarchy
 
 		getRoot: function(onItem, onError){
-			// summary:
-			//
+            var self = this;
 			var collection = this.store.filter(this.query);
-			collection.on('remove, add', function(event){
-				var parent = event.parent;
+			/*collection.on('remove, add', function(event){
+				var parent = event.target;
 				var collection = self.childrenCache[parent.id];
 				if(collection){
 					var children = collection.fetch();
 					self.onChildrenChange(parent, children);
 				}
-			});
+			});*/
 			collection.on('update', function(event){
+                //TODO the tree cookie screws hasChildren so we dont get auto expand
 				var obj = event.target;
 				self.onChange(obj);
 			});
-			var children = collection.fetch();
-            var root = null;
-            children.forEach(function (item) {
-                root = item;//we expect only one
+			collection.fetch().then(function(children){
+                onItem(children[0]);//we expect only one
             });
-			onItem(root);
 		},
-
 		mayHaveChildren: function(item){
 			return item.hasChildren;
 		},
-
 		getChildren: function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
-			// summary:
-			//		Calls onComplete() with array of child items of given parent item.
-			// parentItem:
-			//		Item from the dojo/store
             var self = this;
 
             if(this.schema && this.schema.childrenQuery){
@@ -108,23 +99,6 @@ define([
                 var childrenFilter = this.store.buildFilterFromQuery(parentItem, docFilter);
                 if(childrenFilter) {
                     var childrenCollection = this.store.filter(childrenFilter);
-                    /*childrenCollection.fetch().then(function(childObjects){
-                     //onComplete(childObjects);
-                     console.log('NEW of', parentItem.title ? parentItem.title : parentItem.name, childrenFilter);
-                     console.dir(childObjects);
-                     });*/
-                    childrenCollection.on('remove, add', function (event) {
-                        var parent = event.parent;
-                        var collection = self.childrenCache[parent.id];
-                        if (collection) {
-                            var children = collection.fetch();
-                            self.onChildrenChange(parent, children);
-                        }
-                    });
-                    childrenCollection.on('update', function (event) {
-                        var obj = event.target;
-                        self.onChange(obj);
-                    });
                     childrenCollection.fetch().then(function (childObjects) {
                         var grandChildrenPromises = [];
                         childObjects.forEach(function (childObj) {
@@ -136,7 +110,6 @@ define([
                                     return true;
                                 }));
                             }
-                            //else return true;
                         });
                         all(grandChildrenPromises).then(function (res) {
                             onComplete(childObjects);

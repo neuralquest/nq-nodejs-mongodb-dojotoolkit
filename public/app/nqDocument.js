@@ -20,19 +20,28 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
 			if(id.length == 0) return;
 			var self = this;
 			//Clear the page
-			this.pane.destroyDescendants(false);//destroy all the widget but leave the pane intact
+			this.pane.destroyDescendants(false);//destroy all the widgets but leave the pane intact
 			//load the data
-			self.store.get(id).then(function(obj){
-				when(self.generateNextLevelContents(obj, 1, null, false), function(obj){
-					//registry.byId('tab'+self.tabId).resize();
-					self.pane.resize();
-				});
-			}, nq.errorDialog);
+            var collection = this.store.filter({_id: id});
+
+            collection.fetch().then(function(children){
+                when(self.generateNextLevelContents(children[0], 1, null, false), function(obj){
+                    //registry.byId('tab'+self.tabId).resize();
+                    self.pane.resize();
+                });
+            });
+            collection.on('update', function(event){
+                var obj = event.target;
+                self.pane.destroyDescendants(false);//destroy all the widgets but leave the pane intact
+                when(self.generateNextLevelContents(obj, 1, null, false), function(obj){
+                    //registry.byId('tab'+self.tabId).resize();
+                    self.pane.resize();
+                });
+            });
 		},
 		//Create an ordinary HTML page recursively by obtaining data from the server
 		generateNextLevelContents: function(item, headerLevel, parentId, previousParagraphHasRightFloat){
 			var self = this;
-            //Header
             var divDom = domConstruct.create(
                 'div',
                 {
@@ -45,9 +54,26 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
                 this.pane.containerNode);
 
 			//Header
+            var headerText = item.name?item.name:'[unnamed]';
+            if(true == true){
+                var textDijit = new ValidationTextBox({
+                    item: item,
+                    'type': 'text',
+                    'trim': true,
+                    'value': headerText,
+                    //'style':{width:'90%','background': 'rgba(250, 250, 121, 0.28)', 'border-style': 'none'},//rgba(0,0,255,0.04)
+                    'style':{width:'90%'},
+                    'placeHolder': 'Paragraph Header',
+                    'onChange': function(evt){
+                        item[self.name] = textDijit.get('value');
+                        self.store.put(item);
+                    }
+                }, domConstruct.create('h'+headerLevel));
+                divDom.appendChild(textDijit.domNode);
+            }
 			domConstruct.create(
 				'h'+headerLevel,
-				{innerHTML: item.name, style: {'clear': previousParagraphHasRightFloat?'both':'none'}},
+				{innerHTML: headerText, style: {'clear': previousParagraphHasRightFloat?'both':'none'}},
                 divDom
 			);
             if(item.paragraphParts){
@@ -69,11 +95,11 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
 			var childrenFilter = this.store.buildFilterFromQuery(item, this.schema.childrenQuery);
 			if(childrenFilter){
 				var childrenCollection = this.store.filter(childrenFilter);
-				childrenCollection.on('update', function(event){
+				/*childrenCollection.on('update', function(event){
 					var obj = event.target;
 					alert('doc change');
 					//self.onChange(obj);
-				});
+				});*/
 				var childDocPromises = [];
 				childrenCollection.forEach(function(childItem){
 					var previousParagraphHasRightFloat = false;
