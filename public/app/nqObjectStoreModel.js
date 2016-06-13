@@ -106,70 +106,46 @@ define([
             if(this.schema && this.schema.childrenQuery){
                 var docFilter = this.schema.childrenQuery;
                 var childrenFilter = this.store.buildFilterFromQuery(parentItem, docFilter);
-                var childrenCollection = this.store.filter(childrenFilter);
-                /*childrenCollection.fetch().then(function(childObjects){
-                    //onComplete(childObjects);
-                    console.log('NEW of', parentItem.title ? parentItem.title : parentItem.name, childrenFilter);
-                    console.dir(childObjects);
-                });*/
-                childrenCollection.on('remove, add', function(event){
-                    var parent = event.parent;
-                    var collection = self.childrenCache[parent.id];
-                    if(collection){
-                        var children = collection.fetch();
-                        self.onChildrenChange(parent, children);
-                    }
-                });
-                childrenCollection.on('update', function(event){
-                    var obj = event.target;
-                    self.onChange(obj);
-                });
-                childrenCollection.fetch().then(function(childObjects){
-                    var grandChildrenPromises = [];
-                    childObjects.forEach(function(childObj){
-                        var grandChildrenFilter = self.store.buildFilterFromQuery(childObj, docFilter);
-                        var grandChildrenCollection = self.store.filter(grandChildrenFilter);
-                        grandChildrenPromises.push(grandChildrenCollection.fetch().then(function(grandChildrenObjects){
-                            if(grandChildrenObjects.length>0) childObj.hasChildren = true;
-                            return true;
-                        }));
+                if(childrenFilter) {
+                    var childrenCollection = this.store.filter(childrenFilter);
+                    /*childrenCollection.fetch().then(function(childObjects){
+                     //onComplete(childObjects);
+                     console.log('NEW of', parentItem.title ? parentItem.title : parentItem.name, childrenFilter);
+                     console.dir(childObjects);
+                     });*/
+                    childrenCollection.on('remove, add', function (event) {
+                        var parent = event.parent;
+                        var collection = self.childrenCache[parent.id];
+                        if (collection) {
+                            var children = collection.fetch();
+                            self.onChildrenChange(parent, children);
+                        }
                     });
-                    all(grandChildrenPromises).then(function(res){
-                        onComplete(childObjects);
+                    childrenCollection.on('update', function (event) {
+                        var obj = event.target;
+                        self.onChange(obj);
                     });
-                });
+                    childrenCollection.fetch().then(function (childObjects) {
+                        var grandChildrenPromises = [];
+                        childObjects.forEach(function (childObj) {
+                            var grandChildrenFilter = self.store.buildFilterFromQuery(childObj, docFilter);
+                            if(grandChildrenFilter){
+                                var grandChildrenCollection = self.store.filter(grandChildrenFilter);
+                                grandChildrenPromises.push(grandChildrenCollection.fetch().then(function (grandChildrenObjects) {
+                                    if (grandChildrenObjects.length > 0) childObj.hasChildren = true;
+                                    return true;
+                                }));
+                            }
+                            //else return true;
+                        });
+                        all(grandChildrenPromises).then(function (res) {
+                            onComplete(childObjects);
+                        });
+                    });
+                }
+                else onComplete([]);
             }
 
-/*
-            if(this.schema && this.schema.childrenFilter){
-                var docFilter = this.schema.childrenFilter;
-                var childrenFilter = this.store.buildFilter(parentItem, docFilter);
-                var childrenCollection = this.store.filter(childrenFilter);
-                childrenCollection.fetch().then(function(childObjects){
-                    //onComplete(childObjects);
-                    console.log('OLD of', parentItem.title ? parentItem.title : parentItem.name, childrenFilter);
-                    console.dir(childObjects);
-                });
-                childrenCollection.on('remove, add', function(event){
-                    var parent = event.parent;
-                    var collection = self.childrenCache[parent.id];
-                    if(collection){
-                        var children = collection.fetch();
-                        self.onChildrenChange(parent, children);
-                    }
-                });
-                childrenCollection.on('update', function(event){
-                    var obj = event.target;
-                    self.onChange(obj);
-                });
-                childrenCollection.fetch().then(function(childObjects){
-                    childObjects.forEach(function(childObj){
-                        childObj.viewId = self.schema._id;
-                    });
-                    onComplete(childObjects);
-                });
-            }
-*/
             /*
              recordStoreFilter= new recordStore.Filter()
              name1Filter= recordStoreFilter.eq({'name': 'Name1'})

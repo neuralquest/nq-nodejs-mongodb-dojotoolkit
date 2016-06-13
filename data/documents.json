@@ -1927,6 +1927,7 @@
                 {
                     "displayType" : "Table", 
                     "name" : "Paragraph Parts Table", 
+                    "viewId" : "575de7f43c6d3cd598a5a387", 
                     "pageId" : "575d4c3f2cf3d6dc3ed83156"
                 }
             ]
@@ -2104,6 +2105,43 @@
         "_id", 
         "name"
     ], 
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("575de7f43c6d3cd598a5a387"), 
+    "docType" : "object", 
+    "name" : "Paragraph Parts View", 
+    "description" : "<p>Paragraph Parts View</p>", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "573435f03c6d3cd598a5a2e1"
+    }, 
+    "Yquery" : {
+        "and" : [
+            {
+                "isA" : "573435f03c6d3cd598a5a2e1"
+            }, 
+            {
+                "eq" : {
+                    "ownerId" : "$selectedObj"
+                }
+            }
+        ]
+    }, 
+    "Xquery" : {
+        "dot" : "paragraphParts"
+    }, 
+    "XchildrenQuery" : {
+        "in" : {
+            "_id" : "childDocs"
+        }
+    }, 
+    "properties" : {
+        "paragraphParts" : {
+            "readOnly" : false
+        }
+    }, 
     "parentId" : "573435c23c6d3cd598a5a2df", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }

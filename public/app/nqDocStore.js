@@ -49,18 +49,26 @@ function(declare, lang, array, when, all, registry,
             if(_item) item = _item;
             else if(directives.schema){
                 item._id = this.makeObjectId();
-                for(var propName in directives.schema.properties){
+                /*for(var propName in directives.schema.properties){
                     var prop = directives.schema.properties[propName];
                     if(prop.default){
                         item[propName]= prop.default;
                     }
+                }*/
+                if(directives.schema.query && 'isA' in directives.schema.query){
+                    var mapsToId = directives.schema.query['isA'];
+                    item.parentId = mapsToId;
+                    if(mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
                 }
-                if(directives.schema.filter){
-                    var docFilter = directives.schema.filter;
-                    if(docFilter.type == 'isA') item.parentId = docFilter.args[0];
+                else if(directives.schema.query && 'and' in directives.schema.query){
+                    var queryArray = directives.schema.query['and'];
+                    var mapsToId = null;
+                    if('isA' in queryArray[0]) mapsToId = queryArray[0]['isA'];
+                    else if('isA' in queryArray[1]) mapsToId = queryArray[0]['isA'];
+                    item.parentId = mapsToId;
                 }
-                if(directives.schema.childrenFilter){
-                    var docFilter = directives.schema.childrenFilter;
+                if(directives.schema.childrenQuery){
+                    var docFilter = directives.schema.childrenQuery;
                     if(docFilter.type == 'in') {
                         var key = docFilter.args[0];
                         var arrayName = docFilter.args[1];
@@ -153,9 +161,16 @@ function(declare, lang, array, when, all, registry,
                 if(!viewObj) throw new Error('View Object not found');
                 //console.log('viewObj',viewObj);
                 var inheritedClassSchemaPromise = {};
-                if(viewObj.filter && viewObj.filter.type && viewObj.filter.type == 'isA'){
-                    var mapsToId = viewObj.filter.args[0];//TODO should be able to deal with multiple levels
-                    inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
+                if(viewObj.query && 'isA' in viewObj.query){
+                    var mapsToId = viewObj.query['isA'];
+                    if(mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
+                }
+                else if(viewObj.query && 'and' in viewObj.query){
+                    var queryArray = viewObj.query['and'];
+                    var mapsToId = null;
+                    if('isA' in queryArray[0]) mapsToId = queryArray[0]['isA'];
+                    else if('isA' in queryArray[1]) mapsToId = queryArray[0]['isA'];
+                    if(mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
                 }
                 return when(inheritedClassSchemaPromise, function(inheritedClassSchema){
                     var schema = lang.clone(viewObj);
@@ -280,66 +295,14 @@ function(declare, lang, array, when, all, registry,
                             return this.buildFilterFromQuery(parentObj, subView.childrenQuery);
                         }
                         break;
+                    case 'dot':
+                        debugger;
+                        break;
                     default:
                         break;
                 }
             }
         },
-        /*buildFilter: function(parentObj, docFilter) {
-            var self = this;
-            var filterType = docFilter.type;
-            switch (filterType) {
-                case 'eq':
-                    var key = docFilter.args[0];
-                    var propName = docFilter.args[1];
-                    var value = parentObj[propName];
-                    return self.Filter().eq(key, value);
-                    break;
-                case 'and':
-                    var firstDocFilter = docFilter.args[0];
-                    var secondDocFilter = docFilter.args[1];
-                    var firstFilter = this.buildFilter(parentObj, firstDocFilter);
-                    var secondFilter = this.buildFilter(parentObj, secondDocFilter);
-                    if(firstFilter && secondFilter) return self.Filter().and(firstFilter, secondFilter);
-                    break;
-                case 'or':
-                    var firstDocFilter = docFilter.args[0];
-                    var secondDocFilter = docFilter.args[1];
-                    var firstFilter = this.buildFilter(parentObj, firstDocFilter);
-                    var secondFilter = this.buildFilter(parentObj, secondDocFilter);
-                    if(firstFilter && secondFilter) return self.Filter().or(firstFilter, secondFilter);
-                    if(firstFilter) return firstFilter;
-                    if(secondFilter) return secondFilter;
-                    break;
-                case 'in':
-                    var foreignKey = docFilter.args[0];
-                    var idArrName = docFilter.args[1];
-                    if(idArrName.substr(0,1) == '$'){
-                        debugger;
-                    }
-                    var idArr = parentObj[idArrName];
-                    if(!idArr) return;
-                    return this.Filter().in(foreignKey, idArr);
-                    break;
-                case 'isA':
-                    return this.Filter(function(obj){
-                        if(obj.docType == 'class') return false;
-                        var classId = docFilter.args[0];
-                        return self.isASync(obj, classId);
-                    });
-                    break;
-                case 'view':
-                    var subViewId = docFilter.args[0];
-                    var subView = this.cachingStore.getSync(subViewId);
-                    if(subView  && subView.filter){
-                        var subViewFilter = subView.filter;
-                        return this.buildFilter(parentObj, subViewFilter);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        },*/
         updateAllowed: function(doc){
             return true;
             var userId = "575d4c3f2cf3d6dc3ed83148";

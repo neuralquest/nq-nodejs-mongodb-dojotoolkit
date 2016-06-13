@@ -174,7 +174,11 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                 iconClass: "addIcon",
                 //popup: addMenu,
                // viewId: viewId,
-                onClick: function(){
+                onClick: function(evt){
+                    var node = this.getParent().currentTarget;
+                    var target = dijit.getEnclosingWidget(evt.target);
+                    var tn = dijit.byNode(this.getParent().currentTarget);
+                    var selectedItem = tn.item;
                     var selectedItem = self.tree.get("selectedItem");
                     var directives = {parentId: selectedItem._id, ownerId: self.rootDocId, schema: self.schema};
                     var newObj = self.store.add(null, directives);
