@@ -2145,3 +2145,95 @@
     "parentId" : "573435c23c6d3cd598a5a2df", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
+{ 
+    "_id" : ObjectId("576668623c6d3cd598a5a389"), 
+    "docType" : "object", 
+    "name" : "Login Page", 
+    "description" : "<p>Login Page</p>", 
+    "tabs" : [
+        {
+            "name" : "Login", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Login Form", 
+                    "viewId" : "576669693c6d3cd598a5a38b"
+                }
+            ]
+        }
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("576669693c6d3cd598a5a38b"), 
+    "docType" : "object", 
+    "name" : "Login View", 
+    "description" : "<p>Login view</p>", 
+    "type" : "object", 
+    "properties" : {
+        "activity" : {
+            "title" : "Do What?", 
+            "readOnly" : false, 
+            "type" : "string", 
+            "enum" : [
+                "Login", 
+                "Sign Up"
+            ], 
+            "default" : "Login"
+        }, 
+        "userId" : {
+            "title" : "User Id", 
+            "readOnly" : false, 
+            "type" : "string"
+        }, 
+        "password" : {
+            "title" : "Password", 
+            "readOnly" : false, 
+            "type" : "string"
+        }, 
+        "login" : {
+            "title" : "Login", 
+            "readOnly" : false, 
+            "type" : "button", 
+            "post" : "/login", 
+            "iconClass" : "saveIcon"
+        }, 
+        "googlelogin" : {
+            "title" : "Goggle Login", 
+            "readOnly" : false, 
+            "type" : "button", 
+            "post" : "/login/google"
+        }, 
+        "signup" : {
+            "title" : "Sign Up", 
+            "readOnly" : false, 
+            "type" : "button", 
+            "post" : "/signup"
+        }
+    }, 
+    "oneOf" : [
+        {
+            "properties" : {
+                "name" : "Login", 
+                "userId" : {
+                    "title" : "User Id", 
+                    "readOnly" : false, 
+                    "type" : "string"
+                }, 
+                "password" : {
+                    "title" : "Password", 
+                    "readOnly" : false, 
+                    "type" : "string"
+                }, 
+                "email" : {
+                    "title" : "Email", 
+                    "readOnly" : false, 
+                    "type" : "string", 
+                    "placeholder" : "me@example.com", 
+                    "regEx" : "/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/"
+                }
+            }
+        }
+    ]
+}

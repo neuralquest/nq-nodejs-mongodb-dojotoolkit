@@ -33,9 +33,11 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
             collection.on('update', function(event){
                 var obj = event.target;
                 self.pane.destroyDescendants(false);//destroy all the widgets but leave the pane intact
-                when(self.generateNextLevelContents(obj, 1, null, false), function(obj){
-                    //registry.byId('tab'+self.tabId).resize();
-                    self.pane.resize();
+                collection.fetch().then(function(children){
+                    when(self.generateNextLevelContents(children[0], 1, null, false), function(obj){
+                        //registry.byId('tab'+self.tabId).resize();
+                        self.pane.resize();
+                    });
                 });
             });
 		},
@@ -54,8 +56,9 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
                 this.pane.containerNode);
 
 			//Header
-            var headerText = item.name?item.name:'[unnamed]';
+            var headerText = item.name?item.name:'';
             if(true == true){
+                var headerDom = domConstruct.create('h'+headerLevel,{},divDom);
                 var textDijit = new ValidationTextBox({
                     item: item,
                     'type': 'text',
@@ -65,17 +68,19 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
                     'style':{width:'90%'},
                     'placeHolder': 'Paragraph Header',
                     'onChange': function(evt){
-                        item[self.name] = textDijit.get('value');
+                        item.name = textDijit.get('value');
                         self.store.put(item);
                     }
-                }, domConstruct.create('h'+headerLevel));
-                divDom.appendChild(textDijit.domNode);
+                }, domConstruct.create('span'));
+                headerDom.appendChild(textDijit.domNode);
             }
-			domConstruct.create(
-				'h'+headerLevel,
-				{innerHTML: headerText, style: {'clear': previousParagraphHasRightFloat?'both':'none'}},
-                divDom
-			);
+			else{
+                domConstruct.create(
+                    'h'+headerLevel,
+                    {innerHTML: headerText, style: {'clear': previousParagraphHasRightFloat?'both':'none'}},
+                    divDom
+                );
+            }
             if(item.paragraphParts){
                 var paragraphContent = null;
                 item.paragraphParts.forEach(function(paragraphPart){

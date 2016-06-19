@@ -22,13 +22,15 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         'dgrid/Tree',
         'dgrid/extensions/ColumnResizer',
         "dgrid/extensions/DijitRegistry",
+        "dojo/request",
+        "dijit/form/Form",
 
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins'],
 	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, lang, on,
 			arrayUtil, domAttr, Deferred, all, when, registry, Memory, domStyle, css3, has, Select, DateTextBox, NumberTextBox, Textarea,
              CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton,
              Toolbar, OnDemandGrid, CheckedMultiSelect, Button, Grid, Keyboard,
-             Selection, DnD, Source, Tree, ColumnResizer, DijitRegistry){
+             Selection, DnD, Source, Tree, ColumnResizer, DijitRegistry, request, Form){
 	return declare("nqWidgetBase", [_WidgetBase], {
         widget: null,
 		store: null,
@@ -137,7 +139,9 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         renderForm: function(properties, node, structuredDocPathArr){
             var self = this;
             //console.log(JSON.stringify(object));
-            var formNode = domConstruct.create('table', {style:{'border-spacing':'3px', 'padding-left': '5px'}}, node);
+            //var form = new Form();
+            var form = new Form({}, domConstruct.create("form", null, node));
+            var tableNode = domConstruct.create('table', {style:{'border-spacing':'3px', 'padding-left': '5px'}}, form.containerNode);
 
             //Collect the properties in a three dimensional array: [rows, columns, propNameArr]
             var rowColProperties = [];
@@ -161,7 +165,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 }
                 //iterate the max number of properties for this row 
                 for(var propListIdx=0;propListIdx<maxProperties;propListIdx++){
-                    var trDom = domConstruct.create("tr", null, formNode);
+                    var trDom = domConstruct.create("tr", null, tableNode);
                     //For each column in this row
                     for(var j=1;j<colProperties.length;j++){//column 0 is not used
                         var propNameArr = colProperties[j]; //get the property name array for this row/column
@@ -182,7 +186,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 if (attrProps.type == 'object' || (attrProps.type == 'string' && attrProps.media && attrProps.media.mediaType == 'text/html')) {
                                     // certain input field get they're own row
                                     domConstruct.create("td", null, trDom);//empty td
-                                    var editorRowDom = domConstruct.create("tr", null, formNode);
+                                    var editorRowDom = domConstruct.create("tr", null, tableNode);
                                     tdDom = domConstruct.create("td", {name:attrName, style:style, colspan: 2}, editorRowDom);
                                 }
                                 else tdDom = domConstruct.create("td", null, trDom);//ordinary td
@@ -203,7 +207,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                     if (attrProps.type == 'string') {
                                         if (attrProps.media && attrProps.media.mediaType == 'text/html') {
                                             domConstruct.create("td", null, trDom);//empty td
-                                            var editorRowDom = domConstruct.create("tr", null, formNode);
+                                            var editorRowDom = domConstruct.create("tr", null, tableNode);
                                             var editorTdDom = domConstruct.create("td", {colspan: 2}, editorRowDom);
 
                                             domStyle.set(self.editorToolbarDivNode, 'display', 'block');
@@ -328,7 +332,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                             var itemProperties = attrProps.items;
                                             if (itemProperties.properties) {
                                                 var attrProps = itemProperties.properties;
-                                                //self.buildRowCols(attrProps, formNode, nestingLevel+1);
+                                                //self.buildRowCols(attrProps, tableNode, nestingLevel+1);
                                             }
                                             else {
                                                 // Create a new constructor by mixing in the components
@@ -360,31 +364,70 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                     }
                                     else if (attrProps.type == 'object') {
                                         domConstruct.create("td", null, trDom);//empty td
-                                        var editorRowDom = domConstruct.create("tr", null, formNode);
+                                        var editorRowDom = domConstruct.create("tr", null, tableNode);
                                         var editorTdDom = domConstruct.create("td", {colspan: 2}, editorRowDom);
                                         dijit = new Textarea(attrProps, domConstruct.create("td", {class: 'inputClass'}, editorTdDom));
                                     }
-                                    if (dijit) {
+                                    else if (attrProps.type == 'button') {
+                                        var buttonProps = {
+                                            label: attrProps.title,
+                                            iconClass: attrProps.iconClass
+                                        };
+                                        dijit = new Button(buttonProps, domConstruct.create("input", null, tdDom));
+                                    }
+                                    if(dijit) {
                                         self.own(dijit);
                                         dijit.startup();
                                         dijit.structuredDocPathArr = structuredDocPathArr;
-                                        dijit.on('change', function(value){
-                                            var attrName = this.name;
-                                            var attrDefault = this.default;
-                                            var structuredDocPathArr = this.structuredDocPathArr;
-                                            self.store.get(self.docId).then(function(doc){
-                                                var docPart = doc;
-                                                if(structuredDocPathArr) structuredDocPathArr.forEach(function(pathObj){
-                                                    docPart = docPart[pathObj.arrayName][pathObj.idx];
+                                        if(dijit.declaredClass == 'dijit.form.Button'){
+                                            dijit.on('click', function(value){
+                                                if(!form.validate()) return;
+                                                /*data = {};
+                                                registry.findWidgets(tableNode).forEach(function(wid){
+                                                    if(wid.declaredClass != 'dijit.form.Button'){
+                                                        data[wid.name] = wid.get('value');
+                                                    }
+
+                                                    //console.log('wid', wid);
+                                                });*/
+                                                request.post(attrProps.post, {
+                                                    headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
+                                                    data: JSON.stringify(form.get('value'))
+                                                }).then(function(data){
+                                                    userName = data==''?null:data;
+                                                    domattr.set('userNameDiv', 'innerHTML', data);
+                                                    //TODO refresh the page
+                                                    //dia.hide();
+                                                },function(error){
+                                                    var msg = '';
+                                                    if(error.response.status == 401) msg = 'Invalid user name/password';
+                                                    else msg = error.response.text;
+                                                    domStyle.set(row1, 'display', '');
+                                                    domattr.set(tdDom0, 'innerHTML', msg);
+                                                    userName = null;
+                                                    domattr.set('userNameDiv', 'innerHTML', '');
                                                 });
-                                                //console.log(docPart);
-                                                if(docPart[attrName] !== value){
-                                                    if(!value || value == attrDefault) docPart.delete(attrName);
-                                                    else docPart[attrName] = value;
-                                                    self.store.put(doc);
-                                                }
-                                            },nq.errorDialog);
-                                        });
+                                            });
+                                        }
+                                        else{
+                                            dijit.on('change', function(value){
+                                                var attrName = this.name;
+                                                var attrDefault = this.default;
+                                                var structuredDocPathArr = this.structuredDocPathArr;
+                                                self.store.get(self.docId).then(function(doc){
+                                                    var docPart = doc;
+                                                    if(structuredDocPathArr) structuredDocPathArr.forEach(function(pathObj){
+                                                        docPart = docPart[pathObj.arrayName][pathObj.idx];
+                                                    });
+                                                    //console.log(docPart);
+                                                    if(docPart[attrName] !== value){
+                                                        if(!value || value == attrDefault) docPart.delete(attrName);
+                                                        else docPart[attrName] = value;
+                                                        self.store.put(doc);
+                                                    }
+                                                },nq.errorDialog);
+                                            });
+                                        }
                                     }
                                 }
                             }

@@ -69,50 +69,45 @@ function(declare, lang, array, when, all, registry,
                     else if('isA' in queryArray[1]) mapsToId = queryArray[0]['isA'];
                     item.parentId = mapsToId;
                 }
-                this.cachingStore.add(item, directives);
 
+                var parentObj = this.cachingStore.getSync(directives.parentId);
                 if(directives.schema.childrenQuery && 'in' in directives.schema.childrenQuery){
                     var inObj = directives.schema.childrenQuery['in'];
                     for(var key in inObj){
                         var arrayName = inObj[key];
-                        var parentObj = this.cachingStore.getSync(directives.parentId);
                         var fkArray = parentObj[arrayName];
                         if(!fkArray) fkArray = [];
                         fkArray.push(item[key]);
                         parentObj[arrayName] = fkArray;
                         //parentObj.hasChildren = true;
-                        this.put(parentObj).then(function(){
-                            self.emit('update', {target:item, directives:directives});
-                        });
+
                     }
                 }
                 else if(directives.schema.childrenQuery && 'and' in directives.schema.childrenQuery){
                     var queryArray = directives.schema.childrenQuery['and'];
                     debugger;
-                    var arrayName = null;
-                    if('in' in queryArray[0]) arrayName = queryArray[0]['in'];
-                    else if('in' in queryArray[1]) arrayName = queryArray[0]['in'];
-                    var parentObj = this.cachingStore.getSync(directives.parentId);
-                    var fkArray = parentObj[arrayName];
-                    if(!fkArray) fkArray = [];
-                    fkArray.push(item[key]);
-                    parentObj[arrayName] = fkArray;
-                    this.cachingStore.put(parentObj);
                 }
                 if(directives.ownerId){
                     item.ownerId = directives.ownerId;
                 }
+                return this.cachingStore.add(item, directives).then(function(item){
+                    return self.put(parentObj).then(function(){
+                        return item;
+                    });
+                });
+
+
             }
-            //this.processDirectives(item, directives);
-            //this.emit('add', {target:item, directives:directives});
-            return item;
         },
-        Xput: function (item, directives) {
+        put: function (item, directives) {
+            var self = this;
             this.enableTransactionButtons();
             //if(!directives.viewId) directives.viewId = item._viewId;//TODO pastItem should send viewID in directives
             //this.processDirectives(item, directives);
-            this.cachingStore.put(item, directives);
-            this.emit('update', {target:item, directives:directives});
+            return this.cachingStore.put(item, directives).then(function(item){
+                self.emit('update', {target:item, directives:directives});
+                return item;
+            });
         },
         remove: function (item, directives) {
             this.enableTransactionButtons();

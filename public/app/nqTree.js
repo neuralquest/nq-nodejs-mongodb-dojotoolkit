@@ -182,13 +182,13 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     //var selectedItem = tn.item;
                     var selectedItem = self.tree.get("selectedItem");
                     var directives = {parentId: selectedItem._id, ownerId: self.rootDocId, schema: self.schema};
-                    var newObj = self.store.add(null, directives);
-
-                    var selectedNodes = self.tree.getNodesByItem(selectedItem);
-                    if(!selectedNodes[0].isExpanded){
-                        self.tree._expandNode(selectedNodes[0]);
-                    }
-                    self.tree.set('selectedItem', newObj._id);
+                    self.store.add(null, directives).then(function(newObj){
+                        var selectedNodes = self.tree.getNodesByItem(selectedItem);
+                        selectedNodes[0]._loadDeferred = null;
+                        self.tree._expandNode(selectedNodes[0]).then(function(newObj){
+                            //self.tree.set('selectedItem', newObj._id);
+                        });
+                    });
                 }
             }));
 
