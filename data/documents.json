@@ -411,9 +411,28 @@
     "description" : "<p>Users own resourses</p>", 
     "type" : "object", 
     "properties" : {
-
+        "email" : {
+            "title" : "email", 
+            "type" : "string", 
+            "patern" : "/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/"
+        }, 
+        "password" : {
+            "title" : "Password", 
+            "type" : "string", 
+            "maxLength" : NumberInt(100)
+        }, 
+        "isActive" : {
+            "title" : "Is Active", 
+            "type" : "boolean", 
+            "default" : false
+        }
     }, 
-    "parentId" : "56f870a55dde184ccfb9fc6c"
+    "parentId" : "56f870a55dde184ccfb9fc6c", 
+    "required" : [
+        "email", 
+        "passwordEncrypt", 
+        "isActive"
+    ]
 }
 { 
     "_id" : ObjectId("57343c283c6d3cd598a5a2e9"), 
@@ -2160,6 +2179,16 @@
                     "viewId" : "576669693c6d3cd598a5a38b"
                 }
             ]
+        }, 
+        {
+            "name" : "Sign Up", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Sign Up Form", 
+                    "viewId" : "57679fcb3c6d3cd598a5a38d"
+                }
+            ]
         }
     ], 
     "parentId" : "56f87ec55dde184ccfb9fc74", 
@@ -2172,25 +2201,18 @@
     "description" : "<p>Login view</p>", 
     "type" : "object", 
     "properties" : {
-        "activity" : {
-            "title" : "Do What?", 
-            "readOnly" : false, 
-            "type" : "string", 
-            "enum" : [
-                "Login", 
-                "Sign Up"
-            ], 
-            "default" : "Login"
-        }, 
-        "userId" : {
+        "username" : {
             "title" : "User Id", 
             "readOnly" : false, 
-            "type" : "string"
+            "type" : "string", 
+            "abstract" : true
         }, 
         "password" : {
             "title" : "Password", 
             "readOnly" : false, 
-            "type" : "string"
+            "type" : "string", 
+            "mask" : true, 
+            "abstract" : true
         }, 
         "login" : {
             "title" : "Login", 
@@ -2204,36 +2226,70 @@
             "readOnly" : false, 
             "type" : "button", 
             "post" : "/login/google"
+        }
+    }, 
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("57679fcb3c6d3cd598a5a38d"), 
+    "docType" : "object", 
+    "name" : "Sign Up View", 
+    "description" : "<p>Sign Up view</p>", 
+    "type" : "object", 
+    "properties" : {
+        "username" : {
+            "title" : "User Id", 
+            "readOnly" : false, 
+            "type" : "string", 
+            "minLength" : NumberInt(5), 
+            "abstract" : true
+        }, 
+        "password" : {
+            "title" : "Password", 
+            "readOnly" : false, 
+            "type" : "string", 
+            "mask" : true, 
+            "minLength" : NumberInt(6), 
+            "abstract" : true
+        }, 
+        "password1" : {
+            "title" : "Password", 
+            "readOnly" : false, 
+            "type" : "string", 
+            "mask" : true, 
+            "abstract" : true
+        }, 
+        "email" : {
+            "title" : "Email", 
+            "readOnly" : false, 
+            "type" : "string", 
+            "placeholder" : "me@example.com", 
+            "patern" : "/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/", 
+            "abstract" : true
         }, 
         "signup" : {
             "title" : "Sign Up", 
             "readOnly" : false, 
             "type" : "button", 
             "post" : "/signup"
+        }, 
+        "googlelogin" : {
+            "title" : "Goggle Login", 
+            "readOnly" : false, 
+            "type" : "button", 
+            "post" : "/login/google"
         }
     }, 
-    "oneOf" : [
-        {
-            "properties" : {
-                "name" : "Login", 
-                "userId" : {
-                    "title" : "User Id", 
-                    "readOnly" : false, 
-                    "type" : "string"
-                }, 
-                "password" : {
-                    "title" : "Password", 
-                    "readOnly" : false, 
-                    "type" : "string"
-                }, 
-                "email" : {
-                    "title" : "Email", 
-                    "readOnly" : false, 
-                    "type" : "string", 
-                    "placeholder" : "me@example.com", 
-                    "regEx" : "/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/"
-                }
-            }
-        }
-    ]
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("57685146555f1b602acb32b7"), 
+    "name" : "cjong", 
+    "isActive" : true, 
+    "password" : "$2a$10$WIx8rGcMeuPigotQqQi.b.HUhpgqd0bEaLQ1Eerq6Q9WA/Y6v/y92", 
+    "email" : "", 
+    "docType" : "object", 
+    "parentId" : "57343beb3c6d3cd598a5a2e7"
 }

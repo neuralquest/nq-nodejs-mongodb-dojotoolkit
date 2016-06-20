@@ -64,25 +64,24 @@ exports = module.exports = function(app, passport) {
     app.post('/login',
         passport.authenticate('local'), function(req, res, next) {
             // If this function gets called, authentication was successful.
-            res.send(req.user.name);
+            var returnUser = {name: req.user.name, id: req.user._id};
+            res.send(returnUser);
         });
     app.get('/logout', function(req, res) {
         req.logout();
-        res.send('');
+        res.send({});
     });
     app.post('/signup', function(req, res, next) {
         var Users = require('./models/users');
-        Users.signup(req).then(function (result) {
-            if(result != 'Success') res.status(400).send(result);
+        Users.signup(req).then(function (result) {//should be when
+            if (typeof result === 'string') res.status(400).send(result);
             else{
-                req._passport.instance.authenticate('local', function(err, user, info) {
-                    // If this function gets called, authentication was successful.
-                    if (err) { return next(err) }
-                    req.logIn(user, function(err) {
-                        if (err) { return next(err); }
-                        res.status(201).send(req.user.name);
-                    });
-                })(req, res, next);
+                var user = result.ops[0];
+                req.logIn(user, function(err) {
+                    if (err) { return next(err); }
+                    var returnUser = {name: req.user.name, id: req.user._id};
+                    res.status(201).send(returnUser);
+                });
             }
         }, function (err) {
             next(err);
@@ -90,8 +89,11 @@ exports = module.exports = function(app, passport) {
     });
     app.get('/hello', function(req, res) {
         var auth = req.isAuthenticated();
-        if(auth) res.send(req.user.name);
-        else res.send('');
+        if(auth) {
+            var returnUser = {name: req.user.name, id: req.user._id};
+            res.send(returnUser);
+        }
+        else res.send({});
     });
 
     app.get('/login/google',

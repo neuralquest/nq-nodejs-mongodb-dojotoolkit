@@ -1,8 +1,9 @@
-define(['dojo/_base/declare', "app/nqWidgetBase","dojo/when"],
-    function(declare, nqWidgetBase, when){
+define(['dojo/_base/declare', "app/nqWidgetBase","dojo/when", 'dojo/dom-construct'],
+    function(declare, nqWidgetBase, when, domConstruct){
         return declare("nqForm", [nqWidgetBase],{
             postCreate: function(){
                 this.inherited(arguments);
+                if(this.widTot>1) domConstruct.create('h1', {innerHTML: this.widget.name,'style' : { 'padding': '10px'} }, this.pane.containerNode);
                 this.renderForm(this.schema.properties, this.pane.containerNode);
             },
             setDocId: function(id){

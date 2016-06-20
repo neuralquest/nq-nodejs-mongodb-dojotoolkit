@@ -180,7 +180,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                     'font-size': attrProps.size?attrProps.size:'1em'
                                 };
                                 // The label
-                                domConstruct.create("td", {innerHTML: attrProps.title, style: style},trDom);
+                                if(attrProps.type == 'button') domConstruct.create("td", {},trDom); // No label for buttons
+                                else domConstruct.create("td", {innerHTML: attrProps.title, style: style},trDom);
                                 var tdDom = null;
                                 //The input td
                                 if (attrProps.type == 'object' || (attrProps.type == 'string' && attrProps.media && attrProps.media.mediaType == 'text/html')) {
@@ -313,7 +314,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                                 }
                                             }
                                         }
-                                        else dijit = new ValidationTextBox(attrProps, domConstruct.create("input", null, tdDom));
+                                        else {
+                                            if(attrProps.mask) attrProps.type = 'password';
+                                            dijit = new ValidationTextBox(attrProps, domConstruct.create("input", null, tdDom));
+                                        }
                                     }
                                     else if (attrProps.type == 'number') {
                                         dijit = new NumberTextBox(attrProps, domConstruct.create("input", null, tdDom));
@@ -371,7 +375,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                     else if (attrProps.type == 'button') {
                                         var buttonProps = {
                                             label: attrProps.title,
-                                            iconClass: attrProps.iconClass
+                                            iconClass: attrProps.iconClass,
+                                            post: attrProps.post
                                         };
                                         dijit = new Button(buttonProps, domConstruct.create("input", null, tdDom));
                                     }
@@ -380,36 +385,20 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                         dijit.startup();
                                         dijit.structuredDocPathArr = structuredDocPathArr;
                                         if(dijit.declaredClass == 'dijit.form.Button'){
-                                            dijit.on('click', function(value){
-                                                if(!form.validate()) return;
-                                                /*data = {};
-                                                registry.findWidgets(tableNode).forEach(function(wid){
-                                                    if(wid.declaredClass != 'dijit.form.Button'){
-                                                        data[wid.name] = wid.get('value');
-                                                    }
-
-                                                    //console.log('wid', wid);
-                                                });*/
-                                                request.post(attrProps.post, {
+                                            dijit.on('click', function(evt){
+                                                //if(!form.validate()) return;
+                                                request.post(this.post, {
                                                     headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
                                                     data: JSON.stringify(form.get('value'))
                                                 }).then(function(data){
-                                                    userName = data==''?null:data;
-                                                    domattr.set('userNameDiv', 'innerHTML', data);
-                                                    //TODO refresh the page
-                                                    //dia.hide();
-                                                },function(error){
-                                                    var msg = '';
-                                                    if(error.response.status == 401) msg = 'Invalid user name/password';
-                                                    else msg = error.response.text;
-                                                    domStyle.set(row1, 'display', '');
-                                                    domattr.set(tdDom0, 'innerHTML', msg);
-                                                    userName = null;
-                                                    domattr.set('userNameDiv', 'innerHTML', '');
-                                                });
+                                                    var user = dojo.fromJson(data);
+                                                    nq.setUser(user);
+                                                    //TODO refresh the data
+                                                    window.history.back();
+                                                }, nq.errorDialog);
                                             });
                                         }
-                                        else{
+                                        else if(!attrProps.abstract){
                                             dijit.on('change', function(value){
                                                 var attrName = this.name;
                                                 var attrDefault = this.default;

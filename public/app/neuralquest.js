@@ -13,15 +13,16 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		JSON, Dialog,Form,TextBox,Button,domattr,styles, css2) {
 
     var nqStore = new nqDocStore();
-    var userName = null;
+    var user = {};
     ready(function () {
         request.get('/hello').then(function (data) {
-            userName = data == '' ? null : data;
-            domattr.set('userNameDiv', 'innerHTML', data);
+            user = dojo.fromJson(data);
+            var userName = user.name?user.name:'';
+            domattr.set('userNameDiv', 'innerHTML', userName);
         }, errorDialog);
         topic.subscribe("/dojo/hashchange", interpretHash);
         on(registry.byId('loginButtonId'), 'click', function (event) {
-            login();
+            setHash(null,"576668623c6d3cd598a5a389",0,0,1);// is the log in page
         });
         on(registry.byId('cancelButtonId'), 'click', function (event) {
             nqStore.abort();
@@ -193,6 +194,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                         pageId: pageId,
                         tabNum: tabPane.tabNum,
                         widNum: widNum,
+                        widTot: tabObj.widgets.length,
                         level: tabPane.level,
                         widget: widget,
                         store: nqStore,
@@ -324,16 +326,23 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         }
         else if(wid0.containerNode){
             var w0Arr = registry.findWidgets(wid0.containerNode);
-            if(w0Arr.length >1) throw new Error('too many');
-            if(w0Arr.length ==1){
+            //if(w0Arr.length >1) throw new Error('too many');
+            //if(w0Arr.length ==1){
                 var wid1 = w0Arr[0];
                 if(wid1.declaredClass.substring(0,13) == 'dijit.layout.'){
                     return getSelectedTabRecursive(wid1, indent+'-');
                 }
-            }
+            //}
         }
         return wid0;
     }
+    lang.setObject("nq.setUser", setUser);//make the function globally accessible
+    function setUser(_user){
+        user = _user;
+        domattr.set('userNameDiv', 'innerHTML', _user.name);
+    }
+    //userName = data==''?null:data;
+    //
     lang.setObject("nq.test", test);//make the function globally accessible
     function test(){
         var filter = {

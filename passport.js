@@ -1,6 +1,6 @@
 'use strict';
 var Users = require('./models/users');
-var Items = require('./models/items');
+var Documents = require('./models/documents');
 
 exports = module.exports = function(app, passport) {
     var LocalStrategy = require('passport-local').Strategy,
@@ -103,7 +103,7 @@ exports = module.exports = function(app, passport) {
     });
 
     passport.deserializeUser(function(id, done) {
-        Items.findById(id).then(function(user) {
+        Documents.findById(id).then(function(user) {
             done(null, user);
         },function(err){
             done(err, user)
