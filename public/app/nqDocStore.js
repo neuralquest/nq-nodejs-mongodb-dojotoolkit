@@ -103,7 +103,7 @@ function(declare, lang, array, when, all, registry,
             var self = this;
             this.enableTransactionButtons();
             //if(!directives.viewId) directives.viewId = item._viewId;//TODO pastItem should send viewID in directives
-            //this.processDirectives(item, directives);
+            this.processDirectives(item, directives);
             return this.cachingStore.put(item, directives).then(function(item){
                 self.emit('update', {target:item, directives:directives});
                 return item;
@@ -119,11 +119,83 @@ function(declare, lang, array, when, all, registry,
             if(!directives) return;
             var self = this;
             var viewId = directives.viewId;
+            var arrayName = 'childDocs';
             var movingObjectId = object._id;
-            var oldParentId = directives.oldParent?directives.oldParent._id:undefined;
-            var newParentId = directives.parent?directives.parent._id:undefined;
+            var oldParent = directives.oldParent;
+            var newParent = directives.parent;
             //var newParentId = directives.parent.id;
             var beforeId = directives.before?directives.before._id:undefined;
+
+            if(true == true){
+                if(oldParent){
+                    if(newParent){ //the 'moving object' is detached from the old parent and attached to the new parent
+                        var idx = oldParent[arrayName].indexOf(movingObjectId);
+                        if(idx>-1) {
+                            oldParent[arrayName].splice(idx,1);
+                            //store put old
+                            self.put(oldParent);
+                            if(beforeId) {
+                                var beforeIdx = newParent[arrayName].indexOf(beforeId);
+                                if(beforeIdx>0) {
+                                    newParent[arrayName].splice(beforeIdx,0,movingObjectId);
+                                }
+                                else {
+                                    if(newParent[arrayName]) newParent[arrayName].push(movingObjectId);
+                                    else newParent[arrayName]= [movingObjectId];
+                                }
+                            }
+                            else {
+                                if(newParent[arrayName]) newParent[arrayName].push(movingObjectId);
+                                else newParent[arrayName]= [movingObjectId];
+                            }
+                            //store put new
+                            self.put(newParent);
+                        }
+
+                    }
+                    else{//no new parent means we are detaching the 'moving object' from the old parent
+                        var idx = oldParent[arrayName].indexOf(movingObjectId);
+                        if(idx>0) {
+                            oldParent[arrayName].splice(idx,1);
+                            //store put old
+                            self.put(oldParent);
+                        }
+                    }
+                }
+                else if(newParent) {//no oldParent means a new 'moving object' is attached to the new parent
+                    if(beforeId) {
+                        var beforeIdx = newParent[arrayName].indexOf(beforeId);
+                        if(beforeIdx>0) {
+                            newParent[arrayName].splice(beforeIdx,0,movingObjectId);
+                        }
+                        else {
+                            if(newParent[arrayName]) newParent[arrayName].push(movingObjectId);
+                            else newParent[arrayName]= [movingObjectId];
+                        }
+                    }
+                    else {
+                        if(newParent[arrayName]) newParent[arrayName].push(movingObjectId);
+                        else newParent[arrayName]= [movingObjectId];
+                    }
+                    //store put new
+                    self.put(newParent);
+                }
+            }
+            else{
+                if(oldParent){
+                    if(newParent){ //the 'moving object' is detached from the old parent and attached to the new parent
+                    }
+                    else{//no new parent means we are detaching the 'moving object' from the old parent
+                    }
+                }
+                else if(newParent) {//no oldParent means a new 'moving object' is attached to the new parent
+
+                }
+            }
+
+
+return;
+
 
             return this.get(viewId).then(function(view){
                 //TODO must merge
