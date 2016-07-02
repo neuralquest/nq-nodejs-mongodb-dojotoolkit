@@ -1,14 +1,51 @@
 define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/when', 'dijit/registry', 'dijit/layout/ContentPane',
         'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "app/nqWidgetBase", "dojo/on", "dojo/dom-geometry", 
-        "dojo/sniff", "dijit/form/ToggleButton", "dojo/dom", "dojo/dom-attr",
-        'app/nqClassChart', "dojo/dom-style", "dojo/query", "dojo/mouse", 
-        
-        'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 'dijit/WidgetSet', 
+        "dojo/sniff", "dijit/form/ToggleButton", "dojo/dom", "dojo/dom-attr", "dojo/dom-prop", "dojo/NodeList-dom",
+        'app/nqClassChart', "dojo/dom-style", "dojo/query", "dojo/mouse",'dojo/query!css3',
+
+    // Commom plugins
+    "dijit/_editor/plugins/FullScreen",
+    "dijit/_editor/plugins/LinkDialog",
+    "dijit/_editor/plugins/Print",
+    "dijit/_editor/plugins/ViewSource",
+    "dijit/_editor/plugins/FontChoice",
+    //"dijit/_editor/plugins/TextColor",
+    "dijit/_editor/plugins/NewPage",
+    "dijit/_editor/plugins/ToggleDir",
+
+    //Extension (Less common) plugins
+    "dojox/editor/plugins/ShowBlockNodes",
+    "dojox/editor/plugins/ToolbarLineBreak",
+    "dojox/editor/plugins/Save",
+    "dojox/editor/plugins/InsertEntity",
+    "dojox/editor/plugins/Preview",
+    "dojox/editor/plugins/PageBreak",
+    "dojox/editor/plugins/PrettyPrint",
+    "dojox/editor/plugins/InsertAnchor",
+    "dojox/editor/plugins/CollapsibleToolbar",
+    "dojox/editor/plugins/Blockquote",
+    //"dojox/editor/plugins/InsertAnchor",
+
+    // Experimental Plugins
+    "dojox/editor/plugins/NormalizeIndentOutdent",
+    "dojox/editor/plugins/FindReplace",
+    "dojox/editor/plugins/TablePlugins",
+    "dojox/editor/plugins/TextColor",
+    "dojox/editor/plugins/Breadcrumb",
+    "dojox/editor/plugins/PasteFromWord",
+    "dojox/editor/plugins/Smiley",
+    "dojox/editor/plugins/NormalizeStyle",
+    "dojox/editor/plugins/StatusBar",
+    "dojox/editor/plugins/SafePaste",
+
+    "app/nqLocalImage"
+
+        //'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins',"dijit._editor.plugins.FontChoice", 'dijit/WidgetSet'
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
 	function(declare, domConstruct, all, when, registry, ContentPane,
 			Toolbar, ValidationTextBox, Editor, nqWidgetBase, on, domGeometry, 
-			has, ToggleButton, dom, domAttr,
-			nqClassChart, domStyle, query, mouse){
+			has, ToggleButton, dom, attr, domProp, NodeList,
+			nqClassChart, domStyle, query, mouse, css3){
 
 	return declare("nqDocument", [nqWidgetBase], {
         buildRendering: function(){
@@ -19,30 +56,200 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
 		setDocId: function(id){
 			if(id.length == 0) return;
 			var self = this;
-			//Clear the page
-			this.pane.destroyDescendants(false);//destroy all the widgets but leave the pane intact
 			//load the data
             var collection = this.store.filter({_id: id});
-
             collection.fetch().then(function(children){
-                when(self.generateNextLevelContents(children[0], 1, null, false), function(obj){
-                    //registry.byId('tab'+self.tabId).resize();
-                    self.pane.resize();
-                });
+                self.buildPage(children[0]);
             });
             collection.on('update', function(event){
-                var obj = event.target;
-                self.pane.destroyDescendants(false);//destroy all the widgets but leave the pane intact
                 collection.fetch().then(function(children){
-                    when(self.generateNextLevelContents(children[0], 1, null, false), function(obj){
-                        //registry.byId('tab'+self.tabId).resize();
-                        self.pane.resize();
-                    });
+                    self.buildPage(children[0]);
                 });
             });
 		},
+        buildPage: function(item){
+            var self = this;
+            var docDom = domConstruct.create('div');
+            //var docDom = "";
+            when(self.generateNextLevelContents(docDom, item, 1, null, false), function(obj){
+                if(true == false){
+                    //Clear the page
+                    self.pane.destroyDescendants(false);//destroy all the widgets but leave the pane intact
+                    self.editorDijit = null;
+                    domStyle.set(self.editorToolbarDivNode, 'display' , 'none');
+                    domConstruct.place(docDom, self.pane.containerNode, 'last');
+                }
+                else{
+                    domStyle.set(self.editorToolbarDivNode, 'display' , '');
+                    if(!self.editorDijit){
+                        // Create toolbar and place it at the top of the page
+                        var toolbar = new Toolbar();
+                        self.editorToolbarDivNode.appendChild(toolbar.domNode);
+                        //Paragraph
+                        self.editorDijit = new Editor({
+                            'height': '', //auto grow
+                            'minHeight': '30px',
+                            plugins: self.plugins,
+                            //'extraPlugins': [{name: 'formatBlock', plainText: true},'viewSource'],
+                            'toolbar': toolbar,
+                            focusOnLoad: true//,
+                            //'onChange': self.interpretPage
+                        }, domConstruct.create('div'));
+                        self.editorDijit.on('change', dojo.hitch(self,self.interpretPage));
+                        self.editorDijit.addStyleSheet('app/resources/editor.css');
+                        /*self.editorDijit.on("NormalizedDisplayChanged", function(){
+                            var height = domGeometry.getMarginSize(self.editorDijit.editNode).h;
+                            if(has("opera")){
+                                height = editorDijit.editNode.scrollHeight;
+                            }
+                            self.editorDijit.resize({h: height});
+                        });*/
+                        domConstruct.place(self.editorDijit.domNode, self.pane.containerNode, 'last');
+                        //domConstruct.place(editorDijit.domNode, replaceDiv, "replace");
+                        self.editorDijit.startup();
+                    }
+                    console.log(docDom);
+                    self.editorDijit.set('value', docDom.innerHTML);
+                }
+            });
+        },
 		//Create an ordinary HTML page recursively by obtaining data from the server
-		generateNextLevelContents: function(item, headerLevel, parentId, previousParagraphHasRightFloat){
+        generateNextLevelContents: function(docDom, item, headerLevel, parentId, previousParagraphHasRightFloat){
+            var self = this;
+            var divDom = domConstruct.create('div', {id: item._id}, docDom);
+            //Header
+            domConstruct.create(
+                'h'+headerLevel,
+                {innerHTML: item.name, style: {'clear': previousParagraphHasRightFloat?'both':'none'}},
+                divDom
+            );
+            if(item.paragraphParts){
+                item.paragraphParts.forEach(function(paragraphPart){
+                    if(paragraphPart.mediaType){
+                        if(paragraphPart.mediaType.media == 'img/png'){
+                            //image
+                            domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: paragraphPart.url, width: 300}, divDom);
+                        }
+                    }
+                });
+            }
+            var pDom = dojo.toDom(item.description);
+            domConstruct.place(pDom, divDom, 'last');
+
+
+            var childrenFilter = this.store.buildFilterFromQuery(item, this.schema.childrenQuery);
+            if(childrenFilter){
+                var childrenCollection = this.store.filter(childrenFilter);
+                /*childrenCollection.on('update', function(event){
+                 var obj = event.target;
+                 alert('doc change');
+                 //self.onChange(obj);
+                 });*/
+                var childDocPromises = [];
+                childrenCollection.forEach(function(childItem){
+                    var previousParagraphHasRightFloat = false;
+                    childDocPromises.push(self.generateNextLevelContents(docDom, childItem, headerLevel+1, item._id, previousParagraphHasRightFloat));
+                    //previousParagraphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
+                });
+                return all(childDocPromises);
+            }
+            return true;
+        },
+        interpretPage: function(docString){
+            var self = this;
+            //var docString = self.editorDijit.get('value');
+            //var docString = self.editorDijit.editNode.innerHTML;
+            var docDom = dojo.toDom(docString);
+            //var nl = new NodeList(docDom.childNodes);
+            //var h1List = query("h1", docDom);
+            docDom.childNodes.forEach(function(dom){
+                var nodeName = domProp.get(dom, 'nodeName');
+                if(nodeName == 'DIV'){
+                    var id = attr.get(dom, 'id');
+                    if(id){
+                        var update = false;
+                        self.store.get(id).then(function(storedItem){
+                            var newParagraphParts = [];
+                            dom.childNodes.forEach(function(domToUpdate) {
+                                var nodeNameToUpdate = domProp.get(domToUpdate, 'nodeName');
+                                if(nodeNameToUpdate.charAt(0) == 'H') {
+                                    var newText = attr.get(domToUpdate, 'innerHTML');
+                                    if(storedItem.name != newText){
+                                        update = true;
+                                        storedItem.name = newText;
+                                    }
+                                }
+								else if(nodeNameToUpdate == 'P'){
+									var newText = attr.get(domToUpdate, 'innerHTML');
+									if(storedItem.description != newText){
+										update = true;
+										storedItem.description = newText;
+									}
+								}
+								else if(nodeNameToUpdate == 'DIV'){
+                                    //newParagraphParts.push(domToUpdate.outerHTML);
+                                }
+                                //var value = domToUpdate.outerHTML;
+                                //console.log(domToUpdate);
+                            });
+                            /*if(!newParagraphParts.isEqualNode(storedItem.paragraphParts)){
+                                update = true;
+                                storedItem.paragraphParts = newParagraphParts;
+                            }*/
+                            if(update) self.store.put(storedItem);
+                        });
+                    }
+                }
+            });
+        },
+
+
+
+        plugins: [
+            'collapsibletoolbar', 'breadcrumb', 'newpage', 'save',
+            {name: 'viewSource', stripScripts: true, stripComments: true},
+            'showBlockNodes', '|',
+            {name: 'fullscreen', zIndex: 900}, 'preview', 'print', '|',
+            'findreplace', 'selectAll', 'cut', 'copy','paste', 'pastefromword', 'delete', '|', 'undo', 'redo', '|',
+            'pageBreak', 'insertHorizontalRule', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'blockquote', '|',
+            'justifyLeft', 'justifyRight', 'justifyCenter', 'justifyFull', 'toggleDir', '|',
+            'bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'foreColor', 'hiliteColor', 'removeFormat', '|',
+            'insertEntity', 'smiley', 'createLink', 'insertanchor', 'unlink', 'insertImage',// '||',
+            {name: 'nqLocalImage', uploadable: true, uploadUrl: '/upload', baseImageUrl: '/app/resources/Neuralquest'},
+            //'fontName', {name: 'fontSize', plainText: true}, {name: 'formatBlock', plainText: true},// '||',
+
+            /*{name: 'dojox.editor.plugins.TablePlugins', command: 'insertTable'},
+            {name: 'dojox.editor.plugins.TablePlugins', command: 'modifyTable'},
+            {name: 'dojox.editor.plugins.TablePlugins', command: 'InsertTableRowBefore'},
+            {name: 'dojox.editor.plugins.TablePlugins', command: 'InsertTableRowAfter'},
+            {name: 'dojox.editor.plugins.TablePlugins', command: 'insertTableColumnBefore'},
+            {name: 'dojox.editor.plugins.TablePlugins', command: 'insertTableColumnAfter'},
+            {name: 'dojox.editor.plugins.TablePlugins', command: 'deleteTableRow'},
+            {name: 'dojox.editor.plugins.TablePlugins', command: 'deleteTableColumn'},
+            {name: 'dojox.editor.plugins.TablePlugins', command: 'colorTableCell'},
+            {name: 'dojox.editor.plugins.TablePlugins', command: 'tableContextMenu'},*/
+            //Pretty Print messes with the format of the result
+            //{name: 'prettyprint', indentBy: 3, lineLength: 80, entityMap: dojox.html.entities.html.concat(dojox.html.entities.latin)},
+            {name: 'dijit._editor.plugins.EnterKeyHandling', blockNodeForEnter: "P"},
+            'normalizeindentoutdent', 'normalizestyle', {name: 'statusbar', resizer: false}, "safepaste"
+        ],
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		YgenerateNextLevelContents: function(item, headerLevel, parentId, previousParagraphHasRightFloat){
 			var self = this;
             var divDom = domConstruct.create(
                 'div',
@@ -463,17 +670,6 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
 			});
 			editorDijit.set('value', item.description);
 			domConstruct.place(editorDijit.domNode, replaceDiv, "replace");
-
-			editorDijit.on('mouseenter', function(evt){
-				if(self.editModeButton.get('checked')) {
-					domStyle.set(editorDijit.domNode, 'outline', '1px solid gray');
-				}
-			});
-			editorDijit.on('mouseleave', function(evt){
-				if(self.editModeButton.get('checked')) {
-					domStyle.set(editorDijit.domNode, 'outline', '1px none gray');
-				}
-			});
 
 			this.own(editorDijit);
 			editorDijit.startup();

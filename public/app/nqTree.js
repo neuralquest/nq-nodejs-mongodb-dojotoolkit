@@ -36,10 +36,12 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     return '[unnamed]';
                 },
 				getIconClass: function(item, opened){
-					if(!item) return 'icondefault';
-                    if(item.docType == 'class') return 'icon0';
+					if(!item) return '';
+                    if(item.icon) return 'icon'+item._id;
+                    if(self.schema.icon) return 'icon'+self.schema._id;
+                    //if(item.docType == 'class') return 'icon0';
 					//if(item.type == 'assoc') return 'icon'+item._icon;
-					return 'icon1';
+					return '';
 				},
 				getRowClass: function(item, opened){
 					if(!item) return '';

@@ -100,6 +100,7 @@ define([
                 if(childrenFilter) {
                     var childrenCollection = this.store.filter(childrenFilter);
                     childrenCollection.fetch().then(function (childObjects) {
+                        //See if there are any grandchildren
                         var grandChildrenPromises = [];
                         childObjects.forEach(function (childObj) {
                             var grandChildrenFilter = self.store.buildFilterFromQuery(childObj, docFilter);
@@ -167,6 +168,7 @@ define([
 			//		Move or copy an item from one parent item to another.
 			//		Used in drag & drop.
 
+
 			var d = new Deferred();
 
 			if(oldParentItem === newParentItem && !bCopy && !before){
@@ -192,7 +194,7 @@ define([
 					oldParentChildren.splice(index, 1);
 					this.onChildrenChange(oldParentItem, oldParentChildren);
 
-					d.resolve(this.store.put(childItem, {
+					d.resolve(this.store.processDirectives(childItem, {
 						overwrite: true,
 						parent: newParentItem,
 						oldParent: oldParentItem,
@@ -200,7 +202,7 @@ define([
 					}));
 				}));
 			}else{
-				d.resolve(this.store.put(childItem, {
+				d.resolve(this.store.processDirectives(childItem, {
 					overwrite: true,
 					parent: newParentItem,
 					oldParent: oldParentItem,

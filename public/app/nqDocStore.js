@@ -125,6 +125,7 @@ function(declare, lang, array, when, all, registry,
             var newParent = directives.parent;
             //var newParentId = directives.parent.id;
             var beforeId = directives.before?directives.before._id:undefined;
+            var promises = [];
 
             if(true == true){
                 if(oldParent){
@@ -133,7 +134,7 @@ function(declare, lang, array, when, all, registry,
                         if(idx>-1) {
                             oldParent[arrayName].splice(idx,1);
                             //store put old
-                            self.put(oldParent);
+                            promises.push(self.put(oldParent));
                             if(beforeId) {
                                 var beforeIdx = newParent[arrayName].indexOf(beforeId);
                                 if(beforeIdx>0) {
@@ -141,15 +142,15 @@ function(declare, lang, array, when, all, registry,
                                 }
                                 else {
                                     if(newParent[arrayName]) newParent[arrayName].push(movingObjectId);
-                                    else newParent[arrayName]= [movingObjectId];
+                                    else newParent[arrayName] = [movingObjectId];
                                 }
                             }
                             else {
                                 if(newParent[arrayName]) newParent[arrayName].push(movingObjectId);
-                                else newParent[arrayName]= [movingObjectId];
+                                else newParent[arrayName] = [movingObjectId];
                             }
                             //store put new
-                            self.put(newParent);
+                            promises.push(self.put(newParent));
                         }
 
                     }
@@ -158,7 +159,7 @@ function(declare, lang, array, when, all, registry,
                         if(idx>0) {
                             oldParent[arrayName].splice(idx,1);
                             //store put old
-                            self.put(oldParent);
+                            promises.push(self.put(oldParent));
                         }
                     }
                 }
@@ -170,7 +171,7 @@ function(declare, lang, array, when, all, registry,
                         }
                         else {
                             if(newParent[arrayName]) newParent[arrayName].push(movingObjectId);
-                            else newParent[arrayName]= [movingObjectId];
+                            else newParent[arrayName] = [movingObjectId];
                         }
                     }
                     else {
@@ -178,7 +179,7 @@ function(declare, lang, array, when, all, registry,
                         else newParent[arrayName]= [movingObjectId];
                     }
                     //store put new
-                    self.put(newParent);
+                    promises.push(self.put(newParent));
                 }
             }
             else{
@@ -194,7 +195,7 @@ function(declare, lang, array, when, all, registry,
             }
 
 
-return;
+            return all(promises);
 
 
             return this.get(viewId).then(function(view){
