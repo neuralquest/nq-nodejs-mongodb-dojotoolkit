@@ -2,6 +2,7 @@
 var postData = require('./postData');
 var getData = require('./getData');
 var consistency = require('./consistency');
+var jstoxml = require('jstoxml');
 
 exports = module.exports = function(app, passport) {
     app.get("/documents", function (req, res) {
@@ -118,6 +119,25 @@ exports = module.exports = function(app, passport) {
                 res.send(cssStr);
             }
         });
+    });
+    app.get('/sitemap.xml', function(req, res) {
+        var sitemapObj = jstoxml.toXML({
+            _name: 'urlset',
+            _attrs: {
+                xmlns: "http://www.sitemaps.org/schemas/sitemap/0.9"
+            },
+            _content: [
+                {url: {
+                    loc: 'http://neuralquest.org#.575d4c3f2cf3d6dc3ed83146...575d4c3f2cf3d6dc3ed83148.575d4c3f2cf3d6dc3ed83147..0'
+                }},
+                {url: {
+                    loc: 'http://neuralquest.org#.575d4c3f2cf3d6dc3ed83146...575d4c3f2cf3d6dc3ed83148.575d4c3f2cf3d6dc3ed83147..0'
+                }}
+            ]
+        }, {header: true, indent: '  '});
+        var sitemapXml = jstoxml.toXML(sitemapObj, true, '  ');
+        res.header('Content-Type', 'application/xml');
+        res.send( sitemapXml );
     });
     app.get('/login/google',
         passport.authenticate('google',{

@@ -370,10 +370,9 @@ function(declare, lang, array, when, all, registry,
                         }
                         break;
                     case 'isA':
-                        return this.Filter(function (obj) {
+                        return self.cachingStore.Filter(function (obj) {
                             if(obj.docType == 'class') return false;
-                            var classId = docFilter[key];
-                            return self.isASync(obj, classId);
+                            return self.isASync(obj, docFilter);
                         });
                         break;
                     case 'view':

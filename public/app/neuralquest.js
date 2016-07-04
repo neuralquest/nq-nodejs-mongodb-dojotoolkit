@@ -76,7 +76,10 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 if(pageObj.tabs) pageObj.tabs.forEach(function (tabObj) {
                     //Does the tabObj have a pageId (instead of widgets)?. It wont be empty but the next level might be. Let drawBorderContainer find out.
                     var tabPane = registry.byId(pageId+'.'+tabNum);
+                    //if(!tabPane) tabPane  = parentContentPane;
                     if(tabObj.pageId) tabsPromises.push(drawBorderContainer(tabPane, tabObj.pageId, level));
+                    //else tabsPromises.push(drawAccordionsOrTabs(pageObj, tabPane, level));//Fill the parent content pane with tabs/accordions as needed
+                    //else tabsPromises.push(drawWidgets(tabPane));
                     tabNum++;
                 });
                 return all(tabsPromises);
@@ -123,10 +126,13 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         });
     }
     function drawAccordionsOrTabs(pageObj, parentContentPane, level) {
+        console.log('drawAccordionsOrTabs', pageObj.name, parentContentPane.id);
+        if(pageObj.name=='State History Page') debugger;
         var tabsPromises = [];
         //Is there only one tab? skip the tab container and just use the parent content pane
         if (pageObj.tabs.length <= 1) {
             var tabPane = new ContentPane({
+                //id: pageObj._id+'.0',
                 id: pageObj._id,
                 level: level,
                 tabNum: 0,
@@ -182,6 +188,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     }
     function drawWidgets(tabPane) {
         var pageId = tabPane.id.split('.')[0];
+        //if(pageId == 'slave') pageId = tabPane.id.split('.')[1];
         return nqStore.get(pageId).then(function(pageObj){
             var widgetPromises = [];
             var widNum = 0;
@@ -311,7 +318,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     }
     function getSelectedTabRecursive(wid0, indent){
         indent = indent?indent:'';
-        //console.log(indent, wid0.id, wid0.declaredClass, wid0.region);
+        console.log(indent, wid0.id, wid0.declaredClass, wid0.region);
         if(wid0.declaredClass=='dijit.layout.BorderContainer'){
             var w0Arr = registry.findWidgets(wid0.containerNode);
             var wid2 = null;

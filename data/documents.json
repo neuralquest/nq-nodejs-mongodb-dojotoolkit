@@ -15,7 +15,7 @@
             "title" : "_id", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "filter" : {
+            "query" : {
                 "eq" : {
                     "docType" : "class"
                 }
@@ -36,7 +36,8 @@
         }, 
         "icon" : {
             "title" : "Icon", 
-            "type" : "string"
+            "type" : "string", 
+            "maxLength" : NumberInt(1000)
         }, 
         "description" : {
             "title" : "Description", 
@@ -81,7 +82,7 @@
             "title" : "Owner Id", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "filter" : {
+            "query" : {
                 "isA" : "56f870a55dde184ccfb9fc6c"
             }
         }
@@ -502,17 +503,26 @@
         "buyerId" : {
             "title" : "Buyer", 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "isA" : "56f870a55dde184ccfb9fc6c"
+            }
         }, 
         "sellerId" : {
             "title" : "Seller", 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "isA" : "56f870a55dde184ccfb9fc6c"
+            }
         }, 
         "assetId" : {
             "title" : "Asset", 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "isA" : "56f87bcc5dde184ccfb9fc70"
+            }
         }, 
         "stateHistory" : {
             "title" : "State History", 
@@ -523,8 +533,7 @@
                 "pattern" : "[a-f0-9]{24}"
             }, 
             "query" : {
-                "_id" : "56f87bcc5dde184ccfb9fc70", 
-                "association" : "history"
+                "isA" : "574234113c6d3cd598a5a30b"
             }, 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
@@ -539,20 +548,13 @@
     "description" : "<p>Menbership Agreements between user and organizations</p>", 
     "type" : "object", 
     "properties" : {
-        "userId" : {
-            "title" : "User", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "organizationId" : {
-            "title" : "Organization", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
         "organizationalUnitId" : {
             "title" : "Organizational Unit", 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "isA" : "574237133c6d3cd598a5a30d"
+            }
         }
     }, 
     "parentId" : "574225cb3c6d3cd598a5a305"
@@ -563,23 +565,6 @@
     "title" : "Purchase", 
     "description" : "<p>Purchase Agreements between owners</p>", 
     "type" : "object", 
-    "properties" : {
-        "buyerId" : {
-            "title" : "Buyer", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "sellerId" : {
-            "title" : "Seller", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "assetId" : {
-            "title" : "Asset", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }
-    }, 
     "parentId" : "574225cb3c6d3cd598a5a305"
 }
 { 
@@ -592,10 +577,13 @@
         "stateId" : {
             "title" : "State", 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "isA" : "5745eaa53c6d3cd598a5a371"
+            }
         }, 
-        "changeDate" : {
-            "title" : "Stamp", 
+        "date" : {
+            "title" : "Date", 
             "type" : "string", 
             "format" : "date-time"
         }
@@ -690,23 +678,6 @@
     "title" : "Service", 
     "description" : "<p>Service Agreements between owners</p>", 
     "type" : "object", 
-    "properties" : {
-        "buyerId" : {
-            "title" : "Buyer", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "sellerId" : {
-            "title" : "Seller", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "assetId" : {
-            "title" : "Asset", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }
-    }, 
     "parentId" : "574225cb3c6d3cd598a5a305"
 }
 { 
@@ -715,23 +686,6 @@
     "title" : "Rental", 
     "description" : "<p>Rental Agreements between owners</p>", 
     "type" : "object", 
-    "properties" : {
-        "buyerId" : {
-            "title" : "Buyer", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "sellerId" : {
-            "title" : "Seller", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }, 
-        "assetId" : {
-            "title" : "Asset", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
-        }
-    }, 
     "parentId" : "574225cb3c6d3cd598a5a305"
 }
 { 
@@ -1125,14 +1079,8 @@
         }, 
         {
             "name" : "Backlog", 
-            "description" : "Assets and Liabilities", 
-            "widgets" : [
-                {
-                    "displayType" : "Table", 
-                    "name" : "Home Page", 
-                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
-                }
-            ]
+            "description" : "Backlog", 
+            "pageId" : "577853123c6d3cd598a5a396"
         }, 
         {
             "name" : "Members", 
@@ -1873,7 +1821,7 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83150"), 
     "docType" : "object", 
-    "name" : "Document Page", 
+    "name" : "Document Tree Page", 
     "description" : "<p>The document page</p>", 
     "divider" : "Vertical", 
     "accordionOrTab" : "Accordions", 
@@ -1926,7 +1874,7 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83155"), 
     "docType" : "object", 
-    "name" : "Update Document Page", 
+    "name" : "xxxxxx Inset Page", 
     "description" : "<p>The document page</p>", 
     "divider" : "Vertical", 
     "accordionOrTab" : "Accordions", 
@@ -1950,7 +1898,7 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83156"), 
     "docType" : "object", 
-    "name" : "Update Paragraph Page", 
+    "name" : "XXXXX Update Paragraph Page", 
     "description" : "<p>Update paragraph page</p>", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
@@ -2048,7 +1996,7 @@
     "accordionOrTab" : "Tabs", 
     "tabs" : [
         {
-            "name" : "Read", 
+            "name" : "Page", 
             "description" : "Document Page", 
             "widgets" : [
                 {
@@ -2059,9 +2007,15 @@
             ]
         }, 
         {
-            "name" : "Update", 
-            "description" : "Document Page", 
-            "pageId" : "575d4c3f2cf3d6dc3ed83155"
+            "name" : "Insets", 
+            "description" : "Insets Page", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "Insets Table", 
+                    "viewId" : "575de7f43c6d3cd598a5a387"
+                }
+            ]
         }
     ], 
     "parentId" : "56f87ec55dde184ccfb9fc74", 
@@ -2292,4 +2246,156 @@
 
     }, 
     "parentId" : "57343c283c6d3cd598a5a2e9"
+}
+{ 
+    "_id" : ObjectId("5777a04e3c6d3cd598a5a392"), 
+    "docType" : "object", 
+    "name" : "Backlog View", 
+    "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "57783efc3c6d3cd598a5a394"
+    }, 
+    "properties" : {
+        "name" : {
+            "readOnly" : false
+        }
+    }, 
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("57783efc3c6d3cd598a5a394"), 
+    "docType" : "object", 
+    "name" : "Table editor does not work", 
+    "description" : "<p>Something amis</p>", 
+    "buyerId" : "575d4c3f2cf3d6dc3ed8314f", 
+    "sellerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "assetId" : "", 
+    "stateHistory" : [
+        "577909043c6d3cd598a5a39e"
+    ], 
+    "parentId" : "57424f1b3c6d3cd598a5a321"
+}
+{ 
+    "_id" : ObjectId("577853123c6d3cd598a5a396"), 
+    "docType" : "object", 
+    "name" : "Backlog Page", 
+    "description" : "<p>Backlog page</p>", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Backlog Table", 
+            "description" : "<p>Backlog Table</p>", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "Backlog Table", 
+                    "viewId" : "5777a04e3c6d3cd598a5a392", 
+                    "pageId" : "57785c393c6d3cd598a5a398"
+                }
+            ]
+        }
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("57785c393c6d3cd598a5a398"), 
+    "docType" : "object", 
+    "name" : "State History Page", 
+    "description" : "<p>State History Page</p>", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "History", 
+            "description" : "State Page", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "State Form", 
+                    "viewId" : "577862b83c6d3cd598a5a39a"
+                }, 
+                {
+                    "displayType" : "Table", 
+                    "name" : "State Table", 
+                    "viewId" : "577863d83c6d3cd598a5a39c"
+                }
+            ]
+        }
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("577862b83c6d3cd598a5a39a"), 
+    "docType" : "object", 
+    "name" : "State Form View", 
+    "description" : "<p>State Form View</p>", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "574225cb3c6d3cd598a5a305"
+    }, 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "name" : {
+
+        }, 
+        "assetId" : {
+
+        }, 
+        "buyerId" : {
+
+        }, 
+        "sellerId" : {
+
+        }, 
+        "description" : {
+
+        }
+    }, 
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("577863d83c6d3cd598a5a39c"), 
+    "docType" : "object", 
+    "name" : "State History Table View", 
+    "description" : "<p>State History Table View</p>", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "574234113c6d3cd598a5a30b"
+    }, 
+    "properties" : {
+        "date" : {
+
+        }, 
+        "stateId" : {
+
+        }, 
+        "description" : {
+
+        }
+    }, 
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("577909043c6d3cd598a5a39e"), 
+    "docType" : "object", 
+    "description" : "<p>Defect confirmed</p>", 
+    "stateId" : "57790e503c6d3cd598a5a3a0", 
+    "date" : "2008-10-17T00:00:00Z", 
+    "parentId" : "574234113c6d3cd598a5a30b"
+}
+{ 
+    "_id" : ObjectId("57790e503c6d3cd598a5a3a0"), 
+    "docType" : "object", 
+    "name" : "Proposal", 
+    "description" : "<p>Proposal</p>", 
+    "parentId" : "5747254b3c6d3cd598a5a379"
 }

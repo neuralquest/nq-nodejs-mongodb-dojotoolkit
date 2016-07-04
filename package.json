@@ -26,6 +26,7 @@
     "express": "~4.13.1",
     "express-mongo-db": "^2.0.3",
     "express-session": "^1.12.1",
+    "jstoxml": "^0.2.3",
     "merge": "^1.2.0",
     "mongodb": "2.0.34",
     "morgan": "~1.6.1",

@@ -62,6 +62,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
             var columns = [];
             for(var attrName in self.schema.properties) {
                 var attrProps = self.schema.properties[attrName];
+                attrProps.field = attrProps.title;
                 columns.push(attrProps);
                 if(attrProps.enum){
                     attrProps.renderCell = function(object, value, node, options){
@@ -88,7 +89,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                     attrProps.editor = Select;
                 }
                 else if(attrProps.media && attrProps.media.mediaType == 'text/html'){
-                    self.editorToolbarDivNode.appendChild(attrProps.editorArgs.toolbar.domNode);
+                    //self.editorToolbarDivNode.appendChild(attrProps.editorArgs.toolbar.domNode);
                     attrProps.renderCell = function(object, value, node, options) {
                         if(!value) html.set(node, '<p>[no text]</p>');
                         else html.set(node, value);
@@ -104,6 +105,8 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                 }
                 else if(attrProps.type == 'string'){
                     attrProps.renderCell = function(object, value, node, options) {
+                        html.set(node, object.name);
+                        return;
                         if(!value) html.set(node, '[null]');
                         else html.set(node, value);
                     };
@@ -182,15 +185,19 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
              });*/
             self.grid.on('dgrid-select', function (event) {
                 // Report the item from the selected row to the console.
-                var id = event.rows[0].data._id;
-                if(!id) id = event.rows[0].data.id;
-                console.log('Row selected: ', event.rows);
-                nq.setHashViewId(self.level, self.view._id, self.tabId, id);
+                var item = event.rows[0].data;
+                //var id = event.rows[0].data._id;
+                //if(!id) id = event.rows[0].data.id;
+                //console.log('Row selected: ', event.rows);
+                //nq.setHashViewId(self.level, self.view._id, self.tabId, id);
+                var pageId = item.pageId;
+                if(!pageId) pageId = self.widget.pageId;
+                if(pageId) nq.setHash(item._id, pageId, 0, 0, self.level+1);
             });
             self.grid.on("dgrid-error", function(event) {
                 //nq.errorDialog;
                 // Display an error message above the grid when an error occurs.
-                new dijit.Dialog({title: "DGrid Error", extractContent: true, content: event.error.message}).show();
+                new dijit.Dialog({title: "dGrid Error", extractContent: true, content: event.error.message}).show();
             });
             /*self.grid.on("dgrid-refresh-complete", function(event){
              var row = grid.row(event);
@@ -209,10 +216,18 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			if(this.docId == id) return this;
 			this.docId = id;
 
-            //var collection = this.store.filter({parentId: id, parentViewId: this.widgetId});
-            //var children = collection.fetch();
-            //this.grid.set('collection', collection);
-
+            if(this.schema && this.schema.query) {
+                var docFilter = this.schema.query;
+                var childrenFilter = this.store.buildFilterFromQuery(null, docFilter);
+                if(childrenFilter) {
+                    //childrenFilter = {parentId:'57783efc3c6d3cd598a5a394'};
+                    var collection = this.store.filter(childrenFilter);
+                    //childrenCollection.fetch().then(function (childObjects) {
+                    //var collection = this.store.filter({parentId: id, parentViewId: this.widgetId});
+                    //var children = collection.fetch();
+                    this.grid.set('collection', collection);
+                }
+            }
 
 			//this.grid.set('query',{parentId: value, widgetId: this.widgetId, join:true});
             //this.grid.refresh();
