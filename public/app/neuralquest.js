@@ -43,9 +43,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         else interpretHash();
     });
     function interpretHash(_hash) {
-        var slaveContentPane = registry.byId('placeholder');
-        var widPromise = drawBorderContainer(slaveContentPane, getState(0).pageId, 0);
-        when(widPromise, function(res){
+        when(drawFramesRecursive(0), function(res){
             var hashArr = hash().split('.');
             var levels = Math.ceil(hashArr.length/4);//determine the number of levels, rounded to the highest integer
             for(var level = 0; level<levels; level++) {
@@ -63,29 +61,37 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             }
         },nq.errorDialog);
     }
+    function drawFramesRecursive(level){
+        var state = getState(level);
+        //console.log('state', state);
+        if(!state.pageId) return false;//nothing left to display
+        if(registry.byId(state.pageId)) return drawFramesRecursive(level+1); // if the page already exists we can simply go on to the next level
+        var parentContentPane;
+        //if(level == 0) parentContentPane = registry.byId('placeholder');
+        //else parentContentPane = registry.byId('slave.'+state.pageIdPreviousLevel);
+        //if(!parentContentPane) parentContentPane = registry.byId('slave'+state.tabIdPreviousLevel);
+        if(level == 0) parentContentPane = registry.byId('placeholder');
+        else {
+            var pageObj = nqStore.cachingStore.getSync(state.pageIdPreviousLevel);
+            if(pageObj.tabs && pageObj.tabs[state.tabNumPreviousLevel] && pageObj.tabs[state.tabNumPreviousLevel].pageId){
+                var subPageId = pageObj.tabs[state.tabNumPreviousLevel].pageId;
+                var subPageObj = nqStore.cachingStore.getSync(subPageId);
+                if(subPageObj.divider == 'Horizontal' || subPageObj.divider == 'Vertical') {
+                    parentContentPane = registry.byId('slave.'+subPageObj._id);
+                }
+            }
+            else parentContentPane = registry.byId('slave.'+state.pageIdPreviousLevel);
+        }
+        if(!parentContentPane) return false;
+
+        return when(drawBorderContainer(parentContentPane, state.pageId, level), function(res){
+            return drawFramesRecursive(level+1);
+        });
+    }
     function drawBorderContainer(parentContentPane, pageId, level) {
         if(!pageId) return false;
         return nqStore.get(pageId).then(function (pageObj) {
-            if(registry.byId(pageId)){// this page is already drawn, but the next level might need drawing
-                var tabsPromises = [];
-                if(pageObj.divider == 'Horizontal' || pageObj.divider == 'Vertical'){
-                    var slaveContentPane = registry.byId('slave.'+pageId);
-                    tabsPromises.push(drawBorderContainer(slaveContentPane,  getState(level+1).pageId, level + 1));//Draw the next level into the center pane
-                }
-                var tabNum = 0;
-                if(pageObj.tabs) pageObj.tabs.forEach(function (tabObj) {
-                    //Does the tabObj have a pageId (instead of widgets)?. It wont be empty but the next level might be. Let drawBorderContainer find out.
-                    var tabPane = registry.byId(pageId+'.'+tabNum);
-                    //if(!tabPane) tabPane  = parentContentPane;
-                    if(tabObj.pageId) tabsPromises.push(drawBorderContainer(tabPane, tabObj.pageId, level));
-                    //else tabsPromises.push(drawAccordionsOrTabs(pageObj, tabPane, level));//Fill the parent content pane with tabs/accordions as needed
-                    //else tabsPromises.push(drawWidgets(tabPane));
-                    tabNum++;
-                });
-                return all(tabsPromises);
-            }
             parentContentPane.destroyDescendants(false);
-            var tabsPromisies = [];
             if(pageObj.divider == 'Horizontal' || pageObj.divider == 'Vertical') {
                 var borderContainer = new BorderContainer({
                     'region': 'center',
@@ -114,26 +120,23 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 parentContentPane.containerNode.appendChild(borderContainer.domNode); //appendChild works better than attaching through create
                 borderContainer.startup();//this is a must
                 parentContentPane.resize();//this is a must
-                tabsPromisies.push(drawAccordionsOrTabs(pageObj, leftPane, level));//Fill the left pane with tabs/accordions as needed
-                tabsPromisies.push(drawBorderContainer(centerPane,  getState(level+1).pageId, level + 1));//Draw the next level into the center pane
+                return drawAccordionsOrTabs(pageObj, leftPane, level);//Fill the left pane with tabs/accordions as needed
             }
             else {
                 //There is no border container at this level, so go ahead and use the parent content pane
-                tabsPromisies.push(drawAccordionsOrTabs(pageObj, parentContentPane, level));//Fill the parent content pane with tabs/accordions as needed
-                //return true;
+                return drawAccordionsOrTabs(pageObj, parentContentPane, level);//Fill the parent content pane with tabs/accordions as needed
             }
-            return all(tabsPromisies);
         });
     }
     function drawAccordionsOrTabs(pageObj, parentContentPane, level) {
-        console.log('drawAccordionsOrTabs', pageObj.name, parentContentPane.id);
-        if(pageObj.name=='State History Page') debugger;
+        //console.log('drawAccordionsOrTabs', pageObj.name, parentContentPane.id);
         var tabsPromises = [];
         //Is there only one tab? skip the tab container and just use the parent content pane
         if (pageObj.tabs.length <= 1) {
             var tabPane = new ContentPane({
                 //id: pageObj._id+'.0',
                 id: pageObj._id,
+                region: 'center',
                 level: level,
                 tabNum: 0,
                 title: pageObj.tabs[0].name,
@@ -145,6 +148,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             //parentContentPane.level = level;
             //parentContentPane.tabNum = 0;
             tabsPromises.push(drawWidgets(tabPane));
+            //if(tabObj.pageId) tabsPromises.push(drawBorderContainer(tabPane, tabObj.pageId, level));
+            //else tabsPromises.push(drawWidgets(tabPane));
+
         }
         else {
             var container = null;

@@ -51,10 +51,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
+            this.headerDivNode = domConstruct.create('h1', {'style' : {  'display': 'none', 'padding': '10px'} }, this.domNode);//placeholder for header
             this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
 			this.pageToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.domNode);//placeholder for the page toolbar
 			this.editorToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.domNode);//placeholder for the editor toolbar
-            this.headerDivNode = domConstruct.create('div', {'style' : {  'display': 'none', 'padding': '10px'} }, this.domNode);//placeholder for header
 			this.pane = new ContentPane( {
 //				'class' : 'backgroundClass',
 				'doLayout' : 'true',
@@ -64,9 +64,13 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.own(this.pane);
 		},
         postCreate: function(){
+            this.inherited(arguments);
             if(this.schema){
-                this.headerDivNode.innerHTML = '<h1>'+this.schema.name+'</h1>';
-                //domStyle.set(self.headerDivNode, 'display', 'block');//set the header node, created in the superclass,  to visible
+                if(this.widTot>1) {
+                    this.headerDivNode.innerHTML  = this.widget.name;
+                    //domConstruct.create('h1', {innerHTML: this.widget.name,'style' : { 'padding': '10px'} }, this.pane.containerNode);
+                    domStyle.set(this.headerDivNode, 'display', 'block');//set the header node, created in the superclass,  to visible
+                }
                 this.pageHelpTextDiv.innerHTML = this.schema.description;
             }
         },
@@ -85,6 +89,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.pane.resize();
 		},
         setFromValues: function(properties, doc, node){
+            var self = this;
             for(var attrName in properties) {
                 var attrProps = properties[attrName];
                 var value = doc[attrName]?doc[attrName]:attrProps.default;
@@ -120,6 +125,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 else if(attrProps.media && attrProps.media.mediaType == 'image/webgl'){
                                 }
                                 else if(attrProps.enum) td.innerHTML = value;
+                                else if(attrProps.query) td.innerHTML = self.store.cachingStore.getSync(value).name;
                                 else td.innerHTML = value;
                             }
                             else if(attrProps.type == 'number') td.innerHTML = parseFloat(value).toFixed(2);
@@ -184,7 +190,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 else domConstruct.create("td", {innerHTML: attrProps.title, style: style},trDom);
                                 var tdDom = null;
                                 //The input td
-                                if (attrProps.type == 'object' || (attrProps.type == 'string' && attrProps.media && attrProps.media.mediaType == 'text/html')) {
+                                if ((attrProps.type == 'object' && attrProps.title != '_id') || (attrProps.type == 'string' && attrProps.media && attrProps.media.mediaType == 'text/html')) {
                                     // certain input field get they're own row
                                     domConstruct.create("td", null, trDom);//empty td
                                     var editorRowDom = domConstruct.create("tr", null, tableNode);

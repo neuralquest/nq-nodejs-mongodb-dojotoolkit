@@ -15,11 +15,14 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			stamp/*, nqRenderAllMixin*/){
    
 	return declare("nqTable", [nqWidgetBase], {
-		viewIdsArr: [],
-		
+		//viewIdsArr: [],
+        //readOnly: true,
+
 		postCreate: function(){
 			this.inherited(arguments);
+            var self = this;
 
+            /*
 			//initially show the toolbar div
 			domStyle.set(this.pageToolbarDivNode, 'display' , 'block');
 			// Create toolbar and place it at the top of the page
@@ -58,16 +61,23 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 			});
 			this.normalToolbar.addChild(this.deleteButton);
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
-
+*/
             var columns = [];
             for(var attrName in self.schema.properties) {
                 var attrProps = self.schema.properties[attrName];
-                attrProps.field = attrProps.title;
+                //var attrProps ={};
+                attrProps.field = attrName;
+                attrProps.label = attrProps.title;
+                attrProps.editOn = 'dblclick';
+                attrProps.canEdit = function (object, value) {
+                    if(attrProps.readOnly == undefined) return false;
+                    if(attrProps.readOnly) return false;
+                    return self.store.amAuthorizedToUpdate(object);
+                };
                 columns.push(attrProps);
                 if(attrProps.enum){
                     attrProps.renderCell = function(object, value, node, options){
                         if(!value) html.set(node, '[not selected]');
-                        //if(!value) node.appendChild(document.createTextNode('[not selected]'));
                         else{
                             var selectedOption = this.editorArgs.store.get(value);
                             if(selectedOption) node.appendChild(document.createTextNode(selectedOption.label));
@@ -75,42 +85,71 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                         }
                     };
                     attrProps.editor = Select;
-                }
-                else if(attrProps['#ref']){
-                    attrProps.renderCell = function(object, value, node, options){
-                        if(!value) html.set(node, '[not selected]');
-                        //if(!value) node.appendChild(document.createTextNode('[not selected]'));
-                        else{
-                            var selectedOption = this.editorArgs.store.get(value);
-                            if(selectedOption) node.appendChild(document.createTextNode(selectedOption.label));
-                            else node.appendChild(document.createTextNode('id: '+value));
-                        }
-                    };
-                    attrProps.editor = Select;
-                }
-                else if(attrProps.media && attrProps.media.mediaType == 'text/html'){
-                    //self.editorToolbarDivNode.appendChild(attrProps.editorArgs.toolbar.domNode);
-                    attrProps.renderCell = function(object, value, node, options) {
-                        if(!value) html.set(node, '<p>[no text]</p>');
-                        else html.set(node, value);
-                    };
-                    attrProps.get = function(item){
-                        var value = item[attrName];
-                        if(!value) return '<p>[no text]</p>';//editor will crash if it does not have a value
-                        return value;
-                    };
-                    attrProps.editor = RTFEditor;
                 }
                 else if(attrProps.media && attrProps.media.mediaType == 'text/json'){
                 }
                 else if(attrProps.type == 'string'){
-                    attrProps.renderCell = function(object, value, node, options) {
-                        html.set(node, object.name);
-                        return;
-                        if(!value) html.set(node, '[null]');
-                        else html.set(node, value);
-                    };
-                    attrProps.editor == 'text';
+                    if(attrProps.media && attrProps.media.mediaType == 'text/html'){
+                        //self.editorToolbarDivNode.appendChild(attrProps.editorArgs.toolbar.domNode);
+                        attrProps.renderCell = function(object, value, node, options) {
+                            if(!value) html.set(node, '<p>[no text]</p>');
+                            else html.set(node, value);
+                        };
+                        attrProps.get = function(item){
+                            var value = item[attrName];
+                            if(!value) return '<p>[no text]</p>';//editor will crash if it does not have a value
+                            return value;
+                        };
+                        if(!self.readOnly) attrProps.editor = RTFEditor;
+                    }
+                    else if(attrProps.format == 'date-time'){
+                        /*attrProps.renderCell = function(object, value){
+                            var div = document.createElement("div");
+                            var date = null;
+                            //if(!value || value=='') html.set(node, '[no date selected]');
+                            if(lang.isObject(value)) date = value;//the date widget returns an date object
+                            else date = dojo.date.stamp.fromISOString(value);
+                            //html.set(node, date.toLocaleDateString());
+                            div.appendChild(document.createTextNode(date));
+                            return div;
+                        };
+                        attrProps.renderCell = function(object, value, node, options) {
+                            console.log('value', value);
+                            if(!value || value=='') html.set(node, '[no date selected]');
+                            else {
+                                var date = null;
+                                if(lang.isObject(value)) date = value;//the date widget returns an date object
+                                else date = dojo.date.stamp.fromISOString(value);
+                                html.set(node, date.toLocaleDateString());
+                            }
+                        };
+                        */
+                        attrProps.get = function(item) {
+                            var value = item[this.field];
+                            if(!value) return '[no date]';
+                            var date = dojo.date.stamp.fromISOString(value);
+                            return date.toLocaleDateString();
+                        };
+                        //attrProps.autoSave = true;
+                        attrProps.editor = DateTextBox;
+                    }
+                    else if(attrProps.query){
+                        attrProps.get = function(item) {
+                            var value = item[this.field];
+                            if(!value) return '[null]';
+                            //var date = dojo.date.stamp.fromISOString(value);
+                            return self.store.cachingStore.getSync(value).name;
+                        };
+                        //attrProps.autoSave = true;
+                        attrProps.editor =  'text';
+                    }
+                    else {
+                        attrProps.renderCell = function (object, value, node, options) {
+                            if (!value) html.set(node, '[null]');
+                            else html.set(node, value);
+                        };
+                        attrProps.editor == 'text';
+                    }
                 }
                 else if(attrProps.type == 'number') {
                     attrProps.renderCell = function(object, value, node, options) {
@@ -119,30 +158,9 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                     };
                     attrProps.editor == 'number';
                 }
-                else if(attrProps.type == 'date'){
-                    attrProps.renderCell = function(object, value, node, options) {
-                        console.log('value', value);
-                        if(!value || value=='') html.set(node, '[no date selected]');
-                        else {
-                            var date = null;
-                            if(lang.isObject(value)) date = value;//the date widget returns an date object
-                            else date = dojo.date.stamp.fromISOString(value);
-                            html.set(node, date.toLocaleDateString());
-                        }
-                    };
-                    /*attrProps.set = function(item) {
-                     var value = item[this.field];
-                     if(!value) return;
-                     var date = dojo.date.stamp.fromISOString(value);
-                     return stamp.toISOString(date);
-                     };*/
-                    //attrProps.autoSave = true;
-                    attrProps.editor = DateTextBox;
-                }
                 else if(attrProps.type == 'boolean'){
                     attrProps.renderCell = function(object, value, node, options) {
-                        if(!value) html.set(node, 'false');
-                        else html.set(node, String(value));
+                        html.set(node, value==undefined?'false':String(value));
                     };
                     attrProps.editor = 'radio';
                 }
@@ -207,7 +225,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
 
 
 
-            self.own(self.normalToolbar);
+            //self.own(self.normalToolbar);
             self.own(self.grid);
 		},
 		setDocId: function(id){

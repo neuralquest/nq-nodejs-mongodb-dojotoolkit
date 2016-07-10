@@ -305,7 +305,8 @@ function(declare, lang, array, when, all, registry,
                 };
                 ancestorsArr.forEach(function(ancestor){
                     //combine the the two class.properties, there should be no overlap. If there is, the parent is leading
-                    lang.mixin(inheritedClassSchema.properties, ancestor.properties);
+                    //we have to clone otherwise we start messing with the real class
+                    lang.mixin(inheritedClassSchema.properties, lang.clone(ancestor.properties));
                     //merge.recursive(inheritedClassSchema.properties, ancestor.properties);
                     //combine the to class.required arrays. There should be no overlap
                     if(ancestor.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(inheritedClassSchema.required, ancestor.required);
@@ -389,7 +390,7 @@ function(declare, lang, array, when, all, registry,
                 }
             }
         },
-        updateAllowed: function(doc){
+        amAuthorizedToUpdate: function(doc){
             return true;
             var userId = "575d4c3f2cf3d6dc3ed83148";
             var ownerFilter = this.Filter().contains('owns', [doc._id]);
