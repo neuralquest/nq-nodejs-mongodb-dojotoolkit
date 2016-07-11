@@ -190,13 +190,13 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 else domConstruct.create("td", {innerHTML: attrProps.title, style: style},trDom);
                                 var tdDom = null;
                                 //The input td
-                                if ((attrProps.type == 'object' && attrProps.title != '_id') || (attrProps.type == 'string' && attrProps.media && attrProps.media.mediaType == 'text/html')) {
+                                /*if ((attrProps.type == 'object' && attrProps.title != '_id') || (attrProps.type == 'string' && attrProps.media && attrProps.media.mediaType == 'text/html')) {
                                     // certain input field get they're own row
                                     domConstruct.create("td", null, trDom);//empty td
                                     var editorRowDom = domConstruct.create("tr", null, tableNode);
                                     tdDom = domConstruct.create("td", {name:attrName, style:style, colspan: 2}, editorRowDom);
                                 }
-                                else tdDom = domConstruct.create("td", null, trDom);//ordinary td
+                                else*/ tdDom = domConstruct.create("td", null, trDom);//ordinary td
                                 if(/*!attrProps.readOnly || */attrProps.readOnly == true){
                                     domAttr.set(tdDom, 'name', attrName); //give it a name so we know where to put the value
                                     if(attrProps.bold) {//TODO make these optional
@@ -213,9 +213,9 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                     var dijit = null;
                                     if (attrProps.type == 'string') {
                                         if (attrProps.media && attrProps.media.mediaType == 'text/html') {
-                                            domConstruct.create("td", null, trDom);//empty td
-                                            var editorRowDom = domConstruct.create("tr", null, tableNode);
-                                            var editorTdDom = domConstruct.create("td", {colspan: 2}, editorRowDom);
+                                            //domConstruct.create("td", null, trDom);//empty td
+                                            //var editorRowDom = domConstruct.create("tr", null, tableNode);
+                                            //var editorTdDom = domConstruct.create("td", {colspan: 2}, editorRowDom);
 
                                             domStyle.set(self.editorToolbarDivNode, 'display', 'block');
                                             var toolbar = new Toolbar({
@@ -223,12 +223,12 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                             });
                                             domConstruct.place(toolbar.domNode, self.editorToolbarDivNode);
                                             dijit = new Editor({
-                                                value: "<p>You shouldn't be seeing this</p>",
+                                                value: "<p></p>",
                                                 toolbar: toolbar,
                                                 minHeight: '30px',
                                                 height: '',
                                                 name: attrName
-                                            }, domConstruct.create('div', null, editorTdDom));//setting the name wont be done autoamticly
+                                            }, domConstruct.create('div', null, tdDom));//setting the name wont be done autoamticly
                                             dijit.addStyleSheet('app/resources/editor.css');
 
 
@@ -373,10 +373,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                         }
                                     }
                                     else if (attrProps.type == 'object') {
-                                        domConstruct.create("td", null, trDom);//empty td
-                                        var editorRowDom = domConstruct.create("tr", null, tableNode);
-                                        var editorTdDom = domConstruct.create("td", {colspan: 2}, editorRowDom);
-                                        dijit = new Textarea(attrProps, domConstruct.create("td", {class: 'inputClass'}, editorTdDom));
+                                        //domConstruct.create("td", null, trDom);//empty td
+                                        //var editorRowDom = domConstruct.create("tr", null, tableNode);
+                                        //var editorTdDom = domConstruct.create("td", {colspan: 2}, editorRowDom);
+                                        dijit = new Textarea(attrProps, domConstruct.create("td", {class: 'inputClass'}, tdDom));
                                     }
                                     else if (attrProps.type == 'button') {
                                         var buttonProps = {

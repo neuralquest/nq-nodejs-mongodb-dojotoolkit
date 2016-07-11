@@ -19,10 +19,11 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 
             // load any meshes, return a defered so that selecting the object can wait
 			var loader = new THREE.JSONLoader(true);			
-			loader.load("app/resources/img/Neuralquest/mesh/classMesh.json", function(geometry, materials) {
-                self.classGeometry = geometry;
-                loader.load("app/resources/img/Neuralquest/mesh/objectMesh.json", function (geometry, materials) {
-                    self.objectGeometry = geometry;
+			loader.load("app/resources/img/Neuralquest/mesh/classMesh.json", function(classGeometry, materials) {
+                self.classGeometry = classGeometry;
+                loader.load("app/resources/img/Neuralquest/mesh/objectMesh.json", function (objectGeometry, materials) {
+                    objectGeometry.mergeVertices();
+                    self.objectGeometry = objectGeometry;
                     when(self.buildHierarchy(self.rootId), function (res) {
                         console.dir(cellPostionsStore);
                         var newPos = new THREE.Vector3(0, 0, 0);
@@ -103,7 +104,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
         },
         fillScene: function(){
             var classMaterial = new THREE.MeshLambertMaterial( {color: 0x8904B1});
-            var objectMaterial = new THREE.MeshLambertMaterial( {color:0x00CC00});
+            var objectMaterial = new THREE.MeshLambertMaterial( {color:0x00A300});
             //var connectorMaterial =  new THREE.MeshPhongMaterial({specular: 0xffffff, color: 0x9F9F9F, emissive: 0x4F4F4F,shininess: 100 });
             var connectorMaterial = new THREE.MeshLambertMaterial({color: 0xEFEFEF});
             var textMaterial = new THREE.MeshLambertMaterial({color: 0xEFEFEF});

@@ -442,14 +442,13 @@
     "description" : "<p>Organizations owned by users/organizations</p>", 
     "type" : "object", 
     "properties" : {
-        "banner" : {
+        "iconSrc" : {
             "title" : "Banner", 
             "type" : "string"
         }, 
         "what" : {
             "title" : "What", 
             "type" : "string", 
-            "readOnly" : false, 
             "maxLength" : NumberInt(10000), 
             "media" : {
                 "mediaType" : "text/html"
@@ -459,7 +458,6 @@
         "why" : {
             "title" : "Why", 
             "type" : "string", 
-            "readOnly" : false, 
             "maxLength" : NumberInt(10000), 
             "media" : {
                 "mediaType" : "text/html"
@@ -469,7 +467,6 @@
         "how" : {
             "title" : "How", 
             "type" : "string", 
-            "readOnly" : false, 
             "maxLength" : NumberInt(10000), 
             "media" : {
                 "mediaType" : "text/html"
@@ -1066,8 +1063,8 @@
             "description" : "<p>Neuralquest home page.</p>", 
             "widgets" : [
                 {
-                    "displayType" : "Home Page", 
-                    "name" : "Balance Sheet Form", 
+                    "displayType" : "Home", 
+                    "name" : "Home Page", 
                     "viewId" : "575d4c3f2cf3d6dc3ed83149"
                 }
             ]
@@ -1118,8 +1115,11 @@
     "docType" : "object", 
     "name" : "Neuralquest", 
     "description" : "<p>The Neuralquest organization</p>", 
-    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAMWSURBVDhPDcTpUxILAADw/Zeq6Z5qsA+OZVoqalmWT93woBSIJsSkpAAFkmMFWQ45l93lWt1lQRbkWIXYzCNlmibD7L3e6029j+9DolMzv/kBh5ynxrkOOfh7GkoYJzcD0xv+qRWnkjY+5TyTeZsyAclVQ4Ie3uBks8nbRANHVeaomjrcW/790S69RQUqDPKVI7foAEfMFzD7fhErEVb5yEBPyz2/0gzUtldrW/nDnVLtbeZgPfvzTeZnmantlA+2iwfrhf9Y+lue+oelPmeJDRLZjmPA/xT7I0B+nQvuQ54vs97PJk/VML8H+dbmfBU49B7GPzoj+x7iO7b0A0v8G1wEtsc9FSX+yZD8y17421n801Xcd7CcjsQfhjgZW9FkPpiX9hz5qvO33Jq5AFTnyl+8G7vW8q6Nq+gKpUcxecvjh5flykYzxA/6mjKMIJYTBZkhNw3Cvu55YNexvqktbmrYLTVbGme45zkDqBfzJWDLoPi6LPGcrjjWSi+XGTHhH6TpYT+wPBTPDtM5MVNSrOSkGRokGGGi+IyNSvHsRHoH3SjDpfRMKj6RD40kc4o0QHSg0XY00obGbkVIkKQekZQsHhNH8QcYLU+u6soLT6ILDtn60uxrH2KfhYHIzQjODyFNiH/Ajw+EHVdcVp7FfN4IXYLMl8z6Zp1S0Yqit1V0jzUgZ6eLQOQOibaG7fVOHd80c8FmumA3nLVoT+g0J6bUxzXqc1PDt/vB8bua+y+0HVZtHwygnYSmYUbO05ouh2wNZPDqip+XnT7+Sn1Mpzn1StL/ZKzrmbEONtTZ3F2RhKIASOpkAp5k7IZK1C7vVvRONhpUp436M5aJVpVU9NTU6HK2hZFe2tkecndF4VYUUF8z9NYPCm9IBA0jozyZVKCwdaKyMcXLPoO1AXN3LkRFWWwoBbfg0FUvzMeA0N10+F6GFK4ujq6iYAoZpSC9O/Y4j4KMq42YvYIY691QI+LuJsKijK8/DgT5SaQj5WxewP9Yzmjesvp3yXEuJMy7Ohb1F12qkxbLNYyQ5oPCJR9IefuoX5Pp0wY8bKT4AAAAAElFTkSuQmCC", 
+    "iconSrc" : "app/resources/img/Neuralquest/lefkasHome1.png", 
     "pageId" : "575d4c3f2cf3d6dc3ed83147", 
+    "what" : "<p>Neualquest is a platform that helps people organize and work together</p>", 
+    "why" : "<p>The IT industry has been notably laking when it come to support for business processes</p>", 
+    "how" : "<p>Neuralquest is an open source project that anyone can use, either standallone or in the cloud.</p>", 
     "parentId" : "574243d23c6d3cd598a5a31b"
 }
 { 
