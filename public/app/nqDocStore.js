@@ -369,6 +369,9 @@ function(declare, lang, array, when, all, registry,
         },
         amAuthorizedToUpdate: function(doc){
             return true;
+            var user = nq.getUser();
+            if(user.id) return user.id;
+            return false;
             var userId = "575d4c3f2cf3d6dc3ed83148";
             var ownerFilter = this.Filter().contains('owns', [doc._id]);
             var ownerCollection = this.filter(ownerFilter);

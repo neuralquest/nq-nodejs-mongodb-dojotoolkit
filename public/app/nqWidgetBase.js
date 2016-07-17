@@ -124,11 +124,15 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             if(attrProps.type == 'string'){
                                 if(attrProps.media && attrProps.media.mediaType == 'text/html') td.innerHTML = value;
                                 else if(attrProps.media && attrProps.media.mediaType == 'image/jpg'){
+                                    domConstruct.create("img", {src: value.url, width: 300}, td);
                                 }
                                 else if(attrProps.media && attrProps.media.mediaType == 'image/webgl'){
                                 }
                                 else if(attrProps.enum) td.innerHTML = value;
-                                else if(attrProps.query) td.innerHTML = self.store.cachingStore.getSync(value).name;
+                                else if(attrProps.query) {
+                                    var refDoc = self.store.cachingStore.getSync(value);
+                                    td.innerHTML = refDoc.name?refDoc.name:refDoc.title;
+                                }
                                 else td.innerHTML = value;
                             }
                             else if(attrProps.type == 'number') td.innerHTML = parseFloat(value).toFixed(2);
@@ -138,8 +142,26 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 td.innerHTML = date.toLocaleDateString();
                             }
                             else if(attrProps.type == 'boolean') td.innerHTML = value?'true':'false';
-                            else if(attrProps.type == 'array');
-                            else if(attrProps.type == 'object') td.innerHTML = JSON.stringify(value, null, 4);
+                            else if(attrProps.type == 'array'){
+                                value.forEach(function(item){
+                                    if(attrProps.query){
+                                        var refDoc = self.store.cachingStore.getSync(item);
+                                        domConstruct.create("p", {innerHTML:refDoc.name}, td);
+                                    }
+                                    else if(attrProps.items && attrProps.items.properties){
+                                        var props = attrProps.items.properties;
+                                        //self.setFromValues(props, doc, td)
+                                        var codeNode = domConstruct.create("pre", {style:{padding:'0px', border:'none',background:'transparent'}}, td);
+                                        codeNode.innerHTML = JSON.stringify(item, null, 4);
+                                    }
+                                    else td.innerHTML = value;
+                                });
+                            }
+                            else if(attrProps.type == 'object') {
+                                var codeNode = domConstruct.create("pre", {style:{padding:'0px', border:'none',background:'transparent'}}, td);
+                                codeNode.innerHTML = JSON.stringify(value, null, 4);
+                            }
+                            else td.innerHTML = value;
                         }
                     });
                 }
@@ -177,29 +199,35 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     var props = colProperties[j];
                     maxProperties = props.length>maxProperties?props.length:maxProperties;
                 }
-                //iterate the max number of properties for this row 
+                //iterate the max number of column properties for this row
                 for(var propListIdx=0;propListIdx<maxProperties;propListIdx++){
                     var trDom = domConstruct.create("tr", null, tableNode);
                     //For each column in this row
-                    for(var j=1;j<colProperties.length;j++){//column 0 is not used
-                        var propNameArr = colProperties[j]; //get the property name array for this row/column
+                    for(var k=1;k<colProperties.length;k++){//column 0 is not used
+                        var propNameArr = colProperties[k]; //get the property name array for this row/column
                         var attrName = propNameArr[propListIdx]; //get the attrName from the property name array
                         // there is no corresponding attrName in this column, so add an empty row
                         if(!attrName) domConstruct.create("td", {colspan:2}, trDom);//Empty row
                         else{
                             var attrProps = properties[attrName];
-                            if(attrProps && !(attrProps.type == 'array' && attrProps.items && attrProps.items.type=='object' )){
-                                var style = {
+                            if(attrProps){
+                                // The label
+                                var labelStyle = {
                                     'font-weight': attrProps.bold?'bold':'normal',
                                     //'font-weight': 'bold',
                                     'font-size': attrProps.size?attrProps.size:'1em',
-                                    'padding-top': '5px'
+                                    'padding-top': '3px',
+                                    'white-space': 'nowrap'
                                 };
-                                // The label
                                 if(attrProps.type == 'button') domConstruct.create("td", {},trDom); // No label for buttons
-                                else domConstruct.create("td", {innerHTML: attrProps.title, style: style},trDom);
-                                var tdDom = null;
+                                else domConstruct.create("td", {innerHTML: attrProps.title, style: labelStyle},trDom);
+
                                 //The input td
+                                var tdDom = null;
+                                var style = {
+                                    'font-weight': attrProps.bold?'bold':'normal',
+                                    'font-size': attrProps.size?attrProps.size:'1em'
+                                };
                                 /*if ((attrProps.type == 'object' && attrProps.title != '_id') || (attrProps.type == 'string' && attrProps.media && attrProps.media.mediaType == 'text/html')) {
                                     // certain input field get they're own row
                                     domConstruct.create("td", null, trDom);//empty td
@@ -207,7 +235,9 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                     tdDom = domConstruct.create("td", {name:attrName, style:style, colspan: 2}, editorRowDom);
                                 }
                                 else*/ tdDom = domConstruct.create("td", null, trDom);//ordinary td
-                                if(/*!attrProps.readOnly || */attrProps.readOnly == true){
+                                if(attrProps.readOnly == undefined ||
+                                    attrProps.readOnly ||
+                                    self.amAuthorizedToUpdate == false){
                                     domAttr.set(tdDom, 'name', attrName); //give it a name so we know where to put the value
                                     if(attrProps.bold) {//TODO make these optional
                                         //style['border-top-style'] = 'solid';
@@ -241,27 +271,43 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                             }, domConstruct.create('div', null, tdDom));//setting the name wont be done autoamticly
                                             dijit.addStyleSheet('app/resources/editor.css');
 
-
+                                            dijit.on('focus', lang.hitch(toolbar, function(event){
+                                                registry.findWidgets(self.editorToolbarDivNode).forEach(function(wid){
+                                                    domAttr.set(wid.domNode, 'style', {'display': 'none'});
+                                                });
+                                                domAttr.set(this.domNode, 'style', {'display': ''});
+                                            }));
                                             //Needed for auto sizing, found it in AlwaysShowToolbar in the dijit library
-                                            //dijit.startup();//dijit has to be started before we can attach evens
-                                            dijit.on("NormalizedDisplayChanged", function(event){
+                                            dijit.on('NormalizedDisplayChanged', lang.hitch(dijit, function(event){
                                                 // summary:
                                                 //		Updates the height of the editor area to fit the contents.
-                                                var e = this.editorObject;
-                                                //if(!e.isLoaded) return;
-                                                if(e.height) return;
-                                                var height = domGeometry.getMarginSize(this.domNode).h;
-                                                if(has("opera"))height = e.editNode.scrollHeight;
+                                                var e = this;
+                                                if(!e.isLoaded){
+                                                    return;
+                                                }
+                                                if(e.height){
+                                                    return;
+                                                }
+
+                                                var height = domGeometry.getMarginSize(e.editNode).h;
+                                                if(has("opera")){
+                                                    height = e.editNode.scrollHeight;
+                                                }
                                                 // console.debug('height',height);
                                                 // alert(this.editNode);
+
                                                 //height maybe zero in some cases even though the content is not empty,
                                                 //we try the height of body instead
-                                                if(!height) height = domGeometry.getMarginSize(this.ownerDocumentBody).h;
+                                                if(!height){
+                                                    height = domGeometry.getMarginSize(e.document.body).h;
+                                                }
+
                                                 if(this._fixEnabled){
                                                     // #16204: add toolbar height when it is fixed aka "stuck to the top of the screen" to prevent content from cutting off during autosizing.
                                                     // Seems like _updateHeight should be taking the intitial margin height from a more appropriate node that includes the marginTop set in globalOnScrollHandler.
                                                     height += domGeometry.getMarginSize(this.editor.header).h;
                                                 }
+
                                                 if(height == 0){
                                                     console.debug("Can not figure out the height of the editing area!");
                                                     return; //prevent setting height to 0
@@ -275,19 +321,12 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                                 if(height != this._lastHeight){
                                                     this._lastHeight = height;
                                                     // this.editorObject.style.height = this._lastHeight + "px";
-                                                    //domGeometry.setMarginBox(this.iframe, { h: this._lastHeight });
+                                                    domGeometry.setMarginBox(e.iframe, { h: this._lastHeight });
                                                 }
-                                             /*var height = domGeometry.getMarginSize(this.domNode).h;
-                                             if(has("opera"))
-                                             height = this.editNode.scrollHeight;
-                                             }
-                                             //console.log('height',domGeometry.getMarginSize(this.editNode));
-                                             this.resize({h: height});
-                                             domGeometry.setMarginBox(this.iframe, { h: height });
-                                             */
-                                             });
+                                            }));
                                         }
                                         else if (attrProps.media && attrProps.media.mediaType == 'image/jpg') {
+
                                         }
                                         else if (attrProps.media && attrProps.media.mediaType == 'image/webgl') {
                                         }
@@ -406,11 +445,15 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                         if(dijit.declaredClass == 'dijit.form.Button'){
                                             dijit.on('click', function(evt){
                                                 //if(!form.validate()) return;
+                                                var data = {};
+                                                registry.findWidgets(node).forEach(function(wid){
+                                                    data[wid.name] = wid.get('value');
+                                                });
                                                 request.post(this.post, {
                                                     headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
-                                                    data: JSON.stringify(form.get('value'))
-                                                }).then(function(data){
-                                                    var user = dojo.fromJson(data);
+                                                    data: JSON.stringify(data)
+                                                }).then(function(result){
+                                                    var user = dojo.fromJson(result);
                                                     nq.setUser(user);
                                                     //TODO refresh the data
                                                     window.history.back();

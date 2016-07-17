@@ -214,8 +214,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
         plugins: [
             //'collapsibletoolbar', 'breadcrumb', 'newpage', 'save',
             {name: 'viewSource', stripScripts: true, stripComments: true},
-            'showBlockNodes', '|',
-            {name: 'fullscreen', zIndex: 900}, 'preview', 'print', '|',
+            //'showBlockNodes', '|',{name: 'fullscreen', zIndex: 900},
+            'preview', 'print', '|',
             'findreplace', 'selectAll', 'cut', 'copy','paste', 'pastefromword', 'delete', '|', 'undo', 'redo', '|',
             'pageBreak', 'insertHorizontalRule', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'blockquote', '|',
             'justifyLeft', 'justifyRight', 'justifyCenter', 'justifyFull', 'toggleDir', '|',

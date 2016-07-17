@@ -252,6 +252,15 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     //////////////////////////////////////////////////////////////////////////////
     //Helpers
     //////////////////////////////////////////////////////////////////////////////
+    lang.setObject("nq.setUser", setUser);//make the function globally accessible
+    function setUser(_user){
+        user = _user;
+        domattr.set('userNameDiv', 'innerHTML', _user.name);
+    }
+    lang.setObject("nq.getUser", getUser);//make the function globally accessible
+    function getUser(){
+        return user;
+    }
     lang.setObject("nq.getState", getState);//make the function globally accessible
     function getState(level){
         var hashArr = hash().split('.');
@@ -354,11 +363,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         }
         return wid0;
     }
-    lang.setObject("nq.setUser", setUser);//make the function globally accessible
-    function setUser(_user){
-        user = _user;
-        domattr.set('userNameDiv', 'innerHTML', _user.name);
-    }
+
     //userName = data==''?null:data;
     //
     lang.setObject("nq.test", test);//make the function globally accessible

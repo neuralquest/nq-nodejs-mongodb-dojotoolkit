@@ -6,13 +6,13 @@
     "type" : "object", 
     "properties" : {
         "_id" : {
-            "title" : "_id", 
+            "title" : "id", 
             "readOnly" : true, 
             "type" : "object", 
             "pattern" : "[a-f0-9]{24}"
         }, 
         "parentId" : {
-            "title" : "_id", 
+            "title" : "Class", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
@@ -28,7 +28,7 @@
             "default" : "[unnamed]"
         }, 
         "docType" : {
-            "title" : "Doument Type", 
+            "title" : "Type", 
             "type" : "string", 
             "enum" : [
                 "object"
@@ -63,12 +63,15 @@
     "type" : "object", 
     "properties" : {
         "pageId" : {
-            "title" : "Page Id", 
+            "title" : "Page", 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "isA" : "56f87ec55dde184ccfb9fc74"
+            }
         }, 
         "bannerUrl" : {
-            "title" : "BannerUrl", 
+            "title" : "Banner Url", 
             "type" : "string", 
             "maxLength" : NumberInt(1000)
         }
@@ -83,7 +86,7 @@
     "type" : "object", 
     "properties" : {
         "ownerId" : {
-            "title" : "Owner Id", 
+            "title" : "Owner", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
@@ -125,111 +128,85 @@
             "type" : "array", 
             "items" : {
                 "type" : "object", 
-                "oneOf" : [
-                    {
-                        "name" : "widgets", 
-                        "properties" : {
-                            "name" : {
-                                "title" : "Name", 
-                                "type" : "string", 
-                                "readOnly" : false, 
-                                "maxLength" : NumberInt(1000), 
-                                "default" : "[unnamed]"
-                            }, 
-                            "description" : {
-                                "title" : "Description", 
-                                "type" : "string", 
-                                "readOnly" : false, 
-                                "maxLength" : NumberInt(10000), 
-                                "media" : {
-                                    "mediaType" : "text/html"
-                                }, 
-                                "default" : "<p>no text</p>"
-                            }, 
-                            "widgets" : {
-                                "title" : "Widgets", 
-                                "type" : "array", 
-                                "items" : {
-                                    "type" : "object", 
-                                    "properties" : {
-                                        "name" : {
-                                            "title" : "Name", 
-                                            "type" : "string", 
-                                            "maxLength" : NumberInt(1000), 
-                                            "default" : "[unnamed]"
-                                        }, 
-                                        "description" : {
-                                            "title" : "Description", 
-                                            "type" : "string", 
-                                            "maxLength" : NumberInt(10000), 
-                                            "media" : {
-                                                "mediaType" : "text/html"
-                                            }, 
-                                            "default" : "<p>[no text]</p>"
-                                        }, 
-                                        "displayType" : {
-                                            "title" : "Display Types", 
-                                            "type" : "string", 
-                                            "enum" : [
-                                                "Document", 
-                                                "Tree", 
-                                                "Table", 
-                                                "3D Class Model", 
-                                                "Form", 
-                                                "TreeGrid", 
-                                                "HomePage"
-                                            ], 
-                                            "default" : "Form"
-                                        }, 
-                                        "viewId" : {
-                                            "title" : "View Id", 
-                                            "type" : "string", 
-                                            "pattern" : "[a-f0-9]{24}"
-                                        }, 
-                                        "rootDocId" : {
-                                            "title" : "Root Document Id", 
-                                            "type" : "string", 
-                                            "pattern" : "[a-f0-9]{24}"
-                                        }, 
-                                        "pageId" : {
-                                            "title" : "Page Id", 
-                                            "type" : "string", 
-                                            "pattern" : "[a-f0-9]{24}"
-                                        }
-                                    }, 
-                                    "additionalProperties" : false
-                                }
-                            }
-                        }, 
-                        "additionalProperties" : false
+                "properties" : {
+                    "name" : {
+                        "title" : "Name", 
+                        "type" : "string", 
+                        "readOnly" : false, 
+                        "maxLength" : NumberInt(1000), 
+                        "default" : "[unnamed]"
                     }, 
-                    {
-                        "name" : "subtabs", 
-                        "properties" : {
-                            "name" : {
-                                "title" : "Name", 
-                                "type" : "string", 
-                                "maxLength" : NumberInt(1000), 
-                                "default" : "[unnamed]"
-                            }, 
-                            "description" : {
-                                "title" : "Description", 
-                                "type" : "string", 
-                                "maxLength" : NumberInt(10000), 
-                                "media" : {
-                                    "mediaType" : "text/html"
-                                }, 
-                                "default" : "<p>[no text]</p>"
-                            }, 
-                            "pageId" : {
-                                "title" : "Page Id", 
-                                "type" : "string", 
-                                "pattern" : "[a-f0-9]{24}"
-                            }
+                    "description" : {
+                        "title" : "Description", 
+                        "type" : "string", 
+                        "readOnly" : false, 
+                        "maxLength" : NumberInt(10000), 
+                        "media" : {
+                            "mediaType" : "text/html"
                         }, 
-                        "additionalProperties" : false
+                        "default" : "<p>no text</p>"
+                    }, 
+                    "pageId" : {
+                        "title" : "Page Id", 
+                        "type" : "string", 
+                        "pattern" : "[a-f0-9]{24}"
+                    }, 
+                    "widgets" : {
+                        "title" : "Widgets", 
+                        "type" : "array", 
+                        "items" : {
+                            "type" : "object", 
+                            "properties" : {
+                                "name" : {
+                                    "title" : "Name", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "default" : "[unnamed]"
+                                }, 
+                                "description" : {
+                                    "title" : "Description", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(10000), 
+                                    "media" : {
+                                        "mediaType" : "text/html"
+                                    }, 
+                                    "default" : "<p>[no text]</p>"
+                                }, 
+                                "displayType" : {
+                                    "title" : "Display Types", 
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "Document", 
+                                        "Tree", 
+                                        "Table", 
+                                        "3D Class Model", 
+                                        "Form", 
+                                        "TreeGrid", 
+                                        "HomePage"
+                                    ], 
+                                    "default" : "Form"
+                                }, 
+                                "viewId" : {
+                                    "title" : "View Id", 
+                                    "type" : "string", 
+                                    "pattern" : "[a-f0-9]{24}"
+                                }, 
+                                "rootDocId" : {
+                                    "title" : "Root Document Id", 
+                                    "type" : "string", 
+                                    "pattern" : "[a-f0-9]{24}"
+                                }, 
+                                "pageId" : {
+                                    "title" : "Page Id", 
+                                    "type" : "string", 
+                                    "pattern" : "[a-f0-9]{24}"
+                                }
+                            }, 
+                            "additionalProperties" : false
+                        }
                     }
-                ]
+                }, 
+                "additionalProperties" : false
             }
         }
     }, 
@@ -279,7 +256,7 @@
             "type" : "object"
         }, 
         "query" : {
-            "title" : "Filter", 
+            "title" : "Query", 
             "type" : "object", 
             "properties" : {
                 "condition" : {
@@ -301,7 +278,7 @@
             }
         }, 
         "childrenQuery" : {
-            "title" : "Children Filter", 
+            "title" : "Children Query", 
             "type" : "object", 
             "properties" : {
                 "condition" : {
@@ -323,10 +300,12 @@
             }
         }, 
         "pageId" : {
-            "title" : "Page Id", 
+            "title" : "Page", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000), 
-            "pattern" : "[a-f0-9]{24}"
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "isA" : "56f87ec55dde184ccfb9fc74"
+            }
         }, 
         "required" : {
             "title" : "Required", 
@@ -346,9 +325,12 @@
     "type" : "object", 
     "properties" : {
         "viewId" : {
-            "title" : "View Id", 
+            "title" : "View", 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "isA" : "573435c23c6d3cd598a5a2df"
+            }
         }, 
         "insets" : {
             "title" : "Inset Properties", 
@@ -356,10 +338,6 @@
             "items" : {
                 "type" : "object", 
                 "properties" : {
-                    "mediaType" : {
-                        "title" : "Media Type", 
-                        "type" : "object"
-                    }, 
                     "media" : {
                         "title" : "Media", 
                         "type" : "object", 
@@ -374,12 +352,12 @@
                                     "text/javascript", 
                                     "img/png"
                                 ]
+                            }, 
+                            "default" : {
+                                "mediaType" : "text/plain"
                             }
                         }, 
-                        "additionalProperties" : false, 
-                        "default" : {
-                            "mediaType" : "text/plain"
-                        }
+                        "additionalProperties" : false
                     }, 
                     "url" : {
                         "title" : "Url", 
@@ -404,12 +382,14 @@
         }, 
         "childDocs" : {
             "type" : "array", 
-            "label" : "Sub Paragraphs", 
+            "title" : "Sub Paragraphs", 
             "items" : {
                 "type" : "string", 
                 "pattern" : "[a-f0-9]{24}"
             }, 
-            "isA" : "573435f03c6d3cd598a5a2e1", 
+            "query" : {
+                "isA" : "573435f03c6d3cd598a5a2e1"
+            }, 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
         }
@@ -504,8 +484,7 @@
                 "pattern" : "[a-f0-9]{24}"
             }, 
             "query" : {
-                "_id" : "56f87bcc5dde184ccfb9fc70", 
-                "association" : "owns"
+                "isA" : "56f87bcc5dde184ccfb9fc70"
             }, 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
@@ -618,15 +597,18 @@
     "type" : "object", 
     "properties" : {
         "pageId" : {
-            "title" : "Page Id", 
+            "title" : "Page", 
             "readOnly" : true, 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "isA" : "56f87ec55dde184ccfb9fc74"
+            }
         }, 
         "bannerUrl" : {
-            "title" : "BannerUrl", 
+            "title" : "Banner Url", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000)
+            "maxLength" : NumberInt(2000)
         }, 
         "what" : {
             "title" : "What", 
@@ -662,10 +644,8 @@
             "title" : "Parent Organization Id", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "filter" : {
-                "or" : {
-                    "isA" : "57343c283c6d3cd598a5a2e9"
-                }
+            "query" : {
+                "isA" : "57343c283c6d3cd598a5a2e9"
             }
         }
     }, 
