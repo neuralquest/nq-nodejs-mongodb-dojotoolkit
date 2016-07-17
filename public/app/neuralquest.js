@@ -56,6 +56,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 var widgetsArr = registry.findWidgets(tabPane.containerNode);
                 widgetsArr.forEach(function (widget) {
                     widget.setDocId(state.docIdPreviousLevel);
+                    widget.set('docId',state.docIdPreviousLevel);
                     //widget.setSelectedObjIdThisLevel(state.docId);
                 });
             }
@@ -237,7 +238,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                         var widgetObj = new nqClassChart(parms, domConstruct.create('div'));
                         tabPane.addChild(widgetObj);
                     }
-                    else if (widget.displayType == 'Home') {
+                    else if (widget.displayType == 'HomePage') {
                         var widgetObj = new nqHome(parms, domConstruct.create('div'));
                         tabPane.addChild(widgetObj);
                     }
@@ -328,7 +329,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     }
     function getSelectedTabRecursive(wid0, indent){
         indent = indent?indent:'';
-        console.log(indent, wid0.id, wid0.declaredClass, wid0.region);
+        //console.log(indent, wid0.id, wid0.declaredClass, wid0.region);
         if(wid0.declaredClass=='dijit.layout.BorderContainer'){
             var w0Arr = registry.findWidgets(wid0.containerNode);
             var wid2 = null;

@@ -104,7 +104,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
         },
         fillScene: function(){
             var classMaterial = new THREE.MeshLambertMaterial( {color: 0x8904B1});
-            var objectMaterial = new THREE.MeshLambertMaterial( {color:0x00A300});
+            var objectMaterial = new THREE.MeshLambertMaterial( {color:0x00A300});//0x00A300
             //var connectorMaterial =  new THREE.MeshPhongMaterial({specular: 0xffffff, color: 0x9F9F9F, emissive: 0x4F4F4F,shininess: 100 });
             var connectorMaterial = new THREE.MeshLambertMaterial({color: 0xEFEFEF});
             var textMaterial = new THREE.MeshLambertMaterial({color: 0xEFEFEF});

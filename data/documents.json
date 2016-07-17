@@ -24,7 +24,7 @@
         "name" : {
             "title" : "Name", 
             "type" : "string", 
-            "maxLength" : NumberInt(100), 
+            "maxLength" : NumberInt(1000), 
             "default" : "[unnamed]"
         }, 
         "docType" : {
@@ -37,7 +37,7 @@
         "icon" : {
             "title" : "Icon", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000)
+            "maxLength" : NumberInt(2000)
         }, 
         "description" : {
             "title" : "Description", 
@@ -46,7 +46,7 @@
             "media" : {
                 "mediaType" : "text/html"
             }, 
-            "default" : "<p>no text</p>"
+            "default" : "<p>[no text]</p>"
         }
     }, 
     "required" : [
@@ -64,9 +64,13 @@
     "properties" : {
         "pageId" : {
             "title" : "Page Id", 
-            "readOnly" : true, 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}"
+        }, 
+        "bannerUrl" : {
+            "title" : "BannerUrl", 
+            "type" : "string", 
+            "maxLength" : NumberInt(1000)
         }
     }, 
     "parentId" : "56f86c6a5dde184ccfb9fc6a"
@@ -173,7 +177,7 @@
                                                 "3D Class Model", 
                                                 "Form", 
                                                 "TreeGrid", 
-                                                "Home Page"
+                                                "HomePage"
                                             ], 
                                             "default" : "Form"
                                         }, 
@@ -346,28 +350,51 @@
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}"
         }, 
-        "paragraphParts" : {
+        "insets" : {
+            "title" : "Inset Properties", 
             "type" : "array", 
             "items" : {
                 "type" : "object", 
                 "properties" : {
-                    "content" : {
-                        "title" : "Content", 
-                        "type" : "string", 
-                        "maxLength" : NumberInt(10000), 
-                        "media" : {
-                            "mediaType" : "text/html"
-                        }
-                    }, 
                     "mediaType" : {
                         "title" : "Media Type", 
                         "type" : "object"
                     }, 
+                    "media" : {
+                        "title" : "Media", 
+                        "type" : "object", 
+                        "properties" : {
+                            "mediaType" : {
+                                "title" : "Media Type", 
+                                "type" : "string", 
+                                "enum" : [
+                                    "text/plain", 
+                                    "text/html", 
+                                    "text/json", 
+                                    "text/javascript", 
+                                    "img/png"
+                                ]
+                            }
+                        }, 
+                        "additionalProperties" : false, 
+                        "default" : {
+                            "mediaType" : "text/plain"
+                        }
+                    }, 
                     "url" : {
                         "title" : "Url", 
                         "type" : "string", 
-                        "maxLength" : NumberInt(1000), 
-                        "format" : "hostname"
+                        "maxLength" : NumberInt(1000)
+                    }, 
+                    "height" : {
+                        "title" : "Height", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(100)
+                    }, 
+                    "width" : {
+                        "title" : "Width", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(100)
                     }
                 }, 
                 "required" : [
@@ -442,10 +469,6 @@
     "description" : "<p>Organizations owned by users/organizations</p>", 
     "type" : "object", 
     "properties" : {
-        "iconSrc" : {
-            "title" : "Banner", 
-            "type" : "string"
-        }, 
         "what" : {
             "title" : "What", 
             "type" : "string", 
@@ -600,9 +623,10 @@
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}"
         }, 
-        "banner" : {
-            "title" : "Banner", 
-            "type" : "string"
+        "bannerUrl" : {
+            "title" : "BannerUrl", 
+            "type" : "string", 
+            "maxLength" : NumberInt(1000)
         }, 
         "what" : {
             "title" : "What", 
@@ -1061,13 +1085,7 @@
         {
             "name" : "Home", 
             "description" : "<p>Neuralquest home page.</p>", 
-            "widgets" : [
-                {
-                    "displayType" : "Home", 
-                    "name" : "Home Page", 
-                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
-                }
-            ]
+            "pageId" : "578919763c6d3cd598a5a3a2"
         }, 
         {
             "name" : "Document", 
@@ -1115,10 +1133,11 @@
     "docType" : "object", 
     "name" : "Neuralquest", 
     "description" : "<p>The Neuralquest organization</p>", 
-    "iconSrc" : "app/resources/img/Neuralquest/lefkasHome1.png", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAGSSURBVDhPY2hgaMCDGpkaJ6lM2pq19cLCCzc23Hhy8glDr1QvmiJcqIm5qUOgg2H3uubNeasXuS7q4O9AU4EVMTQ3s06cqLxsUcDN40cOtx3uk+kDOgNNETJCMJuamJcu9T5ypOPCyeV7ps/fXLJ0Z/nWrdlbF7stnmU8a4L8BKDj23jbEBrgqLGRub2dt69PdsoU9fXrE86enH/nysFHV6+8vf/67e23DG1tPGgacKG2Nu45cywZnm/btHNnIdBINGlciOG/WPH/np0vl646u7N/1fLg/n7Zzk4hoGGNjUxoSiGI4T9DGghxZv9XqPxj1PCxaNq7eWvfbtz2+NGxffuqly71BGrGpgETqdT8D5j2v3Ldl57VLzpnPFmx9PquuSf3duPWgIwY0/7z5v2XKf+vWsPw/9jd//kr/lt2/BctRleHDTH8h4CP3//ff/N/2an/Dj3/BQtARmIohSCYBmTw99//68/+zzj4v3zt/7wV/5MW/Hfq/a9Z/1+q9D93LjYNmODrz/8vP/1/+Pb/rZcAE2mMw+k9hMEAAAAASUVORK5CYII=", 
+    "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
     "pageId" : "575d4c3f2cf3d6dc3ed83147", 
-    "what" : "<p>Neualquest is a platform that helps people organize and work together</p>", 
-    "why" : "<p>The IT industry has been notably laking when it come to support for business processes</p>", 
+    "what" : "<p>Neualquest is a platform that helps people organize and work together. As a visitor you can browse published information. As a participant you have your own space in which you can maintain blogs, foto albums, apps etc. and make them public as desired. You can also create organizations based on industy standard templates including basic business process, which you can then enhance as the need arises. Role based authorization ensures that only members of your organization assigned to a paticular organizational unit can read/modify data.<br></br></p>", 
+    "why" : "<p>The IT industry has been notably laking when it come to support for business processes. Today, a typical large organization might have thousands of systems running on tens of thousands of servers. Each of these systems requires a small army of experts to keep it from falling over. Gernally speaking, the processes themselves are not are not particulary complex. More often than not, its the interaction between the systems that causes</p>", 
     "how" : "<p>Neuralquest is an open source project that anyone can use, either standallone or in the cloud.</p>", 
     "parentId" : "574243d23c6d3cd598a5a31b"
 }
@@ -1667,7 +1686,7 @@
         "name" : {
             "readOnly" : false
         }, 
-        "paragraphParts" : {
+        "insets" : {
             "readOnly" : false
         }, 
         "childDocs" : {
@@ -1769,7 +1788,7 @@
             "description" : "Class Properties", 
             "widgets" : [
                 {
-                    "displayType" : "TreeGrid", 
+                    "displayType" : "Form", 
                     "name" : "Class TreeGrid"
                 }
             ]
@@ -1809,11 +1828,11 @@
         ]
     }, 
     "properties" : {
-        "icon" : {
+        "name" : {
             "readOnly" : false
         }, 
         "subUnits" : {
-            "readOnly" : false
+            "readOnly" : true
         }
     }, 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAADxSURBVDhPY/j//z9FmLrgzEyT/yB8eobx/5PTDP+fmGpAvBUgjahgFxgf6tcibAhI8+3thUAchAUX/t/bpfp/V7vS/+0t8v+3Nsn+39wo/X9DnQTCYJCTSQVrqkQQBoD8+///TCCeQySe+X95KT/CgONT9MGCpODFhdwIA45O0oVI/JhMHAaqXZDHgTAAFNJgA953EoeBauflsCEMONCrATHgST1xGKh2ThYLwgBQNIENuF1KHAaqnZXBhDAAFMdgA67kE4eBamemMyIMAAHkBLKuRuz/6krh/yvKBP4vLeYFhzgo0ED+BjkdQ/MAAgYGAKPFDB0e1bt2AAAAAElFTkSuQmCC", 
@@ -1850,12 +1869,13 @@
     "docType" : "object", 
     "name" : "The Neuralquest Document", 
     "description" : "<p>Boy desirous families prepared gay reserved add ecstatic say. Replied joy age visitor nothing cottage. Mrs door paid led loud sure easy read. Hastily at perhaps as neither or ye fertile tedious visitor. Use fine bed none call busy dull when. Quiet ought match my right by table means. Principles up do in me favourable affronting. Twenty mother denied effect we to do on.</p>", 
-    "paragraphParts" : [
+    "insets" : [
         {
             "url" : "app/resources/img/Neuralquest/3dClassModel.png", 
             "mediaType" : {
                 "media" : "img/png"
-            }
+            }, 
+            "width" : "30%"
         }
     ], 
     "childDocs" : [
@@ -1998,7 +2018,7 @@
     "accordionOrTab" : "Tabs", 
     "tabs" : [
         {
-            "name" : "Page", 
+            "name" : "Read", 
             "description" : "Document Page", 
             "widgets" : [
                 {
@@ -2009,12 +2029,25 @@
             ]
         }, 
         {
-            "name" : "Insets", 
+            "name" : "Update", 
+            "description" : "Document Page", 
+            "widgets" : [
+                {
+                    "displayType" : "Document", 
+                    "name" : "Document Page", 
+                    "readOnly" : false, 
+                    "viewId" : "575d4c3f2cf3d6dc3ed8314a"
+                }
+            ]
+        }, 
+        {
+            "name" : "Inset", 
             "description" : "Insets Page", 
             "widgets" : [
                 {
                     "displayType" : "Table", 
                     "name" : "Insets Table", 
+                    "readOnly" : false, 
                     "viewId" : "575de7f43c6d3cd598a5a387"
                 }
             ]
@@ -2074,34 +2107,15 @@
 { 
     "_id" : ObjectId("575de7f43c6d3cd598a5a387"), 
     "docType" : "object", 
-    "name" : "Paragraph Parts View", 
-    "description" : "<p>Paragraph Parts View</p>", 
+    "name" : "Inset Subdoc View", 
+    "description" : "<p>Inset Subdoc View</p>", 
     "type" : "object", 
     "query" : {
-        "isA" : "573435f03c6d3cd598a5a2e1"
-    }, 
-    "Yquery" : {
-        "and" : [
-            {
-                "isA" : "573435f03c6d3cd598a5a2e1"
-            }, 
-            {
-                "eq" : {
-                    "ownerId" : "$selectedObj"
-                }
-            }
-        ]
-    }, 
-    "Xquery" : {
-        "dot" : "paragraphParts"
-    }, 
-    "XchildrenQuery" : {
-        "in" : {
-            "_id" : "childDocs"
-        }
+        "isA" : "573435f03c6d3cd598a5a2e1", 
+        "subDoc" : "insets"
     }, 
     "properties" : {
-        "paragraphParts" : {
+        "insets" : {
             "readOnly" : false
         }
     }, 
@@ -2409,4 +2423,71 @@
     "name" : "Proposal", 
     "description" : "<p>Proposal</p>", 
     "parentId" : "5747254b3c6d3cd598a5a379"
+}
+{ 
+    "_id" : ObjectId("578919763c6d3cd598a5a3a2"), 
+    "docType" : "object", 
+    "name" : "Home Page", 
+    "description" : "<p>The home page</p>", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Read", 
+            "description" : "Home Page", 
+            "widgets" : [
+                {
+                    "displayType" : "HomePage", 
+                    "name" : "Home Page", 
+                    "viewId" : "578921fe3c6d3cd598a5a3a4"
+                }
+            ]
+        }, 
+        {
+            "name" : "Update", 
+            "description" : "Home Page", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Home Page", 
+                    "readOnly" : false, 
+                    "viewId" : "578921fe3c6d3cd598a5a3a4"
+                }
+            ]
+        }
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("578921fe3c6d3cd598a5a3a4"), 
+    "docType" : "object", 
+    "name" : "Home Page View", 
+    "description" : "<p>Descibes home page of the organization</p>", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "57343c283c6d3cd598a5a2e9"
+    }, 
+    "properties" : {
+        "name" : {
+            "readOnly" : false
+        }, 
+        "bannerUrl" : {
+            "readOnly" : false
+        }, 
+        "icon" : {
+            "readOnly" : false
+        }, 
+        "what" : {
+            "readOnly" : false
+        }, 
+        "why" : {
+            "readOnly" : false
+        }, 
+        "how" : {
+            "readOnly" : false
+        }
+    }, 
+    "parentId" : "573435c23c6d3cd598a5a2df", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }

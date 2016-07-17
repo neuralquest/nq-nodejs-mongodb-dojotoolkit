@@ -53,26 +53,32 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
             domStyle.set(this.pane.containerNode, 'padding-left' , '10px');
             domStyle.set(this.pane.containerNode, 'padding-right' , '10px');
         },
-		setDocId: function(id){
-			if(id.length == 0) return;
-			var self = this;
-			//load the data
-            var collection = this.store.filter({_id: id});
-            collection.fetch().then(function(children){
-                self.buildPage(children[0]);
-            });
-            collection.on('update', function(event){
-                collection.fetch().then(function(children){
-                    self.buildPage(children[0]);
+        _setDocIdAttr: function(docId){
+            this.inherited(arguments);
+            var self = this;
+            if(!this.docId) return;
+            var docCol = this.store.filter({_id: this.docId});
+            docCol.on('update', function(event){
+                docCol.fetch().then(function(docsArr){
+                    var doc = docsArr[0];
+                    self.buildPage(doc);
                 });
             });
-		},
+            docCol.fetch().then(function(docsArr){
+                var doc = docsArr[0];
+                when(self.store.amAuthorizedToUpdate(doc), function(updateAllowed){
+                    //if(self.amAuthorizedToUpdate != updateAllowed) self.buildPage(doc);
+                    self.amAuthorizedToUpdate = updateAllowed;
+                    self.buildPage(doc);
+                });
+            });
+        },
         buildPage: function(item){
             var self = this;
             var docDom = domConstruct.create('div');
             //var docDom = "";
             when(self.generateNextLevelContents(docDom, item, 1, null, false), function(obj){
-                if(true == false){
+                if(self.widget.readOnly==undefined?true:self.widget.readOnly){
                     //Clear the page
                     self.pane.destroyDescendants(false);//destroy all the widgets but leave the pane intact
                     self.editorDijit = null;
@@ -108,7 +114,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
                         //domConstruct.place(editorDijit.domNode, replaceDiv, "replace");
                         self.editorDijit.startup();
                     }
-                    console.log(docDom);
+                    //console.log(docDom);
                     self.editorDijit.set('value', docDom.innerHTML);
                 }
             });
@@ -123,12 +129,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
                 {innerHTML: item.name, style: {'clear': previousParagraphHasRightFloat?'both':'none'}},
                 divDom
             );
-            if(item.paragraphParts){
-                item.paragraphParts.forEach(function(paragraphPart){
-                    if(paragraphPart.mediaType){
-                        if(paragraphPart.mediaType.media == 'img/png'){
+            if(item.insets){
+                item.insets.forEach(function(inset){
+                    if(inset.mediaType){
+                        if(inset.mediaType.media == 'img/png'){
                             //image
-                            domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: paragraphPart.url, width: 300}, divDom);
+                            domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: inset.url, width: 300}, divDom);
                         }
                     }
                 });
@@ -206,7 +212,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
 
 
         plugins: [
-            'collapsibletoolbar', 'breadcrumb', 'newpage', 'save',
+            //'collapsibletoolbar', 'breadcrumb', 'newpage', 'save',
             {name: 'viewSource', stripScripts: true, stripComments: true},
             'showBlockNodes', '|',
             {name: 'fullscreen', zIndex: 900}, 'preview', 'print', '|',
@@ -214,8 +220,8 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
             'pageBreak', 'insertHorizontalRule', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'blockquote', '|',
             'justifyLeft', 'justifyRight', 'justifyCenter', 'justifyFull', 'toggleDir', '|',
             'bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'foreColor', 'hiliteColor', 'removeFormat', '|',
-            'insertEntity', 'smiley', 'createLink', 'insertanchor', 'unlink', 'insertImage',// '||',
-            {name: 'nqLocalImage', uploadable: true, uploadUrl: '/upload', baseImageUrl: '/app/resources/Neuralquest'},
+            'insertEntity', 'smiley', 'createLink', 'insertanchor', 'unlink', //'insertImage', '||',
+            //{name: 'nqLocalImage', uploadable: true, uploadUrl: '/upload', baseImageUrl: '/app/resources/Neuralquest'},
             //'fontName', {name: 'fontSize', plainText: true}, {name: 'formatBlock', plainText: true},// '||',
 
             /*{name: 'dojox.editor.plugins.TablePlugins', command: 'insertTable'},
@@ -230,7 +236,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
             {name: 'dojox.editor.plugins.TablePlugins', command: 'tableContextMenu'},*/
             //Pretty Print messes with the format of the result
             //{name: 'prettyprint', indentBy: 3, lineLength: 80, entityMap: dojox.html.entities.html.concat(dojox.html.entities.latin)},
-            {name: 'dijit._editor.plugins.EnterKeyHandling', blockNodeForEnter: "P"},
+            {name: 'dijit._editor.plugins.EnterKeyHandling', blockNodeForEnter: "Br"},
             'normalizeindentoutdent', 'normalizestyle', {name: 'statusbar', resizer: false}, "safepaste"
         ],
 

@@ -1,18 +1,18 @@
-define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-style",'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox', 'dojo/when', "dojo/promise/all", 
+define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-style",'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox', 'dojo/when', "dojo/promise/all",
          'dijit/Editor', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", "dojo/cookie", "dojo/hash", "dijit/form/ToggleButton",
          "app/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/date/locale", "dojo/html", 'dgrid/extensions/ColumnResizer',
         'dgrid/OnDemandGrid', 'dgrid/Editor', 'dgrid/Selector', 'dgrid/Keyboard', 'dgrid/extensions/DijitRegistry', "dgrid/extensions/DnD",
         "dgrid/Selection", "dijit/form/Button","dojo/_base/array", "dijit/registry",
-        "dojo/date/stamp", //'dGrid/_StoreMixin', 
+        "dojo/date/stamp",'dstore/QueryResults', //'dGrid/_StoreMixin',
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
-	function(declare, arrayUtil, lang, domStyle, Select, Toolbar, DateTextBox, when, all, 
+	function(declare, nqSubDocStore, arrayUtil, lang, domStyle, Select, Toolbar, DateTextBox, when, all,
 			RTFEditor, Memory, domConstruct, on, cookie, hash, ToggleButton,
 			nqWidgetBase, ContentPane, domGeometry, has, locale, html, ColumnResizer,
 			Grid, Editor, Selector, Keyboard, DijitRegistry, Dnd,
 			Selection, Button, array, registry,
-			stamp/*, nqRenderAllMixin*/){
+			stamp, QueryResults/*, nqRenderAllMixin*/){
    
 	return declare("nqTable", [nqWidgetBase], {
 		//viewIdsArr: [],
@@ -164,10 +164,24 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
                     };
                     attrProps.editor = 'radio';
                 }
+                else if(attrProps.type == 'array'){
+                    attrProps.renderCell = function(object, value, node, options) {
+                        var props = self.schema.properties.insets.items.properties;
+                        if(!object) html.set(node, '{}');
+                        else {
+                            self.renderForm(props, node, []);
+                            self.setFromValues(props, object, node)
+                        }
+                        //else html.set(node, JSON.stringify(object, null, 4));
+                    };
+                    attrProps.editor == 'text';
+                }
                 else if(attrProps.type == 'object'){
                     attrProps.renderCell = function(object, value, node, options) {
-                        if(!value) html.set(node, '{}');
-                        else html.set(node, JSON.stringify(value, null, 4));
+                        var props = self.schema.properties;
+                        if(!object) html.set(node, '{}');
+                        else self.renderForm(props, node, []);
+                        //else html.set(node, JSON.stringify(object, null, 4));
                     };
                     attrProps.editor == 'text';
                 }
@@ -228,31 +242,41 @@ define(['dojo/_base/declare', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-
             //self.own(self.normalToolbar);
             self.own(self.grid);
 		},
-		setDocId: function(id){
-            if(id.length == 0) return;
+        _setDocIdAttr: function(docId){
+            //if(docId == this.docId) return;
+            this.inherited(arguments);
+            var self = this;
+            if(!this.docId) return;
             //load the data
-			if(this.docId == id) return this;
-			this.docId = id;
-
+            var docCol = null;
             if(this.schema && this.schema.query) {
                 var docFilter = this.schema.query;
-                var childrenFilter = this.store.buildFilterFromQuery(null, docFilter);
-                if(childrenFilter) {
-                    //childrenFilter = {parentId:'57783efc3c6d3cd598a5a394'};
-                    var collection = this.store.filter(childrenFilter);
-                    //childrenCollection.fetch().then(function (childObjects) {
-                    //var collection = this.store.filter({parentId: id, parentViewId: this.widgetId});
-                    //var children = collection.fetch();
-                    this.grid.set('collection', collection);
+                if('subDoc' in docFilter){
+                    var parentDoc = this.store.cachingStore.getSync(this.docId);
+                    var subDocStore = new nqSubDocStore({
+                        idProperty: "name",
+                        data: parentDoc.insets?parentDoc.insets:[]
+                    });
+                    //var subDocStore = new nqSubDocStore({data:parentDoc.insets});
+                    docCol = subDocStore.filter();
+                    //docCol = new QueryResults(parentDoc.insets?parentDoc.insets:[]);
+                    this.grid.set('collection', docCol);
+                }
+                else{
+                    var childrenFilter = this.store.buildFilterFromQuery(null, docFilter);
+                    if(childrenFilter) {
+                        docCol = this.store.filter(childrenFilter);
+                        this.grid.set('collection', docCol);
+                    }
                 }
             }
-
-			//this.grid.set('query',{parentId: value, widgetId: this.widgetId, join:true});
-            //this.grid.refresh();
-			
-			//this.setDocIdDeferred.resolve(this);
-		}
-
+            if(docCol) {
+                //docCol.on('update', function (event) {
+                //    self.grid.refresh();
+                //});
+                //this.grid.set('collection', docCol);
+            }
+        }
 	});
 });
 

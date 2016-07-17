@@ -40,7 +40,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		docId: null,
 		selectedObjIdThisLevel: null,
 		setDocIdDeferred: null,
-		
+
+        _setDocIdAttr: function(docId){
+            this.docId = docId.length==0?null:docId;
+        },
 		setDocId: function(value){
 			this.docId = value;
 			return this;
@@ -144,10 +147,15 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         },
         renderForm: function(properties, node, structuredDocPathArr){
             var self = this;
+            registry.findWidgets(node).forEach(function(wid){
+                wid.destroyRecursive(true);
+                //node.destroyDescendants(wid);
+            });
+            domConstruct.empty(node);
             //console.log(JSON.stringify(object));
             //var form = new Form();
-            var form = new Form({}, domConstruct.create("form", null, node));
-            var tableNode = domConstruct.create('table', {style:{'border-spacing':'3px', 'padding-left': '5px'}}, form.containerNode);
+            //var form = new Form({}, domConstruct.create("form", null, node));
+            var tableNode = domConstruct.create('table', {style:{'border-spacing':'3px', 'padding-left': '5px'}}, node);
 
             //Collect the properties in a three dimensional array: [rows, columns, propNameArr]
             var rowColProperties = [];
@@ -183,7 +191,9 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             if(attrProps && !(attrProps.type == 'array' && attrProps.items && attrProps.items.type=='object' )){
                                 var style = {
                                     'font-weight': attrProps.bold?'bold':'normal',
-                                    'font-size': attrProps.size?attrProps.size:'1em'
+                                    //'font-weight': 'bold',
+                                    'font-size': attrProps.size?attrProps.size:'1em',
+                                    'padding-top': '5px'
                                 };
                                 // The label
                                 if(attrProps.type == 'button') domConstruct.create("td", {},trDom); // No label for buttons
@@ -373,10 +383,13 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                         }
                                     }
                                     else if (attrProps.type == 'object') {
+                                        if(attrProps.properties){
+                                            self.renderForm(attrProps.properties, tdDom, []);
+                                        }
                                         //domConstruct.create("td", null, trDom);//empty td
                                         //var editorRowDom = domConstruct.create("tr", null, tableNode);
                                         //var editorTdDom = domConstruct.create("td", {colspan: 2}, editorRowDom);
-                                        dijit = new Textarea(attrProps, domConstruct.create("td", {class: 'inputClass'}, tdDom));
+                                        else dijit = new Textarea(attrProps, domConstruct.create("td", {class: 'inputClass'}, tdDom));
                                     }
                                     else if (attrProps.type == 'button') {
                                         var buttonProps = {

@@ -193,40 +193,7 @@ function(declare, lang, array, when, all, registry,
 
                 }
             }
-
-
             return all(promises);
-
-
-            return this.get(viewId).then(function(view){
-                //TODO must merge
-                var assocType = view.toManyAssociations;
-                if(!assocType) assocType = view.toOneAssociations;
-                var destClassId = view.mapsTo;
-                if(assocType == 'ordered'){
-                    if(oldParentId){
-                        if(newParentId){
-                        }
-                        else{//no new parent means we are deleting the association
-                        }
-                    }
-                    else{//no oldParent means we're creating a new cell with a new association
-                        if(newParentId) {
-                        }
-                    }
-                }
-                else{
-                    if(oldParentId == newParentId) return;
-                    if(oldParentId){
-                        if(newParentId){
-                        }
-                        else{//no new parent means we are deleting the association
-                        }
-                    }
-                    else if(newParentId){//new assoc
-                    }
-                }
-            });
         },
         getRootCollection: function () {
 
@@ -242,7 +209,7 @@ function(declare, lang, array, when, all, registry,
             });
         },
         getSchemaForView: function (viewId) {
-            if(!viewId) return{};
+            if(!viewId) return null;
             var self = this;
             return self.get(viewId).then(function(viewObj){
                 if(!viewObj) throw new Error('View Object not found');
@@ -303,14 +270,24 @@ function(declare, lang, array, when, all, registry,
                     required:[],
                     additionalProperties: false
                 };
-                ancestorsArr.forEach(function(ancestor){
+                for(var i = ancestorsArr.length-1; i>=0; i--){
+                    var ancestor = ancestorsArr[i];
                     //combine the the two class.properties, there should be no overlap. If there is, the parent is leading
                     //we have to clone otherwise we start messing with the real class
                     lang.mixin(inheritedClassSchema.properties, lang.clone(ancestor.properties));
                     //merge.recursive(inheritedClassSchema.properties, ancestor.properties);
                     //combine the to class.required arrays. There should be no overlap
                     if(ancestor.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(inheritedClassSchema.required, ancestor.required);
-                });
+
+                };
+                /*ancestorsArr.forEach(function(ancestor){
+                    //combine the the two class.properties, there should be no overlap. If there is, the parent is leading
+                    //we have to clone otherwise we start messing with the real class
+                    lang.mixin(inheritedClassSchema.properties, lang.clone(ancestor.properties));
+                    //merge.recursive(inheritedClassSchema.properties, ancestor.properties);
+                    //combine the to class.required arrays. There should be no overlap
+                    if(ancestor.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(inheritedClassSchema.required, ancestor.required);
+                });*/
                 return inheritedClassSchema;
             });
         },
@@ -382,7 +359,7 @@ function(declare, lang, array, when, all, registry,
                             return this.buildFilterFromQuery(parentObj, subView.childrenQuery);
                         }
                         break;
-                    case 'dot':
+                    case 'array':
                         debugger;
                         break;
                     default:
