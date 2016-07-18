@@ -36,9 +36,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
     "dojox/editor/plugins/Smiley",
     "dojox/editor/plugins/NormalizeStyle",
     "dojox/editor/plugins/StatusBar",
-    "dojox/editor/plugins/SafePaste",
-
-    "app/nqLocalImage"
+    "dojox/editor/plugins/SafePaste"
 
         //'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins',"dijit._editor.plugins.FontChoice", 'dijit/WidgetSet'
         /*'dojox/editor/plugins/ResizeTableColumn'*/],

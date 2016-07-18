@@ -34,23 +34,18 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 	return declare("nqWidgetBase", [_WidgetBase], {
         widget: null,
 		store: null,
-        createDeferred: null,
-        parentId: null,
 		schema: null,
 		docId: null,
-		selectedObjIdThisLevel: null,
-		setDocIdDeferred: null,
+        selectedId: null,
+
 
         _setDocIdAttr: function(docId){
-            this.docId = docId.length==0?null:docId;
+            this.docId = docId?docId.length==24?docId:null:null;
         },
-		setDocId: function(value){
-			this.docId = value;
-			return this;
-		},
-		setSelectedObjIdThisLevel: function(value){
-			this.selectedObjIdThisLevel = value;
-		},
+        _setSelectedIdAttr: function(selectedId){
+            this.selectedId = selectedId?selectedId.length==24?selectedId:null:null;
+        },
+
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
@@ -135,7 +130,22 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 }
                                 else td.innerHTML = value;
                             }
-                            else if(attrProps.type == 'number') td.innerHTML = parseFloat(value).toFixed(2);
+                            else if(attrProps.type == 'number') {
+                                if(attrProps.query){
+                                    var childrenFilter = self.store.buildFilterFromQuery(doc, attrProps.query);
+                                    if(childrenFilter) {
+                                        var childrenCollection = self.store.filter(childrenFilter);
+                                        childrenCollection.fetch().then(function (childObjects) {
+                                            var sum = 0;
+                                            childObjects.forEach(function(asset){
+                                                sum+=asset.value;
+                                            });
+                                            td.innerHTML = parseFloat(sum).toFixed(2);
+                                        });
+                                    }
+                                }
+                                else td.innerHTML = parseFloat(value).toFixed(2);
+                            }
                             else if(attrProps.type == 'integer') td.innerHTML = parseInt(value);
                             else if(attrProps.type == 'date') {
                                 var date = dojo.date.stamp.fromISOString(value);

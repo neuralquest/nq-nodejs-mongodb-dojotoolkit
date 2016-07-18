@@ -9,8 +9,10 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
             this.inherited(arguments);
             this.createMenusForWidget();
         },
-		setDocId: function(id){
+        _setDocIdAttr: function(docId){
+            this.inherited(arguments);
             var self = this;
+
             if(self.rootDocId == self.widget.rootDocId) return;
             self.rootDocId = self.widget.rootDocId;
 			if(self.tree) self.tree.destroy();
@@ -50,8 +52,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				},
 				getTooltip: function(item, opened){
 					if(!item) return '';
-					//return item.id+' - '+item.viewId+' - '+item.classId;
-					if(dojo.config.isDebug) return item._id+' - '+item._viewId+' - '+item._icon;
+					if(dojo.config.isDebug) return item._id;
 				},
 				onClick: function(item, node, evt){
 					self.inherited('onClick',arguments);
@@ -59,112 +60,20 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     if(!pageId) pageId = self.widget.pageId;
                     if(pageId) nq.setHash(item._id, pageId, self.tabNum, self.widNum, self.level+1);
 				},
-                /*mayHaveChildren: function(item){
-                    //return 'children' in item;
-                    return true;
-                },
                 checkItemAcceptance: function(target, source, position){
-					var targetItem = dijit.getEnclosingWidget(target).item;
-					var uViewObj = self.permittedClassesByViewObj[targetItem._viewId];
-					var sourceItemClassId = source.current.item._icon;
-                    var found = false;
-                    for(var uViewId in uViewObj) {
-                        var permClassesArr = uViewObj[uViewId].classes;
-                        permClassesArr.forEach(function(permClass){
-                            var permClassId = permClass._id;
-                            // Why the f doesnt this work?
-                            //if(permClassId == sourceItemClassId) return true;
-                            //if(permClassId == sourceItemClassId) console.log('sourceItemClassId', sourceItemClassId);
-                            if(permClassId == sourceItemClassId) found = true;
-                        });
-                    }
- 					return found;
+					//var targetItem = dijit.getEnclosingWidget(target).item;
+ 					return true;
 				},
-
-				getRoot: function(onItem, onError){
-                    self.store.get( self.rootDocId).then(function(item) {
-                        onItem(item);
-                    });
-				},*/
 				onLoad: function(){
 					fullPage.resize();//need this for lazy loaded trees, some how the first tree lags behind
-					//console.dir(self.createDeferred.resolve(self));
-//					self.createDeferred.resolve(self);//ready to be loaded with data/
-//					self.setDocIdDeferred.resolve(self);
 				}
 			}, domConstruct.create('div'));
 			this.pane.containerNode.appendChild(this.tree.domNode);
 //			this.tree.startup();
 		},
-        setSelectedObjIdThisLevel: function(itemId){
-            if(!itemId) return;
-            var self = this;
-            //var itemNode = this.tree.getNodesByItem[846];
-            //console.log('itemNode', itemNode);
-            //this.tree.set('path', [842, 1784, 2387, 846]);
-
-
-
-            var promises = [];
-            var viewsArr = [];
-            //find the class of the current item
-            promises.push(self.store.getItemsByAssocType(itemId, 'parent'));
-            promises.push(self.store.getUniqueViewsForWidget(self.widgetId, viewsArr));
-            var pathPromises = all(promises).then(function(promiseResults){
-                var itemClass = promiseResults[0][0];
-                var allowedClassesPromises = [];
-                viewsArr.forEach(function(view){
-                    if(view.mapsTo) allowedClassesPromises.push(self.store.collectAllByAssocType(view.mapsTo, 'subclasses'));
-                    else allowedClassesPromises.push([]);
-                });
-                return all(allowedClassesPromises).then(function(allowedClassesArrArr){
-                    var count = 0;
-                    var restultsArr = [];
-                    var treePathPromises = [];
-                    allowedClassesArrArr.forEach(function(allowedClassesArr){
-                        var view = viewsArr[count];
-                        allowedClassesArr.forEach(function(allowedClass){
-                            if(itemClass._id == allowedClass._id){
-                                treePathPromises.push(self.store.getTreePath(view, itemId, restultsArr, 0));
-                            }
-                        });
-                        count++;
-                    });
-                    return all(treePathPromises).then(function(tree){
-                        return restultsArr;
-                    });
-                });
-            });
-            pathPromises.then(function(treePaths){
-                console.log('treePaths',treePaths);
-                if(treePaths[0] == 702) treePaths = [846,2016,702];
-                self.tree.set('path', treePaths).then(function(results){
-                    console.log('results',results);
-                    //self.tree.set('selectedItem', result[results.length-1]);
-                }, function(err){console.log('defect in set tree path');});
-            }, nq.errorDialog);
-        },
-        permittedClassesForUniqueView: function(uView){
-            var self = this;
-            self.store.getItemsByAssocTypeAndDestClass(uView._id, 'manyToMany', VIEW_CLASS_TYPE).then(function(manyViewsArr){
-                var permClassesPromises = [];
-                manyViewsArr.forEach(function(manyView){
-                    if(manyView.mapsTo) permClassesPromises.push(self.store.collectAllByAssocType(manyView.mapsTo, 'subclasses'));
-                });
-                return all(permClassesPromises).then(function(permClassesArrArr){
-                    //console.log('permClassesArrArr',permClassesArrArr);
-                    var permObj = {};
-                    var count = 0;
-                    permClassesArrArr.forEach(function(permClassesArr){
-                        var manyView = manyViewsArr[count];
-                        permObj[manyView._id] = {view: manyView, classes: permClassesArr};
-                        count++;
-                    });
-                    self.permittedClassesByViewObj[uView._id] = permObj;
-                    //console.log('permObj',uView._id,permObj);
-                    return true;
-                });
-            });
+        _setSelectedIdAttr: function(selectedId){
+            this.inherited(arguments);
+            this.tree.set('selectedItem', selectedId);
         },
 		createMenusForWidget: function(){
 			var self = this;

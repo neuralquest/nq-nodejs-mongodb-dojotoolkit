@@ -55,8 +55,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 var tabPane = getSelectedTabRecursive(registry.byId(state.pageId));//This will poke through sub-pages
                 var widgetsArr = registry.findWidgets(tabPane.containerNode);
                 widgetsArr.forEach(function (widget) {
-                    widget.setDocId(state.docIdPreviousLevel);
+                    //widget.setDocId(state.docIdPreviousLevel);
                     widget.set('docId',state.docIdPreviousLevel);
+                    widget.set('selectedId',state.docId);
                     //widget.setSelectedObjIdThisLevel(state.docId);
                 });
             }

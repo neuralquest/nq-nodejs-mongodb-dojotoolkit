@@ -5,33 +5,28 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 	var renderer, camera, scene, controls, projector, stats, requestId;
 	
 	return declare("nqWebGlChart", [_WidgetBase], {
+		widget: null,
+		store: null,
+		schema: null,
+		docId: null,
+		selectedId: null,
 		skyboxArray: [],
 		selectableObjects: [],
 		displayFPS: false,
 
-		docId: null,
-		selectedObjIdThisLevel: null,
 		
 		createDeferred: null,
 		setDocId: new Deferred(),
 		setSelectedObjIdThisLevel: new Deferred(),
-		
-		setDocId: function(objectId){
-            if(objectId.length == 0) return;
-            if(objectId == this.docId) return this;
-			this.docId = objectId;
-			
+		_setDocIdAttr: function(docId){
+			this.docId = docId?docId.length==24?docId:null:null;
+			if(!this.docId) return;
 			//goto selected object
-			var mesh = this.getMeshByName(objectId);
+			var mesh = this.getMeshByName(this.docId);
 			if(mesh) this.moveCameraToMesh(mesh);
-			return this;
 		},
-		_getSelectedObjIdPreviousLevelAttr: function(){ 
-			return this.docId;
-		},
-		setSelectedObjIdThisLevel: function(value){
-			this.selectedObjIdThisLevel = value;
-			return this;
+		_setSelectedIdAttr: function(selectedId){
+			this.selectedId = selectedId?selectedId.length==24?selectedId:null:null;
 		},
 		_getSelectedObjIdIdAttr: function(){ 
 			return this.selectedObjIdThisLevel;
