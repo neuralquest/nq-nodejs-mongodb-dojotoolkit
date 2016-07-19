@@ -215,16 +215,21 @@
 { 
     "_id" : ObjectId("573435433c6d3cd598a5a2db"), 
     "docType" : "class", 
-    "title" : "Balanace Sheet", 
+    "title" : "Balance Sheet", 
     "description" : "<p>Balance sheet owned by users/organizations</p>", 
     "type" : "object", 
     "properties" : {
         "value" : {
+            "title" : "Value", 
             "type" : "number"
         }, 
-        "curency" : {
+        "currency" : {
+            "title" : "Currency", 
             "type" : "string", 
-            "maxLength" : NumberInt(3)
+            "enum" : [
+                "EUR", 
+                "USD"
+            ]
         }
     }, 
     "parentId" : "56f87bcc5dde184ccfb9fc70"
@@ -613,7 +618,6 @@
         "what" : {
             "title" : "What", 
             "type" : "string", 
-            "readOnly" : false, 
             "maxLength" : NumberInt(100000), 
             "media" : {
                 "mediaType" : "text/html"
@@ -623,7 +627,6 @@
         "why" : {
             "title" : "Why", 
             "type" : "string", 
-            "readOnly" : false, 
             "maxLength" : NumberInt(100000), 
             "media" : {
                 "mediaType" : "text/html"
@@ -633,7 +636,6 @@
         "how" : {
             "title" : "How", 
             "type" : "string", 
-            "readOnly" : false, 
             "maxLength" : NumberInt(100000), 
             "media" : {
                 "mediaType" : "text/html"
@@ -641,7 +643,7 @@
             "default" : "<p>[How are you doing it?]</p>"
         }, 
         "parentOrgId" : {
-            "title" : "Parent Organization Id", 
+            "title" : "Parent Organization", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
@@ -1021,13 +1023,11 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83146"), 
     "docType" : "object", 
     "name" : "Navigation Page", 
-    "description" : "<p>The navigation accordion</p>", 
     "divider" : "Vertical", 
     "accordionOrTab" : "Accordions", 
     "tabs" : [
         {
             "name" : "Navigation", 
-            "description" : "This page provides an overview of users/organizations", 
             "widgets" : [
                 {
                     "displayType" : "Tree", 
@@ -1039,7 +1039,6 @@
         }, 
         {
             "name" : "Class Model", 
-            "description" : "Explore the Class Model", 
             "widgets" : [
                 {
                     "displayType" : "Tree", 
@@ -1058,28 +1057,23 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83147"), 
     "docType" : "object", 
     "name" : "Neuralquest Page", 
-    "description" : "<p>Neuralquest home page.</p>", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
         {
             "name" : "Home", 
-            "description" : "<p>Neuralquest home page.</p>", 
             "pageId" : "578919763c6d3cd598a5a3a2"
         }, 
         {
             "name" : "Document", 
-            "description" : "Assets and Liabilities", 
             "pageId" : "575d4c3f2cf3d6dc3ed83150"
         }, 
         {
             "name" : "Backlog", 
-            "description" : "Backlog", 
             "pageId" : "577853123c6d3cd598a5a396"
         }, 
         {
             "name" : "Members", 
-            "description" : "Neuralquest Members", 
             "widgets" : [
                 {
                     "displayType" : "Form", 
@@ -1090,7 +1084,6 @@
         }, 
         {
             "name" : "Balance Sheet", 
-            "description" : "Assets and Liabilities", 
             "widgets" : [
                 {
                     "displayType" : "Form", 
@@ -1101,7 +1094,6 @@
         }, 
         {
             "name" : "Resources", 
-            "description" : "Rsources owned by Neuralquest", 
             "pageId" : "575d4c3f2cf3d6dc3ed8314e"
         }
     ], 
@@ -1150,9 +1142,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256343c6d3cd598a5a329"
             }
         }, 
         "temporaryInvestments" : {
@@ -1162,9 +1153,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256373c6d3cd598a5a32b"
             }
         }, 
         "accountReceivibale" : {
@@ -1174,9 +1164,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742563a3c6d3cd598a5a32d"
             }
         }, 
         "inventory" : {
@@ -1186,9 +1175,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742563e3c6d3cd598a5a32f"
             }
         }, 
         "supplies" : {
@@ -1198,9 +1186,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256413c6d3cd598a5a331"
             }
         }, 
         "prepaidInsurance" : {
@@ -1210,9 +1197,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256453c6d3cd598a5a333"
             }
         }, 
         "totalCurrentAssests" : {
@@ -1223,9 +1209,8 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742561f3c6d3cd598a5a327"
             }
         }, 
         "investments" : {
@@ -1236,14 +1221,12 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256493c6d3cd598a5a335"
             }
         }, 
         "propertyPlantEquipment" : {
             "title" : "Property, Plant and Equipment", 
-            "default" : NumberInt(0), 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
@@ -1256,9 +1239,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742564f3c6d3cd598a5a339"
             }
         }, 
         "landImprovements" : {
@@ -1268,9 +1250,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256573c6d3cd598a5a33d"
             }
         }, 
         "buildings" : {
@@ -1280,9 +1261,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742565b3c6d3cd598a5a33f"
             }
         }, 
         "equipment" : {
@@ -1292,9 +1272,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742565e3c6d3cd598a5a341"
             }
         }, 
         "lessAccumDeprecation" : {
@@ -1304,9 +1283,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256613c6d3cd598a5a343"
             }
         }, 
         "totalPropPlantEquipment" : {
@@ -1317,9 +1295,8 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742564c3c6d3cd598a5a337"
             }
         }, 
         "intangibleAssets" : {
@@ -1336,9 +1313,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742566a3c6d3cd598a5a349"
             }
         }, 
         "tradeNames" : {
@@ -1348,9 +1324,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256713c6d3cd598a5a34d"
             }
         }, 
         "totalIntangibleAssests" : {
@@ -1361,9 +1336,8 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256643c6d3cd598a5a345"
             }
         }, 
         "totalAssests" : {
@@ -1375,9 +1349,8 @@
             "col" : NumberInt(1), 
             "size" : "1.2em", 
             "bold" : true, 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "57343b823c6d3cd598a5a2e3"
             }
         }, 
         "libilities" : {
@@ -1402,9 +1375,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256773c6d3cd598a5a351"
             }
         }, 
         "accountsPayable" : {
@@ -1414,9 +1386,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742567a3c6d3cd598a5a353"
             }
         }, 
         "wagesPayable" : {
@@ -1426,9 +1397,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742567d3c6d3cd598a5a355"
             }
         }, 
         "intrestPayable" : {
@@ -1438,9 +1408,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256833c6d3cd598a5a359"
             }
         }, 
         "taxesPayable" : {
@@ -1450,9 +1419,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256863c6d3cd598a5a35b"
             }
         }, 
         "warantyLiability" : {
@@ -1462,9 +1430,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256893c6d3cd598a5a35d"
             }
         }, 
         "Unearned Revenues" : {
@@ -1474,9 +1441,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742568e3c6d3cd598a5a35f"
             }
         }, 
         "totalCurrentLiabilities" : {
@@ -1487,9 +1453,8 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256743c6d3cd598a5a34f"
             }
         }, 
         "longTermLiabilities" : {
@@ -1506,9 +1471,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574261583c6d3cd598a5a363"
             }
         }, 
         "bondsPayable" : {
@@ -1518,9 +1482,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574261633c6d3cd598a5a365"
             }
         }, 
         "totalLongTermLiabilities" : {
@@ -1531,9 +1494,8 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256923c6d3cd598a5a361"
             }
         }, 
         "totalLiabilities" : {
@@ -1544,9 +1506,8 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574256743c6d3cd598a5a34f"
             }
         }, 
         "stockoldersEquity" : {
@@ -1564,9 +1525,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574261743c6d3cd598a5a369"
             }
         }, 
         "retainedEarnings" : {
@@ -1576,21 +1536,19 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574261793c6d3cd598a5a36b"
             }
         }, 
-        "AccumOtherComprehesiveIncome" : {
+        "accumOtherComprehesiveIncome" : {
             "title" : "Accum Other Comprehensive Income", 
             "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742617f3c6d3cd598a5a36d"
             }
         }, 
         "lessTreasuryStock" : {
@@ -1600,9 +1558,8 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "574261843c6d3cd598a5a36f"
             }
         }, 
         "totalStockholdersEquity" : {
@@ -1613,9 +1570,8 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "5742616e3c6d3cd598a5a367"
             }
         }, 
         "totalLibilitiesAndStock" : {
@@ -1627,9 +1583,8 @@
             "col" : NumberInt(2), 
             "size" : "1.2em", 
             "bold" : true, 
-            "sum" : {
-                "_id" : "", 
-                "association" : "instances"
+            "query" : {
+                "isA" : "57343bba3c6d3cd598a5a2e5"
             }
         }
     }, 
@@ -1759,13 +1714,11 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314c"), 
     "docType" : "object", 
     "name" : "Class Model Page", 
-    "description" : "<p>The class model page</p>", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
         {
             "name" : "Properties", 
-            "description" : "Class Properties", 
             "widgets" : [
                 {
                     "displayType" : "Form", 
@@ -1775,7 +1728,6 @@
         }, 
         {
             "name" : "3D Class Model", 
-            "description" : "Realtime view against Jupiter atmosphere", 
             "widgets" : [
                 {
                     "displayType" : "3D Class Model", 
@@ -1823,13 +1775,11 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83150"), 
     "docType" : "object", 
     "name" : "Document Tree Page", 
-    "description" : "<p>The document page</p>", 
     "divider" : "Vertical", 
     "accordionOrTab" : "Accordions", 
     "tabs" : [
         {
             "name" : "Document Tree", 
-            "description" : "<p>Docuement owned by user/organizations</p>", 
             "widgets" : [
                 {
                     "displayType" : "Tree", 
@@ -1874,56 +1824,11 @@
     "ownerId" : "575d4c3f2cf3d6dc3ed83148"
 }
 { 
-    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83155"), 
-    "docType" : "object", 
-    "name" : "xxxxxx Inset Page", 
-    "description" : "<p>The document page</p>", 
-    "divider" : "Vertical", 
-    "accordionOrTab" : "Accordions", 
-    "tabs" : [
-        {
-            "name" : "Document Tree", 
-            "description" : "<p>Docuement owned by user/organizations</p>", 
-            "widgets" : [
-                {
-                    "displayType" : "Table", 
-                    "name" : "Paragraph Parts Table", 
-                    "viewId" : "575de7f43c6d3cd598a5a387", 
-                    "pageId" : "575d4c3f2cf3d6dc3ed83156"
-                }
-            ]
-        }
-    ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
-}
-{ 
-    "_id" : ObjectId("575d4c3f2cf3d6dc3ed83156"), 
-    "docType" : "object", 
-    "name" : "XXXXX Update Paragraph Page", 
-    "description" : "<p>Update paragraph page</p>", 
-    "divider" : "None", 
-    "accordionOrTab" : "Tabs", 
-    "tabs" : [
-        {
-            "name" : "Properties", 
-            "description" : "Pargraph Properties", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Praragraph Part Form"
-                }
-            ]
-        }
-    ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
-}
-{ 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315a"), 
     "docType" : "object", 
     "name" : "Client", 
     "description" : "<p>The Neuralquest client</p>", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFWklEQVRYR62XbUxTVxjH/+faVigDqePN4JYwv2zGkGV8IUIkmYoDQgbRuExjSFCBdd1CAAETd3t7hQgIxCh2gEJCjJqYGdgMlKEugYjxi2YhxmmiM3tRuchAUcpL23uXc+lty7Wle7mnISTwO/f++5zn+T/PIQi/dLmN6HMDeR4RkFbgCYBVDKAD+gdqUADAHe7xdE+4FZ3diJme4jNYdIsAmBV4EQYdg6LugxiqQQyAV+Ee/k8ExG9twERHUSuG7laAbgi2iUaG/mRvakVpTwWu1yIBwHMtBCRsOwaheV85bv16AoSsIEAC0t8rR9W5E7h2GIkAJjQRsP0YBHZvIe6N9wb99spLaAQ2JhWCP9+Lq1oKyG6AULEnDX+8vL0U51BnQIB31qSh9cJtDNVqGIGcRggHi+Lwan5yeRlQIYFlQYDoiDic6ZmEo0Y7AfEfW9FriEKGRIvAu6SAKJAAEYQBFmcx+pMNhVolYTSAdwHEQS5x39JXltQ5WjqP5ABwBfyd1v4kgN+1KkP60kgAEarTN5VbDt0/0Xb8fQDTAQJoPOYBzP1XIzJYLJYF+kBJgrfsGBBaf77sC+aHypko/6Ob/bJOnjy5GsCiuiyD5bPJbDZP2e32NFVo1XuNZrP5lt1uTwfgXKHe9RaL5XZbW9taVaTkLYoAwvN8usfjcT148MAQExMz+vDhwx3JycluvV6/uru7+44q3+leKvS+3W5XH4Fai6msrOx+e3t7UGOiAvT19fWCx+MxieJSmtNwSzT+1PkZ2ft/YFn2M57nLwHIV7jAN3m5KyzL7lY4yVs2BAQS/Ui+5/WzLCs3Kyogluf56dIyM9zuN5uXTqdDR7sdLMsm8zz/ROGU/FB+h+LU4Qjg5GZFBSRwHCeUlH6Bn8fGlpkcjcGHqano7PgWHMdt5Djunoac3Kx8AvYfKMGjR4/lrF9KjaWQbdiQgq6znVRAKsdxYxpyck74BBTvP4DxceGNZE5KSkR311mfAA255QL2l5TixfS0r9coPSfWZEJXZ4c/AtpxfgFHeZtg/vIrzM855bB7T0A+johII+ynT+Eb1pp6lLeNacGdPn0KLGv1CYjnayt6o4zGDFGUIIJAJASMJIGBBIYheO2cG7E2tJTZaivb3zJGblFztMgIw+C1c2HE1tC0IgeGwYxzYbSuoUluVjQH1M1GX1Oyz9HYeU5pMkpzoX5vCmhK/5eTmxUVQJuNcW3xsXTiWnDPP3ms27Mp7scLdyd3RCSnuCX9at1U9+FbXh83hOQMRsNUV/XNf8FR+5aNSL++blBwiZJJlOgRMJAIAZGPQARDCPQMmfjzyCcp6+sGH7tEKUHNEYhYRRisgqfvKZu3Z33d4G8uUYoPyUme/qfWPL8TJvKO6dZdWfCINAMChg55zmdQ8d0wnDcuZRgzd4+G5W72bTZuLrgZjhPYHL8TxtsGhJZdWeCGBegYXxGAXgO4rERUUgGXj28z7jx0LRw3933z1shPq66H455bc/1OmGAbEI7kZ+LyLy/lm40y6tGb0M4P1qDuyg3M9jVtjyqovqoVN2HN9fsAFVCVk4k7404w3rmf2oEoAR8lGdHsuIHZ3pbsqMLKobCcV2g4bpmAJN4hVOVmYXLO9UYOxEXq0TwwjFlHZ35UTsmVcNxMf3teTF5ZfzhunM3xG9G66ou9iI7NoFmrXrQK8Gpq5FnTXsu66vNtiF67ZQVu+FnT3q+T+f4RkTBrQnMvRp81fR7SiNQaqBH9BeAFnR0AvK2ajhVeMSx6IaUMNa1gI9+yqVkxomBTr+8K4J1y6eitDzIdqzn6AjqAGkLMicum5r8BTGo/TgyrTmsAAAAASUVORK5CYII=", 
     "pageId" : "", 
     "parentId" : "574237133c6d3cd598a5a30d", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -1934,7 +1839,7 @@
     "docType" : "object", 
     "name" : "ACME Bicycle Shop", 
     "description" : "<p>The ACME Bicycle Shop</p>", 
-    "pageId" : "", 
+    "pageId" : "578bff823c6d3cd598a5a3a6", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB5klEQVQ4T61Tv2sUURD+Zt7undFYqKTKsW/v7p0YDqwEGxst/EUKbcQiYKGIAUGRVIqKTYpYiBjQSiEGSSPIgYX5C+wEUSx8t7e3kassDAlL4vneyIKBxICFl2mGGeZ988038wgDGg34HjsLYKKoCeYRAIIgeG+t7Teq1WMiwuLU9/ZS+9PfjLcwaES1cWE/DZEFhOFsuVxeW19dvSJgFvgJKHUqSZLlzSDbRjBxPOkEUwz6srXQaxA9t2n6aBtAvVI3FLhx8ZQz4YJ4UT7kcxvd4jjeFQpeiHdjpNRTAXbDuZZdWmpTXeszLHRdQM9AuASSg/A0A0jdZumDQ6OjB34F4TwR3ohzt8HcIlHvAD8pih5TI4rflvbuOZ/n+T5ybg4+mKLAXyaBBmQGnqbBckuEriqhV57cHZtlp40xZem712R0dd52OxMFExG5ycxrIjgiwA8GxCs+myRJZqJowWbZRVOtnrSdzmKhQ03rl2S0nsv7/Wu9Xi8vko04PirAcZumD/+I5Qpvovg+SFq22/1QxM2R5vDPoZVZqlVqDSh3j4UXCbLfw49RqXTDWru+We1KpTJUUuETJvkMkWWATyj4uxtrVEbrw+KClfa3tv3XeRcb48ANf03TjwD8zp7y/3ysgRn8BlTuy14MbVpqAAAAAElFTkSuQmCC", 
     "parentId" : "5742439f3c6d3cd598a5a319"
 }
@@ -1951,13 +1856,11 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314e"), 
     "docType" : "object", 
     "name" : "Resources Page", 
-    "description" : "<p>The resources page</p>", 
     "divider" : "Vertical", 
     "accordionOrTab" : "Accordions", 
     "tabs" : [
         {
             "name" : "Resources Tree", 
-            "description" : "This page provides an overview of users/organizations", 
             "widgets" : [
                 {
                     "displayType" : "Tree", 
@@ -1993,16 +1896,14 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83154"), 
     "docType" : "object", 
     "name" : "Document Page", 
-    "description" : "<p>The document page</p>", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
         {
             "name" : "Read", 
-            "description" : "Document Page", 
             "widgets" : [
                 {
-                    "displayType" : "Document", 
+                    "displayType" : "Document Read", 
                     "name" : "Document Page", 
                     "viewId" : "575d4c3f2cf3d6dc3ed8314a"
                 }
@@ -2010,19 +1911,16 @@
         }, 
         {
             "name" : "Update", 
-            "description" : "Document Page", 
             "widgets" : [
                 {
-                    "displayType" : "Document", 
+                    "displayType" : "Document Update", 
                     "name" : "Document Page", 
-                    "readOnly" : false, 
                     "viewId" : "575d4c3f2cf3d6dc3ed8314a"
                 }
             ]
         }, 
         {
             "name" : "Inset", 
-            "description" : "Insets Page", 
             "widgets" : [
                 {
                     "displayType" : "Table", 
@@ -2041,6 +1939,7 @@
     "docType" : "object", 
     "name" : "Server", 
     "description" : "<p>The Neuralquest server</p>", 
+    "icon" : "data:image/png;base64,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", 
     "pageId" : "575d4c3f2cf3d6dc3ed83157", 
     "parentId" : "574237133c6d3cd598a5a30d", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2106,7 +2005,6 @@
     "_id" : ObjectId("576668623c6d3cd598a5a389"), 
     "docType" : "object", 
     "name" : "Login Page", 
-    "description" : "<p>Login Page</p>", 
     "tabs" : [
         {
             "name" : "Login", 
@@ -2287,13 +2185,11 @@
     "_id" : ObjectId("577853123c6d3cd598a5a396"), 
     "docType" : "object", 
     "name" : "Backlog Page", 
-    "description" : "<p>Backlog page</p>", 
     "divider" : "Vertical", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
         {
             "name" : "Backlog Table", 
-            "description" : "<p>Backlog Table</p>", 
             "widgets" : [
                 {
                     "displayType" : "Table", 
@@ -2311,7 +2207,6 @@
     "_id" : ObjectId("57785c393c6d3cd598a5a398"), 
     "docType" : "object", 
     "name" : "Service Request Page", 
-    "description" : "<p>Service Request Page</p>", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
@@ -2408,13 +2303,11 @@
     "_id" : ObjectId("578919763c6d3cd598a5a3a2"), 
     "docType" : "object", 
     "name" : "Home Page", 
-    "description" : "<p>The home page</p>", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
         {
             "name" : "Read", 
-            "description" : "Home Page", 
             "widgets" : [
                 {
                     "displayType" : "HomePage", 
@@ -2425,7 +2318,6 @@
         }, 
         {
             "name" : "Update", 
-            "description" : "Home Page", 
             "widgets" : [
                 {
                     "displayType" : "Form", 
@@ -2470,4 +2362,89 @@
     }, 
     "parentId" : "573435c23c6d3cd598a5a2df", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+}
+{ 
+    "_id" : ObjectId("578bff823c6d3cd598a5a3a6"), 
+    "docType" : "object", 
+    "name" : "ACME Bicycle Page", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Catalouge", 
+            "pageId" : "578919763c6d3cd598a5a3a2"
+        }, 
+        {
+            "name" : "Transactions", 
+            "pageId" : "577853123c6d3cd598a5a396"
+        }, 
+        {
+            "name" : "Who Are We?", 
+            "pageId" : "575d4c3f2cf3d6dc3ed83150"
+        }, 
+        {
+            "name" : "Members", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Home Page", 
+                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
+                }
+            ]
+        }, 
+        {
+            "name" : "Balance Sheet", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Balance Sheet Form", 
+                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
+                }
+            ]
+        }, 
+        {
+            "name" : "Resources", 
+            "pageId" : "575d4c3f2cf3d6dc3ed8314e"
+        }
+    ], 
+    "parentId" : "56f87ec55dde184ccfb9fc74", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b"
+}
+{ 
+    "_id" : ObjectId("578c03fa3c6d3cd598a5a3a8"), 
+    "docType" : "object", 
+    "name" : "Red Bicycle", 
+    "description" : "<p>A very nice bicyle</p>", 
+    "value" : NumberInt(150), 
+    "currency" : "EUR", 
+    "parentId" : "5742563e3c6d3cd598a5a32f", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b"
+}
+{ 
+    "_id" : ObjectId("578c06233c6d3cd598a5a3aa"), 
+    "docType" : "object", 
+    "name" : "Blue Bicycle", 
+    "description" : "<p>A very nice bicyle</p>", 
+    "value" : NumberInt(160), 
+    "currency" : "EUR", 
+    "parentId" : "5742563e3c6d3cd598a5a32f", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b"
+}
+{ 
+    "_id" : ObjectId("578c06793c6d3cd598a5a3ac"), 
+    "docType" : "object", 
+    "name" : "Green Bicycle", 
+    "description" : "<p>A very nice bicyle</p>", 
+    "value" : NumberInt(155), 
+    "currency" : "EUR", 
+    "parentId" : "5742563e3c6d3cd598a5a32f", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b"
+}
+{ 
+    "_id" : ObjectId("578c14c63c6d3cd598a5a3b0"), 
+    "docType" : "object", 
+    "value" : NumberInt(465), 
+    "currency" : "EUR", 
+    "parentId" : "574261743c6d3cd598a5a369", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b"
 }

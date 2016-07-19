@@ -131,6 +131,9 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 else td.innerHTML = value;
                             }
                             else if(attrProps.type == 'number') {
+                                var style = domAttr.get(td, 'style');
+                                style+='text-align: right;';
+                                domAttr.set(td, 'style', style);
                                 if(attrProps.query){
                                     var childrenFilter = self.store.buildFilterFromQuery(doc, attrProps.query);
                                     if(childrenFilter) {
@@ -140,7 +143,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                             childObjects.forEach(function(asset){
                                                 sum+=asset.value;
                                             });
-                                            td.innerHTML = parseFloat(sum).toFixed(2);
+                                            td.innerHTML = parseFloat(sum);
                                         });
                                     }
                                 }

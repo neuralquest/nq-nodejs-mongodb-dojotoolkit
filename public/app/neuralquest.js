@@ -3,13 +3,13 @@ require([
 'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct',
 'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
-'app/nqDocStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument','app/nqTreeGrid','app/nqHome',
+'app/nqDocStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocumentRO','app/nqDocumentRW','app/nqTreeGrid','app/nqHome',
 "dojo/json","dijit/Dialog","dijit/form/Form","dijit/form/TextBox","dijit/form/Button","dojo/dom-attr",'dojox/html/styles', 'dojo/query!css2'],
 function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		dom, dojo, lang, declare, array, domConstruct,
 		Deferred, when, all, query, BorderContainer,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
-        nqDocStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument, nqTreeGrid, nqHome,
+        nqDocStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocumentRO, nqDocumentRW, nqTreeGrid, nqHome,
 		JSON, Dialog,Form,TextBox,Button,domattr,styles, css2) {
 
     var nqStore = new nqDocStore();
@@ -215,8 +215,12 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                         store: nqStore,
                         schema: schema
                     };
-                    if (widget.displayType == 'Document') {
-                        var widgetObj = new nqDocument(parms, domConstruct.create('div'));
+                    if (widget.displayType == 'Document Read') {
+                        var widgetObj = new nqDocumentRO(parms, domConstruct.create('div'));
+                        tabPane.addChild(widgetObj);
+                    }
+                    else if (widget.displayType == 'Document Update') {
+                        var widgetObj = new nqDocumentRW(parms, domConstruct.create('div'));
                         tabPane.addChild(widgetObj);
                     }
                     else if (widget.displayType == 'Form') {

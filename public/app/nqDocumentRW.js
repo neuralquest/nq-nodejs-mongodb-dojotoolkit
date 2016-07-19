@@ -1,4 +1,4 @@
-define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/when', 'dijit/registry', 'dijit/layout/ContentPane',
+define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promise/all", 'dojo/when', 'dijit/registry', 'dijit/layout/ContentPane',
         'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "app/nqWidgetBase", "dojo/on", "dojo/dom-geometry", 
         "dojo/sniff", "dijit/form/ToggleButton", "dojo/dom", "dojo/dom-attr", "dojo/dom-prop", "dojo/NodeList-dom",
         'app/nqClassChart', "dojo/dom-style", "dojo/query", "dojo/mouse",'dojo/query!css3',
@@ -40,16 +40,16 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
 
         //'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins',"dijit._editor.plugins.FontChoice", 'dijit/WidgetSet'
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
-	function(declare, domConstruct, all, when, registry, ContentPane,
+	function(declare, domConstruct, domAttr, all, when, registry, ContentPane,
 			Toolbar, ValidationTextBox, Editor, nqWidgetBase, on, domGeometry, 
 			has, ToggleButton, dom, attr, domProp, NodeList,
 			nqClassChart, domStyle, query, mouse, css3){
 
-	return declare("nqDocument", [nqWidgetBase], {
+	return declare("nqDocumentWR", [nqWidgetBase], {
         buildRendering: function(){
             this.inherited(arguments);
-            domStyle.set(this.pane.containerNode, 'padding-left' , '10px');
-            domStyle.set(this.pane.containerNode, 'padding-right' , '10px');
+            domAttr.set(this.pane.containerNode, 'style', {'padding-left': '10px', 'padding-right': '10px'});
+            domStyle.set(this.editorToolbarDivNode, 'display' , '');
         },
         _setDocIdAttr: function(docId){
             this.inherited(arguments);
@@ -76,45 +76,35 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
             var docDom = domConstruct.create('div');
             //var docDom = "";
             when(self.generateNextLevelContents(docDom, item, 1, null, false), function(obj){
-                if(self.widget.readOnly==undefined?true:self.widget.readOnly){
-                    //Clear the page
-                    self.pane.destroyDescendants(false);//destroy all the widgets but leave the pane intact
-                    self.editorDijit = null;
-                    domStyle.set(self.editorToolbarDivNode, 'display' , 'none');
-                    domConstruct.place(docDom, self.pane.containerNode, 'last');
+                if(!self.editorDijit){
+                    // Create toolbar and place it at the top of the page
+                    var toolbar = new Toolbar();
+                    self.editorToolbarDivNode.appendChild(toolbar.domNode);
+                    //Paragraph
+                    self.editorDijit = new Editor({
+                        'height': '', //auto grow
+                        'minHeight': '30px',
+                        plugins: self.plugins,
+                        //'extraPlugins': [{name: 'formatBlock', plainText: true},'viewSource'],
+                        'toolbar': toolbar,
+                        focusOnLoad: true//,
+                        //'onChange': self.interpretPage
+                    }, domConstruct.create('div'));
+                    self.editorDijit.on('change', dojo.hitch(self,self.interpretPage));
+                    self.editorDijit.addStyleSheet('app/resources/editor.css');
+                    /*self.editorDijit.on("NormalizedDisplayChanged", function(){
+                     var height = domGeometry.getMarginSize(self.editorDijit.editNode).h;
+                     if(has("opera")){
+                     height = editorDijit.editNode.scrollHeight;
+                     }
+                     self.editorDijit.resize({h: height});
+                     });*/
+                    domConstruct.place(self.editorDijit.domNode, self.pane.containerNode, 'last');
+                    //domConstruct.place(editorDijit.domNode, replaceDiv, "replace");
+                    self.editorDijit.startup();
                 }
-                else{
-                    domStyle.set(self.editorToolbarDivNode, 'display' , '');
-                    if(!self.editorDijit){
-                        // Create toolbar and place it at the top of the page
-                        var toolbar = new Toolbar();
-                        self.editorToolbarDivNode.appendChild(toolbar.domNode);
-                        //Paragraph
-                        self.editorDijit = new Editor({
-                            'height': '', //auto grow
-                            'minHeight': '30px',
-                            plugins: self.plugins,
-                            //'extraPlugins': [{name: 'formatBlock', plainText: true},'viewSource'],
-                            'toolbar': toolbar,
-                            focusOnLoad: true//,
-                            //'onChange': self.interpretPage
-                        }, domConstruct.create('div'));
-                        self.editorDijit.on('change', dojo.hitch(self,self.interpretPage));
-                        self.editorDijit.addStyleSheet('app/resources/editor.css');
-                        /*self.editorDijit.on("NormalizedDisplayChanged", function(){
-                            var height = domGeometry.getMarginSize(self.editorDijit.editNode).h;
-                            if(has("opera")){
-                                height = editorDijit.editNode.scrollHeight;
-                            }
-                            self.editorDijit.resize({h: height});
-                        });*/
-                        domConstruct.place(self.editorDijit.domNode, self.pane.containerNode, 'last');
-                        //domConstruct.place(editorDijit.domNode, replaceDiv, "replace");
-                        self.editorDijit.startup();
-                    }
-                    //console.log(docDom);
-                    self.editorDijit.set('value', docDom.innerHTML);
-                }
+                //console.log(docDom);
+                self.editorDijit.set('value', docDom.innerHTML);
             });
         },
 		//Create an ordinary HTML page recursively by obtaining data from the server
