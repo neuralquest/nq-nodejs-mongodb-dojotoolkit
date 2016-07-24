@@ -253,10 +253,12 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                     self.amAuthorizedToUpdate == false){
                                     domAttr.set(tdDom, 'name', attrName); //give it a name so we know where to put the value
                                     if(attrProps.bold) {//TODO make these optional
-                                        //style['border-top-style'] = 'solid';
+                                        style['border-top-style'] = 'solid';
                                         style['border-top-color'] = 'lightgrey';
-                                        style['padding-left'] = '30px';
+                                        style['border-width'] = '1px';
+                                        style['padding-right'] = '10px';
                                     }
+                                    else style['padding-right'] = '50px';
                                     domAttr.set(tdDom, 'style', style);
                                 }
                                 else {

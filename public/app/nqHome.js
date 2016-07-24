@@ -31,7 +31,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
 			domConstruct.create('div', {innerHTML: item.name,
                 style:{
                     position: 'absolute',
-                    top: '40%',
+                    top: '30%',
                     width: '100%',
                     'text-align':'center',
                     'font-size': '40px',

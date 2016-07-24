@@ -113,7 +113,7 @@ exports = module.exports = function(app, passport) {
             else {
                 var cssStr = "";
                 docArr.forEach(function(doc){
-                    cssStr += ".icon"+doc._id+" {width: 16px; height: 16px; background-position: center center; background: url('"+doc.icon+"');}\n";
+                    cssStr += ".icon"+doc._id+" {width: 16px; height: 16px; background-position: center center; backgroundImage: url('"+doc.icon+"');}\n";
                 });
                 res.set('Content-Type', 'text/css');
                 res.send(cssStr);

@@ -2,7 +2,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
         "dojo/dom-geometry", "dojo/Deferred", 'dojo/store/Memory'],
 	function(declare, when, all, arrayUtil, nqWebGlChart, domConstruct, lang, domGeom, Deferred, Memory){
 
-	var cellPostionsStore = new Memory({});
+	var docPositionStore = new Memory({});
 
 	return declare("nqClassChart", [nqWebGlChart], {
 		bodyViewHeight: 400,
@@ -10,7 +10,28 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		bodyViewDepth: 800,
 		skyboxArray: [ 'app/resources/img/Neuralquest/space_3_right.jpg', 'app/resources/img/Neuralquest/space_3_left.jpg', 'app/resources/img/Neuralquest/space_3_top.jpg' ,'app/resources/img/Neuralquest/space_3_bottom.jpg','app/resources/img/Neuralquest/space_3_front.jpg','app/resources/img/Neuralquest/space_3_back.jpg'],
 		classGeometry: null,
-
+        assocProps: {
+            /*ownerId:{
+                depth: -200,
+                connectorMaterial: new THREE.MeshLambertMaterial({color: 0xEF0000}) //red
+            },*/
+            pageId:{
+                depth: -300,
+                connectorMaterial: new THREE.MeshLambertMaterial({color: 0x00EFEF})
+            },
+            buyerId:{
+                depth: -400,
+                connectorMaterial: new THREE.MeshLambertMaterial({color: 0x00EF00})//green
+            },
+            sellerId:{
+                depth: -500,
+                connectorMaterial: new THREE.MeshLambertMaterial({color: 0xEFEF00})//?
+            },
+            assetId:{
+                depth: -600,
+                connectorMaterial: new THREE.MeshLambertMaterial({color: 0x000EF})//blue
+            }
+        },
 
 		postCreate: function(){
 			this.inherited(arguments);//create the scene
@@ -25,19 +46,25 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
                     objectGeometry.mergeVertices();
                     self.objectGeometry = objectGeometry;
                     when(self.buildHierarchy(self.rootId), function (res) {
-                        console.dir(cellPostionsStore);
+                        console.dir(docPositionStore);
                         var newPos = new THREE.Vector3(0, 0, 0);
-                        self.postionObjectsXY(self.rootId, newPos);
+                        self.positionClasses(self.rootId, newPos);
+                        //find the lowest class
+                        var lowestY = 0;
+                        docPositionStore.query({}).forEach(function (cellInfo) {
+                            if(cellInfo.pos && cellInfo.pos.y < lowestY) lowestY = cellInfo.pos.y;
+                        });
+                        self.positionObjects(lowestY);
                         //shift all the cells
-                        var positionInfo = cellPostionsStore.get(self.rootId);
+                        var positionInfo = docPositionStore.get(self.rootId);
                         var addPos = new THREE.Vector3(-positionInfo.pos.x, 0, 0);
-                        cellPostionsStore.query({}).forEach(function (cellInfo) {
+                        docPositionStore.query({}).forEach(function (cellInfo) {
                             cellInfo.pos.add(addPos);
                         });
                         self.clearScene();
                         var sceneObject3D = self.fillScene(self.rootId);
                         self.addToScene(sceneObject3D);
-                        //self.drawAssociations();
+                        self.drawAssociations();
                     }, nq.errorDialog);
                 });
 			});
@@ -46,7 +73,32 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			var self = this;
 			return when(self.store.get(id), function (doc) {
 				//if (cell.type == 'object') return cell;
-                var associations = {};
+                var cellPosInfo = {
+                    id:doc._id,
+                    name: doc.docType == 'class'?doc.title:doc.name,
+                    docType: doc.docType,
+                    subClasses:[],
+                    instantiations:[],
+                    associations:[]
+                };
+                if(doc.docType == 'class'){
+                    for(var attrName in doc.properties){
+                        var attrProps = doc.properties[attrName];
+                        if(self.assocProps[attrName] && attrProps.query && attrProps.query.isA){
+                            cellPosInfo.associations.push({assocName:attrName, destId:attrProps.query.isA});
+                        }
+                    }
+                }
+                else{
+                    for(var attrName in doc){
+                        var attrProps = doc[attrName];
+                        if(self.assocProps[attrName]){
+                            cellPosInfo.associations.push({assocName:attrName, destId:attrProps});
+                        }
+                    }
+                }
+                docPositionStore.put(cellPosInfo);
+                
                 var promisses = [];
                 if(self.schema && self.schema.childrenQuery) {
                     var childrenFilter = self.store.buildFilterFromQuery(doc, self.schema.childrenQuery);
@@ -55,46 +107,48 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
                         promisses.push(childrenCollection.fetch());
                     }
                 }
-                var name = doc.docType == 'class'?doc.title:doc.name;
-				cellPostionsStore.put({id:doc._id, name: name, docType: doc.docType, associations:associations});
-                return when(all(promisses), function(resArrArr) {
-                    var subClassesArr = [];
-                    resArrArr[0].forEach(function (child) {
-                        subClassesArr.push(child._id);
-                    });
-                    associations['subclasses'] = subClassesArr;
-
+				
+                return all(promisses).then(function(resArrArr) {
                     var childPromisses = [];
-                    for(var i=0;i<associations['subclasses'].length;i++){
-                        var childId = associations['subclasses'][i];
-                        childPromisses.push(self.buildHierarchy(childId));
-                    }
+                    resArrArr[0].forEach(function (child) {
+                        if(child.docType == 'class') cellPosInfo.subClasses.push(child._id);
+                        else cellPosInfo.instantiations.push(child._id);
+                        childPromisses.push(self.buildHierarchy(child._id));
+                    });
+
                     return all(childPromisses);
                 });
 			});
 		},
-        postionObjectsXY: function(id, ourPos){
-            var cellPositionsObj = cellPostionsStore.get(id);
+        positionClasses: function(id, ourPos){
+            var cellPositionsObj = docPositionStore.get(id);
             if(!cellPositionsObj) return ourPos.x;
             var x = ourPos.x;
             var y = ourPos.y - this.bodyViewHeight;
             var z = ourPos.z;
             var maxXUntilNow = ourPos.x;
-            cellPositionsObj.isAttr = false;
-            var children = cellPositionsObj.associations['subclasses'];
+            var children = cellPositionsObj.subClasses;
             for(var i=0;i<children.length;i++){
                 var subObjectId = children[i];
                 var newPos = new THREE.Vector3( x, y, z );
-                maxXUntilNow = this.postionObjectsXY(subObjectId, newPos);
+                maxXUntilNow = this.positionClasses(subObjectId, newPos);
                 x = maxXUntilNow + this.bodyViewWidth;
             }
+            /*var instantiations = cellPositionsObj.instantiations;
+            for(var j=0;j<instantiations.length;j++){
+                var objId = instantiations[j];
+                var objPos = docPositionStore.get(objId);
+                objPos.pos = new THREE.Vector3( x, y, z );
+                cellPositionsObj.pos = objPos;
+                y -= this.bodyViewHeight;
+            }*/
             //place our position over the center of the children
             if(children.length>1){
                 var maxXId = children[children.length-1];
-                if(cellPostionsStore.get(maxXId)){
-                    var maxX = cellPostionsStore.get(maxXId).pos.x;
+                if(docPositionStore.get(maxXId)){
+                    var maxX = docPositionStore.get(maxXId).pos.x;
                     var minXId = children[0];
-                    var minX = cellPostionsStore.get(minXId).pos.x;
+                    var minX = docPositionStore.get(minXId).pos.x;
                     ourPos.x = (maxX - minX)/2 + minX;
                 }
             }
@@ -102,7 +156,21 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
             cellPositionsObj.pos = ourPos;
             return maxXUntilNow;
         },
+        positionObjects: function(lowestY){
+            var self = this;
+            docPositionStore.query({}).forEach(function (cellInfo) {
+                var x = cellInfo.pos.x;
+                var y = lowestY - self.bodyViewHeight;
+                var z = cellInfo.pos.z;
+                cellInfo.instantiations.forEach(function(instantiationId){
+                    var objPos = docPositionStore.get(instantiationId);
+                    objPos.pos = new THREE.Vector3( x, y, z );
+                    y -= self.bodyViewHeight;
+                });
+            });
+        },
         fillScene: function(){
+            var self = this;
             var classMaterial = new THREE.MeshLambertMaterial( {color: 0x8904B1});
             var objectMaterial = new THREE.MeshLambertMaterial( {color:0x00A300});//0x00A300
             //var connectorMaterial =  new THREE.MeshPhongMaterial({specular: 0xffffff, color: 0x9F9F9F, emissive: 0x4F4F4F,shininess: 100 });
@@ -110,11 +178,9 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
             var textMaterial = new THREE.MeshLambertMaterial({color: 0xEFEFEF});
             //console.dir(cellPositionsObj);
             var sceneObject3D = new THREE.Object3D();
-            var cellPosArr = cellPostionsStore.query({});
+            var cellPosArr = docPositionStore.query({});
             for(var i=0;i<cellPosArr.length;i++){
                 var positionInfo = cellPosArr[i];
-                if(positionInfo.isDrawn) continue;
-                positionInfo.isDrawn = true;
 
                 var classObject = new THREE.Object3D();
                 classObject.position = positionInfo.pos;
@@ -154,167 +220,104 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
             }
 
 
-            //now add connectors
+            //now add class connectors
             for(var i=0;i<cellPosArr.length;i++){
                 //console.log('connectors positionInfo', positionInfo);
                 var positionInfo = cellPosArr[i];
-                var children = positionInfo.associations['subclasses'];
                 var parentPos = positionInfo.pos;
-                if(children.length==0) continue;
                 //for the subclasses
-                var firstPos = new THREE.Vector3();
-                var lastPos = new THREE.Vector3();
-                if(positionInfo.isAttr){
+                if(positionInfo.subClasses.length >0){
+                    var firstPos = new THREE.Vector3();
+                    var lastPos = new THREE.Vector3();
                     //get the length of the connector
-                    var firstId = children[0];
-                    var lastId = children[children.length -1];
-                    firstPos.x = parentPos.x;
-                    firstPos.y = parentPos.y - this.bodyViewHeight/2;
-                    firstPos.z = cellPostionsStore.get(firstId).pos.z;
-                    //firstPos.z = cellPositionsObj[firstId].pos.z;
-                    lastPos.x = parentPos.x;
-                    lastPos.y = parentPos.y - this.bodyViewHeight/2;
-                    lastPos.z = cellPostionsStore.get(lastId).pos.z;
-                    //lastPos.z = cellPositionsObj[lastId].pos.z;
-                }
-                else {
-                    //get the length of the connector
-                    var firstId = children[0];
-                    if(!cellPostionsStore.get(firstId)) {
+                    var firstId = positionInfo.subClasses[0];
+                    if(!docPositionStore.get(firstId)) {
                         return sceneObject3D;
                     }
-                    var lastId = children[children.length -1];
-                    firstPos.x = cellPostionsStore.get(firstId).pos.x;
+                    var lastId = positionInfo.subClasses[positionInfo.subClasses.length -1];
+                    firstPos.x = docPositionStore.get(firstId).pos.x;
                     //firstPos.x = cellPositionsObj[firstId].pos.x;
                     firstPos.y = parentPos.y - this.bodyViewHeight/2;
                     firstPos.z = parentPos.z;
-                    lastPos.x = cellPostionsStore.get(lastId).pos.x;
+                    lastPos.x = docPositionStore.get(lastId).pos.x;
                     //lastPos.x = cellPositionsObj[lastId].pos.x;
                     lastPos.y = parentPos.y - this.bodyViewHeight/2;
                     lastPos.z = parentPos.z;
-                }
-                //horizontal connector
-                this.drawBeam(firstPos, lastPos, connectorMaterial, sceneObject3D);
+                    //horizontal connector
+                    this.drawBeam(firstPos, lastPos, connectorMaterial, sceneObject3D);
 
-                //sphere at the left end
-                var connectorGeometry = new THREE.SphereGeometry( 10 );
-                var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
-                connectorMesh.position = firstPos;
-                sceneObject3D.add(connectorMesh);
+                    //sphere at the left end
+                    var connectorGeometry = new THREE.SphereGeometry( 10 );
+                    var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
+                    connectorMesh.position = firstPos;
+                    sceneObject3D.add(connectorMesh);
 
-                //sphere at the right end
-                var connectorGeometry = new THREE.SphereGeometry( 10 );
-                var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
-                connectorMesh.position = lastPos;
-                sceneObject3D.add(connectorMesh);
+                    //sphere at the right end
+                    var connectorGeometry = new THREE.SphereGeometry( 10 );
+                    var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
+                    connectorMesh.position = lastPos;
+                    sceneObject3D.add(connectorMesh);
 
-                //vertical connector to super attr
-                var ourVec = new THREE.Vector3( parentPos.x, parentPos.y - this.bodyViewHeight/2, parentPos.z);
-                this.drawBeam(parentPos, ourVec, connectorMaterial, sceneObject3D);
+                    //vertical connector to super attr
+                    var ourVec = new THREE.Vector3( parentPos.x, parentPos.y - this.bodyViewHeight/2, parentPos.z);
+                    this.drawBeam(parentPos, ourVec, connectorMaterial, sceneObject3D);
 
-                //vertical connectors to sub classes
-                for(var j=0;j<children.length;j++){
-                    var chlidClassItemId = children[j];
-                    var childPositionInfo = cellPostionsStore.get(chlidClassItemId);
-                    var connectorDestPos = new THREE.Vector3();
-                    if(positionInfo.isAttr){
-                        connectorDestPos.x = firstPos.x;
-                        connectorDestPos.y = firstPos.y;
-                        connectorDestPos.z = childPositionInfo.pos.z;
-                    }
-                    else{
+                    //vertical connectors to sub classes
+                    positionInfo.subClasses.forEach(function(subClassId){
+                        var childPositionInfo = docPositionStore.get(subClassId);
+                        var connectorDestPos = new THREE.Vector3();
                         connectorDestPos.x = childPositionInfo.pos.x;
                         connectorDestPos.y = firstPos.y;
                         connectorDestPos.z = firstPos.z;
-                    }
-                    this.drawBeam(connectorDestPos, childPositionInfo.pos, connectorMaterial, sceneObject3D);
-                };
+                        self.drawBeam(connectorDestPos, childPositionInfo.pos, connectorMaterial, sceneObject3D);
+                    });
+                }
+
+                //for the objects
+                positionInfo.instantiations.forEach(function(instantiationId){
+                    var childPositionInfo = docPositionStore.get(instantiationId);
+                    var connectorDestPos = new THREE.Vector3();
+                    connectorDestPos.x = childPositionInfo.pos.x;
+                    connectorDestPos.y = firstPos.y;
+                    connectorDestPos.z = firstPos.z;
+                    self.drawBeam(connectorDestPos, childPositionInfo.pos, connectorMaterial, sceneObject3D);
+                });
+
+
+                var children = positionInfo.subClasses;
+                var parentPos = positionInfo.pos;
+                if(children.length==0) continue;
+
             }
             return sceneObject3D;
         },
         drawAssociations: function(){
+            var self = this;
             var sceneObject3D = new THREE.Object3D();
-            var cellPosArr = cellPostionsStore.query({});
+            var cellPosArr = docPositionStore.query({});
             for(var j=0;j<cellPosArr.length;j++){
                 var positionInfo = cellPosArr[j];
-                var associations = positionInfo.associations;
-                if(!associations) continue;
+                var associationsArr = positionInfo.associations;
+                if(!associationsArr) continue;
+
                 var fromMesh = this.getMeshByName(positionInfo.id);
                 if(!fromMesh) continue;
                 var fromPosition = new THREE.Vector3();
                 fromPosition.getPositionFromMatrix( fromMesh.matrixWorld );
-                /*var attibutesArr = associations[ATTRIBUTE_ASSOC];//attributes
-                 if(attibutesArr){
-                 var connectorMaterial = new THREE.MeshLambertMaterial({color: 0x000EF});//blue
-                 for(var i=0;i<attibutesArr.length;i++){
-                 var toObjId = attibutesArr[i];
-                 var toMesh = this.getMeshByName(toObjId);
-                 if(!toMesh) continue;
-                 var toPosition = new THREE.Vector3();
-                 toPosition.getPositionFromMatrix( toMesh.matrixWorld );
-                 this.drawBeam(fromPosition, toPosition, connectorMaterial, sceneObject3D, 'attribute', false, false);
-                 }
-                 }*/
-                var attibutesArr = associations['ordered'];// ordered
-                if(attibutesArr){
-                    var connectorMaterial = new THREE.MeshLambertMaterial({color: 0xEF0000}); //red
-                    for(var i=0;i<attibutesArr.length;i++){
-                        var toObjId = attibutesArr[i];
-                        var toMesh = this.getMeshByName(toObjId);
-                        if(!toMesh) continue;
+
+                var num = 0;
+                associationsArr.forEach(function(association){
+                    var assocProp = self.assocProps[association.assocName];
+                    if(!assocProp) assocProp = self.assocProps.default;
+                    //var connectorMaterial = new THREE.MeshLambertMaterial({color: 0xEF0000}); //red
+                    var toMesh = self.getMeshByName(association.destId);
+                    if(toMesh) {
                         var toPosition = new THREE.Vector3();
-                        toPosition.getPositionFromMatrix( toMesh.matrixWorld );
-                        this.drawHorseshoe(fromPosition, toPosition, this.bodyViewDepth/4, connectorMaterial, sceneObject3D, 'ordered', false, true);
+                        toPosition.getPositionFromMatrix(toMesh.matrixWorld);
+                        self.drawHorseshoe(fromPosition, toPosition, assocProp.depth, assocProp.connectorMaterial, sceneObject3D, association.assocName, false, true);
                     }
-                }
-                var attibutesArr = associations['oneToMany'];//many to many
-                if(attibutesArr){
-                    var connectorMaterial = new THREE.MeshLambertMaterial({color: 0x00EFEF});
-                    for(var i=0;i<attibutesArr.length;i++){
-                        var toObjId = attibutesArr[i];
-                        var toMesh = this.getMeshByName(toObjId);
-                        if(!toMesh) continue;
-                        var toPosition = new THREE.Vector3();
-                        toPosition.getPositionFromMatrix( toMesh.matrixWorld );
-                        this.drawHorseshoe(fromPosition, toPosition, this.bodyViewDepth/2, connectorMaterial, sceneObject3D, 'one to many', false, true);
-                    }
-                }
-                var attibutesArr = associations['manyToMany']; // one to many
-                if(attibutesArr){
-                    var connectorMaterial = new THREE.MeshLambertMaterial({color: 0x00EF00});//green
-                    for(var i=0;i<attibutesArr.length;i++){
-                        var toObjId = attibutesArr[i];
-                        var toMesh = this.getMeshByName(toObjId);
-                        if(!toMesh) continue;
-                        var toPosition = new THREE.Vector3();
-                        toPosition.getPositionFromMatrix( toMesh.matrixWorld );
-                        this.drawHorseshoe(fromPosition, toPosition, (this.bodyViewDepth/4)*3, connectorMaterial, sceneObject3D, 'many to many', true, true);
-                    }
-                }
-                var attibutesArr = associations['mapsTo']; // one to many
-                if(attibutesArr){
-                    var connectorMaterial = new THREE.MeshLambertMaterial({color: 0xEFEF00});//?
-                    for(var i=0;i<attibutesArr.length;i++){
-                        var toObjId = attibutesArr[i];
-                        var toMesh = this.getMeshByName(toObjId);
-                        if(!toMesh) continue;
-                        var toPosition = new THREE.Vector3();
-                        toPosition.getPositionFromMatrix( toMesh.matrixWorld );
-                        this.drawHorseshoe(fromPosition, toPosition, (this.bodyViewDepth/4)*4, connectorMaterial, sceneObject3D, 'mapsTo', false, true);
-                    }
-                }
-                var attibutesArr = associations['owns']; // one to many
-                if(attibutesArr){
-                    var connectorMaterial = new THREE.MeshLambertMaterial({color: 0x000EF});//blue
-                    for(var i=0;i<attibutesArr.length;i++){
-                        var toObjId = attibutesArr[i];
-                        var toMesh = this.getMeshByName(toObjId);
-                        if(!toMesh) continue;
-                        var toPosition = new THREE.Vector3();
-                        toPosition.getPositionFromMatrix( toMesh.matrixWorld );
-                        this.drawHorseshoe(fromPosition, toPosition, (this.bodyViewDepth/4)*5, connectorMaterial, sceneObject3D, 'ownes', false, true);
-                    }
-                }
+                    num++;
+                });
             }
             this.addToScene(sceneObject3D);
         },
@@ -348,7 +351,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
             rightSphere.position = thirdPos;
             sceneObject3D.add(rightSphere);
 
-            var coneGeometry = new THREE.CylinderGeometry(0, 50, 180, 50, 50, false);
+            var coneGeometry = new THREE.CylinderGeometry(0, 40, 100, 40, 40, false);
             //cone at the left end
             if(fromCone){
                 var leftCone = new THREE.Mesh( coneGeometry, connectorMaterial );
@@ -361,7 +364,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
             if(toCone){
                 var rightCone = new THREE.Mesh( coneGeometry, connectorMaterial );
                 rightCone.position = lastPos;
-                rightCone.position.z += 60;
+                rightCone.position.z -= 80;
                 rightCone.rotation.x = Math.PI / 2;
                 sceneObject3D.add(rightCone);
             }
@@ -428,7 +431,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
                 promisses.push(self.store.getItemsByAssocType(id, 'mapsTo'));
                 promisses.push(self.store.getItemsByAssocType(id, 'owns'));
 
-				cellPostionsStore.put({id:cell._id, name: cell.name, type: cell.type, associations:associations});
+				docPositionStore.put({id:cell._id, name: cell.name, type: cell.type, associations:associations});
 				return when(all(promisses), function(resArrArr){
                     var subClassesArr = [];
                     resArrArr[0].forEach(function(child){
@@ -539,13 +542,13 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		},
 		positionAttributeClasses: function(){
 			var self = this;
-			return when(cellPostionsStore.query({isAttribute:false}), function(cellPosArr){
+			return when(docPositionStore.query({isAttribute:false}), function(cellPosArr){
 				for(var i=0;i<cellPosArr.length;i++){
 					var cellPosObj = cellPosArr[i];
 					var assocArr = cellPosObj.associations[ATTRIBUTE_ASSOC]
 					for(var j=0;j<assocArr.length;j++){
 						var attrId = assocArr[j];
-						var attrPosObj = cellPostionsStore.get(attrId);						
+						var attrPosObj = docPositionStore.get(attrId);						
 						attrPosObj.pos = new THREE.Vector3(cellPosObj.pos.x, cellPosObj.pos.y, -500 );//500 is a temporary value
 						attrPosObj.attrOwnedByClass = true;
 					}
@@ -555,7 +558,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		},*/
 
 		/*postionObjectsZY: function(id, ourPos){
-			var cellPositionsObj = cellPostionsStore.get(id);
+			var cellPositionsObj = docPositionStore.get(id);
 			if(!cellPositionsObj) return ourPos.x;
 			if(cellPositionsObj.pos){//already has a position, got it from positionAttributeClasses
 				cellPositionsObj.pos.z = ourPos.z;//simply provide depth
@@ -578,10 +581,10 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 				//place our position over the center of the children
 				if(children.length>1){
 					var minZId = children[children.length-1];
-					var minZ = cellPostionsStore.get(minZId).pos.z;
+					var minZ = docPositionStore.get(minZId).pos.z;
 					//var minZ = cellPositionsObj[minZId].pos.z;
 					var maxZId = children[0];
-					var maxZ = cellPostionsStore.get(maxZId).pos.z;
+					var maxZ = docPositionStore.get(maxZId).pos.z;
 					//var maxZ = cellPositionsObj[maxZId].pos.z;
 					ourPos.z = (minZ - maxZ)/2 + maxZ;
 				}

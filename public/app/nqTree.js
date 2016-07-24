@@ -38,13 +38,23 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     return '[unnamed]';
                 },
 				getIconClass: function(item, opened){
-					if(!item) return '';
-                    if(item.icon) return 'icon'+item._id;
-                    if(self.schema.icon) return 'icon'+self.schema._id;
-                    //if(item.docType == 'class') return 'icon0';
-					//if(item.type == 'assoc') return 'icon'+item._icon;
-					return '';
+					return '';//for some reason this override is required
 				},
+                getIconStyle: function(item, opened){
+                    // summary:
+                    //		Overridable function to return CSS styles to display icon
+                    // item: dojo/data/Item
+                    // opened: Boolean
+                    // returns: Object
+                    //		Object suitable for input to dojo.style() like {backgroundImage: "url(...)"}
+                    // tags:
+                    //		extension
+                    var icon = '';
+                    if(!item) return '';
+                    else if(item.icon) icon = item.icon;
+                    else if(self.schema.icon) icon = self.schema.icon;
+                    return {backgroundImage: "url('"+icon+"')"}
+                },
 				getRowClass: function(item, opened){
 					if(!item) return '';
                     //TODO if(!this.schema.updateAllowed(item)) return;
@@ -52,7 +62,12 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				},
 				getTooltip: function(item, opened){
 					if(!item) return '';
-					if(dojo.config.isDebug) return item._id;
+					if(dojo.config.isDebug) return JSON.stringify({
+                        _id: item._id,
+                        schema: self.schema.name,
+                        query: self.schema.query,
+                        childrenQuery: self.schema.childrenQuery
+                    }, null, 4)
 				},
 				onClick: function(item, node, evt){
 					self.inherited('onClick',arguments);

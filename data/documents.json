@@ -11,7 +11,7 @@
             "type" : "object", 
             "pattern" : "[a-f0-9]{24}"
         }, 
-        "parentId" : {
+        "classId" : {
             "title" : "Class", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
@@ -1050,8 +1050,8 @@
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83147"), 
@@ -1097,8 +1097,8 @@
             "pageId" : "575d4c3f2cf3d6dc3ed8314e"
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83148"), 
@@ -1111,7 +1111,7 @@
     "what" : "<p>Neualquest is a platform that helps people organize and work together. As a visitor you can browse published information. As a participant you have your own space in which you can maintain blogs, foto albums, apps etc. and make them public as desired. You can also create organizations based on industy standard templates including basic business process, which you can then enhance as the need arises. Role based authorization ensures that only members of your organization assigned to a paticular organizational unit can read/modify data.<br></br></p>", 
     "why" : "<p>The IT industry has been notably laking when it come to support for business processes. Today, a typical large organization might have thousands of systems running on tens of thousands of servers. Each of these systems requires a small army of experts to keep it from falling over. Gernally speaking, the processes themselves are not are not particulary complex. More often than not, its the interaction between the systems that causes</p>", 
     "how" : "<p>Neuralquest is an open source project that anyone can use, either standallone or in the cloud.</p>", 
-    "parentId" : "574243d23c6d3cd598a5a31b"
+    "classId" : "574243d23c6d3cd598a5a31b"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83149"), 
@@ -1588,8 +1588,8 @@
             }
         }
     }, 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314a"), 
@@ -1629,8 +1629,8 @@
         }
     }, 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAE/SURBVDhPpZLdS8JQGIf9J7sNuoiokKKMQvqkQIoo+7opCFIiixApiAihgVcVCdmNYhEDTSxGH7qttbZf52wdP/AdFb7wXOyw5zkvbD4AbUEe/ofarJ+/I7R/50lg+qjhbWJWky8sCFiWBdM0YRgGdF1HtaoiJytOYO0g4x1ZOX2CbdtORAx/+jCBfEl3Ah17CsLRKzqyfFx0bhcjZPUTyBY1JyD4UZpnMf7gmmy4yFE0oKy6pG8BSQKGJxN0YCGWwxdbQIiNcl5xyT4DQ+NxOhDayUBj61aMuiy/ugj5pgwMBA/pwNzWpafM4fL1I+AfjdGBmY1UbWVKvii49Ad26cDUUvJXOSUDvYMROjAxf4LCW6ssAlyW2Ifq8W/TgeBsokVOl+q3c/nsHuju26QDI2NR/IXOrnBzgP03bQDfNy91dEbnT99iAAAAAElFTkSuQmCC", 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314b"), 
@@ -1645,9 +1645,16 @@
         }
     }, 
     "childrenQuery" : {
-        "eq" : {
-            "parentId" : "_id"
-        }
+        "or" : [
+            {
+                "eq" : {
+                    "parentId" : "_id"
+                }
+            }, 
+            {
+                "view" : "579338e73c6d3cd598a5a3b2"
+            }
+        ]
     }, 
     "properties" : {
         "_id" : {
@@ -1707,8 +1714,8 @@
         "name"
     ], 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABTSURBVDhPYxjm4D/Dnf8gDOUSD2AaNzH8B2OiDULXiI5xGkRIIzpGMYgUjegYxRBSDIKpB2tGBoQMwqkRHaAbRLRGdEC2RvoCkA8pwVgFicf/GQD/KjucAgshDwAAAABJRU5ErkJggg==", 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314c"), 
@@ -1738,13 +1745,13 @@
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314d"), 
     "docType" : "object", 
-    "name" : "Owners View", 
+    "name" : "Owners Class View", 
     "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
     "type" : "object", 
     "childrenQuery" : {
@@ -1755,21 +1762,18 @@
                 }
             }, 
             {
-                "view" : "575d4c3f2cf3d6dc3ed8315d"
+                "view" : "579357cf3c6d3cd598a5a3b4"
             }
         ]
     }, 
     "properties" : {
         "name" : {
             "readOnly" : false
-        }, 
-        "subUnits" : {
-            "readOnly" : true
         }
     }, 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAADxSURBVDhPY/j//z9FmLrgzEyT/yB8eobx/5PTDP+fmGpAvBUgjahgFxgf6tcibAhI8+3thUAchAUX/t/bpfp/V7vS/+0t8v+3Nsn+39wo/X9DnQTCYJCTSQVrqkQQBoD8+///TCCeQySe+X95KT/CgONT9MGCpODFhdwIA45O0oVI/JhMHAaqXZDHgTAAFNJgA953EoeBauflsCEMONCrATHgST1xGKh2ThYLwgBQNIENuF1KHAaqnZXBhDAAFMdgA67kE4eBamemMyIMAAHkBLKuRuz/6krh/yvKBP4vLeYFhzgo0ED+BjkdQ/MAAgYGAKPFDB0e1bt2AAAAAElFTkSuQmCC", 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83150"), 
@@ -1791,8 +1795,8 @@
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83151"), 
@@ -1812,16 +1816,16 @@
         "575d4c3f2cf3d6dc3ed83152", 
         "575d4c3f2cf3d6dc3ed83153"
     ], 
-    "parentId" : "573435f03c6d3cd598a5a2e1", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83152"), 
     "docType" : "object", 
     "name" : "Par 1", 
     "description" : "<p>May indulgence difficulty ham can put especially. Bringing remember for supplied her why was confined. Middleton principle did she procuring extensive believing add. Weather adapted prepare oh is calling. These wrong of he which there smile to my front. He fruit oh enjoy it of whose table. Cultivated occasional old her unpleasing unpleasant. At as do be against pasture covered viewing started. Enjoyed me settled mr respect no spirits civilly.</p>", 
-    "parentId" : "573435f03c6d3cd598a5a2e1", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315a"), 
@@ -1830,9 +1834,9 @@
     "description" : "<p>The Neuralquest client</p>", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFWklEQVRYR62XbUxTVxjH/+faVigDqePN4JYwv2zGkGV8IUIkmYoDQgbRuExjSFCBdd1CAAETd3t7hQgIxCh2gEJCjJqYGdgMlKEugYjxi2YhxmmiM3tRuchAUcpL23uXc+lty7Wle7mnISTwO/f++5zn+T/PIQi/dLmN6HMDeR4RkFbgCYBVDKAD+gdqUADAHe7xdE+4FZ3diJme4jNYdIsAmBV4EQYdg6LugxiqQQyAV+Ee/k8ExG9twERHUSuG7laAbgi2iUaG/mRvakVpTwWu1yIBwHMtBCRsOwaheV85bv16AoSsIEAC0t8rR9W5E7h2GIkAJjQRsP0YBHZvIe6N9wb99spLaAQ2JhWCP9+Lq1oKyG6AULEnDX+8vL0U51BnQIB31qSh9cJtDNVqGIGcRggHi+Lwan5yeRlQIYFlQYDoiDic6ZmEo0Y7AfEfW9FriEKGRIvAu6SAKJAAEYQBFmcx+pMNhVolYTSAdwHEQS5x39JXltQ5WjqP5ABwBfyd1v4kgN+1KkP60kgAEarTN5VbDt0/0Xb8fQDTAQJoPOYBzP1XIzJYLJYF+kBJgrfsGBBaf77sC+aHypko/6Ob/bJOnjy5GsCiuiyD5bPJbDZP2e32NFVo1XuNZrP5lt1uTwfgXKHe9RaL5XZbW9taVaTkLYoAwvN8usfjcT148MAQExMz+vDhwx3JycluvV6/uru7+44q3+leKvS+3W5XH4Fai6msrOx+e3t7UGOiAvT19fWCx+MxieJSmtNwSzT+1PkZ2ft/YFn2M57nLwHIV7jAN3m5KyzL7lY4yVs2BAQS/Ui+5/WzLCs3Kyogluf56dIyM9zuN5uXTqdDR7sdLMsm8zz/ROGU/FB+h+LU4Qjg5GZFBSRwHCeUlH6Bn8fGlpkcjcGHqano7PgWHMdt5Djunoac3Kx8AvYfKMGjR4/lrF9KjaWQbdiQgq6znVRAKsdxYxpyck74BBTvP4DxceGNZE5KSkR311mfAA255QL2l5TixfS0r9coPSfWZEJXZ4c/AtpxfgFHeZtg/vIrzM855bB7T0A+johII+ynT+Eb1pp6lLeNacGdPn0KLGv1CYjnayt6o4zGDFGUIIJAJASMJIGBBIYheO2cG7E2tJTZaivb3zJGblFztMgIw+C1c2HE1tC0IgeGwYxzYbSuoUluVjQH1M1GX1Oyz9HYeU5pMkpzoX5vCmhK/5eTmxUVQJuNcW3xsXTiWnDPP3ms27Mp7scLdyd3RCSnuCX9at1U9+FbXh83hOQMRsNUV/XNf8FR+5aNSL++blBwiZJJlOgRMJAIAZGPQARDCPQMmfjzyCcp6+sGH7tEKUHNEYhYRRisgqfvKZu3Z33d4G8uUYoPyUme/qfWPL8TJvKO6dZdWfCINAMChg55zmdQ8d0wnDcuZRgzd4+G5W72bTZuLrgZjhPYHL8TxtsGhJZdWeCGBegYXxGAXgO4rERUUgGXj28z7jx0LRw3933z1shPq66H455bc/1OmGAbEI7kZ+LyLy/lm40y6tGb0M4P1qDuyg3M9jVtjyqovqoVN2HN9fsAFVCVk4k7404w3rmf2oEoAR8lGdHsuIHZ3pbsqMLKobCcV2g4bpmAJN4hVOVmYXLO9UYOxEXq0TwwjFlHZ35UTsmVcNxMf3teTF5ZfzhunM3xG9G66ou9iI7NoFmrXrQK8Gpq5FnTXsu66vNtiF67ZQVu+FnT3q+T+f4RkTBrQnMvRp81fR7SiNQaqBH9BeAFnR0AvK2ajhVeMSx6IaUMNa1gI9+yqVkxomBTr+8K4J1y6eitDzIdqzn6AjqAGkLMicum5r8BTGo/TgyrTmsAAAAASUVORK5CYII=", 
     "pageId" : "", 
-    "parentId" : "574237133c6d3cd598a5a30d", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "parentOrgId" : "575d4c3f2cf3d6dc3ed83148"
+    "parentOrgId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "574237133c6d3cd598a5a30d"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315b"), 
@@ -1840,8 +1844,9 @@
     "name" : "ACME Bicycle Shop", 
     "description" : "<p>The ACME Bicycle Shop</p>", 
     "pageId" : "578bff823c6d3cd598a5a3a6", 
+    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB5klEQVQ4T61Tv2sUURD+Zt7undFYqKTKsW/v7p0YDqwEGxst/EUKbcQiYKGIAUGRVIqKTYpYiBjQSiEGSSPIgYX5C+wEUSx8t7e3kassDAlL4vneyIKBxICFl2mGGeZ988038wgDGg34HjsLYKKoCeYRAIIgeG+t7Teq1WMiwuLU9/ZS+9PfjLcwaES1cWE/DZEFhOFsuVxeW19dvSJgFvgJKHUqSZLlzSDbRjBxPOkEUwz6srXQaxA9t2n6aBtAvVI3FLhx8ZQz4YJ4UT7kcxvd4jjeFQpeiHdjpNRTAXbDuZZdWmpTXeszLHRdQM9AuASSg/A0A0jdZumDQ6OjB34F4TwR3ohzt8HcIlHvAD8pih5TI4rflvbuOZ/n+T5ybg4+mKLAXyaBBmQGnqbBckuEriqhV57cHZtlp40xZem712R0dd52OxMFExG5ycxrIjgiwA8GxCs+myRJZqJowWbZRVOtnrSdzmKhQ03rl2S0nsv7/Wu9Xi8vko04PirAcZumD/+I5Qpvovg+SFq22/1QxM2R5vDPoZVZqlVqDSh3j4UXCbLfw49RqXTDWru+We1KpTJUUuETJvkMkWWATyj4uxtrVEbrw+KClfa3tv3XeRcb48ANf03TjwD8zp7y/3ysgRn8BlTuy14MbVpqAAAAAElFTkSuQmCC", 
-    "parentId" : "5742439f3c6d3cd598a5a319"
+    "classId" : "5742439f3c6d3cd598a5a319"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315c"), 
@@ -1850,7 +1855,7 @@
     "description" : "<p>The ACME Health Care Clinic</p>", 
     "pageId" : "", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABtklEQVQ4T5WSsUtbURTGz3dfiFEzFKFL1Xtv8p4g2sFOFdql0E5tQTJlkHZ16FQo/gOdnBw6dA4dhKKTdHDKIJKpUy2heUneTYKLIBLakERzT3liIAlJSO50z3e+8zv3XA6o57hSPgPECRHN9eo99wYTvyoac9bV0AdQiQ+wt5/Icd4RUV/uzmdthuHsFU35y2gA8Y5vgsfDXuAp/YsJX/sArtb7zIiHBYJ5jUCrlnA0DCCIU8SUt8DvMO+QbcBT+goCW50O7Ii5R8qC7Xckla6VTLA06Fp/uB5vRVsPQn2mPXN9fnn+d9DjSpkfCfBU4hsRxe6Lmr4pb08FcJf1Yaw5/z4sasf+ZQrVIDURwNP6hBltEDtLRr/NUpY9KQ+JRRQC0YIpv+yCho7gqcSpb8rPB7tprWORTifnV6sbYwFJpXIA9pm5XjLmR2heUeo1s1iwxB9LleDJWICr1AuwWCTY3cbNzdPQPBuJ/AQ5n0lwzQ+C7FhAN+lJecBCHIQxrE37lUp6ok/smlZk8g2BN+9iRq5QKR0PBbhKXxRN8GjaLQz9ntZ/kJSyTkBTWJ5ulZlAjoj/B4u9x9M8LUgYAAAAAElFTkSuQmCC", 
-    "parentId" : "574243d23c6d3cd598a5a31b"
+    "classId" : "574243d23c6d3cd598a5a31b"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314e"), 
@@ -1872,8 +1877,8 @@
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314f"), 
@@ -1882,15 +1887,15 @@
     "description" : "<p>Platos Cave user</p>", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAALwSURBVDhPLY3dbxRVGMbPrSEkvRBDwpUQYwQlKGAMJIYLjDd6p3+ABPy405gI7uzH7HycM2dmzp6Zc87Mzux2u+3ObLvdFtay1FbImkYkEBTiR0ADwS9CZNsIFNpKU2AYom+eqzfP7/eAhZp7uy4W63ypIe43+GrEHo7ypO0nLe/RmEjG/QdNlj5XI7HcEPdGPNCv8FtD3mJd3B3iy3V3LfLWGiwZ85KJIJkIk1H/QeTdHxb/DvtpZ6HKwI2A3QxFP3RuVflSTawOi4exnxwtJxc6yTftdGqtIVaG2GKNz1fcvwMXXBXsGmfXPfdmmf8T8HtV91EcriycTf67bjPV3wndvu/c8Nlv3AEXKf2ROpcoveo6f3HaF3R5UKz2L/4PTI/frbK+cP9gzhXGLzMOThNyjtDzNvmJur9Q53eX9l2yUvOSXjfptJZCMS9Y2v6ZkNR73qZg1oBf29acaZ61S08wQn8t0esunxd8wRN/us4lm1yw7HMmOW3Zc3YJfGEYU8g4YaCvTPMUxnPYPmPa31mlH6wn8Pc2+dYwU90pbM5gPI0xGNNhGxptiDvImNJhVzdOqKiHSQ+aPYhPGngGoeMQdXQ0qcMJhEAEzRgakQobijZp03d373lr67YDe/e1ZaWj6B0FxlKhpcHUm3aaCINKUQ8KMPPeobdf3bN/67Zdz2x4Y8uzO9av2zUw8OaW5156ah06+GFTRXUFDmmophrg9e0v79uxc+/zL+zctKmqFlnmSDmf8TOfvfPabj9z2M9K5Vw2kGWWywpZcXIF8MrmzS9u3PA0AFUtP6hmB1WprkktS63LUgSVMPd5TSuEWt6TpfxH70sfHAIDAIwQWEPZuKS2HFhTDrdLaqQeOYblNLGaGbeKMc7HtjxaUpqkCCqwMGzrTaq1HO2YQONEmSDKyaA0y9AUKYbSJ02zEFuyyH48gnMpBmaq5HiAJ5nei/xUUEeSl/s0nfqyQjtUmQ1wl8OjVOuWrdkqma5YjwEfCcrTn7ebgwAAAABJRU5ErkJggg==", 
     "pageId" : "575d4c3f2cf3d6dc3ed83147", 
-    "parentId" : "57343beb3c6d3cd598a5a2e7"
+    "classId" : "57343beb3c6d3cd598a5a2e7"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83153"), 
     "docType" : "object", 
     "name" : "Par 2", 
     "description" : "<p>He my polite be object oh change. Consider no mr am overcame yourself throwing sociable children. Hastily her totally conduct may. My solid by stuff first smile fanny. Humoured how advanced mrs elegance sir who. Home sons when them dine do want to. Estimating themselves unsatiable imprudence an he at an. Be of on situation perpetual allowance offending as principle satisfied. Improved carriage securing are desirous too.</p>", 
-    "parentId" : "573435f03c6d3cd598a5a2e1", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83154"), 
@@ -1925,14 +1930,13 @@
                 {
                     "displayType" : "Table", 
                     "name" : "Insets Table", 
-                    "readOnly" : false, 
                     "viewId" : "575de7f43c6d3cd598a5a387"
                 }
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83159"), 
@@ -1941,9 +1945,9 @@
     "description" : "<p>The Neuralquest server</p>", 
     "icon" : "data:image/png;base64,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", 
     "pageId" : "575d4c3f2cf3d6dc3ed83157", 
-    "parentId" : "574237133c6d3cd598a5a30d", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "parentOrgId" : "575d4c3f2cf3d6dc3ed83148"
+    "parentOrgId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "574237133c6d3cd598a5a30d"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315d"), 
@@ -1952,13 +1956,18 @@
     "description" : "<p>Descibes the organizational unit hierarchy, including a children array</p>", 
     "type" : "object", 
     "query" : {
+        "eq" : {
+            "parentOrgId" : "_id"
+        }
+    }, 
+    "xquery" : {
         "and" : [
             {
                 "isA" : "574237133c6d3cd598a5a30d"
             }, 
             {
-                "in" : {
-                    "_id" : "subUnits"
+                "eq" : {
+                    "parentOrgId" : "_id"
                 }
             }
         ]
@@ -1980,8 +1989,8 @@
         "_id", 
         "name"
     ], 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("575de7f43c6d3cd598a5a387"), 
@@ -1998,8 +2007,8 @@
             "readOnly" : false
         }
     }, 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("576668623c6d3cd598a5a389"), 
@@ -2027,8 +2036,8 @@
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("576669693c6d3cd598a5a38b"), 
@@ -2064,8 +2073,8 @@
             "post" : "/login/google"
         }
     }, 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57679fcb3c6d3cd598a5a38d"), 
@@ -2117,8 +2126,8 @@
             "post" : "/login/google"
         }
     }, 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57685146555f1b602acb32b7"), 
@@ -2128,7 +2137,7 @@
     "email" : "", 
     "docType" : "object", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABPSURBVDhPY6AY/P//nyKMKQAFLm5u/5ExVBhTPYYAFAy8AQ0N//8jY6gwpnp0AZBt6JphGCSHrh6FA8KjBgAFgACbZhAmKhaGgQGk4f8MAIqza92/3MmUAAAAAElFTkSuQmCC", 
-    "parentId" : "57343beb3c6d3cd598a5a2e7"
+    "classId" : "57343beb3c6d3cd598a5a2e7"
 }
 { 
     "_id" : ObjectId("574243d23c6d3cd598a5a31c"), 
@@ -2165,8 +2174,8 @@
     "query" : {
         "isA" : "574225cb3c6d3cd598a5a305"
     }, 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57783efc3c6d3cd598a5a394"), 
@@ -2179,7 +2188,7 @@
     "stateHistory" : [
         "577909043c6d3cd598a5a39e"
     ], 
-    "parentId" : "57424f1b3c6d3cd598a5a321"
+    "classId" : "57424f1b3c6d3cd598a5a321"
 }
 { 
     "_id" : ObjectId("577853123c6d3cd598a5a396"), 
@@ -2200,8 +2209,8 @@
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("57785c393c6d3cd598a5a398"), 
@@ -2226,8 +2235,8 @@
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("577862b83c6d3cd598a5a39a"), 
@@ -2258,8 +2267,8 @@
 
         }
     }, 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("577863d83c6d3cd598a5a39c"), 
@@ -2281,8 +2290,8 @@
 
         }
     }, 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("577909043c6d3cd598a5a39e"), 
@@ -2290,14 +2299,14 @@
     "description" : "<p>Defect confirmed</p>", 
     "stateId" : "57790e503c6d3cd598a5a3a0", 
     "date" : "2008-10-17T00:00:00Z", 
-    "parentId" : "574234113c6d3cd598a5a30b"
+    "classId" : "574234113c6d3cd598a5a30b"
 }
 { 
     "_id" : ObjectId("57790e503c6d3cd598a5a3a0"), 
     "docType" : "object", 
     "name" : "Proposal", 
     "description" : "<p>Proposal</p>", 
-    "parentId" : "5747254b3c6d3cd598a5a379"
+    "classId" : "5747254b3c6d3cd598a5a379"
 }
 { 
     "_id" : ObjectId("578919763c6d3cd598a5a3a2"), 
@@ -2328,8 +2337,8 @@
             ]
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("578921fe3c6d3cd598a5a3a4"), 
@@ -2360,8 +2369,8 @@
             "readOnly" : false
         }
     }, 
-    "parentId" : "573435c23c6d3cd598a5a2df", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148"
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("578bff823c6d3cd598a5a3a6"), 
@@ -2407,8 +2416,8 @@
             "pageId" : "575d4c3f2cf3d6dc3ed8314e"
         }
     ], 
-    "parentId" : "56f87ec55dde184ccfb9fc74", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed8315b"
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("578c03fa3c6d3cd598a5a3a8"), 
@@ -2417,8 +2426,8 @@
     "description" : "<p>A very nice bicyle</p>", 
     "value" : NumberInt(150), 
     "currency" : "EUR", 
-    "parentId" : "5742563e3c6d3cd598a5a32f", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed8315b"
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "classId" : "5742563e3c6d3cd598a5a32f"
 }
 { 
     "_id" : ObjectId("578c06233c6d3cd598a5a3aa"), 
@@ -2427,8 +2436,8 @@
     "description" : "<p>A very nice bicyle</p>", 
     "value" : NumberInt(160), 
     "currency" : "EUR", 
-    "parentId" : "5742563e3c6d3cd598a5a32f", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed8315b"
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "classId" : "5742563e3c6d3cd598a5a32f"
 }
 { 
     "_id" : ObjectId("578c06793c6d3cd598a5a3ac"), 
@@ -2437,14 +2446,88 @@
     "description" : "<p>A very nice bicyle</p>", 
     "value" : NumberInt(155), 
     "currency" : "EUR", 
-    "parentId" : "5742563e3c6d3cd598a5a32f", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed8315b"
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "classId" : "5742563e3c6d3cd598a5a32f"
 }
 { 
     "_id" : ObjectId("578c14c63c6d3cd598a5a3b0"), 
     "docType" : "object", 
     "value" : NumberInt(465), 
     "currency" : "EUR", 
-    "parentId" : "574261743c6d3cd598a5a369", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed8315b"
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "classId" : "574261743c6d3cd598a5a369"
+}
+{ 
+    "_id" : ObjectId("579338e73c6d3cd598a5a3b2"), 
+    "docType" : "object", 
+    "name" : "Object View", 
+    "description" : "<p>Displays objects</p>", 
+    "type" : "object", 
+    "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
+    "Xquery" : {
+        "eq" : {
+            "docType" : "object"
+        }
+    }, 
+    "query" : {
+        "eq" : {
+            "classId" : "_id"
+        }
+    }, 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "name" : {
+
+        }, 
+        "icon" : {
+            "title" : "Icon", 
+            "type" : "string"
+        }, 
+        "description" : {
+
+        }
+    }, 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABvSURBVDhPY/j//z9FeNiD/4pAjwIxyQCq0ecYAxgTbxCaRnSM2yACGtExqkEkaETHEEOGgQGDAgBzVTYQewKxGhBLALEIEDMBMSMSBvFVgVgXiEuBOBmmnQmImYGYEQmzQzEHFMPkQepBGMr+zwUAa2Uzpn+czq8AAAAASUVORK5CYII=", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("579357cf3c6d3cd598a5a3b4"), 
+    "docType" : "object", 
+    "name" : "Owner Object View", 
+    "description" : "<p>Displays owners</p>", 
+    "type" : "object", 
+    "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
+    "query" : {
+        "or" : [
+            {
+                "eq" : {
+                    "classId" : "_id"
+                }
+            }, 
+            {
+                "view" : "575d4c3f2cf3d6dc3ed8315d"
+            }
+        ]
+    }, 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "name" : {
+
+        }, 
+        "icon" : {
+            "title" : "Icon", 
+            "type" : "string"
+        }, 
+        "description" : {
+
+        }
+    }, 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABvSURBVDhPY/j//z9FeNiD/4pAjwIxyQCq0ecYAxgTbxCaRnSM2yACGtExqkEkaETHEEOGgQGDAgBzVTYQewKxGhBLALEIEDMBMSMSBvFVgVgXiEuBOBmmnQmImYGYEQmzQzEHFMPkQepBGMr+zwUAa2Uzpn+czq8AAAAASUVORK5CYII=", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }

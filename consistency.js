@@ -74,14 +74,17 @@ function validateObjects(){
     });
 }
 /**/
-function cleanup(){
+function xcleanup(){
 
-    return Documents.find({docType:'object'}).then(function(objectssArr){
+    return Documents.find({docType:'object'}).then(function(objectsArr){
         var classPromises = [];
         var results = [];
-        objectssArr.forEach(function(objDoc) {
-            delete objDoc._id;
-            Documents.insert(objDoc);
+        objectsArr.forEach(function(objDoc) {
+            delete(objDoc.parentId);
+            //console.log(objDoc);
+            var unset  = {'parentId': null};
+            Documents.update(objDoc, unset);
+            //Documents.insert(objDoc);
             //results.push(objDoc._id);
         });
         /*Documents.findById("570064645dde184ccfb9fc84").then(function(nqObj){
@@ -232,27 +235,4 @@ function validateAssocByClassModel(assoc){
         });
     });
 }
-
-
-/*function cleanup(){
-    var removeArr = [59,60,66,69,77,91,94,100,101,102,106,107,109,63];
-    var collectedPromises = [];
-    removeArr.forEach(function(itemId){
-        collectedPromises.push(utils.collectAllByAssocType(itemId, 'children'));
-    });
-    return all(collectedPromises).then(function(collectedPromisesArrArr){
-        var results = [];
-        collectedPromisesArrArr.forEach(function(collectedPromisesArr) {
-            collectedPromisesArr.forEach(function(item){
-                results.push(item);
-                var itemId = item._id;
-                assocsColl.remove({source: itemId});
-                assocsColl.remove({dest: itemId});
-                itemsColl.remove({_id: itemId});
-            });
-        });
-        return results
-    });
-
-}*/
 module.exports.check = check;

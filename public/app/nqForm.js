@@ -18,7 +18,7 @@ define(['dojo/_base/declare', "app/nqWidgetBase","dojo/when"],
                     var newFormNeeded = false;
                     if(!self.schema && doc.docType == 'object'){
                         newFormNeeded = true;
-                        promise = self.store.getInheritedClassSchema(doc.parentId);
+                        promise = self.store.getInheritedClassSchema(doc.classId);
                     }
                     else promise = false;
                     when(promise, function(inheritedClassSchema){

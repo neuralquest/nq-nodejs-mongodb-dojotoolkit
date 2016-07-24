@@ -355,8 +355,11 @@ function(declare, lang, array, when, all, registry,
                         break;
                     case 'view':
                         var subView = this.cachingStore.getSync(docFilter);
-                        if (subView && subView.childrenQuery) {
-                            return this.buildFilterFromQuery(parentObj, subView.childrenQuery);
+                        if (subView) {
+                            var fil = this.buildFilterFromQuery(parentObj, subView.query);
+                            fil.viewId = docFilter;
+                            return fil;
+                            //return this.buildFilterFromQuery(parentObj, subView.query);
                         }
                         break;
                     case 'array':
@@ -373,7 +376,7 @@ function(declare, lang, array, when, all, registry,
             if(user.id) return user.id;
             return false;
             var userId = "575d4c3f2cf3d6dc3ed83148";
-            var ownerFilter = this.Filter().contains('owns', [doc._id]);
+            var ownerFilter = this.Filter().contains('owns', +[doc._id]);
             var ownerCollection = this.filter(ownerFilter);
             return ownerCollection.fetch().then(function(owners){
                 console.log('owner of', doc.name, ownerFilter);
