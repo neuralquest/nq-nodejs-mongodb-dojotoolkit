@@ -293,15 +293,17 @@ function(declare, lang, array, when, all, registry,
         },
         isASync: function(doc, id) {
             if(doc._id == id) return true;
-            if(!doc.parentId) return false;
-            var parentDoc =  this.cachingStore.getSync(doc.parentId);
+            var parentId = doc.docType=='object'?doc.classId:doc.parentId;
+            if(!parentId) return false;
+            var parentDoc =  this.cachingStore.getSync(parentId);
             return this.isASync(parentDoc, id);
         },
         isA: function(doc, id) {
             var self = this;
             if(doc._id == id) return true;
-            if(!doc.parentId) return false;
-            return this.get(doc.parentId).then(function(parentDoc){
+            var parentId = doc.docType=='object'?doc.classId:doc.parentId;
+            if(!parentId) return false;
+            return this.get(parentId).then(function(parentDoc){
                 return self.isA(parentDoc, id);
             });
         },

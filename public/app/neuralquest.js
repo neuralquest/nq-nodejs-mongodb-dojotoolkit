@@ -94,6 +94,19 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         if(!pageId) return false;
         return nqStore.get(pageId).then(function (pageObj) {
             parentContentPane.destroyDescendants(false);
+            if(pageObj.bannerUrl){
+                var headerDiv = domConstruct.create('div', {style:{position: 'relative'}}, parentContentPane.containerNode);
+                domConstruct.create('img', {src:pageObj.bannerUrl, width: '100%', height: '150px'}, headerDiv);
+                domConstruct.create('div', {innerHTML: pageObj.name,
+                    style:{
+                        position: 'absolute',
+                        top: '30%',
+                        width: '100%',
+                        'text-align':'center',
+                        'font-size': '40px',
+                        'font-weight': 'bold',
+                        color: 'white'
+                    }}, headerDiv);           }
             if(pageObj.divider == 'Horizontal' || pageObj.divider == 'Vertical') {
                 var borderContainer = new BorderContainer({
                     'region': 'center',

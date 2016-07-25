@@ -729,7 +729,16 @@
     "title" : "Inventory", 
     "description" : "<p>Inventory owned by users/organizations</p>", 
     "type" : "object", 
-    "parentId" : "5742561f3c6d3cd598a5a327"
+    "parentId" : "5742561f3c6d3cd598a5a327", 
+    "properties" : {
+        "imageUrl" : {
+            "title" : "Image", 
+            "type" : "string", 
+            "style" : {
+                "width" : "5em"
+            }
+        }
+    }
 }
 { 
     "_id" : ObjectId("574256413c6d3cd598a5a331"), 
@@ -1844,7 +1853,6 @@
     "name" : "ACME Bicycle Shop", 
     "description" : "<p>The ACME Bicycle Shop</p>", 
     "pageId" : "578bff823c6d3cd598a5a3a6", 
-    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB5klEQVQ4T61Tv2sUURD+Zt7undFYqKTKsW/v7p0YDqwEGxst/EUKbcQiYKGIAUGRVIqKTYpYiBjQSiEGSSPIgYX5C+wEUSx8t7e3kassDAlL4vneyIKBxICFl2mGGeZ988038wgDGg34HjsLYKKoCeYRAIIgeG+t7Teq1WMiwuLU9/ZS+9PfjLcwaES1cWE/DZEFhOFsuVxeW19dvSJgFvgJKHUqSZLlzSDbRjBxPOkEUwz6srXQaxA9t2n6aBtAvVI3FLhx8ZQz4YJ4UT7kcxvd4jjeFQpeiHdjpNRTAXbDuZZdWmpTXeszLHRdQM9AuASSg/A0A0jdZumDQ6OjB34F4TwR3ohzt8HcIlHvAD8pih5TI4rflvbuOZ/n+T5ybg4+mKLAXyaBBmQGnqbBckuEriqhV57cHZtlp40xZem712R0dd52OxMFExG5ycxrIjgiwA8GxCs+myRJZqJowWbZRVOtnrSdzmKhQ03rl2S0nsv7/Wu9Xi8vko04PirAcZumD/+I5Qpvovg+SFq22/1QxM2R5vDPoZVZqlVqDSh3j4UXCbLfw49RqXTDWru+We1KpTJUUuETJvkMkWWATyj4uxtrVEbrw+KClfa3tv3XeRcb48ANf03TjwD8zp7y/3ysgRn8BlTuy14MbVpqAAAAAElFTkSuQmCC", 
     "classId" : "5742439f3c6d3cd598a5a319"
 }
@@ -2376,12 +2384,14 @@
     "_id" : ObjectId("578bff823c6d3cd598a5a3a6"), 
     "docType" : "object", 
     "name" : "ACME Bicycle Page", 
+    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
+    "displayBanner" : true, 
     "tabs" : [
         {
-            "name" : "Catalouge", 
-            "pageId" : "578919763c6d3cd598a5a3a2"
+            "name" : "Catalog", 
+            "pageId" : "5794cd333c6d3cd598a5a3b5"
         }, 
         {
             "name" : "Transactions", 
@@ -2528,6 +2538,51 @@
         }
     }, 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABvSURBVDhPY/j//z9FeNiD/4pAjwIxyQCq0ecYAxgTbxCaRnSM2yACGtExqkEkaETHEEOGgQGDAgBzVTYQewKxGhBLALEIEDMBMSMSBvFVgVgXiEuBOBmmnQmImYGYEQmzQzEHFMPkQepBGMr+zwUAa2Uzpn+czq8AAAAASUVORK5CYII=", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("5794cd333c6d3cd598a5a3b5"), 
+    "docType" : "object", 
+    "name" : "Catalog Page", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Catalog Table", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "Catalog Table", 
+                    "viewId" : "579529973c6d3cd598a5a3b7", 
+                    "pageId" : ""
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("579529973c6d3cd598a5a3b7"), 
+    "docType" : "object", 
+    "name" : "Catalog View", 
+    "description" : "<p>View useed for the catalog</p>", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "5742563e3c6d3cd598a5a32f"
+    }, 
+    "properties" : {
+        "imageUrl" : {
+            "title" : "Image"
+        }, 
+        "name" : {
+
+        }, 
+        "value" : {
+
+        }
+    }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435c23c6d3cd598a5a2df"
 }
