@@ -1,7 +1,6 @@
 var all = require("promised-io/promise").all;
 var when = require("promised-io/promise").when;
-var Items = require('../../models/items');
-var Assocs = require('../../models/assocs');
+var Documents = require('../../models/documents');
 
 
 function getCombinedSchemaForView(view) {

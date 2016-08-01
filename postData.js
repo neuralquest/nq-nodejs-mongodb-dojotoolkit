@@ -2,8 +2,7 @@ var all = require("promised-io/promise").all;
 var when = require("promised-io/promise").when;
 var consistency = require('./consistency');
 var utils = require('./public/app/utils');
-var Items = require('./models/items');
-var Assocs = require('./models/assocs');
+var Documents = require('./models/documents');
 var tv4 = require("tv4");
 var idMap = {};
 

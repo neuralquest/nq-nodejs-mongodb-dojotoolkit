@@ -11,10 +11,10 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		skyboxArray: [ 'app/resources/img/Neuralquest/space_3_right.jpg', 'app/resources/img/Neuralquest/space_3_left.jpg', 'app/resources/img/Neuralquest/space_3_top.jpg' ,'app/resources/img/Neuralquest/space_3_bottom.jpg','app/resources/img/Neuralquest/space_3_front.jpg','app/resources/img/Neuralquest/space_3_back.jpg'],
 		classGeometry: null,
         assocProps: {
-            /*ownerId:{
+            ownerId:{
                 depth: -200,
                 connectorMaterial: new THREE.MeshLambertMaterial({color: 0xEF0000}) //red
-            },*/
+            },
             pageId:{
                 depth: -300,
                 connectorMaterial: new THREE.MeshLambertMaterial({color: 0x00EFEF})

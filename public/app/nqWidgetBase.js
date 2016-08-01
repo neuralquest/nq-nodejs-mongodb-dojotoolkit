@@ -1,6 +1,6 @@
 define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/_base/lang", 'dojo/on',
         'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", "dojo/promise/all", "dojo/when", 'dijit/registry', 'dojo/store/Memory', "dojo/dom-style",'dojo/query!css3',
-        "dojo/sniff",
+        "dojo/sniff", "dojo/date", "dojox/form/Uploader",
         'dijit/form/Select',
         'dijit/form/DateTextBox',
         'dijit/form/NumberTextBox',
@@ -27,7 +27,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins'],
 	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, lang, on,
-			arrayUtil, domAttr, Deferred, all, when, registry, Memory, domStyle, css3, has, Select, DateTextBox, NumberTextBox, Textarea,
+			arrayUtil, domAttr, Deferred, all, when, registry, Memory, domStyle, css3, has, date, Uploader,
+             Select, DateTextBox, NumberTextBox, Textarea,
              CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton,
              Toolbar, OnDemandGrid, CheckedMultiSelect, Button, Grid, Keyboard,
              Selection, DnD, Source, Tree, ColumnResizer, DijitRegistry, request, Form){
@@ -91,6 +92,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             for(var attrName in properties) {
                 var attrProps = properties[attrName];
                 var value = doc[attrName]?doc[attrName]:attrProps.default;
+                if(value == '$userId') value = nq.getUser().id;
+                else if(value == '$ownerId') value = nq.getOwner().id;
+                else if(value == '$docId') value = self.docId;
+
                 //console.log('attrName', attrName);
                 //console.log('value', value);
                 //console.log('attrProps', attrProps);
@@ -386,6 +391,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                         }
                                         else {
                                             if(attrProps.mask) attrProps.type = 'password';
+                                            //if(attrProps.maxLength > 500) dijit = new Textarea(attrProps, domConstruct.create("td", {class: 'inputClass'}, tdDom));
                                             dijit = new ValidationTextBox(attrProps, domConstruct.create("input", null, tdDom));
                                         }
                                     }
@@ -449,15 +455,67 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                         var buttonProps = {
                                             label: attrProps.title,
                                             iconClass: attrProps.iconClass,
-                                            post: attrProps.post
+                                            post: attrProps.post,
+                                            action: attrProps.action
                                         };
                                         dijit = new Button(buttonProps, domConstruct.create("input", null, tdDom));
+                                        dijit.on('click', function(evt){
+                                            var data = {};
+                                            for(var attrName in self.schema.properties) {
+                                                var attrProps = self.schema.properties[attrName];
+                                                var value = null;
+                                                var widget = null;
+                                                registry.findWidgets(node).forEach(function(wid){
+                                                    if(!widget && wid.name == attrName) widget = wid;
+                                                    //console.log('wid', wid);
+                                                });
+                                                if(widget){
+                                                    //console.log('widget', widget.name);
+                                                    if(widget.declaredClass ==  "OnDemandGrid"){
+                                                    }
+                                                    else value = widget.get('value');
+                                                }
+                                                else {//no widget, so we're dealing with a readonly field
+                                                    if (attrProps.default == '$userId') value = nq.getUser().id;
+                                                    else if (attrProps.default == '$ownerId') value = nq.getOwner().id;
+                                                    else if (attrProps.default == '$docId') value = self.docId;
+                                                }
+                                                if(value) data[attrName] = value;
+                                            }
+                                            //data.parentId = self.schema.query.isA;
+                                            if(this.action == 'add'){
+                                                data.stateHistory = [{
+                                                    date: dojo.date.stamp.toISOString(new Date()),
+                                                    stateId: "57790e503c6d3cd598a5a3a0"
+                                                }];
+                                                self.store.add(data, {schema:self.schema});
+                                            }
+                                            else{
+                                                data = {path:'C:/Users/cjong/Pictures/zonomhoog.jpg', name:'zonomhoog', owner:nq.getOwner().id};
+                                                //if(!form.validate()) return;
+                                                request.post(this.post, {
+                                                    headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
+                                                    data: JSON.stringify(data)
+                                                }).then(function(result){
+                                                    var user = dojo.fromJson(result);
+                                                    nq.setUser(user);
+                                                    //TODO refresh the data
+                                                    window.history.back();
+                                                }, nq.errorDialog);
+                                            }
+                                        });
+                                    }
+                                    else if (attrProps.type == 'file') {
+                                        //dijit = new Uploader(attrProps, domConstruct.create("input", null, tdDom));
+                                        //domConstruct.create("input", {type:'file', id:"files", name:"files", accept:"image/*"  }, tdDom);
+                                        //dijit = new Button({label:'A',type:'file', id:"files", name:"files", accept:"image/*"  }, domConstruct.create("input",null , tdDom));
+                                        dijit = new Uploader({label:'Upload a file', type:'file', url:'/upload', accept:"image/*",  uploadOnSelect:true, id:'ownerrr'}, domConstruct.create("span",null , tdDom));
                                     }
                                     if(dijit) {
                                         self.own(dijit);
                                         dijit.startup();
                                         dijit.structuredDocPathArr = structuredDocPathArr;
-                                        if(dijit.declaredClass == 'dijit.form.Button'){
+                                        /*if(dijit.declaredClass == 'dijit.form.Button'){
                                             dijit.on('click', function(evt){
                                                 //if(!form.validate()) return;
                                                 var data = {};
@@ -474,8 +532,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                                     window.history.back();
                                                 }, nq.errorDialog);
                                             });
-                                        }
-                                        else if(!attrProps.abstract){
+                                        }*/
+                                        if(!attrProps.abstract){
                                             dijit.on('change', function(value){
                                                 var attrName = this.name;
                                                 var attrDefault = this.default;

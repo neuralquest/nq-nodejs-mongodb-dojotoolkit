@@ -46,6 +46,23 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
                             //image
                             domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: inset.url, width: 300}, divDom);
                         }
+                        if(inset.mediaType.media == 'widget/3D Class Model'){
+                            //image
+                            domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: inset.url, width: 300}, divDom);
+                            var parms = {
+                                id: pageId + '.' + tabPane.tabNum + '.' + widNum,
+                                pageId: pageId,
+                                tabNum: tabPane.tabNum,
+                                widNum: widNum,
+                                widTot: tabObj.widgets.length,
+                                level: tabPane.level,
+                                widget: widget,
+                                store: nqStore,
+                                schema: schema
+                            };
+                            var widgetObj = new nqClassChart(parms, domConstruct.create('div'));
+                            tabPane.addChild(widgetObj);
+                        }
                     }
                 });
             }

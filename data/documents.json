@@ -510,7 +510,8 @@
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
                 "isA" : "56f870a55dde184ccfb9fc6c"
-            }
+            }, 
+            "default" : "$userId"
         }, 
         "sellerId" : {
             "title" : "Seller", 
@@ -518,7 +519,8 @@
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
                 "isA" : "56f870a55dde184ccfb9fc6c"
-            }
+            }, 
+            "default" : "$ownerId"
         }, 
         "assetId" : {
             "title" : "Asset", 
@@ -526,9 +528,46 @@
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
                 "isA" : "56f87bcc5dde184ccfb9fc70"
-            }
+            }, 
+            "default" : "$docId"
         }, 
         "stateHistory" : {
+            "title" : "History", 
+            "type" : "array", 
+            "items" : {
+                "type" : "object", 
+                "properties" : {
+                    "stateId" : {
+                        "title" : "State", 
+                        "type" : "string", 
+                        "pattern" : "[a-f0-9]{24}", 
+                        "query" : {
+                            "isA" : "5745eaa53c6d3cd598a5a371"
+                        }
+                    }, 
+                    "date" : {
+                        "title" : "Date", 
+                        "type" : "string", 
+                        "format" : "date-time"
+                    }, 
+                    "description" : {
+                        "title" : "Description", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(10000), 
+                        "media" : {
+                            "mediaType" : "text/html"
+                        }, 
+                        "default" : "<p>[no text]</p>"
+                    }, 
+                    "default" : {
+                        "stateId" : "PPP", 
+                        "date" : "$now"
+                    }
+                }, 
+                "additionalProperties" : false
+            }
+        }, 
+        "XstateHistory" : {
             "title" : "State History", 
             "readOnly" : true, 
             "type" : "array", 
@@ -1115,7 +1154,6 @@
     "name" : "Neuralquest", 
     "description" : "<p>The Neuralquest organization</p>", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAGSSURBVDhPY2hgaMCDGpkaJ6lM2pq19cLCCzc23Hhy8glDr1QvmiJcqIm5qUOgg2H3uubNeasXuS7q4O9AU4EVMTQ3s06cqLxsUcDN40cOtx3uk+kDOgNNETJCMJuamJcu9T5ypOPCyeV7ps/fXLJ0Z/nWrdlbF7stnmU8a4L8BKDj23jbEBrgqLGRub2dt69PdsoU9fXrE86enH/nysFHV6+8vf/67e23DG1tPGgacKG2Nu45cywZnm/btHNnIdBINGlciOG/WPH/np0vl646u7N/1fLg/n7Zzk4hoGGNjUxoSiGI4T9DGghxZv9XqPxj1PCxaNq7eWvfbtz2+NGxffuqly71BGrGpgETqdT8D5j2v3Ldl57VLzpnPFmx9PquuSf3duPWgIwY0/7z5v2XKf+vWsPw/9jd//kr/lt2/BctRleHDTH8h4CP3//ff/N/2an/Dj3/BQtARmIohSCYBmTw99//68/+zzj4v3zt/7wV/5MW/Hfq/a9Z/1+q9D93LjYNmODrz/8vP/1/+Pb/rZcAE2mMw+k9hMEAAAAASUVORK5CYII=", 
-    "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
     "pageId" : "575d4c3f2cf3d6dc3ed83147", 
     "what" : "<p>Neualquest is a platform that helps people organize and work together. As a visitor you can browse published information. As a participant you have your own space in which you can maintain blogs, foto albums, apps etc. and make them public as desired. You can also create organizations based on industy standard templates including basic business process, which you can then enhance as the need arises. Role based authorization ensures that only members of your organization assigned to a paticular organizational unit can read/modify data.<br></br></p>", 
     "why" : "<p>The IT industry has been notably laking when it come to support for business processes. Today, a typical large organization might have thousands of systems running on tens of thousands of servers. Each of these systems requires a small army of experts to keep it from falling over. Gernally speaking, the processes themselves are not are not particulary complex. More often than not, its the interaction between the systems that causes</p>", 
@@ -2188,15 +2226,19 @@
 { 
     "_id" : ObjectId("57783efc3c6d3cd598a5a394"), 
     "docType" : "object", 
-    "name" : "Table editor does not work", 
+    "name" : "Purchase proposal", 
     "description" : "<p>Something amis</p>", 
     "buyerId" : "575d4c3f2cf3d6dc3ed8314f", 
     "sellerId" : "575d4c3f2cf3d6dc3ed8315b", 
-    "assetId" : "", 
+    "assetId" : "578c06793c6d3cd598a5a3ac", 
     "stateHistory" : [
-        "577909043c6d3cd598a5a39e"
+        {
+            "description" : "<p>I want to buy a bicyle</p>", 
+            "stateId" : "57790e503c6d3cd598a5a3a0", 
+            "date" : "2008-10-17T00:00:00Z"
+        }
     ], 
-    "classId" : "57424f1b3c6d3cd598a5a321"
+    "classId" : "574232b83c6d3cd598a5a309"
 }
 { 
     "_id" : ObjectId("577853123c6d3cd598a5a396"), 
@@ -2312,16 +2354,17 @@
 { 
     "_id" : ObjectId("57790e503c6d3cd598a5a3a0"), 
     "docType" : "object", 
-    "name" : "Proposal", 
-    "description" : "<p>Proposal</p>", 
+    "name" : "Proposed", 
+    "description" : "<p>Proposed</p>", 
     "classId" : "5747254b3c6d3cd598a5a379"
 }
 { 
     "_id" : ObjectId("578919763c6d3cd598a5a3a2"), 
     "docType" : "object", 
-    "name" : "Home Page", 
+    "name" : "Neuralquest", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
+    "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
     "tabs" : [
         {
             "name" : "Read", 
@@ -2364,6 +2407,16 @@
         "bannerUrl" : {
             "readOnly" : false
         }, 
+        "fileSelect" : {
+            "type" : "file", 
+            "readOnly" : false
+        }, 
+        "uploadButton" : {
+            "type" : "button", 
+            "title" : "Upload", 
+            "readOnly" : false, 
+            "post" : "/upload"
+        }, 
         "icon" : {
             "readOnly" : false
         }, 
@@ -2384,7 +2437,6 @@
     "_id" : ObjectId("578bff823c6d3cd598a5a3a6"), 
     "docType" : "object", 
     "name" : "ACME Bicycle Page", 
-    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "displayBanner" : true, 
@@ -2547,6 +2599,7 @@
     "name" : "Catalog Page", 
     "divider" : "Vertical", 
     "accordionOrTab" : "Tabs", 
+    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "tabs" : [
         {
             "name" : "Catalog Table", 
@@ -2555,7 +2608,7 @@
                     "displayType" : "Table", 
                     "name" : "Catalog Table", 
                     "viewId" : "579529973c6d3cd598a5a3b7", 
-                    "pageId" : ""
+                    "pageId" : "57979cdc3c6d3cd598a5a3b9"
                 }
             ]
         }
@@ -2581,6 +2634,98 @@
         }, 
         "value" : {
 
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57979cdc3c6d3cd598a5a3b9"), 
+    "docType" : "object", 
+    "name" : "Purchase Page", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Product", 
+            "Xstyle" : {
+                "backgroundImage" : "url('app/resources/img/Neuralquest/bicycle-788733_960_720.jpg')", 
+                "background-position" : "center", 
+                "background-size" : "cover"
+            }, 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Product", 
+                    "viewId" : "57979de93c6d3cd598a5a3bd"
+                }, 
+                {
+                    "displayType" : "Form", 
+                    "name" : "Agreement", 
+                    "viewId" : "579c97942d8cd20920e6d813"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57979de93c6d3cd598a5a3bd"), 
+    "docType" : "object", 
+    "name" : "Product View", 
+    "description" : "<p>View useed for the product</p>", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "5742563e3c6d3cd598a5a32f"
+    }, 
+    "properties" : {
+        "imageUrl" : {
+            "title" : "Image"
+        }, 
+        "name" : {
+
+        }, 
+        "description" : {
+
+        }, 
+        "value" : {
+
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("579c97942d8cd20920e6d813"), 
+    "docType" : "object", 
+    "name" : "New Agreement View", 
+    "description" : "<p>New Agreement View</p>", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "574232b83c6d3cd598a5a309"
+    }, 
+    "properties" : {
+        "buyerId" : {
+            "default" : "$userId"
+        }, 
+        "sellerId" : {
+            "default" : "$ownerId"
+        }, 
+        "assetId" : {
+            "default" : "$docId"
+        }, 
+        "value" : {
+
+        }, 
+        "stateHistory" : {
+
+        }, 
+        "buyButton" : {
+            "type" : "button", 
+            "title" : "Purchase", 
+            "readOnly" : false, 
+            "action" : "add"
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 

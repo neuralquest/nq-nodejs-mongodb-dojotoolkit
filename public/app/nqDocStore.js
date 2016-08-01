@@ -50,7 +50,7 @@ function(declare, lang, array, when, all, registry,
             this.enableTransactionButtons();
             var item = {};
             if(_item) item = _item;
-            else if(directives.schema){
+            if(directives.schema){
                 item._id = this.makeObjectId();
                 /*for(var propName in directives.schema.properties){
                     var prop = directives.schema.properties[propName];
@@ -59,41 +59,45 @@ function(declare, lang, array, when, all, registry,
                     }
                 }*/
                 if(directives.schema.query && 'isA' in directives.schema.query){
-                    var mapsToId = directives.schema.query['isA'];
-                    item.parentId = mapsToId;
+                    item.classId = directives.schema.query['isA'];
                 }
                 else if(directives.schema.query && 'and' in directives.schema.query){
                     var queryArray = directives.schema.query['and'];
                     var mapsToId = null;
                     if('isA' in queryArray[0]) mapsToId = queryArray[0]['isA'];
                     else if('isA' in queryArray[1]) mapsToId = queryArray[0]['isA'];
-                    item.parentId = mapsToId;
+                    item.classId = mapsToId;
                 }
 
-                var parentObj = this.cachingStore.getSync(directives.parentId);
-                if(directives.schema.childrenQuery && 'in' in directives.schema.childrenQuery){
-                    var inObj = directives.schema.childrenQuery['in'];
-                    for(var key in inObj){
-                        var arrayName = inObj[key];
-                        var fkArray = parentObj[arrayName];
-                        if(!fkArray) fkArray = [];
-                        fkArray.push(item[key]);
-                        parentObj[arrayName] = fkArray;
-                        //parentObj.hasChildren = true;
+                var parentObj = null;
+                if(directives.parentId){
+                    parentObj = this.cachingStore.getSync(directives.parentId);
+                    if(directives.schema.childrenQuery && 'in' in directives.schema.childrenQuery){
+                        var inObj = directives.schema.childrenQuery['in'];
+                        for(var key in inObj){
+                            var arrayName = inObj[key];
+                            var fkArray = parentObj[arrayName];
+                            if(!fkArray) fkArray = [];
+                            fkArray.push(item[key]);
+                            parentObj[arrayName] = fkArray;
+                            //parentObj.hasChildren = true;
 
+                        }
+                    }
+                    else if(directives.schema.childrenQuery && 'and' in directives.schema.childrenQuery){
+                        var queryArray = directives.schema.childrenQuery['and'];
+                        debugger;
                     }
                 }
-                else if(directives.schema.childrenQuery && 'and' in directives.schema.childrenQuery){
-                    var queryArray = directives.schema.childrenQuery['and'];
-                    debugger;
-                }
+
                 if(directives.ownerId){
                     item.ownerId = directives.ownerId;
                 }
                 return this.cachingStore.add(item, directives).then(function(item){
-                    return self.put(parentObj).then(function(){
+                    if(parentObj) return self.put(parentObj).then(function(){
                         return item;
                     });
+                    else return item;
                 });
 
 

@@ -3,7 +3,39 @@ var postData = require('./postData');
 var getData = require('./getData');
 var consistency = require('./consistency');
 var jstoxml = require('jstoxml');
+var multer  = require('multer');
+// Create a storage object with a given configuration
+var storage = require('multer-gridfs-storage')({
+    url: 'mongodb://localhost:27017/neuralquest',
+    filename: function(req, file, cb) {
+        cb(null, file.originalname);
+    },
+    metadata: function(req, file, cb) {
+        cb(null, req.body);
+    }
+});
+// Set multer storage engine to the newly created object
+var upload = multer({ storage: storage });
+/*
+var upload = multer();
+var fs      = require('fs');
+var Grid    = require('gridfs-stream');
+var mongo   = require('mongodb');
 
+//TODO why cant I use normal db here?
+var db = new mongo.Db('neuralquest', new mongo.Server("127.0.0.1", 27017));
+// make sure the db instance is open before passing into `Grid`
+var upload = null;
+db.open(function (err) {
+    if (err) return handleError(err);
+    var gfs = Grid(db, mongo);
+
+    var storage = GridFsStorage({
+        gfs: gfs
+    });
+    upload = multer({ storage: storage });
+});
+*/
 exports = module.exports = function(app, passport) {
     app.get("/documents", function (req, res) {
         var itemsColl = req.db.collection('documents');
@@ -40,38 +72,7 @@ exports = module.exports = function(app, passport) {
             next(err);
         }
     });
-    app.get("/file", function (req, res) {
-        var pic_id = req.param('id');
-        var gfs = req.gfs;
-        gfs.files.find({filename: pic_id}).toArray(function (err, files) {
-            if (err) {
-                res.json(err);
-            }
-            if (files.length > 0) {
-                var mime = 'image/jpeg';
-                res.set('Content-Type', mime);
-                var read_stream = gfs.createReadStream({filename: pic_id});
-                read_stream.pipe(res);
-            } else {
-                res.json('File Not Found');
-            }
-        });
-    });
-    app.post("/upload", function (req, res) {
-        var dirname = require('path').dirname(__dirname);
-        var filename = req.files.file.name;
-        var path = req.files.file.path;
-        var type = req.files.file.mimetype;
-        var read_stream =  fs.createReadStream(dirname + '/' + path);
-        var conn = req.conn;
-        var Grid = require('gridfs-stream');
-        Grid.mongo = mongoose.mongo;
-        var gfs = Grid(conn.db);
-        var writestream = gfs.createWriteStream({
-            filename: filename
-        });
-        read_stream.pipe(writestream);
-    });
+
     app.post('/login',
         passport.authenticate('local'), function(req, res, next) {
             // If this function gets called, authentication was successful.
@@ -106,7 +107,7 @@ exports = module.exports = function(app, passport) {
         }
         else res.send({});
     });
-    app.get("/icons.css", function (req, res) {
+    /*app.get("/icons.css", function (req, res) {
         var itemsColl = req.db.collection('documents');
         itemsColl.find({"icon":{$ne:null}}).toArray(function(err, docArr) {
             if(err) res.status(500).send(err);
@@ -119,6 +120,44 @@ exports = module.exports = function(app, passport) {
                 res.send(cssStr);
             }
         });
+    });*/
+    app.get("/file", function (req, res) {
+        var pic_id = req.param('id');
+        var gfs = req.gfs;
+        gfs.files.find({filename: pic_id}).toArray(function (err, files) {
+            if (err) {
+                res.json(err);
+            }
+            if (files.length > 0) {
+                var mime = 'image/jpeg';
+                res.set('Content-Type', mime);
+                var read_stream = gfs.createReadStream({filename: pic_id});
+                read_stream.pipe(res);
+            } else {
+                res.json('File Not Found');
+            }
+        });
+    });
+    app.post('/upload', upload.single('uploadedfile'), function (req, res, next) {
+        console.log(req.body);
+        res.json(req.body);
+    });
+    app.post("/Xupload", function (req, res) {
+        var body = req.body;
+        var tempfile    = body.path;
+        var origname    = body.name;
+        var writestream = gfs.createWriteStream({
+            filename: origname });
+        // open a stream to the temporary file created by Express...
+        fs.createReadStream(tempfile)
+            .on('end', function() {
+                res.send('OK');
+            })
+            .on('error', function() {
+                res.status(500).send('error loading file');
+            })
+            // and pipe it to gfs
+            .pipe(writestream);
     });
     app.get('/sitemap.xml', function(req, res) {
         var sitemapObj = jstoxml.toXML({

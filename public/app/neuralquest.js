@@ -10,15 +10,21 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
 		Deferred, when, all, query, BorderContainer,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
         nqDocStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocumentRO, nqDocumentRW, nqTreeGrid, nqHome,
-		JSON, Dialog,Form,TextBox,Button,domattr,styles, css2) {
+		JSON, Dialog,Form,TextBox,Button,domAttr,styles, css2) {
 
     var nqStore = new nqDocStore();
     var user = {};
+    var owner = {};
     ready(function () {
+        setOwner(
+            {
+                id: "575d4c3f2cf3d6dc3ed8315b",
+                name: "ACME Bicycle Shop"
+            }
+        );
+        //request.get('/hello').then(setUser);
         request.get('/hello').then(function (data) {
-            user = dojo.fromJson(data);
-            var userName = user.name?user.name:'';
-            domattr.set('userNameDiv', 'innerHTML', userName);
+            setUser(dojo.fromJson(data));
         }, errorDialog);
         topic.subscribe("/dojo/hashchange", interpretHash);
         on(registry.byId('loginButtonId'), 'click', function (event) {
@@ -106,7 +112,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                         'font-size': '40px',
                         'font-weight': 'bold',
                         color: 'white'
-                    }}, headerDiv);           }
+                    }}, headerDiv);
+            }
             if(pageObj.divider == 'Horizontal' || pageObj.divider == 'Vertical') {
                 var borderContainer = new BorderContainer({
                     'region': 'center',
@@ -148,6 +155,16 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
         var tabsPromises = [];
         //Is there only one tab? skip the tab container and just use the parent content pane
         if (pageObj.tabs.length <= 1) {
+            var style = {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'};
+            if(pageObj.tabs[0].style) {
+                lang.mixin(style, pageObj.tabs[0].style);
+                //style.backgroundImage = "url('app/resources/img/Neuralquest/bicycle-788733_960_720.jpg')";
+            }
+            else {
+                style.background = "linear-gradient(#CDDDE9, white)";
+                style['background-size'] = '50px';
+                style['background-repeat-y'] = 'no-repeat';
+            }
             var tabPane = new ContentPane({
                 //id: pageObj._id+'.0',
                 id: pageObj._id,
@@ -155,8 +172,9 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                 level: level,
                 tabNum: 0,
                 title: pageObj.tabs[0].name,
-                'class': 'backgroundClass',
-                style: {overflow: 'hidden', padding: '0px', margin: '0px', width: '100%', height: '100%'}
+                //'class': 'backgroundClass',
+                //background: background,
+                style: style
             });
             parentContentPane.addChild(tabPane);
             //parentContentPane.id = pageObj._id;
@@ -273,11 +291,20 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     lang.setObject("nq.setUser", setUser);//make the function globally accessible
     function setUser(_user){
         user = _user;
-        domattr.set('userNameDiv', 'innerHTML', _user.name);
+        domAttr.set('userNameDiv', 'innerHTML', _user.name);
     }
     lang.setObject("nq.getUser", getUser);//make the function globally accessible
     function getUser(){
         return user;
+    }
+    lang.setObject("nq.setOwner", setOwner);//make the function globally accessible
+    function setOwner(_owner){
+        owner = _owner;
+        domAttr.set('ownerNameDiv', 'innerHTML', _owner.name);
+    }
+    lang.setObject("nq.getOwner", getOwner);//make the function globally accessible
+    function getOwner(){
+        return owner;
     }
     lang.setObject("nq.getState", getState);//make the function globally accessible
     function getState(level){

@@ -25,26 +25,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/wh
         buildPage: function(item){
             var self = this;
             self.pane.destroyDescendants(false);
-			//Header
-            var headerDiv = domConstruct.create('div', {style:{position: 'relative'}}, self.pane.containerNode);
-            domConstruct.create('img', {src:item.bannerUrl, width: '100%', height: '150px'}, headerDiv);
-			domConstruct.create('div', {innerHTML: item.name,
-                style:{
-                    position: 'absolute',
-                    top: '30%',
-                    width: '100%',
-                    'text-align':'center',
-                    'font-size': '40px',
-                    'font-weight': 'bold',
-                    color: 'white'
-                }}, headerDiv);
-            var docDiv = domConstruct.create('div', {style:{'padding-left': '10px', 'padding-right': '10px'}}, self.pane.containerNode);
-            domConstruct.create('h1', {innerHTML: 'What?'}, docDiv);
-            domConstruct.create('p', {innerHTML: item.what}, docDiv);
-            domConstruct.create('h1', {innerHTML: 'Why?'}, docDiv);
-            domConstruct.create('p', {innerHTML: item.why}, docDiv);
-            domConstruct.create('h1', {innerHTML: 'How?'}, docDiv);
-            domConstruct.create('p', {innerHTML: item.how}, docDiv);
+            domConstruct.create('h1', {innerHTML: 'What?'}, self.pane.containerNode);
+            domConstruct.create('p', {innerHTML: item.what}, self.pane.containerNode);
+            domConstruct.create('h1', {innerHTML: 'Why?'}, self.pane.containerNode);
+            domConstruct.create('p', {innerHTML: item.why}, self.pane.containerNode);
+            domConstruct.create('h1', {innerHTML: 'How?'}, self.pane.containerNode);
+            domConstruct.create('p', {innerHTML: item.how}, self.pane.containerNode);
         }
 	});
 });
