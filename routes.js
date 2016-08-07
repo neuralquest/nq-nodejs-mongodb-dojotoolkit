@@ -138,11 +138,11 @@ exports = module.exports = function(app, passport) {
             }
         });
     });
-    app.post('/upload', upload.single('uploadedfile'), function (req, res, next) {
+    app.post('/Xupload', upload.single('uploadedfile'), function (req, res, next) {
         console.log(req.body);
         res.json(req.body);
     });
-    app.post("/Xupload", function (req, res) {
+    app.post("/upload", function (req, res) {
         var body = req.body;
         var tempfile    = body.path;
         var origname    = body.name;

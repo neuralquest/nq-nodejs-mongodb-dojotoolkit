@@ -23,7 +23,7 @@ Author: Mike Wilcox, SitePen Inc.
 .soria .nqField.dijitTextBox,				/* TextBox, ValidationTextBox, Date Box */ 
 .soria .nqField.dijitSpinner,				/* Number Spinner			*/
 .nqField.dijitTextBox.dijitTimeTextBox,     /* Time Text Box 			*/
-.soria .nqField.dijitTextArea				/* TextArea 				*/
+.soria .nqField.dijitTextArea
 {
 	width:200px !important;
 	margin:3px 0 0 0 !important;
@@ -77,6 +77,7 @@ Author: Mike Wilcox, SitePen Inc.
     border-width: thin;
     background: transparent;
     /*width: 15em;*/
+	width:200px !important;
 }
 
 .soria .dijitTextBox:hover,

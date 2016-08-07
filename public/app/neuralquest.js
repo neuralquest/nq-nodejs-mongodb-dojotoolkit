@@ -162,7 +162,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             }
             else {
                 style.background = "linear-gradient(#CDDDE9, white)";
-                style['background-size'] = '50px';
+                style['background-size'] = '100px';
                 style['background-repeat-y'] = 'no-repeat';
             }
             var tabPane = new ContentPane({

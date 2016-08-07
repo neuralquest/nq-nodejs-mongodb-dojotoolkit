@@ -63,8 +63,9 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
 			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
 */
             var columns = [];
-            for(var attrName in self.schema.properties) {
-                var attrProps = self.schema.properties[attrName];
+            var properties = self.schema.properties;
+            for(var attrName in properties) {
+                var attrProps = properties[attrName];
                 //var attrProps ={};
                 attrProps.field = attrName;
                 attrProps.label = attrProps.title;
@@ -169,8 +170,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                         var props = self.schema.properties.insets.items.properties;
                         if(!object) html.set(node, '{}');
                         else {
-                            self.renderForm(props, node, []);
-                            self.setFromValues(props, object, node)
+                            self.renderForm(props, object, node);
                         }
                         //else html.set(node, JSON.stringify(object, null, 4));
                     };
@@ -180,7 +180,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                     attrProps.renderCell = function(object, value, node, options) {
                         var props = self.schema.properties;
                         if(!object) html.set(node, '{}');
-                        else self.renderForm(props, node, []);
+                        else self.renderForm(props, {}, node);
                         //else html.set(node, JSON.stringify(object, null, 4));
                     };
                     attrProps.editor == 'text';
@@ -252,10 +252,11 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
             if(this.schema && this.schema.query) {
                 var docFilter = this.schema.query;
                 if('subDoc' in docFilter){
+                    var subDocName = docFilter.subDoc;
                     var parentDoc = this.store.cachingStore.getSync(this.docId);
                     var subDocStore = new nqSubDocStore({
                         idProperty: "name",
-                        data: parentDoc.insets?parentDoc.insets:[]
+                        data: parentDoc[subDocName]?parentDoc[subDocName]:[]
                     });
                     //var subDocStore = new nqSubDocStore({data:parentDoc.insets});
                     docCol = subDocStore.filter();

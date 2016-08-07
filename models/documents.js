@@ -74,12 +74,14 @@ exports.find = function(query) {
 };
 exports.getAncestors = function(id) {
     var self = this;
-    return this.findById(id).then(function(classObj){
-        if(classObj.parentId) return self.getAncestors(classObj.parentId).then(function(ancestorsArr){
-            ancestorsArr.unshift(classObj);//add to the beginning
+    return this.findById(id).then(function(doc){
+        var parentId = doc.parentId;
+        if(doc.docType == 'object') parentId = doc.classId;
+        if(parentId) return self.getAncestors(parentId).then(function(ancestorsArr){
+            ancestorsArr.unshift(doc);//add to the beginning
             return ancestorsArr;
         });
-        else return [classObj];//no parent, we are at the root
+        else return [doc];//no parent, we are at the root
     });
 };
 exports.getInheritedClassSchema = function(id){

@@ -37,7 +37,11 @@
         "icon" : {
             "title" : "Icon", 
             "type" : "string", 
-            "maxLength" : NumberInt(2000)
+            "maxLength" : NumberInt(2000), 
+            "media" : {
+                "binaryEncoding" : "base64", 
+                "type" : "image/png"
+            }
         }, 
         "description" : {
             "title" : "Description", 
@@ -52,7 +56,7 @@
     "required" : [
         "_id", 
         "docType", 
-        "parentId"
+        "classId"
     ]
 }
 { 
@@ -73,7 +77,8 @@
         "bannerUrl" : {
             "title" : "Banner Url", 
             "type" : "string", 
-            "maxLength" : NumberInt(1000)
+            "maxLength" : NumberInt(1000), 
+            "format" : "uri"
         }
     }, 
     "parentId" : "56f86c6a5dde184ccfb9fc6a"
@@ -149,7 +154,10 @@
                     "pageId" : {
                         "title" : "Page Id", 
                         "type" : "string", 
-                        "pattern" : "[a-f0-9]{24}"
+                        "pattern" : "[a-f0-9]{24}", 
+                        "query" : {
+                            "isA" : "56f87ec55dde184ccfb9fc74"
+                        }
                     }, 
                     "widgets" : {
                         "title" : "Widgets", 
@@ -189,17 +197,26 @@
                                 "viewId" : {
                                     "title" : "View Id", 
                                     "type" : "string", 
-                                    "pattern" : "[a-f0-9]{24}"
+                                    "pattern" : "[a-f0-9]{24}", 
+                                    "query" : {
+                                        "isA" : "573435c23c6d3cd598a5a2df"
+                                    }
                                 }, 
                                 "rootDocId" : {
                                     "title" : "Root Document Id", 
                                     "type" : "string", 
-                                    "pattern" : "[a-f0-9]{24}"
+                                    "pattern" : "[a-f0-9]{24}", 
+                                    "query" : {
+                                        "isA" : "56f87ec55dde184ccfb9fc74"
+                                    }
                                 }, 
                                 "pageId" : {
                                     "title" : "Page Id", 
                                     "type" : "string", 
-                                    "pattern" : "[a-f0-9]{24}"
+                                    "pattern" : "[a-f0-9]{24}", 
+                                    "query" : {
+                                        "isA" : "56f87ec55dde184ccfb9fc74"
+                                    }
                                 }
                             }, 
                             "additionalProperties" : false
@@ -565,20 +582,8 @@
                     }
                 }, 
                 "additionalProperties" : false
-            }
-        }, 
-        "XstateHistory" : {
-            "title" : "State History", 
-            "readOnly" : true, 
-            "type" : "array", 
-            "items" : {
-                "type" : "string", 
-                "pattern" : "[a-f0-9]{24}"
             }, 
-            "query" : {
-                "isA" : "574234113c6d3cd598a5a30b"
-            }, 
-            "minItems" : NumberInt(0), 
+            "minItems" : NumberInt(1), 
             "uniqueItems" : true
         }
     }, 
@@ -1142,7 +1147,7 @@
         }, 
         {
             "name" : "Resources", 
-            "pageId" : "575d4c3f2cf3d6dc3ed8314e"
+            "pageId" : "57a674592d8cd20920e6d815"
         }
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -1166,6 +1171,9 @@
     "name" : "Balance Sheet View", 
     "description" : "<p>The standard balance sheet view</p>", 
     "type" : "object", 
+    "query" : {
+        "isA" : "573435433c6d3cd598a5a2db"
+    }, 
     "properties" : {
         "assets" : {
             "title" : "Assets", 
@@ -1801,6 +1809,11 @@
     "name" : "Owners Class View", 
     "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
     "type" : "object", 
+    "query" : {
+        "eq" : {
+            "docType" : "class"
+        }
+    }, 
     "childrenQuery" : {
         "or" : [
             {
@@ -2049,7 +2062,16 @@
         "subDoc" : "insets"
     }, 
     "properties" : {
-        "insets" : {
+        "media" : {
+            "readOnly" : false
+        }, 
+        "url" : {
+            "readOnly" : false
+        }, 
+        "height" : {
+            "readOnly" : false
+        }, 
+        "width" : {
             "readOnly" : false
         }
     }, 
@@ -2106,14 +2128,14 @@
             "abstract" : true
         }, 
         "login" : {
-            "title" : "Login", 
+            "label" : "Login", 
             "readOnly" : false, 
             "type" : "button", 
             "post" : "/login", 
             "iconClass" : "saveIcon"
         }, 
         "googlelogin" : {
-            "title" : "Goggle Login", 
+            "label" : "Goggle Login", 
             "readOnly" : false, 
             "type" : "button", 
             "post" : "/login/google"
@@ -2160,13 +2182,13 @@
             "abstract" : true
         }, 
         "signup" : {
-            "title" : "Sign Up", 
+            "label" : "Sign Up", 
             "readOnly" : false, 
             "type" : "button", 
             "post" : "/signup"
         }, 
         "googlelogin" : {
-            "title" : "Goggle Login", 
+            "label" : "Goggle Login", 
             "readOnly" : false, 
             "type" : "button", 
             "post" : "/login/google"
@@ -2202,6 +2224,9 @@
     "name" : "Backlog View", 
     "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
     "type" : "object", 
+    "query" : {
+        "isA" : "574225cb3c6d3cd598a5a305"
+    }, 
     "properties" : {
         "date" : {
             "title" : "Date", 
@@ -2216,9 +2241,6 @@
         "name" : {
 
         }
-    }, 
-    "query" : {
-        "isA" : "574225cb3c6d3cd598a5a305"
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435c23c6d3cd598a5a2df"
@@ -2327,7 +2349,8 @@
     "description" : "<p>State History Table View</p>", 
     "type" : "object", 
     "query" : {
-        "isA" : "574234113c6d3cd598a5a30b"
+        "isA" : "574225cb3c6d3cd598a5a305", 
+        "subDoc" : "stateHistory"
     }, 
     "properties" : {
         "date" : {
@@ -2407,9 +2430,11 @@
         "bannerUrl" : {
             "readOnly" : false
         }, 
-        "fileSelect" : {
+        "fileLocation" : {
+            "title" : "File Location", 
             "type" : "file", 
-            "readOnly" : false
+            "readOnly" : false, 
+            "post" : "/upload"
         }, 
         "uploadButton" : {
             "type" : "button", 
@@ -2475,7 +2500,7 @@
         }, 
         {
             "name" : "Resources", 
-            "pageId" : "575d4c3f2cf3d6dc3ed8314e"
+            "pageId" : "57a674592d8cd20920e6d815"
         }
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
@@ -2658,11 +2683,6 @@
                     "displayType" : "Form", 
                     "name" : "Product", 
                     "viewId" : "57979de93c6d3cd598a5a3bd"
-                }, 
-                {
-                    "displayType" : "Form", 
-                    "name" : "Agreement", 
-                    "viewId" : "579c97942d8cd20920e6d813"
                 }
             ]
         }
@@ -2691,41 +2711,242 @@
         }, 
         "value" : {
 
-        }
-    }, 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
-}
-{ 
-    "_id" : ObjectId("579c97942d8cd20920e6d813"), 
-    "docType" : "object", 
-    "name" : "New Agreement View", 
-    "description" : "<p>New Agreement View</p>", 
-    "type" : "object", 
-    "query" : {
-        "isA" : "574232b83c6d3cd598a5a309"
-    }, 
-    "properties" : {
-        "buyerId" : {
-            "default" : "$userId"
-        }, 
-        "sellerId" : {
-            "default" : "$ownerId"
-        }, 
-        "assetId" : {
-            "default" : "$docId"
-        }, 
-        "value" : {
-
-        }, 
-        "stateHistory" : {
-
         }, 
         "buyButton" : {
             "type" : "button", 
             "title" : "Purchase", 
             "readOnly" : false, 
             "action" : "add"
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57a674592d8cd20920e6d815"), 
+    "docType" : "object", 
+    "name" : "Resources Page", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Accordions", 
+    "tabs" : [
+        {
+            "name" : "Pages", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "Page Table", 
+                    "viewId" : "57a67be02d8cd20920e6d81b", 
+                    "pageId" : "57a677652d8cd20920e6d817"
+                }
+            ]
+        }, 
+        {
+            "name" : "Views", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "View Table", 
+                    "viewId" : "57a67c2f2d8cd20920e6d81d", 
+                    "pageId" : "57a678162d8cd20920e6d819"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57a677652d8cd20920e6d817"), 
+    "docType" : "object", 
+    "name" : "Page Form", 
+    "tabs" : [
+        {
+            "name" : "Pages", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Page Form", 
+                    "viewId" : "57a67ef52d8cd20920e6d81f"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57a678162d8cd20920e6d819"), 
+    "docType" : "object", 
+    "name" : "View Form", 
+    "tabs" : [
+        {
+            "name" : "Views", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "View Form", 
+                    "viewId" : "57a67f252d8cd20920e6d821"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57a67be02d8cd20920e6d81b"), 
+    "docType" : "object", 
+    "name" : "Page Table View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "56f87ec55dde184ccfb9fc74"
+    }, 
+    "properties" : {
+        "name" : {
+
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57a67c2f2d8cd20920e6d81d"), 
+    "docType" : "object", 
+    "name" : "View Table View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "573435c23c6d3cd598a5a2df"
+    }, 
+    "properties" : {
+        "name" : {
+
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57a67ef52d8cd20920e6d81f"), 
+    "docType" : "object", 
+    "name" : "Page Form View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "56f87ec55dde184ccfb9fc74"
+    }, 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "classId" : {
+
+        }, 
+        "ownerId" : {
+
+        }, 
+        "name" : {
+            "readOnly" : false
+        }, 
+        "description" : {
+            "readOnly" : false
+        }, 
+        "divider" : {
+            "readOnly" : false
+        }, 
+        "accordionOrTab" : {
+            "readOnly" : false
+        }, 
+        "tabs" : {
+            "readOnly" : false, 
+            "items" : {
+                "properties" : {
+                    "name" : {
+                        "readOnly" : false
+                    }, 
+                    "description" : {
+                        "readOnly" : false
+                    }, 
+                    "pageId" : {
+                        "readOnly" : false
+                    }, 
+                    "widgets" : {
+                        "readOnly" : false, 
+                        "items" : {
+                            "properties" : {
+                                "name" : {
+                                    "readOnly" : false
+                                }, 
+                                "description" : {
+                                    "readOnly" : false
+                                }, 
+                                "displayType" : {
+                                    "readOnly" : false
+                                }, 
+                                "viewId" : {
+                                    "readOnly" : false
+                                }, 
+                                "rootDocId" : {
+                                    "readOnly" : false
+                                }, 
+                                "pageId" : {
+                                    "readOnly" : false
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57a67f252d8cd20920e6d821"), 
+    "docType" : "object", 
+    "name" : "View Form View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "56f87ec55dde184ccfb9fc74"
+    }, 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "classId" : {
+
+        }, 
+        "ownerId" : {
+
+        }, 
+        "name" : {
+            "readOnly" : false
+        }, 
+        "description" : {
+            "readOnly" : false
+        }, 
+        "type" : {
+            "readOnly" : false
+        }, 
+        "properties" : {
+            "readOnly" : false
+        }, 
+        "query" : {
+            "readOnly" : false, 
+            "properties" : {
+
+            }
+        }, 
+        "childrenQuery" : {
+            "readOnly" : false, 
+            "properties" : {
+
+            }
+        }, 
+        "pageId" : {
+            "readOnly" : false
+        }, 
+        "required" : {
+            "readOnly" : false
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 

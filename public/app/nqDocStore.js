@@ -219,25 +219,36 @@ function(declare, lang, array, when, all, registry,
                 if(!viewObj) throw new Error('View Object not found');
                 //console.log('viewObj',viewObj);
                 var inheritedClassSchemaPromise = {};
-                if(viewObj.query && 'isA' in viewObj.query){
-                    var mapsToId = viewObj.query['isA'];
-                    if(mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
+                //var docFilter = viewObj.query;
+                if(viewObj.query) {
+                    if ('isA' in viewObj.query) {
+                        var mapsToId = viewObj.query['isA'];
+                        if (mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
+                    }
+                    else if ('and' in viewObj.query) {
+                        var queryArray = viewObj.query['and'];
+                        var mapsToId = null;
+                        if ('isA' in queryArray[0]) mapsToId = queryArray[0]['isA'];
+                        else if ('isA' in queryArray[1]) mapsToId = queryArray[0]['isA'];
+                        if (mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
+                    }
                 }
-                else if(viewObj.query && 'and' in viewObj.query){
-                    var queryArray = viewObj.query['and'];
-                    var mapsToId = null;
-                    if('isA' in queryArray[0]) mapsToId = queryArray[0]['isA'];
-                    else if('isA' in queryArray[1]) mapsToId = queryArray[0]['isA'];
-                    if(mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
-                }
+                //else inheritedClassSchemaPromise = {};
                 return when(inheritedClassSchemaPromise, function(inheritedClassSchema){
+                    //var properties = viewObj.properties;
+                    var inheritedClassProperties = inheritedClassSchema.properties;
+                    if(viewObj.query && 'subDoc' in viewObj.query){
+                        var subDocName = viewObj.query.subDoc;
+                        var subDocItems = inheritedClassSchema.properties[subDocName];
+                        inheritedClassProperties = subDocItems.items.properties;
+                    }
                     var schema = lang.clone(viewObj);
                     schema.properties = {};
                     schema.templateObj = {};
                     schema.required = [];
                     for(var propName in viewObj.properties){
                         var viewObjProp = viewObj.properties[propName];
-                        var classProp = inheritedClassSchema.properties?inheritedClassSchema.properties[propName]:null;
+                        var classProp = inheritedClassProperties?inheritedClassProperties[propName]:null;
                         if(!classProp) {
                             schema.properties[propName] = lang.clone(viewObj.properties[propName]);
                         }
