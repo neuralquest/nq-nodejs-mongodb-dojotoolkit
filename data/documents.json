@@ -575,10 +575,6 @@
                             "mediaType" : "text/html"
                         }, 
                         "default" : "<p>[no text]</p>"
-                    }, 
-                    "default" : {
-                        "stateId" : "PPP", 
-                        "date" : "$now"
                     }
                 }, 
                 "additionalProperties" : false
@@ -2298,11 +2294,6 @@
                     "displayType" : "Form", 
                     "name" : "Service Request", 
                     "viewId" : "577862b83c6d3cd598a5a39a"
-                }, 
-                {
-                    "displayType" : "Table", 
-                    "name" : "State History", 
-                    "viewId" : "577863d83c6d3cd598a5a39c"
                 }
             ]
         }
@@ -2313,8 +2304,7 @@
 { 
     "_id" : ObjectId("577862b83c6d3cd598a5a39a"), 
     "docType" : "object", 
-    "name" : "State Form View", 
-    "description" : "<p>State Form View</p>", 
+    "name" : "Agreement View", 
     "type" : "object", 
     "query" : {
         "isA" : "574225cb3c6d3cd598a5a305"
@@ -2337,6 +2327,21 @@
         }, 
         "description" : {
 
+        }, 
+        "stateHistory" : {
+            "items" : {
+                "properties" : {
+                    "stateId" : {
+
+                    }, 
+                    "date" : {
+
+                    }, 
+                    "description" : {
+
+                    }
+                }
+            }
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2345,7 +2350,7 @@
 { 
     "_id" : ObjectId("577863d83c6d3cd598a5a39c"), 
     "docType" : "object", 
-    "name" : "State History Table View", 
+    "name" : "XXX State History Table View", 
     "description" : "<p>State History Table View</p>", 
     "type" : "object", 
     "query" : {
@@ -2714,7 +2719,7 @@
         }, 
         "buyButton" : {
             "type" : "button", 
-            "title" : "Purchase", 
+            "label" : "Purchase", 
             "readOnly" : false, 
             "action" : "add"
         }

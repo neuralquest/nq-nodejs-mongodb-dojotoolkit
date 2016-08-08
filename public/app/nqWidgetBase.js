@@ -273,7 +273,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     'border-top-style': attrProps.bold?'solid':'',
                     'border-top-color': 'lightgrey',
                     'border-width': '1px',
-                    'padding-right': attrProps.bold?'50px':'10px'
+                    'padding-right': attrProps.bold?'10px':'50px'
                 };
                 domAttr.set(node, 'style', style);
             }
@@ -458,11 +458,11 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             }
             else if (attrProps.type == 'number') {
                 if(readOnly){
-                    var style = domAttr.get(td, 'style');
+                    var style = domAttr.get(node, 'style');
                     style+='text-align: right;';
-                    domAttr.set(td, 'style', style);
+                    domAttr.set(node, 'style', style);
                     if(attrProps.query){
-                        var childrenFilter = self.store.buildFilterFromQuery(doc, attrProps.query);
+                        var childrenFilter = self.store.buildFilterFromQuery(value, attrProps.query);
                         if(childrenFilter) {
                             var childrenCollection = self.store.filter(childrenFilter);
                             childrenCollection.fetch().then(function (childObjects) {
@@ -516,16 +516,25 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             }
             else if (attrProps.type == 'array') {
                 if(readOnly){
-                    if(attrProps.query){
+                    if(attrProps.items) {
+                        var itemProperties = attrProps.items;
+                        if(itemProperties.properties) {
+                            var attrProps = itemProperties.properties;
+                            if(value) value.forEach(function(valueObj){
+                                self.renderForm(attrProps, valueObj, owner, node);
+                            });
+                        }
+                    }
+                    else if(attrProps.query){
                         var refDoc = self.store.cachingStore.getSync(item);
                         domConstruct.create("p", {innerHTML:refDoc.name}, td);
                     }
-                    else if(attrProps.items && attrProps.items.properties){
+                    /*else if(attrProps.items && attrProps.items.properties){
                         var props = attrProps.items.properties;
                         //self.setFromValues(props, doc, td)
                         var codeNode = domConstruct.create("pre", {style:{padding:'0px', border:'none',background:'transparent'}}, node);
                         codeNode.innerHTML = JSON.stringify(value, null, 4);
-                    }
+                    }*/
                     else node.innerHTML = value;
                 }
                 else{
@@ -649,7 +658,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     }, nq.errorDialog);
                 });
             }
-            else node.innerHTML = value;
+            else if(value) node.innerHTML = value;
             if(dijit) {
                 self.own(dijit);
                 dijit.startup();
