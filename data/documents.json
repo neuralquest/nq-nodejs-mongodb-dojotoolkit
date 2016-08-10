@@ -28,7 +28,7 @@
             "default" : "[unnamed]"
         }, 
         "docType" : {
-            "title" : "Type", 
+            "title" : "Doc Type", 
             "type" : "string", 
             "enum" : [
                 "object"
@@ -73,12 +73,6 @@
             "query" : {
                 "isA" : "56f87ec55dde184ccfb9fc74"
             }
-        }, 
-        "bannerUrl" : {
-            "title" : "Banner Url", 
-            "type" : "string", 
-            "maxLength" : NumberInt(1000), 
-            "format" : "uri"
         }
     }, 
     "parentId" : "56f86c6a5dde184ccfb9fc6a"
@@ -126,6 +120,12 @@
                 "Tabs"
             ], 
             "default" : "Tabs"
+        }, 
+        "bannerUrl" : {
+            "title" : "Banner Url", 
+            "type" : "string", 
+            "maxLength" : NumberInt(1000), 
+            "format" : "uri"
         }, 
         "tabs" : {
             "title" : "Tabs", 
@@ -274,52 +274,16 @@
             ]
         }, 
         "properties" : {
-            "title" : "Schema Properties", 
+            "title" : "Properties", 
             "type" : "object"
         }, 
         "query" : {
             "title" : "Query", 
-            "type" : "object", 
-            "properties" : {
-                "condition" : {
-                    "title" : "Condition", 
-                    "type" : "string", 
-                    "enum" : [
-                        "eq", 
-                        "and", 
-                        "or", 
-                        "in", 
-                        "isA", 
-                        "view"
-                    ]
-                }, 
-                "args" : {
-                    "title" : "Arguments", 
-                    "type" : "array"
-                }
-            }
+            "type" : "object"
         }, 
         "childrenQuery" : {
             "title" : "Children Query", 
-            "type" : "object", 
-            "properties" : {
-                "condition" : {
-                    "title" : "Condition", 
-                    "type" : "string", 
-                    "enum" : [
-                        "eq", 
-                        "and", 
-                        "or", 
-                        "in", 
-                        "isA", 
-                        "view"
-                    ]
-                }, 
-                "args" : {
-                    "title" : "Arguments", 
-                    "type" : "array"
-                }
-            }
+            "type" : "object"
         }, 
         "pageId" : {
             "title" : "Page", 
@@ -564,7 +528,7 @@
                     }, 
                     "date" : {
                         "title" : "Date", 
-                        "type" : "string", 
+                        "type" : "date", 
                         "format" : "date-time"
                     }, 
                     "description" : {
@@ -774,9 +738,7 @@
         "imageUrl" : {
             "title" : "Image", 
             "type" : "string", 
-            "style" : {
-                "width" : "5em"
-            }
+            "format" : "uri"
         }
     }
 }
@@ -2432,9 +2394,6 @@
         "name" : {
             "readOnly" : false
         }, 
-        "bannerUrl" : {
-            "readOnly" : false
-        }, 
         "fileLocation" : {
             "title" : "File Location", 
             "type" : "file", 
@@ -2518,6 +2477,7 @@
     "description" : "<p>A very nice bicyle</p>", 
     "value" : NumberInt(150), 
     "currency" : "EUR", 
+    "imageUrl" : "app/resources/img/Neuralquest/green-bike-19463282.jpg", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "classId" : "5742563e3c6d3cd598a5a32f"
 }
@@ -2698,7 +2658,7 @@
 { 
     "_id" : ObjectId("57979de93c6d3cd598a5a3bd"), 
     "docType" : "object", 
-    "name" : "Product View", 
+    "name" : "Purchase View", 
     "description" : "<p>View useed for the product</p>", 
     "type" : "object", 
     "query" : {
@@ -2706,7 +2666,10 @@
     }, 
     "properties" : {
         "imageUrl" : {
-            "title" : "Image"
+
+        }, 
+        "_id" : {
+
         }, 
         "name" : {
 
@@ -2848,6 +2811,9 @@
         "ownerId" : {
 
         }, 
+        "bannerUrl" : {
+            "readOnly" : false
+        }, 
         "name" : {
             "readOnly" : false
         }, 
@@ -2865,9 +2831,6 @@
             "items" : {
                 "properties" : {
                     "name" : {
-                        "readOnly" : false
-                    }, 
-                    "description" : {
                         "readOnly" : false
                     }, 
                     "pageId" : {
@@ -2911,7 +2874,7 @@
     "name" : "View Form View", 
     "type" : "object", 
     "query" : {
-        "isA" : "56f87ec55dde184ccfb9fc74"
+        "isA" : "573435c23c6d3cd598a5a2df"
     }, 
     "properties" : {
         "_id" : {
@@ -2929,28 +2892,19 @@
         "description" : {
             "readOnly" : false
         }, 
-        "type" : {
-            "readOnly" : false
-        }, 
-        "properties" : {
-            "readOnly" : false
-        }, 
-        "query" : {
-            "readOnly" : false, 
-            "properties" : {
-
-            }
-        }, 
-        "childrenQuery" : {
-            "readOnly" : false, 
-            "properties" : {
-
-            }
-        }, 
         "pageId" : {
             "readOnly" : false
         }, 
         "required" : {
+
+        }, 
+        "query" : {
+            "readOnly" : false
+        }, 
+        "childrenQuery" : {
+            "readOnly" : false
+        }, 
+        "properties" : {
             "readOnly" : false
         }
     }, 

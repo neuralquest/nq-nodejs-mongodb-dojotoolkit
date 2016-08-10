@@ -1,12 +1,13 @@
-define(['dojo/_base/declare', "dojo/_base/lang", "dojo/_base/array", "dojo/when", "dojo/promise/all", 'dijit/registry',
-		'dstore/RequestMemory', 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/QueryResults'],
-function(declare, lang, array, when, all, registry,
-		 RequestMemory, SimpleQuery, QueryMethod, QueryResults){
+define(['dojo/_base/declare', "dojo/_base/lang", "dojo/_base/array", "dojo/when", "dojo/promise/all", 'dijit/registry',"dojo/request",
+		'dstore/RequestMemory', 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/QueryResults', 'dojo/dom-construct'],
+function(declare, lang, array, when, all, registry, request,
+		 RequestMemory, SimpleQuery, QueryMethod, QueryResults, domConstruct){
 
     return declare("nqDocStore", [RequestMemory], {
         target: '/documents',
         idProperty: '_id',
         autoEmitEvents: false,
+        transactionObj: {add:{}, update:{}, delete:{}},
         constructor: function () {
 
             this.root = this;
@@ -52,6 +53,7 @@ function(declare, lang, array, when, all, registry,
             if(_item) item = _item;
             if(directives.schema){
                 item._id = this.makeObjectId();
+                self.transactionObj.add[item._id] = item;
                 /*for(var propName in directives.schema.properties){
                     var prop = directives.schema.properties[propName];
                     if(prop.default){
@@ -106,6 +108,7 @@ function(declare, lang, array, when, all, registry,
         put: function (item, directives) {
             var self = this;
             this.enableTransactionButtons();
+            if(!item._id in self.transactionObj.add) self.transactionObj.update[item._id] = item;
             //if(!directives.viewId) directives.viewId = item._viewId;//TODO pastItem should send viewID in directives
             this.processDirectives(item, directives);
             return this.cachingStore.put(item, directives).then(function(item){
@@ -115,9 +118,13 @@ function(declare, lang, array, when, all, registry,
         },
         remove: function (item, directives) {
             this.enableTransactionButtons();
-            //if(directives) this.processDirectives(item, directives);
-            //this.itemsColl.remove(item._id, directives);
+            if(!item._id in self.transactionObj.add) delete self.transactionObj.add[item._id];
+            else {
+                delete self.transactionObj.update[item._id];
+                self.transactionObj.delete[item._id] = item;
+            }
             this.emit('remove', {target:item, directives:directives});
+            return this.cachingStore.remove(item, directives);
         },
         processDirectives: function(object, directives){
             if(!directives) return;
@@ -233,7 +240,6 @@ function(declare, lang, array, when, all, registry,
                         if (mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
                     }
                 }
-                //else inheritedClassSchemaPromise = {};
                 return when(inheritedClassSchemaPromise, function(inheritedClassSchema){
                     //var properties = viewObj.properties;
                     var inheritedClassProperties = inheritedClassSchema.properties;
@@ -243,23 +249,9 @@ function(declare, lang, array, when, all, registry,
                         inheritedClassProperties = subDocItems.items.properties;
                     }
                     var schema = lang.clone(viewObj);
-                    schema.properties = {};
-                    schema.templateObj = {};
+                    schema.properties = self.mergeProperties(viewObj.properties, inheritedClassSchema.properties);
                     schema.required = [];
-                    for(var propName in viewObj.properties){
-                        var viewObjProp = viewObj.properties[propName];
-                        var classProp = inheritedClassProperties?inheritedClassProperties[propName]:null;
-                        if(!classProp) {
-                            schema.properties[propName] = lang.clone(viewObj.properties[propName]);
-                        }
-                        else{
-                            var viewReadOnly = true;
-                            if(classProp.readOnly != undefined) viewReadOnly = classProp.readOnly;
-                            else if(viewObjProp.readOnly != undefined) viewReadOnly = viewObjProp.readOnly;
-                            classProp.readOnly = viewReadOnly;
-                            schema.properties[propName] = classProp;
-                       }
-                    }
+
                     schema.required = schema.required.concat(schema.required, inheritedClassSchema.required);
                     //console.log('SCHEMA');
                     //console.dir(schema);
@@ -305,6 +297,58 @@ function(declare, lang, array, when, all, registry,
                 });*/
                 return inheritedClassSchema;
             });
+        },
+        mergeProperties: function(viewProps, classProps) {
+            var self = this;
+            var properties = {};
+            for(var viewPropName in viewProps){
+                var viewProp = viewProps[viewPropName];
+                if(classProps) {
+                    var classProp = classProps[viewPropName];
+                    var newProp = {};
+                    if(classProp) {
+                        if (classProp.type == 'object' && 'properties' in classProp && 'properties' in viewProp) {
+                            var subDocClassProps = classProp.properties;
+                            var subDocViewProps = viewProp.properties;
+                            newProp = self.mergeProperties(subDocViewProps, subDocClassProps);
+                            newProp.type = 'object';
+                        }
+                        else if (classProp.type == 'array' && 'items' in classProp && 'properties' in classProp.items &&
+                            'items' in viewProp && 'properties' in viewProp.items) {
+                            var subDocClassProps = classProp.items.properties;
+                            var subDocViewProps = viewProp.items.properties;
+                            var items = self.mergeProperties(subDocViewProps, subDocClassProps);
+                            newProp.items = {properties: self.mergeProperties(subDocViewProps, subDocClassProps)};
+                            newProp.type = 'array';
+                        }
+                        else {
+                            newProp = lang.clone(classProp);
+                            if (classProp.readOnly) newProp.readOnly = true;
+                            else newProp.readOnly = viewProp.readOnly == undefined ? true : viewProp.readOnly;
+                            if (classProp.maxLength) {
+                                if (viewProp.maxLength && viewProp.maxLength < classProp.maxLength) newProp.maxLength = viewProp.maxLength
+                            }
+                            if (classProp.minLength) {
+                                if (viewProp.minLength && viewProp.minLength > classProp.minLength) newProp.minLength = viewProp.minLength
+                            }
+                            if (classProp.maximum) {
+                                if (viewProp.maximum && viewProp.maximum < classProp.maximum) newProp.maximum = viewProp.maximum
+                            }
+                            if (classProp.minimum) {
+                                if (viewProp.minimum && viewProp.minimum > classProp.minimum) newProp.minimum = viewProp.minimum
+                            }
+                        }
+                        newProp.title = viewProp.title?viewProp.title:classProp.title;
+                        if(viewProp.col) newProp.col = viewProp.col;
+                        if(viewProp.row) newProp.row = viewProp.row;
+                        if(viewPropName=='_id') newProp.type = 'string';
+                    }
+                    else newProp = lang.clone(viewProp);
+                    properties[viewPropName] = newProp;
+                }
+                else properties[viewPropName] = lang.clone(viewProp);
+            }
+            return properties;
         },
         isASync: function(doc, id) {
             if(doc._id == id) return true;
@@ -411,6 +455,44 @@ function(declare, lang, array, when, all, registry,
         enableTransactionButtons: function () {
             registry.byId('cancelButtonId').set('disabled', false);
             registry.byId('saveButtonId').set('disabled', false);
+        },
+        commit: function(){
+            var self = this;
+            request.post('/documents', {
+                // send all the operations in the body
+                headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
+                data: JSON.stringify(self.transactionObj)
+            }).then(function(data){
+                console.log('data', data);
+                self.transactionObj = {};
+                var domNode = domConstruct.create("div", {
+                    style:{
+                        border: '2px solid gray','border-radius': '5px',position: 'fixed','z-index': 2,opacity: 0,
+                        'background-color': 'lime',top: '30%',left: '40%',width: '100px',height: '50px'
+                    }
+                }, 'fullPage');
+                domConstruct.create("div", {
+                    style:{ 'font-size': '20px','font-weight': 'bold','text-align': 'center', 'margin-top': '15px'},
+                    innerHTML: 'Saved'
+                }, domNode);
+                dojo.fadeIn({
+                    node:domNode,duration: 300,
+                    onEnd: function(){
+                        dojo.fadeOut({
+                            node:domNode,duration: 300,delay:300,
+                            onEnd: function(){domConstruct.destroy(domNode)}
+                        }).play();
+                    }}).play();
+                registry.byId('cancelButtonId').set('disabled',true);
+                registry.byId('saveButtonId').set('disabled',true);
+            },function(error){
+                nq.errorDialog(error);
+            });
+        },
+        abort: function(){
+            registry.byId('cancelButtonId').set('disabled',true);
+            registry.byId('saveButtonId').set('disabled',true);
+            self.transactionObj = {};
         }
     });
 });

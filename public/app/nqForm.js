@@ -1,6 +1,10 @@
-define(['dojo/_base/declare', "app/nqWidgetBase","dojo/when"],
-    function(declare, nqWidgetBase, when){
+define(['dojo/_base/declare', "app/nqWidgetBase","dojo/when",  "dojo/dom-attr"],
+    function(declare, nqWidgetBase, when, domAttr){
         return declare("nqForm", [nqWidgetBase],{
+            buildRendering: function(){
+                this.inherited(arguments);
+                domAttr.set(this.pane.containerNode, 'style', {'padding-left': '10px', 'padding-right': '10px'});
+            },
             _setDocIdAttr: function(docId){
                 this.inherited(arguments);
                 var self = this;

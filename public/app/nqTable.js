@@ -134,6 +134,11 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                         //attrProps.autoSave = true;
                         attrProps.editor = DateTextBox;
                     }
+                    else if(attrProps.format == 'uri'){
+                        attrProps.renderCell = function (object, value, node, options) {
+                            if(value) domConstruct.create("img", {src:value, style:{width:'100px'}}, node);
+                        };
+                    }
                     else if(attrProps.query){
                         attrProps.get = function(item) {
                             var value = item[this.field];

@@ -41,7 +41,7 @@ Author: Mike Wilcox, SitePen Inc.
 .nqField.dijitTextBox.dijitTimeTextBox,		
 .soria .dijitTextArea.nqField
 {
-	padding:3px;					    /* General Text Padding			*/
+	padding:0px;					    /* General Text Padding			*/
 }
 .dijitSpinner{
 	padding:0px !important;				/* Prevent outter padding (in IE6)	*/

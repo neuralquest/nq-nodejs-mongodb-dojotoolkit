@@ -1,5 +1,5 @@
 define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/_base/lang", 'dojo/on',
-        'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", "dojo/promise/all", "dojo/when", 'dijit/registry', 'dojo/store/Memory', 'dstore/legacy/DstoreAdapter', "dojo/dom-style",'dojo/query!css3',
+        'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", "dojo/promise/all", "dojo/when", 'dijit/registry', 'dojo/store/Memory', "dojo/dom-style",'dojo/query!css3',
         "dojo/sniff", "dojo/date", "dojox/form/Uploader",
         'dijit/form/Select',
         'dijit/form/DateTextBox',
@@ -23,15 +23,14 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         'dgrid/extensions/ColumnResizer',
         "dgrid/extensions/DijitRegistry",
         "dojo/request",
-        "dijit/form/Form",
 
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins'],
 	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, lang, on,
-			arrayUtil, domAttr, Deferred, all, when, registry, Memory, DstoreAdapter, domStyle, css3, has, date, Uploader,
+			arrayUtil, domAttr, Deferred, all, when, registry, Memory, domStyle, css3, has, date, Uploader,
              Select, DateTextBox, NumberTextBox, Textarea,
              CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton,
              Toolbar, OnDemandGrid, CheckedMultiSelect, Button, Grid, Keyboard,
-             Selection, DnD, Source, Tree, ColumnResizer, DijitRegistry, request, Form){
+             Selection, DnD, Source, Tree, ColumnResizer, DijitRegistry, request){
 	return declare("nqWidgetBase", [_WidgetBase], {
         widget: null,
 		store: null,
@@ -195,11 +194,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         },
         renderForm: function(properties, doc, owner, node){
             var self = this;
-
-            //console.log(JSON.stringify(object));
-            //var form = new Form();
-            //var form = new Form({}, domConstruct.create("form", null, node));
-            var tableNode = domConstruct.create('table', {style:{'border-spacing':'3px', 'padding-left': '5px'}}, node);
+            var tableNode = domConstruct.create('table', {style:{'border-spacing':'3px'}}, node);
 
             //Collect the properties in a three dimensional array: [rows, columns, propNameArr]
             var rowColProperties = [];
@@ -245,8 +240,11 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 else domConstruct.create("td", null,trDom);
 
                                 //The input td
-                                var node = domConstruct.create("td", null,trDom);
-                                self.renderValue(attrProps, attrName, doc[attrName], owner, node);
+                                var inputNode = domConstruct.create("td", {style:{'padding-left': '5px'}}, trDom);
+                                self.renderValue(attrProps, attrName, doc, owner, inputNode);
+
+                                //The help td
+                                //domConstruct.create("img",{class:'helpIcon'}, inputNode);
                             }
                         }
 
@@ -255,8 +253,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             }
             return true;
         },
-        renderValue: function(attrProps, attrName, value, owner, node){
+        renderValue: function(attrProps, attrName, doc, owner, node){
             var self = this;
+            if(!doc) return;
+            var value = doc[attrName];
             var readOnly = owner?false:attrProps.readOnly;
             var readOnly = attrProps.readOnly==undefined?false:attrProps.readOnly;
             value = value==undefined?attrProps.default:value;
@@ -362,7 +362,21 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     }
                 }
                 else if(attrProps.media && attrProps.media.binaryEncoding == 'base64' && attrProps.media.type == 'image/png') {
-                    if(value) domConstruct.create("img", {src:value}, node);
+                    if(!readOnly){
+                        dijitProperties.constraints = {
+                            minLength: attrProps.minLength,
+                            maxLength: attrProps.maxLength,
+                            regExp: attrProps.pattern
+                        };
+                        dijit = new ValidationTextBox(dijitProperties, domConstruct.create("input", null, node));
+                    }
+                    if(value) {
+                        domConstruct.create("br", null, node);
+                        domConstruct.create("img", {src:value}, node);
+                    }
+                }
+                else if(attrProps.format && attrProps.format == 'uri') {
+                    if(value) domConstruct.create("img", {src:value, style:{width:'200px'}}, node);
                 }
                 else if(attrProps.media && attrProps.media.mediaType == 'image/webgl') {
                 }
@@ -421,20 +435,22 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         var childrenFilter = self.store.buildFilterFromQuery(value, attrProps.query);
                         if(childrenFilter) {
                             var childrenCollection = self.store.filter(childrenFilter);
-                            var stateStore = new DstoreAdapter(
-                                childrenCollection
-                            );
-                            stateStore.getLabel = function(item){return item.name?item.name:item.title};
+                            data = [];
+                            childrenCollection.forEach(function (childObject) {
+                                data.push({id:childObject._id, label:childObject.name?childObject.name:childObject.title});
+                            });
+                            data.push({id:'null',label:'[not selected]'});
+                            var selectStore = new Memory({
+                                data: data
+                            });
                             var editorArgs = {
-                                value: value?value:"",
+                                value: value?value:"null",
                                 id: node.id,
-                                name: 'name',
-                                store: stateStore,
-                                //style: "width:100%;",
-                                //style: "width:200px",
-                                //class: 'nqField',
-                                idProperty: "_id",
-                                labelAttr: 'name',
+                                name: attrName,
+                                store: selectStore,
+                                style: "width:100%;",
+                                idProperty: "id",
+                                labelAttr: 'label',
                                 maxHeight: -1, // tells _HasDropDown to fit menu within viewport
                                 fetchProperties: {sort: [{attribute: "name"}]},
                                 queryOptions: {ignoreCase: true}//doesnt work
@@ -444,16 +460,20 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     }
                 }
                 else {
-                    //if(attrProps.mask) attrProps.type = 'password';
-                    //if(attrProps.maxLength > 500) dijit = new Textarea(attrProps, domConstruct.create("td", {class: 'inputClass'}, tdDom));
-                    dijitProperties.type = attrProps.mask?'password':'text';
-                    dijitProperties.constraints = {
-                        minLength: attrProps.minLength,
-                        maxLength: attrProps.maxLength,
-                        regExp: attrProps.pattern
-                    };
-                    dijitProperties.type = attrProps.mask?'password':'text';
-                    dijit = new ValidationTextBox(dijitProperties, domConstruct.create("input", null, node));
+                    if(readOnly){
+                        if(value && !attrProps.mask) node.innerHTML = value;
+                    }
+                    else{
+                        //if(attrProps.maxLength > 500) dijit = new Textarea(attrProps, domConstruct.create("td", {class: 'inputClass'}, tdDom));
+                        dijitProperties.type = attrProps.mask?'password':'text';
+                        dijitProperties.constraints = {
+                            minLength: attrProps.minLength,
+                            maxLength: attrProps.maxLength,
+                            regExp: attrProps.pattern
+                        };
+                        dijitProperties.type = attrProps.mask?'password':'text';
+                        dijit = new ValidationTextBox(dijitProperties, domConstruct.create("input", null, node));
+                    }
                 }
             }
             else if (attrProps.type == 'number') {
@@ -662,24 +682,6 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             if(dijit) {
                 self.own(dijit);
                 dijit.startup();
-                /*if(dijit.declaredClass == 'dijit.form.Button'){
-                 dijit.on('click', function(evt){
-                 //if(!form.validate()) return;
-                 var data = {};
-                 registry.findWidgets(node).forEach(function(wid){
-                 data[wid.name] = wid.get('value');
-                 });
-                 request.post(this.post, {
-                 headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
-                 data: JSON.stringify(data)
-                 }).then(function(result){
-                 var user = dojo.fromJson(result);
-                 nq.setUser(user);
-                 //TODO refresh the data
-                 window.history.back();
-                 }, nq.errorDialog);
-                 });
-                 }*/
                 if(!attrProps.abstract){
                     dijit.on('change', function(value){
                         var attrName = this.name;
