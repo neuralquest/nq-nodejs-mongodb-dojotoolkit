@@ -71,7 +71,7 @@ Author: Mike Wilcox, SitePen Inc.
 .soria .dijitSelect,
 .soria .dijitSelect .dijitButtonContents,
 .soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper,
-.dijitEditor{
+.nqField .dijitEditor{
 	border: solid;
     border-color: #e6f2ff;              /*give dijits a blue border*/
     border-width: thin;

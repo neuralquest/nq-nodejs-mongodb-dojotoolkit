@@ -1,9 +1,13 @@
 define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/promise/all", 'dojo/when', 'dijit/registry', 'dijit/layout/ContentPane',
-        'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "app/nqWidgetBase"],
+        'dijit/Toolbar', 'dijit/form/ValidationTextBox', 'dijit/Editor', "app/nqWidgetBase", "dojo/dom-attr"],
 	function(declare, domConstruct, all, when, registry, ContentPane,
-			Toolbar, ValidationTextBox, Editor, nqWidgetBase){
+			Toolbar, ValidationTextBox, Editor, nqWidgetBase, domAttr){
 
 	return declare("nqHome", [nqWidgetBase], {
+        buildRendering: function(){
+            this.inherited(arguments);
+            domAttr.set(this.pane.containerNode, 'style', {'padding-left': '10px', 'padding-right': '10px'});
+        },
         _setDocIdAttr: function(docId){
             //if(docId == this.docId) return;
             this.inherited(arguments);

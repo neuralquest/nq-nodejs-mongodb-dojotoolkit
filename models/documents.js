@@ -96,7 +96,7 @@ exports.getInheritedClassSchema = function(id){
             //combine the the two class.properties, there should be no overlap. If there is, the parent is leading
             merge.recursive(inheritedClassSchema.properties, ancestor.properties);
             //combine the to class.required arrays. There should be no overlap
-            if(ancestor.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(inheritedClassSchema.required, ancestor.required);
+            if(ancestor.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(ancestor.required);
         });
         return inheritedClassSchema;
     });

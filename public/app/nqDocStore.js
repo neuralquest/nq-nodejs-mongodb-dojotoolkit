@@ -46,9 +46,38 @@ function(declare, lang, array, when, all, registry, request,
                 return true;
             }
         },
-        add: function (_item, directives) {
+        add: function (item, directives) {
             var self = this;
             this.enableTransactionButtons();
+            item._id = this.makeObjectId();
+            self.transactionObj.add[item._id] = item;
+            return this.cachingStore.add(item, directives).then(function(item){
+                self.emit('update', {target:item, directives:directives});
+                if(directives && 'parentId' in directives){
+                    var parentObj = this.cachingStore.getSync(directives.parentId);
+                    if(directives.schema.childrenQuery && 'in' in directives.schema.childrenQuery){
+                        var inObj = directives.schema.childrenQuery['in'];
+                        for(var key in inObj){
+                            var arrayName = inObj[key];
+                            var fkArray = parentObj[arrayName];
+                            if(!fkArray) fkArray = [];
+                            fkArray.push(item[key]);
+                            parentObj[arrayName] = fkArray;
+                            //parentObj.hasChildren = true;
+                        }
+                    }
+                    else if(directives.schema.childrenQuery && 'and' in directives.schema.childrenQuery){
+                        var queryArray = directives.schema.childrenQuery['and'];
+                        debugger;
+                    }
+                    return self.put(parentObj).then(function(){
+                        return item;
+                    });
+                }
+                else return item;
+            });
+
+            return;
             var item = {};
             if(_item) item = _item;
             if(directives.schema){
@@ -284,7 +313,7 @@ function(declare, lang, array, when, all, registry, request,
                     lang.mixin(inheritedClassSchema.properties, lang.clone(ancestor.properties));
                     //merge.recursive(inheritedClassSchema.properties, ancestor.properties);
                     //combine the to class.required arrays. There should be no overlap
-                    if(ancestor.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(inheritedClassSchema.required, ancestor.required);
+                    if(ancestor.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(ancestor.required);
 
                 };
                 /*ancestorsArr.forEach(function(ancestor){
@@ -293,7 +322,7 @@ function(declare, lang, array, when, all, registry, request,
                     lang.mixin(inheritedClassSchema.properties, lang.clone(ancestor.properties));
                     //merge.recursive(inheritedClassSchema.properties, ancestor.properties);
                     //combine the to class.required arrays. There should be no overlap
-                    if(ancestor.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(inheritedClassSchema.required, ancestor.required);
+                    if(ancestor.required) inheritedClassSchema.required = inheritedClassSchema.required.concat(ancestor.required);
                 });*/
                 return inheritedClassSchema;
             });
@@ -338,9 +367,11 @@ function(declare, lang, array, when, all, registry, request,
                                 if (viewProp.minimum && viewProp.minimum > classProp.minimum) newProp.minimum = viewProp.minimum
                             }
                         }
-                        newProp.title = viewProp.title?viewProp.title:classProp.title;
+                        if(viewProp.title) newProp.title = viewProp.title;
                         if(viewProp.col) newProp.col = viewProp.col;
                         if(viewProp.row) newProp.row = viewProp.row;
+                        if(viewProp.default) newProp.default = viewProp.default;
+                        if(viewProp.styleColumn) newProp.styleColumn = viewProp.styleColumn;
                         if(viewPropName=='_id') newProp.type = 'string';
                     }
                     else newProp = lang.clone(viewProp);
@@ -419,7 +450,7 @@ function(declare, lang, array, when, all, registry, request,
                         if (subView) {
                             var fil = this.buildFilterFromQuery(parentObj, subView.query);
                             fil.viewId = docFilter;
-                            return fil;
+                            return fil;//TODO how to determin viewId from object?
                             //return this.buildFilterFromQuery(parentObj, subView.query);
                         }
                         break;

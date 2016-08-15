@@ -41,14 +41,6 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 					return '';//for some reason this override is required
 				},
                 getIconStyle: function(item, opened){
-                    // summary:
-                    //		Overridable function to return CSS styles to display icon
-                    // item: dojo/data/Item
-                    // opened: Boolean
-                    // returns: Object
-                    //		Object suitable for input to dojo.style() like {backgroundImage: "url(...)"}
-                    // tags:
-                    //		extension
                     var icon = '';
                     if(!item) return '';
                     else if(item.icon) icon = item.icon;

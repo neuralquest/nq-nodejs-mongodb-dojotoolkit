@@ -270,6 +270,10 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                         var widgetObj = new nqTree(parms, domConstruct.create('div'));
                         tabPane.addChild(widgetObj);
                     }
+                    else if (widget.displayType == 'Process Model') {
+                        var widgetObj = new nqProcessChart(parms, domConstruct.create('div'));
+                        tabPane.addChild(widgetObj);
+                    }
                     else if (widget.displayType == '3D Class Model') {
                         var widgetObj = new nqClassChart(parms, domConstruct.create('div'));
                         tabPane.addChild(widgetObj);

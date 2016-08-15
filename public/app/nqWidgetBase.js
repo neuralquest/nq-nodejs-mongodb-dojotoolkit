@@ -302,7 +302,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             toolbar: toolbar,
                             minHeight: '30px',
                             height: '',
-                            name: attrName
+                            name: attrName,
+                            class: 'nqField'
                         }, domConstruct.create('div', null, node));//setting the name wont be done autoamticly
                         dijit.addStyleSheet('app/resources/editor.css');
 
@@ -519,8 +520,11 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             }
             else if (attrProps.type == 'date') {
                 if(readOnly){
-                    var date = dojo.date.stamp.fromISOString(value);
-                    node.innerHTML = date.toLocaleDateString();
+                    if(value=='$now') node.innerHTML = value;
+                    else {
+                        var date = dojo.date.stamp.fromISOString(value);
+                        node.innerHTML = date.toLocaleDateString();
+                    }
                 }
                 else{
                     dijit = new DateTextBox(dijitProperties, domConstruct.create("input", null, node));
@@ -608,14 +612,14 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 var buttonProps = {
                     label: attrProps.label,
                     iconClass: attrProps.iconClass,
-                    post: attrProps.post,
                     action: attrProps.action,
                     disabled: readOnly
                 };
                 dijit = new Button(buttonProps, domConstruct.create("input", null, node));
                 dijit.on('click', function(evt){
                     var data = {};
-                    for(var attrName in self.schema.properties) {
+                    var properties = self.schema.properties;
+                    /*for(var attrName in self.schema.properties) {
                         var attrProps = self.schema.properties[attrName];
                         var value = null;
                         var widget = null;
@@ -635,27 +639,49 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             else if (attrProps.default == '$docId') value = self.docId;
                         }
                         if(value) data[attrName] = value;
-                    }
+                    }*/
+                    /*data.stateHistory = [{
+                     date: dojo.date.stamp.toISOString(new Date()),
+                     stateId: "57790e503c6d3cd598a5a3a0"
+                     }];*/
                     //data.parentId = self.schema.query.isA;
-                    if(this.action == 'add'){
-                        data.stateHistory = [{
-                            date: dojo.date.stamp.toISOString(new Date()),
-                            stateId: "57790e503c6d3cd598a5a3a0"
-                        }];
-                        self.store.add(data, {schema:self.schema});
+                    if('action' in this.params){
+                        var action = this.params.action;
+                        if('actionType' in action && action.actionType == 'add'){
+                            var newDoc = lang.clone(action.newDoc);
+                            for(var attrName in newDoc){
+                                if (newDoc[attrName] == '$userId') newDoc[attrName] = nq.getUser().id;
+                                else if (newDoc[attrName] == '$ownerId') newDoc[attrName] = nq.getOwner().id;
+                                else if (newDoc[attrName] == '$docId') newDoc[attrName] = self.docId;
+                            }
+                            self.store.add(newDoc);
+                        }
+                        else if('actionType' in action && action.actionType == 'insertSubDocArray'){
+                            var newDoc = lang.clone(action.newDoc);
+                            for(var attrName in newDoc){
+                                if (newDoc[attrName] == '$userId') newDoc[attrName] = nq.getUser().id;
+                                else if (newDoc[attrName] == '$ownerId') newDoc[attrName] = nq.getOwner().id;
+                                else if (newDoc[attrName] == '$docId') newDoc[attrName] = self.docId;
+                            }
+                            var updateDoc = self.store.cachingStore.getSync(self.docId);
+                            var updateArray = updateDoc[action.arrayName];
+                            updateArray.unshift(newDoc);
+                            self.store.put(updateDoc);
+                        }
+                        else if('actionType' in action && action.actionType == 'post'){
+                            //if(!form.validate()) return;
+                            request.post(this.post, {
+                                headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
+                                data: JSON.stringify(data)
+                            }).then(function(result){
+                                var user = dojo.fromJson(result);
+                                nq.setUser(user);
+                                //TODO refresh the data
+                                window.history.back();
+                            }, nq.errorDialog);
+                        }
                     }
-                    else{
-                        //if(!form.validate()) return;
-                        request.post(this.post, {
-                            headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
-                            data: JSON.stringify(data)
-                        }).then(function(result){
-                            var user = dojo.fromJson(result);
-                            nq.setUser(user);
-                            //TODO refresh the data
-                            window.history.back();
-                        }, nq.errorDialog);
-                    }
+
                 });
             }
             else if (attrProps.type == 'file') {

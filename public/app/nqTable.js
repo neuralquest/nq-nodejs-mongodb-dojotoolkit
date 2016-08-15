@@ -206,7 +206,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
 //					self.grid.startup();
             for(var i=0;i<columns.length;i++){
                 var attrProps = columns[i];
-                self.grid.styleColumn(i, attrProps.style);
+                if(attrProps.styleColumn) self.grid.styleColumn(i, attrProps.styleColumn);
             }
 
             self.pane.containerNode.appendChild(self.grid.domNode);
@@ -277,11 +277,20 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                 }
             }
             if(docCol) {
-                //docCol.on('update', function (event) {
-                //    self.grid.refresh();
-                //});
+                docCol.on('update', function (event) {
+                    /*var newFilter = self.store.buildFilterFromQuery(null, self.schema.query);
+                    var col = self.store.filter(newFilter);
+                    col.fetch().then(function (childObjects) {
+                        console.log('childObjects', childObjects);
+                    });*/
+                    self.grid.refresh();
+                });
                 //this.grid.set('collection', docCol);
             }
+        },
+        _setSelectedIdAttr: function(selectedId){
+            this.inherited(arguments);
+            if(this.selectedId) this.grid.select(this.grid.row(this.selectedId));
         }
 	});
 });

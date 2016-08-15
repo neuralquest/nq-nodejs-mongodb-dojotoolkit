@@ -41,7 +41,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			this.swimlaneColors.push(new THREE.Color( 0x85D6FF ));
 			this.swimlaneColors.push(new THREE.Color( 0x85D6FF ));
 			this.swimlaneColors.push(new THREE.Color( 0x5CB8E6 ));
-
+return;
 			
 			var parentChildrenArray = [];
 			var rowHeaderPositionsObj = {};
