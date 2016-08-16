@@ -34,8 +34,10 @@ define(['dojo/_base/declare', "app/nqWidgetBase","dojo/when",  "dojo/dom-attr"],
                 docCol.on('update', function(event){
                     docCol.fetch().then(function(docsArr){
                         var doc = docsArr[0];
-                        self.setFromValues(self.schema.properties, doc, self.pane.containerNode);
-                        //self.renderForm(schema.properties, doc, owner, self.pane.containerNode);
+                        //self.setFromValues(self.schema.properties, doc, self.pane.containerNode);
+                        when(self.store.amAuthorizedToUpdate(doc), function(owner) {
+                            self.renderNewForm(self.schema.properties, doc, owner, self.pane.containerNode);
+                        });
                     });
                 });
             }

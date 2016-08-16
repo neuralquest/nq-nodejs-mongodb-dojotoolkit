@@ -1,6 +1,6 @@
 define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/_base/lang", 'dojo/on',
         'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", "dojo/promise/all", "dojo/when", 'dijit/registry', 'dojo/store/Memory', "dojo/dom-style",'dojo/query!css3',
-        "dojo/sniff", "dojo/date", "dojox/form/Uploader",
+        "dojo/sniff", "dojo/date", "dojox/form/Uploader", 'app/nqSubDocStore',
         'dijit/form/Select',
         'dijit/form/DateTextBox',
         'dijit/form/NumberTextBox',
@@ -26,7 +26,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins'],
 	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, lang, on,
-			arrayUtil, domAttr, Deferred, all, when, registry, Memory, domStyle, css3, has, date, Uploader,
+			arrayUtil, domAttr, Deferred, all, when, registry, Memory, domStyle, css3, has, date, Uploader, nqSubDocStore,
              Select, DateTextBox, NumberTextBox, Textarea,
              CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton,
              Toolbar, OnDemandGrid, CheckedMultiSelect, Button, Grid, Keyboard,
@@ -75,7 +75,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		resize: function(changeSize){
 			this.inherited(arguments);
 			if(!changeSize) return;
-			var hDiv = dojo.position(this.headerDivNode);
+			var hDiv = dojo.position(this.editorToolbarDivNode);
 			if(hDiv) changeSize.h -= hDiv.h;
 			this.pane.resize(changeSize);
 		},
@@ -86,104 +86,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			});
 			this.pane.resize();
 		},
-        setFromValues: function(properties, doc, node){
-            var self = this;
-            for(var attrName in properties) {
-                var attrProps = properties[attrName];
-                var value = doc[attrName]?doc[attrName]:attrProps.default;
-                if(value == '$userId') value = nq.getUser().id;
-                else if(value == '$ownerId') value = nq.getOwner().id;
-                else if(value == '$docId') value = self.docId;
 
-                //console.log('attrName', attrName);
-                //console.log('value', value);
-                //console.log('attrProps', attrProps);
-                var widget = null;
-                registry.findWidgets(node).forEach(function(wid){
-                    if(!widget && wid.name == attrName) widget = wid;
-                    //console.log('wid', wid);
-                });
-                if(widget){
-                    //console.log('widget', widget.name);
-                    if(widget.declaredClass ==  "OnDemandGrid"){
-                        var filter = new this.store.Filter();
-                        var childrenFilter = filter.in('_id', doc[attrName]);
-                        var childrenCollection = this.store.filter(childrenFilter);
-                        widget.set('collection', childrenCollection);
-                    }
-                    else if(value) {
-                        if(attrProps.type == 'object') value = JSON.stringify(value, null, 4);
-                        widget.set('value', value, false);
-                    }
-                }
-                else{//no widget, so we're dealing with a readonly field
-                    dojo.query('td[name=\"'+attrName+'\"]', node).forEach(function(td){//expect only one td
-                        //console.log('td', td);
-                        if(undefined != value){
-                            if(attrProps.type == 'string'){
-                                if(attrProps.media && attrProps.media.mediaType == 'text/html') td.innerHTML = value;
-                                else if(attrProps.media && attrProps.media.mediaType == 'image/jpg'){
-                                    domConstruct.create("img", {src: value.url, width: 300}, td);
-                                }
-                                else if(attrProps.media && attrProps.media.mediaType == 'image/webgl'){
-                                }
-                                else if(attrProps.enum) td.innerHTML = value;
-                                else if(attrProps.query) {
-                                    var refDoc = self.store.cachingStore.getSync(value);
-                                    td.innerHTML = refDoc.name?refDoc.name:refDoc.title;
-                                }
-                                else td.innerHTML = value;
-                            }
-                            else if(attrProps.type == 'number') {
-                                var style = domAttr.get(td, 'style');
-                                style+='text-align: right;';
-                                domAttr.set(td, 'style', style);
-                                if(attrProps.query){
-                                    var childrenFilter = self.store.buildFilterFromQuery(doc, attrProps.query);
-                                    if(childrenFilter) {
-                                        var childrenCollection = self.store.filter(childrenFilter);
-                                        childrenCollection.fetch().then(function (childObjects) {
-                                            var sum = 0;
-                                            childObjects.forEach(function(asset){
-                                                sum+=asset.value;
-                                            });
-                                            td.innerHTML = parseFloat(sum);
-                                        });
-                                    }
-                                }
-                                else td.innerHTML = parseFloat(value).toFixed(2);
-                            }
-                            else if(attrProps.type == 'integer') td.innerHTML = parseInt(value);
-                            else if(attrProps.type == 'date') {
-                                var date = dojo.date.stamp.fromISOString(value);
-                                td.innerHTML = date.toLocaleDateString();
-                            }
-                            else if(attrProps.type == 'boolean') td.innerHTML = value?'true':'false';
-                            else if(attrProps.type == 'array'){
-                                value.forEach(function(item){
-                                    if(attrProps.query){
-                                        var refDoc = self.store.cachingStore.getSync(item);
-                                        domConstruct.create("p", {innerHTML:refDoc.name}, td);
-                                    }
-                                    else if(attrProps.items && attrProps.items.properties){
-                                        var props = attrProps.items.properties;
-                                        //self.setFromValues(props, doc, td)
-                                        var codeNode = domConstruct.create("pre", {style:{padding:'0px', border:'none',background:'transparent'}}, td);
-                                        codeNode.innerHTML = JSON.stringify(item, null, 4);
-                                    }
-                                    else td.innerHTML = value;
-                                });
-                            }
-                            else if(attrProps.type == 'object') {
-                                var codeNode = domConstruct.create("pre", {style:{padding:'0px', border:'none',background:'transparent'}}, td);
-                                codeNode.innerHTML = JSON.stringify(value, null, 4);
-                            }
-                            else td.innerHTML = value;
-                        }
-                    });
-                }
-            }
-        },
         renderNewForm: function(properties, doc, owner, node){
             registry.findWidgets(node).forEach(function(wid){
                 wid.destroyRecursive(true);
@@ -194,7 +97,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         },
         renderForm: function(properties, doc, owner, node){
             var self = this;
-            var tableNode = domConstruct.create('table', {style:{'border-spacing':'3px'}}, node);
+            var tableNode = domConstruct.create('table', {style:{'border-top-style':'solid', 'border-top-width':'thin', 'border-top-color':'#a8c1eb'}}, node);
 
             //Collect the properties in a three dimensional array: [rows, columns, propNameArr]
             var rowColProperties = [];
@@ -282,8 +185,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             //attrProps.class = 'nqField';
             //attrProps.name = attrName;
             var dijit = null;
-            if (attrProps.type == 'string') {
-                if (attrProps.media && attrProps.media.mediaType == 'text/html') {
+            if(attrProps.type == 'string') {
+                if(attrProps.media && attrProps.media.mediaType == 'text/html') {
                     if(readOnly){
                         node.innerHTML = value;
                     }
@@ -565,10 +468,45 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     if(attrProps.items) {
                         var itemProperties = attrProps.items;
                         if(itemProperties.properties) {
-                            var attrProps = itemProperties.properties;
+                            var subDocStore = new nqSubDocStore({
+                                idProperty: "name",
+                                data: value?value:[]
+                            });
+                            //var subDocStore = new nqSubDocStore({data:parentDoc.insets});
+                            var docCol = subDocStore.filter();
+                            //docCol = new QueryResults(parentDoc.insets?parentDoc.insets:[]);
+                            //this.grid.set('collection', docCol);
+                            // Create a new constructor by mixing in the components
+                            var CustomGrid = declare([OnDemandGrid, Keyboard, Selection, DnD, DijitRegistry]);
+                            var columns = [{
+                                label: 'Label',
+                                field: 'title',
+                                sortable: true,
+                                renderCell: function(object, value, gridNode, options) {
+                                    if(!object) html.set(node, '{}');
+                                    else self.renderForm(itemProperties.properties, object, owner, gridNode);
+                                    //else html.set(node, JSON.stringify(object, null, 4));
+                                }//,
+                                //editor: 'text'
+                            }];
+                            dijit = new CustomGrid({
+                                name: attrName,
+                                collection: docCol,
+                                loadingMessage: 'Loading data...',
+                                noDataMessage: 'No results found.',
+                                columns: columns,
+                                showHeader: false,
+                                // for Selection; only select a single row at a time
+                                selectionMode: 'single',
+                                // for Keyboard; allow only row-level keyboard navigation
+                                cellNavigation: false,
+                                className: "dgrid-autoheight nqTransparent",
+                                declaredClass: 'OnDemandGrid' //need this for recognition later on
+                            }, domConstruct.create("div",null, node));
+                            /*var attrProps = itemProperties.properties;
                             if(value) value.forEach(function(valueObj){
                                 self.renderForm(attrProps, valueObj, owner, node);
-                            });
+                            });*/
                         }
                         else {
                             // Create a new constructor by mixing in the components
@@ -721,6 +659,104 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 self.store.put(doc);
                             }
                         },nq.errorDialog);
+                    });
+                }
+            }
+        },
+        XsetFromValues: function(properties, doc, node){
+            var self = this;
+            for(var attrName in properties) {
+                var attrProps = properties[attrName];
+                var value = doc[attrName]?doc[attrName]:attrProps.default;
+                if(value == '$userId') value = nq.getUser().id;
+                else if(value == '$ownerId') value = nq.getOwner().id;
+                else if(value == '$docId') value = self.docId;
+
+                //console.log('attrName', attrName);
+                //console.log('value', value);
+                //console.log('attrProps', attrProps);
+                var widget = null;
+                registry.findWidgets(node).forEach(function(wid){
+                    if(!widget && wid.name == attrName) widget = wid;
+                    //console.log('wid', wid);
+                });
+                if(widget){
+                    //console.log('widget', widget.name);
+                    if(widget.declaredClass ==  "OnDemandGrid"){
+                        var filter = new this.store.Filter();
+                        var childrenFilter = filter.in('_id', doc[attrName]);
+                        var childrenCollection = this.store.filter(childrenFilter);
+                        widget.set('collection', childrenCollection);
+                    }
+                    else if(value) {
+                        if(attrProps.type == 'object') value = JSON.stringify(value, null, 4);
+                        widget.set('value', value, false);
+                    }
+                }
+                else{//no widget, so we're dealing with a readonly field
+                    dojo.query('td[name=\"'+attrName+'\"]', node).forEach(function(td){//expect only one td
+                        //console.log('td', td);
+                        if(undefined != value){
+                            if(attrProps.type == 'string'){
+                                if(attrProps.media && attrProps.media.mediaType == 'text/html') td.innerHTML = value;
+                                else if(attrProps.media && attrProps.media.mediaType == 'image/jpg'){
+                                    domConstruct.create("img", {src: value.url, width: 300}, td);
+                                }
+                                else if(attrProps.media && attrProps.media.mediaType == 'image/webgl'){
+                                }
+                                else if(attrProps.enum) td.innerHTML = value;
+                                else if(attrProps.query) {
+                                    var refDoc = self.store.cachingStore.getSync(value);
+                                    td.innerHTML = refDoc.name?refDoc.name:refDoc.title;
+                                }
+                                else td.innerHTML = value;
+                            }
+                            else if(attrProps.type == 'number') {
+                                var style = domAttr.get(td, 'style');
+                                style+='text-align: right;';
+                                domAttr.set(td, 'style', style);
+                                if(attrProps.query){
+                                    var childrenFilter = self.store.buildFilterFromQuery(doc, attrProps.query);
+                                    if(childrenFilter) {
+                                        var childrenCollection = self.store.filter(childrenFilter);
+                                        childrenCollection.fetch().then(function (childObjects) {
+                                            var sum = 0;
+                                            childObjects.forEach(function(asset){
+                                                sum+=asset.value;
+                                            });
+                                            td.innerHTML = parseFloat(sum);
+                                        });
+                                    }
+                                }
+                                else td.innerHTML = parseFloat(value).toFixed(2);
+                            }
+                            else if(attrProps.type == 'integer') td.innerHTML = parseInt(value);
+                            else if(attrProps.type == 'date') {
+                                var date = dojo.date.stamp.fromISOString(value);
+                                td.innerHTML = date.toLocaleDateString();
+                            }
+                            else if(attrProps.type == 'boolean') td.innerHTML = value?'true':'false';
+                            else if(attrProps.type == 'array'){
+                                value.forEach(function(item){
+                                    if(attrProps.query){
+                                        var refDoc = self.store.cachingStore.getSync(item);
+                                        domConstruct.create("p", {innerHTML:refDoc.name}, td);
+                                    }
+                                    else if(attrProps.items && attrProps.items.properties){
+                                        var props = attrProps.items.properties;
+                                        //self.setFromValues(props, doc, td)
+                                        var codeNode = domConstruct.create("pre", {style:{padding:'0px', border:'none',background:'transparent'}}, td);
+                                        codeNode.innerHTML = JSON.stringify(item, null, 4);
+                                    }
+                                    else td.innerHTML = value;
+                                });
+                            }
+                            else if(attrProps.type == 'object') {
+                                var codeNode = domConstruct.create("pre", {style:{padding:'0px', border:'none',background:'transparent'}}, td);
+                                codeNode.innerHTML = JSON.stringify(value, null, 4);
+                            }
+                            else td.innerHTML = value;
+                        }
                     });
                 }
             }

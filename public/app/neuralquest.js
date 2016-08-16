@@ -102,7 +102,7 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
             parentContentPane.destroyDescendants(false);
             if(pageObj.bannerUrl){
                 var headerDiv = domConstruct.create('div', {style:{position: 'relative'}}, parentContentPane.containerNode);
-                domConstruct.create('img', {src:pageObj.bannerUrl, width: '100%', height: '150px'}, headerDiv);
+                domConstruct.create('img', {src:pageObj.bannerUrl, width: '100%', height: '100px'}, headerDiv);
                 domConstruct.create('div', {innerHTML: pageObj.name,
                     style:{
                         position: 'absolute',
@@ -111,7 +111,8 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
                         'text-align':'center',
                         'font-size': '40px',
                         'font-weight': 'bold',
-                        color: 'white'
+                        color: 'white',
+                        'text-shadow': '2px 2px 4px black'
                     }}, headerDiv);
             }
             if(pageObj.divider == 'Horizontal' || pageObj.divider == 'Vertical') {
@@ -417,6 +418,11 @@ function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
     //
     lang.setObject("nq.test", test);//make the function globally accessible
     function test(){
+        registry.byId('placeholder').resize();
+
+        return;
+
+
         var filter = {
             "type" : "eq",
             "args" : [

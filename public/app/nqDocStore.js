@@ -339,8 +339,9 @@ function(declare, lang, array, when, all, registry, request,
                         if (classProp.type == 'object' && 'properties' in classProp && 'properties' in viewProp) {
                             var subDocClassProps = classProp.properties;
                             var subDocViewProps = viewProp.properties;
-                            newProp = self.mergeProperties(subDocViewProps, subDocClassProps);
+                            newProp.properties = self.mergeProperties(subDocViewProps, subDocClassProps);
                             newProp.type = 'object';
+                            newProp.title = classProp.title;
                         }
                         else if (classProp.type == 'array' && 'items' in classProp && 'properties' in classProp.items &&
                             'items' in viewProp && 'properties' in viewProp.items) {
@@ -349,6 +350,7 @@ function(declare, lang, array, when, all, registry, request,
                             var items = self.mergeProperties(subDocViewProps, subDocClassProps);
                             newProp.items = {properties: self.mergeProperties(subDocViewProps, subDocClassProps)};
                             newProp.type = 'array';
+                            newProp.title = classProp.title;
                         }
                         else {
                             newProp = lang.clone(classProp);

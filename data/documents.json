@@ -93,6 +93,9 @@
             }
         }
     }, 
+    "required" : [
+        "ownerId"
+    ], 
     "parentId" : "56f86c6a5dde184ccfb9fc6a"
 }
 { 
@@ -152,7 +155,7 @@
                         "default" : "<p>no text</p>"
                     }, 
                     "pageId" : {
-                        "title" : "Page Id", 
+                        "title" : "Page", 
                         "type" : "string", 
                         "pattern" : "[a-f0-9]{24}", 
                         "query" : {
@@ -181,13 +184,14 @@
                                     "default" : "<p>[no text]</p>"
                                 }, 
                                 "displayType" : {
-                                    "title" : "Display Types", 
+                                    "title" : "Display Type", 
                                     "type" : "string", 
                                     "enum" : [
                                         "Document", 
                                         "Tree", 
                                         "Table", 
                                         "3D Class Model", 
+                                        "Process Model", 
                                         "Form", 
                                         "TreeGrid", 
                                         "HomePage"
@@ -195,7 +199,7 @@
                                     "default" : "Form"
                                 }, 
                                 "viewId" : {
-                                    "title" : "View Id", 
+                                    "title" : "View", 
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
                                     "query" : {
@@ -203,7 +207,7 @@
                                     }
                                 }, 
                                 "rootDocId" : {
-                                    "title" : "Root Document Id", 
+                                    "title" : "Root Document", 
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
                                     "query" : {
@@ -211,7 +215,7 @@
                                     }
                                 }, 
                                 "pageId" : {
-                                    "title" : "Page Id", 
+                                    "title" : "Page", 
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
                                     "query" : {
@@ -238,7 +242,16 @@
     "properties" : {
         "value" : {
             "title" : "Value", 
-            "type" : "number"
+            "type" : "number", 
+            "styleColumn" : "width : 50px", 
+            "currency" : {
+                "title" : "Currency", 
+                "type" : "string", 
+                "enum" : [
+                    "EUR", 
+                    "USD"
+                ]
+            }
         }, 
         "currency" : {
             "title" : "Currency", 
@@ -319,7 +332,7 @@
             }
         }, 
         "insets" : {
-            "title" : "Inset Properties", 
+            "title" : "Insets", 
             "type" : "array", 
             "items" : {
                 "type" : "object", 
@@ -336,7 +349,7 @@
                                     "text/html", 
                                     "text/json", 
                                     "text/javascript", 
-                                    "img/png"
+                                    "image/png"
                                 ]
                             }, 
                             "default" : {
@@ -1588,7 +1601,7 @@
             }
         }, 
         "totalLibilitiesAndStock" : {
-            "title" : "Total Libilities and Stockholder's Equity", 
+            "title" : "Total Libilities and<br>Stockholder's Equity", 
             "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
@@ -1824,8 +1837,8 @@
     "insets" : [
         {
             "url" : "app/resources/img/Neuralquest/3dClassModel.png", 
-            "mediaType" : {
-                "media" : "img/png"
+            "media" : {
+                "mediaType" : "img/png"
             }, 
             "width" : "30%"
         }
@@ -1851,7 +1864,7 @@
     "name" : "Client", 
     "description" : "<p>The Neuralquest client</p>", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFWklEQVRYR62XbUxTVxjH/+faVigDqePN4JYwv2zGkGV8IUIkmYoDQgbRuExjSFCBdd1CAAETd3t7hQgIxCh2gEJCjJqYGdgMlKEugYjxi2YhxmmiM3tRuchAUcpL23uXc+lty7Wle7mnISTwO/f++5zn+T/PIQi/dLmN6HMDeR4RkFbgCYBVDKAD+gdqUADAHe7xdE+4FZ3diJme4jNYdIsAmBV4EQYdg6LugxiqQQyAV+Ee/k8ExG9twERHUSuG7laAbgi2iUaG/mRvakVpTwWu1yIBwHMtBCRsOwaheV85bv16AoSsIEAC0t8rR9W5E7h2GIkAJjQRsP0YBHZvIe6N9wb99spLaAQ2JhWCP9+Lq1oKyG6AULEnDX+8vL0U51BnQIB31qSh9cJtDNVqGIGcRggHi+Lwan5yeRlQIYFlQYDoiDic6ZmEo0Y7AfEfW9FriEKGRIvAu6SAKJAAEYQBFmcx+pMNhVolYTSAdwHEQS5x39JXltQ5WjqP5ABwBfyd1v4kgN+1KkP60kgAEarTN5VbDt0/0Xb8fQDTAQJoPOYBzP1XIzJYLJYF+kBJgrfsGBBaf77sC+aHypko/6Ob/bJOnjy5GsCiuiyD5bPJbDZP2e32NFVo1XuNZrP5lt1uTwfgXKHe9RaL5XZbW9taVaTkLYoAwvN8usfjcT148MAQExMz+vDhwx3JycluvV6/uru7+44q3+leKvS+3W5XH4Fai6msrOx+e3t7UGOiAvT19fWCx+MxieJSmtNwSzT+1PkZ2ft/YFn2M57nLwHIV7jAN3m5KyzL7lY4yVs2BAQS/Ui+5/WzLCs3Kyogluf56dIyM9zuN5uXTqdDR7sdLMsm8zz/ROGU/FB+h+LU4Qjg5GZFBSRwHCeUlH6Bn8fGlpkcjcGHqano7PgWHMdt5Djunoac3Kx8AvYfKMGjR4/lrF9KjaWQbdiQgq6znVRAKsdxYxpyck74BBTvP4DxceGNZE5KSkR311mfAA255QL2l5TixfS0r9coPSfWZEJXZ4c/AtpxfgFHeZtg/vIrzM855bB7T0A+johII+ynT+Eb1pp6lLeNacGdPn0KLGv1CYjnayt6o4zGDFGUIIJAJASMJIGBBIYheO2cG7E2tJTZaivb3zJGblFztMgIw+C1c2HE1tC0IgeGwYxzYbSuoUluVjQH1M1GX1Oyz9HYeU5pMkpzoX5vCmhK/5eTmxUVQJuNcW3xsXTiWnDPP3ms27Mp7scLdyd3RCSnuCX9at1U9+FbXh83hOQMRsNUV/XNf8FR+5aNSL++blBwiZJJlOgRMJAIAZGPQARDCPQMmfjzyCcp6+sGH7tEKUHNEYhYRRisgqfvKZu3Z33d4G8uUYoPyUme/qfWPL8TJvKO6dZdWfCINAMChg55zmdQ8d0wnDcuZRgzd4+G5W72bTZuLrgZjhPYHL8TxtsGhJZdWeCGBegYXxGAXgO4rERUUgGXj28z7jx0LRw3933z1shPq66H455bc/1OmGAbEI7kZ+LyLy/lm40y6tGb0M4P1qDuyg3M9jVtjyqovqoVN2HN9fsAFVCVk4k7404w3rmf2oEoAR8lGdHsuIHZ3pbsqMLKobCcV2g4bpmAJN4hVOVmYXLO9UYOxEXq0TwwjFlHZ35UTsmVcNxMf3teTF5ZfzhunM3xG9G66ou9iI7NoFmrXrQK8Gpq5FnTXsu66vNtiF67ZQVu+FnT3q+T+f4RkTBrQnMvRp81fR7SiNQaqBH9BeAFnR0AvK2ajhVeMSx6IaUMNa1gI9+yqVkxomBTr+8K4J1y6eitDzIdqzn6AjqAGkLMicum5r8BTGo/TgyrTmsAAAAASUVORK5CYII=", 
-    "pageId" : "", 
+    "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "574237133c6d3cd598a5a30d"
@@ -1945,7 +1958,7 @@
             "name" : "Inset", 
             "widgets" : [
                 {
-                    "displayType" : "Table", 
+                    "displayType" : "Form", 
                     "name" : "Insets Table", 
                     "viewId" : "575de7f43c6d3cd598a5a387"
                 }
@@ -1961,7 +1974,7 @@
     "name" : "Server", 
     "description" : "<p>The Neuralquest server</p>", 
     "icon" : "data:image/png;base64,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", 
-    "pageId" : "575d4c3f2cf3d6dc3ed83157", 
+    "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "574237133c6d3cd598a5a30d"
@@ -2012,25 +2025,56 @@
 { 
     "_id" : ObjectId("575de7f43c6d3cd598a5a387"), 
     "docType" : "object", 
-    "name" : "Inset Subdoc View", 
-    "description" : "<p>Inset Subdoc View</p>", 
+    "name" : "Paragraph View", 
+    "description" : "<p>Paragraph View</p>", 
     "type" : "object", 
     "query" : {
-        "isA" : "573435f03c6d3cd598a5a2e1", 
-        "subDoc" : "insets"
+        "isA" : "573435f03c6d3cd598a5a2e1"
     }, 
     "properties" : {
-        "media" : {
+        "_id" : {
+
+        }, 
+        "name" : {
             "readOnly" : false
         }, 
-        "url" : {
+        "description" : {
             "readOnly" : false
         }, 
-        "height" : {
-            "readOnly" : false
+        "newInsetButton" : {
+            "type" : "button", 
+            "label" : "Add Inset", 
+            "readOnly" : false, 
+            "action" : {
+                "actionType" : "insertSubDocArray", 
+                "arrayName" : "insets", 
+                "newDoc" : {
+
+                }
+            }
         }, 
-        "width" : {
-            "readOnly" : false
+        "insets" : {
+            "items" : {
+                "type" : "object", 
+                "properties" : {
+                    "media" : {
+                        "properties" : {
+                            "mediaType" : {
+                                "readOnly" : false
+                            }
+                        }
+                    }, 
+                    "url" : {
+                        "readOnly" : false
+                    }, 
+                    "height" : {
+                        "readOnly" : false
+                    }, 
+                    "width" : {
+                        "readOnly" : false
+                    }
+                }
+            }
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2250,11 +2294,21 @@
     "accordionOrTab" : "Tabs", 
     "tabs" : [
         {
-            "name" : "History", 
+            "name" : "Service Request", 
             "widgets" : [
                 {
                     "displayType" : "Form", 
                     "name" : "Service Request", 
+                    "viewId" : "577862b83c6d3cd598a5a39a"
+                }
+            ]
+        }, 
+        {
+            "name" : "Process", 
+            "widgets" : [
+                {
+                    "displayType" : "Process Model", 
+                    "name" : "Process", 
                     "viewId" : "577862b83c6d3cd598a5a39a"
                 }
             ]
@@ -2266,7 +2320,7 @@
 { 
     "_id" : ObjectId("577862b83c6d3cd598a5a39a"), 
     "docType" : "object", 
-    "name" : "Agreement View", 
+    "name" : "Service Request View", 
     "type" : "object", 
     "query" : {
         "isA" : "574225cb3c6d3cd598a5a305"
@@ -2289,6 +2343,19 @@
         }, 
         "description" : {
 
+        }, 
+        "newStateButton" : {
+            "type" : "button", 
+            "label" : "Update State", 
+            "readOnly" : false, 
+            "action" : {
+                "actionType" : "insertSubDocArray", 
+                "arrayName" : "stateHistory", 
+                "newDoc" : {
+                    "date" : "$now", 
+                    "stateId" : "57790e503c6d3cd598a5a3a0"
+                }
+            }
         }, 
         "stateHistory" : {
             "items" : {
@@ -2617,7 +2684,7 @@
     }, 
     "properties" : {
         "imageUrl" : {
-            "title" : "Image"
+            "styleColumn" : "width : 100px"
         }, 
         "name" : {
 
@@ -2665,10 +2732,10 @@
         "isA" : "5742563e3c6d3cd598a5a32f"
     }, 
     "properties" : {
-        "imageUrl" : {
+        "_id" : {
 
         }, 
-        "_id" : {
+        "imageUrl" : {
 
         }, 
         "name" : {
@@ -2684,7 +2751,20 @@
             "type" : "button", 
             "label" : "Purchase", 
             "readOnly" : false, 
-            "action" : "add"
+            "action" : {
+                "add" : {
+                    "name" : "Purchase Agreement", 
+                    "docType" : "object", 
+                    "classId" : "574232b83c6d3cd598a5a309", 
+                    "buyerId" : "$userId", 
+                    "sellerId" : "$ownerId", 
+                    "assetId" : "$docId", 
+                    "stateHistory" : {
+                        "date" : "$now", 
+                        "stateId" : "57790e503c6d3cd598a5a3a0"
+                    }
+                }
+            }
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2826,6 +2906,18 @@
         "accordionOrTab" : {
             "readOnly" : false
         }, 
+        "newTabButton" : {
+            "type" : "button", 
+            "label" : "Add Tab", 
+            "readOnly" : false, 
+            "action" : {
+                "actionType" : "insertSubDocArray", 
+                "arrayName" : "tabs", 
+                "newDoc" : {
+
+                }
+            }
+        }, 
         "tabs" : {
             "readOnly" : false, 
             "items" : {
@@ -2835,6 +2927,18 @@
                     }, 
                     "pageId" : {
                         "readOnly" : false
+                    }, 
+                    "newWidgetButton" : {
+                        "type" : "button", 
+                        "label" : "Add Widget", 
+                        "readOnly" : false, 
+                        "action" : {
+                            "actionType" : "insertSubDocArray", 
+                            "arrayName" : "widgets", 
+                            "newDoc" : {
+
+                            }
+                        }
                     }, 
                     "widgets" : {
                         "readOnly" : false, 
@@ -2910,4 +3014,63 @@
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57af81b02d8cd20920e6d823"), 
+    "docType" : "object", 
+    "name" : "Front Desk", 
+    "description" : "<p>ACME Front Desk</p>", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFWklEQVRYR62XbUxTVxjH/+faVigDqePN4JYwv2zGkGV8IUIkmYoDQgbRuExjSFCBdd1CAAETd3t7hQgIxCh2gEJCjJqYGdgMlKEugYjxi2YhxmmiM3tRuchAUcpL23uXc+lty7Wle7mnISTwO/f++5zn+T/PIQi/dLmN6HMDeR4RkFbgCYBVDKAD+gdqUADAHe7xdE+4FZ3diJme4jNYdIsAmBV4EQYdg6LugxiqQQyAV+Ee/k8ExG9twERHUSuG7laAbgi2iUaG/mRvakVpTwWu1yIBwHMtBCRsOwaheV85bv16AoSsIEAC0t8rR9W5E7h2GIkAJjQRsP0YBHZvIe6N9wb99spLaAQ2JhWCP9+Lq1oKyG6AULEnDX+8vL0U51BnQIB31qSh9cJtDNVqGIGcRggHi+Lwan5yeRlQIYFlQYDoiDic6ZmEo0Y7AfEfW9FriEKGRIvAu6SAKJAAEYQBFmcx+pMNhVolYTSAdwHEQS5x39JXltQ5WjqP5ABwBfyd1v4kgN+1KkP60kgAEarTN5VbDt0/0Xb8fQDTAQJoPOYBzP1XIzJYLJYF+kBJgrfsGBBaf77sC+aHypko/6Ob/bJOnjy5GsCiuiyD5bPJbDZP2e32NFVo1XuNZrP5lt1uTwfgXKHe9RaL5XZbW9taVaTkLYoAwvN8usfjcT148MAQExMz+vDhwx3JycluvV6/uru7+44q3+leKvS+3W5XH4Fai6msrOx+e3t7UGOiAvT19fWCx+MxieJSmtNwSzT+1PkZ2ft/YFn2M57nLwHIV7jAN3m5KyzL7lY4yVs2BAQS/Ui+5/WzLCs3Kyogluf56dIyM9zuN5uXTqdDR7sdLMsm8zz/ROGU/FB+h+LU4Qjg5GZFBSRwHCeUlH6Bn8fGlpkcjcGHqano7PgWHMdt5Djunoac3Kx8AvYfKMGjR4/lrF9KjaWQbdiQgq6znVRAKsdxYxpyck74BBTvP4DxceGNZE5KSkR311mfAA255QL2l5TixfS0r9coPSfWZEJXZ4c/AtpxfgFHeZtg/vIrzM855bB7T0A+johII+ynT+Eb1pp6lLeNacGdPn0KLGv1CYjnayt6o4zGDFGUIIJAJASMJIGBBIYheO2cG7E2tJTZaivb3zJGblFztMgIw+C1c2HE1tC0IgeGwYxzYbSuoUluVjQH1M1GX1Oyz9HYeU5pMkpzoX5vCmhK/5eTmxUVQJuNcW3xsXTiWnDPP3ms27Mp7scLdyd3RCSnuCX9at1U9+FbXh83hOQMRsNUV/XNf8FR+5aNSL++blBwiZJJlOgRMJAIAZGPQARDCPQMmfjzyCcp6+sGH7tEKUHNEYhYRRisgqfvKZu3Z33d4G8uUYoPyUme/qfWPL8TJvKO6dZdWfCINAMChg55zmdQ8d0wnDcuZRgzd4+G5W72bTZuLrgZjhPYHL8TxtsGhJZdWeCGBegYXxGAXgO4rERUUgGXj28z7jx0LRw3933z1shPq66H455bc/1OmGAbEI7kZ+LyLy/lm40y6tGb0M4P1qDuyg3M9jVtjyqovqoVN2HN9fsAFVCVk4k7404w3rmf2oEoAR8lGdHsuIHZ3pbsqMLKobCcV2g4bpmAJN4hVOVmYXLO9UYOxEXq0TwwjFlHZ35UTsmVcNxMf3teTF5ZfzhunM3xG9G66ou9iI7NoFmrXrQK8Gpq5FnTXsu66vNtiF67ZQVu+FnT3q+T+f4RkTBrQnMvRp81fR7SiNQaqBH9BeAFnR0AvK2ajhVeMSx6IaUMNa1gI9+yqVkxomBTr+8K4J1y6eitDzIdqzn6AjqAGkLMicum5r8BTGo/TgyrTmsAAAAASUVORK5CYII=", 
+    "pageId" : "57afa6372d8cd20920e6d827", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "parentOrgId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "classId" : "574237133c6d3cd598a5a30d"
+}
+{ 
+    "_id" : ObjectId("57af88862d8cd20920e6d825"), 
+    "docType" : "object", 
+    "name" : "Workshop", 
+    "description" : "<p>ACME Workshop</p>", 
+    "icon" : "data:image/png;base64,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", 
+    "pageId" : "57afa6372d8cd20920e6d827", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "parentOrgId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "classId" : "574237133c6d3cd598a5a30d"
+}
+{ 
+    "_id" : ObjectId("57afa6372d8cd20920e6d827"), 
+    "docType" : "object", 
+    "name" : "Organizational Unit Page", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Home", 
+            "pageId" : "578919763c6d3cd598a5a3a2"
+        }, 
+        {
+            "name" : "Document", 
+            "pageId" : "575d4c3f2cf3d6dc3ed83150"
+        }, 
+        {
+            "name" : "Backlog", 
+            "pageId" : "577853123c6d3cd598a5a396"
+        }, 
+        {
+            "name" : "Members", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Home Page", 
+                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
+                }
+            ]
+        }, 
+        {
+            "name" : "Resources", 
+            "pageId" : "57a674592d8cd20920e6d815"
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }

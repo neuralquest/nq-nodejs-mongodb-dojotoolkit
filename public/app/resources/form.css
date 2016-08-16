@@ -89,7 +89,8 @@ Author: Mike Wilcox, SitePen Inc.
 }
                                         /*MULTI SELECT*/
 .soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{
-    overflow:hidden                     /*remove overflow from checked multi select*/
+    overflow:hidden;                     /*remove overflow from checked multi select*/
+	padding-right:0px;
 }
 .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{
     height:inherit                      /*checked multi select auto height*/
@@ -111,7 +112,12 @@ Author: Mike Wilcox, SitePen Inc.
 /*.nqGrid .dgrid-cell-padding {padding: 0px;}*/
 /*.field-classId {width:2em} icon column*/
 
-
+.soria .dgrid-cell{
+    border:none;
+}
+.soria .dgrid-selected{
+    background-color: transparent  !important;
+}
 /*****************************************************************************************************
 					Small Form Boxes
 ******************************************************************************************************/

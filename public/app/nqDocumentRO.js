@@ -41,12 +41,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
             );
             if(item.insets){
                 item.insets.forEach(function(inset){
-                    if(inset.mediaType){
-                        if(inset.mediaType.media == 'img/png'){
+                    if(inset.media){
+                        if(inset.media.mediaType == 'img/png'){
                             //image
                             domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: inset.url, width: 300}, divDom);
                         }
-                        if(inset.mediaType.media == 'widget/3D Class Model'){
+                        if(inset.media.mediaType == 'widget/3D Class Model'){
                             //image
                             domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: inset.url, width: 300}, divDom);
                             var parms = {

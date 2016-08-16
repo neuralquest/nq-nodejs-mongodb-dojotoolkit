@@ -179,7 +179,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                         }
                         //else html.set(node, JSON.stringify(object, null, 4));
                     };
-                    attrProps.editor == 'text';
+                    attrProps.editor = 'text';
                 }
                 else if(attrProps.type == 'object'){
                     attrProps.renderCell = function(object, value, node, options) {
@@ -188,7 +188,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                         else self.renderForm(props, {}, node);
                         //else html.set(node, JSON.stringify(object, null, 4));
                     };
-                    attrProps.editor == 'text';
+                    attrProps.editor = 'text';
                 }
             }
             self.grid = new (declare([Grid, Selection, Keyboard, DijitRegistry, Dnd, Editor, ColumnResizer]))({
