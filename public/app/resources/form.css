@@ -66,18 +66,23 @@ Author: Mike Wilcox, SitePen Inc.
 					Nq Additions
 					TODO add nqField
 ******************************************************************************************************/
+.soria .dijitTextBox,
+.soria .dijitSelect,
+.soria .dijitSelect .dijitButtonContents,
+.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{
+    /*width: 15em;*/
+    width:200px !important;
+}
 
 .soria .dijitTextBox,
 .soria .dijitSelect,
 .soria .dijitSelect .dijitButtonContents,
 .soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper,
-.nqField .dijitEditor{
+.dijitEditor{
 	border: solid;
     border-color: #e6f2ff;              /*give dijits a blue border*/
     border-width: thin;
     background: transparent;
-    /*width: 15em;*/
-	width:200px !important;
 }
 
 .soria .dijitTextBox:hover,
@@ -115,9 +120,14 @@ Author: Mike Wilcox, SitePen Inc.
 .soria .dgrid-cell{
     border:none;
 }
+
 .soria .dgrid-selected{
-    background-color: transparent  !important;
+    background-color: #f2f4fe  !important;
 }
+.soria .dojoDndItemAnchor, .soria .dojoDndItemSelected {
+    background-color: #f2f4fe;
+}
+
 /*****************************************************************************************************
 					Small Form Boxes
 ******************************************************************************************************/

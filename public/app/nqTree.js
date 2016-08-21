@@ -63,8 +63,10 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
 				},
 				onClick: function(item, node, evt){
 					self.inherited('onClick',arguments);
-                    var pageId = item.pageId;
-                    if(!pageId) pageId = self.widget.pageId;
+                    //var pageId = item.pageId;
+                    //if(!pageId) pageId = self.widget.pageId;
+                    var pageId = self.widget.pageId;
+                    if(!pageId) pageId = item.pageId;
                     if(pageId) nq.setHash(item._id, pageId, self.tabNum, self.widNum, self.level+1);
 				},
                 checkItemAcceptance: function(target, source, position){

@@ -49,14 +49,14 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
-            this.headerDivNode = domConstruct.create('h1', {'style' : {  'display': 'none', 'padding': '10px'} }, this.domNode);//placeholder for header
+            this.headerDivNode = domConstruct.create('div', null, this.domNode);//placeholder for header
             this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
 			this.pageToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.domNode);//placeholder for the page toolbar
 			this.editorToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.domNode);//placeholder for the editor toolbar
 			this.pane = new ContentPane( {
 //				'class' : 'backgroundClass',
 				'doLayout' : 'true',
-				'style' : { 'overflow': 'auto', 'padding': '0px', 'margin': '0px', width: '100%', height: '100%', background:'transparent'}
+				'style' : { 'overflow': 'auto', 'padding': '0px', 'margin': '0px', width: '100%', height: '100%', background:'backgroundClass'}
 			},  domConstruct.create('div'));
 			this.domNode.appendChild(this.pane.domNode);
 			this.own(this.pane);
@@ -97,8 +97,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         },
         renderForm: function(properties, doc, owner, node){
             var self = this;
-            var tableNode = domConstruct.create('table', {style:{'border-top-style':'solid', 'border-top-width':'thin', 'border-top-color':'#a8c1eb'}}, node);
-
+            var tableNode = domConstruct.create('table', null/*{style:{'border-top-style':'solid', 'border-top-width':'thin', 'border-top-color':'#a8c1eb'}}*/, node);
             //Collect the properties in a three dimensional array: [rows, columns, propNameArr]
             var rowColProperties = [];
             for(var attrName in properties) {
@@ -154,7 +153,6 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     }
                 }
             }
-            return true;
         },
         renderValue: function(attrProps, attrName, doc, owner, node){
             var self = this;
@@ -210,14 +208,14 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         }, domConstruct.create('div', null, node));//setting the name wont be done autoamticly
                         dijit.addStyleSheet('app/resources/editor.css');
 
-                        dijit.on('focus', lang.hitch(toolbar, function(event){
+                        this.own(dijit.on('focus', lang.hitch(toolbar, function(event){
                             registry.findWidgets(self.editorToolbarDivNode).forEach(function(wid){
                                 domAttr.set(wid.domNode, 'style', {'display': 'none'});
                             });
                             domAttr.set(this.domNode, 'style', {'display': ''});
-                        }));
+                        })));
                         //Needed for auto sizing, found it in AlwaysShowToolbar in the dijit library
-                        dijit.on('NormalizedDisplayChanged', lang.hitch(dijit, function(event){
+                        this.own(dijit.on('NormalizedDisplayChanged', lang.hitch(dijit, function(event){
                             // summary:
                             //		Updates the height of the editor area to fit the contents.
                             var e = this;
@@ -262,7 +260,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 // this.editorObject.style.height = this._lastHeight + "px";
                                 domGeometry.setMarginBox(e.iframe, { h: this._lastHeight });
                             }
-                        }));
+                        })));
                     }
                 }
                 else if(attrProps.media && attrProps.media.binaryEncoding == 'base64' && attrProps.media.type == 'image/png') {
@@ -372,8 +370,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         dijitProperties.type = attrProps.mask?'password':'text';
                         dijitProperties.constraints = {
                             minLength: attrProps.minLength,
-                            maxLength: attrProps.maxLength,
-                            regExp: attrProps.pattern
+                            maxLength: attrProps.maxLength
+                            //regExp: attrProps.pattern
                         };
                         dijitProperties.type = attrProps.mask?'password':'text';
                         dijit = new ValidationTextBox(dijitProperties, domConstruct.create("input", null, node));
@@ -468,6 +466,40 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     if(attrProps.items) {
                         var itemProperties = attrProps.items;
                         if(itemProperties.properties) {
+                            var attrProps = itemProperties.properties;
+                            var dndTbl = domConstruct.create('div', {class: 'container'}, node);
+                            if (value) value.forEach(function (valueObj) {
+                                var dndRow = domConstruct.create('div', {class: 'dojoDndItem'}, dndTbl);
+                                self.renderForm(attrProps, valueObj, owner, dndRow);
+                            });
+                            new Source(dndTbl, {skipForm: 'true', type: attrName});
+                        }
+                        else if(attrProps.query){
+                            var childrenFilter = self.store.Filter().in('_id', value);
+                            // Create a new constructor by mixing in the components
+                            var CustomGrid = declare([OnDemandGrid, Keyboard, Selection, DnD, DijitRegistry]);
+                            var columns = [{
+                                label: 'Name',
+                                field: 'name',
+                                sortable: true
+                            }];
+                            dijit = new CustomGrid({
+                                name: attrName,
+                                collection: self.store.filter(childrenFilter),
+                                loadingMessage: 'Loading data...',
+                                noDataMessage: 'No results found.',
+                                columns: columns,
+                                showHeader: false,
+                                // for Selection; only select a single row at a time
+                                selectionMode: 'single',
+                                // for Keyboard; allow only row-level keyboard navigation
+                                cellNavigation: false,
+                                className: "dgrid-autoheight nqTransparent"//,
+                                //declaredClass: 'OnDemandGrid' //need this for recognition later on
+                            }, domConstruct.create("div",null, node));
+                        }
+                        /*
+                        if(itemProperties.properties) {
                             var subDocStore = new nqSubDocStore({
                                 idProperty: "name",
                                 data: value?value:[]
@@ -477,7 +509,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             //docCol = new QueryResults(parentDoc.insets?parentDoc.insets:[]);
                             //this.grid.set('collection', docCol);
                             // Create a new constructor by mixing in the components
-                            var CustomGrid = declare([OnDemandGrid, Keyboard, Selection, DnD, DijitRegistry]);
+                            var CustomGrid = declare([OnDemandGrid, Keyboard,  DnD, DijitRegistry]);
                             var columns = [{
                                 label: 'Label',
                                 field: 'title',
@@ -506,31 +538,9 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             /*var attrProps = itemProperties.properties;
                             if(value) value.forEach(function(valueObj){
                                 self.renderForm(attrProps, valueObj, owner, node);
-                            });*/
-                        }
-                        else {
-                            // Create a new constructor by mixing in the components
-                            var CustomGrid = declare([OnDemandGrid, Keyboard, Selection, DnD, DijitRegistry]);
-                            var columns = [{
-                                label: 'View Name',
-                                field: 'title',
-                                sortable: true
-                            }];
-                            dijit = new CustomGrid({
-                                name: attrName,
-                                collection: self.store.filter({_id: 0}),//must return empty array
-                                loadingMessage: 'Loading data...',
-                                noDataMessage: 'No results found.',
-                                columns: columns,
-                                showHeader: false,
-                                // for Selection; only select a single row at a time
-                                selectionMode: 'single',
-                                // for Keyboard; allow only row-level keyboard navigation
-                                cellNavigation: false,
-                                className: "dgrid-autoheight nqTransparent",
-                                declaredClass: 'OnDemandGrid' //need this for recognition later on
-                            }, domConstruct.create("div",null, node));
-                        }
+                            });* /
+                        }*/
+
                     }
                     else {
                         dijit = new Select(dijitProperties, domConstruct.create("input", null, node));
@@ -554,7 +564,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     disabled: readOnly
                 };
                 dijit = new Button(buttonProps, domConstruct.create("input", null, node));
-                dijit.on('click', function(evt){
+                this.own(dijit.on('click', function(evt){
                     var data = {};
                     var properties = self.schema.properties;
                     /*for(var attrName in self.schema.properties) {
@@ -620,14 +630,14 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         }
                     }
 
-                });
+                }));
             }
             else if (attrProps.type == 'file') {
                 //dijit = new Uploader(dijitProperties, domConstruct.create("input", null, node));
                 //domConstruct.create("input", {type:'file', id:"files", name:"files", accept:"image/*"  }, tdDom);
                 //dijit = new Button({label:'A',type:'file', id:"files", name:"files", accept:"image/*"  }, domConstruct.create("input",null , tdDom));
                 dijit = new Uploader({type:'file', url:'/upload', accept:"image/*", readOnly: "false"}, domConstruct.create("input",attrProps , node));
-                dijit.on('change', function(evt){
+                this.own(dijit.on('change', function(evt){
                     var data = evt[0];
                     var temp = window.webkitURL.createObjectURL(evt);
                     data.owner = nq.getOwner().id;
@@ -640,14 +650,14 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     }).then(function(result){
                         var name = dojo.fromJson(result).name;
                     }, nq.errorDialog);
-                });
+                }));
             }
             else if(value) node.innerHTML = value;
             if(dijit) {
                 self.own(dijit);
                 dijit.startup();
                 if(!attrProps.abstract){
-                    dijit.on('change', function(value){
+                    this.own(dijit.on('change', function(value){
                         var attrName = this.name;
                         var attrDefault = this.default;
                         self.store.get(self.docId).then(function(doc){
@@ -659,7 +669,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 self.store.put(doc);
                             }
                         },nq.errorDialog);
-                    });
+                    }));
                 }
             }
         },

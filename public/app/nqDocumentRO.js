@@ -10,12 +10,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
             var self = this;
             if(!this.docId) return;
             var docCol = this.store.filter({_id: this.docId});
-            docCol.on('update', function(event){
+            this.own(docCol.on('update', function(event){
                 docCol.fetch().then(function(docsArr){
                     var doc = docsArr[0];
                     self.buildPage(doc);
                 });
-            });
+            }));
             docCol.fetch().then(function(docsArr){
                 var doc = docsArr[0];
 				self.buildPage(doc);

@@ -201,6 +201,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                 cleanAddedRules: true,
                 //className: "dgrid-autoheight",
                 //height: '',//needed for auto grow
+                showHeader: columns.length>1,
                 getBeforePut:false// temporary fix for the fact that a get without a viewId ruins the item sent to the put
             }, domConstruct.create('div'));
 //					self.grid.startup();
@@ -220,22 +221,24 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
              var id = item._id;
              nq.setHashViewId(self.level, self.view._id, self.tabId, id);
              });*/
-            self.grid.on('dgrid-select', function (event) {
+            self.own(self.grid.on('dgrid-select', function (event) {
                 // Report the item from the selected row to the console.
                 var item = event.rows[0].data;
                 //var id = event.rows[0].data._id;
                 //if(!id) id = event.rows[0].data.id;
                 //console.log('Row selected: ', event.rows);
                 //nq.setHashViewId(self.level, self.view._id, self.tabId, id);
-                var pageId = item.pageId;
-                if(!pageId) pageId = self.widget.pageId;
+                //var pageId = item.pageId;
+                //if(!pageId) pageId = self.widget.pageId;
+                var pageId = self.widget.pageId;
+                if(!pageId) pageId = item.pageId;
                 if(pageId) nq.setHash(item._id, pageId, 0, 0, self.level+1);
-            });
-            self.grid.on("dgrid-error", function(event) {
+            }));
+            self.own(self.grid.on("dgrid-error", function(event) {
                 //nq.errorDialog;
                 // Display an error message above the grid when an error occurs.
                 new dijit.Dialog({title: "dGrid Error", extractContent: true, content: event.error.message}).show();
-            });
+            }));
             /*self.grid.on("dgrid-refresh-complete", function(event){
              var row = grid.row(event);
              console.log("Row complete:", event);
@@ -245,7 +248,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
 
 
             //self.own(self.normalToolbar);
-            self.own(self.grid);
+            //self.own(self.grid);
 		},
         _setDocIdAttr: function(docId){
             //if(docId == this.docId) return;

@@ -56,12 +56,12 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
             var self = this;
             if(!this.docId) return;
             var docCol = this.store.filter({_id: this.docId});
-            docCol.on('update', function(event){
+			this.own(docCol.on('update', function(event){
                 docCol.fetch().then(function(docsArr){
                     var doc = docsArr[0];
                     self.buildPage(doc);
                 });
-            });
+            }));
             docCol.fetch().then(function(docsArr){
                 var doc = docsArr[0];
                 when(self.store.amAuthorizedToUpdate(doc), function(updateAllowed){
@@ -90,7 +90,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
                         focusOnLoad: true//,
                         //'onChange': self.interpretPage
                     }, domConstruct.create('div'));
-                    self.editorDijit.on('change', dojo.hitch(self,self.interpretPage));
+					this.own(self.editorDijit.on('change', dojo.hitch(self,self.interpretPage)));
                     self.editorDijit.addStyleSheet('app/resources/editor.css');
                     /*self.editorDijit.on("NormalizedDisplayChanged", function(){
                      var height = domGeometry.getMarginSize(self.editorDijit.editNode).h;
@@ -655,13 +655,13 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
 				}
 			}, domConstruct.create('div'));
 			editorDijit.addStyleSheet('css/editor.css');
-			editorDijit.on("NormalizedDisplayChanged", function(){
+			this.own(editorDijit.on("NormalizedDisplayChanged", function(){
 				var height = domGeometry.getMarginSize(editorDijit.editNode).h;
 				if(has("opera")){
 					height = editorDijit.editNode.scrollHeight;
 				}
 				editorDijit.resize({h: height});
-			});
+			}));
 			editorDijit.set('value', item.description);
 			domConstruct.place(editorDijit.domNode, replaceDiv, "replace");
 
@@ -674,7 +674,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
 			var value = item.description;
 			if(!value) value = '<p>[no text]</p>'
 			var paragraphNode = domConstruct.create('div', {
-				innerHTML: value, 
+				innerHTML: value
 			}, replaceDiv, "replace");
 
 			this.own(on(paragraphNode, mouse.enter, function(evt){

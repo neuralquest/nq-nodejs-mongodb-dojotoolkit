@@ -25,6 +25,7 @@
             "title" : "Name", 
             "type" : "string", 
             "maxLength" : NumberInt(1000), 
+            "minLength" : NumberInt(0), 
             "default" : "[unnamed]"
         }, 
         "docType" : {
@@ -38,6 +39,7 @@
             "title" : "Icon", 
             "type" : "string", 
             "maxLength" : NumberInt(2000), 
+            "minLength" : NumberInt(0), 
             "media" : {
                 "binaryEncoding" : "base64", 
                 "type" : "image/png"
@@ -47,6 +49,7 @@
             "title" : "Description", 
             "type" : "string", 
             "maxLength" : NumberInt(10000), 
+            "minLength" : NumberInt(0), 
             "media" : {
                 "mediaType" : "text/html"
             }, 
@@ -123,12 +126,6 @@
                 "Tabs"
             ], 
             "default" : "Tabs"
-        }, 
-        "bannerUrl" : {
-            "title" : "Banner Url", 
-            "type" : "string", 
-            "maxLength" : NumberInt(1000), 
-            "format" : "uri"
         }, 
         "tabs" : {
             "title" : "Tabs", 
@@ -288,7 +285,23 @@
         }, 
         "properties" : {
             "title" : "Properties", 
-            "type" : "object"
+            "type" : "object", 
+            "patternProperties" : {
+                "^[a-z0-9]+$" : {
+                    "anyOf" : [
+                        {
+                            "title" : "string", 
+                            "readOnly" : {
+                                "type" : "boolean", 
+                                "enum" : [
+                                    true, 
+                                    false
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
         }, 
         "query" : {
             "title" : "Query", 
@@ -448,45 +461,15 @@
     "description" : "<p>Organizations owned by users/organizations</p>", 
     "type" : "object", 
     "properties" : {
-        "what" : {
-            "title" : "What", 
+        "bannerUrl" : {
+            "title" : "Banner Url", 
             "type" : "string", 
-            "maxLength" : NumberInt(10000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[What are you doing that is diffrent?]</p>"
+            "maxLength" : NumberInt(2000)
         }, 
-        "why" : {
-            "title" : "Why", 
+        "headline" : {
+            "title" : "Headline", 
             "type" : "string", 
-            "maxLength" : NumberInt(10000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[Which opportunity are you taking advantage of?]</p>"
-        }, 
-        "how" : {
-            "title" : "How", 
-            "type" : "string", 
-            "maxLength" : NumberInt(10000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[How are you doing it?]</p>"
-        }, 
-        "subUnits" : {
-            "title" : "Organizational Units", 
-            "type" : "array", 
-            "items" : {
-                "type" : "string", 
-                "pattern" : "[a-f0-9]{24}"
-            }, 
-            "query" : {
-                "isA" : "56f87bcc5dde184ccfb9fc70"
-            }, 
-            "minItems" : NumberInt(0), 
-            "uniqueItems" : true
+            "maxLength" : NumberInt(1000)
         }
     }, 
     "parentId" : "56f870a55dde184ccfb9fc6c"
@@ -591,25 +574,43 @@
 { 
     "_id" : ObjectId("574234113c6d3cd598a5a30b"), 
     "docType" : "class", 
-    "title" : "State History", 
-    "description" : "<p>State History</p>", 
+    "title" : "Offerings", 
+    "description" : "<p>Offerings</p>", 
     "type" : "object", 
     "properties" : {
-        "stateId" : {
-            "title" : "State", 
+        "initialStateId" : {
+            "title" : "Initial State", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
-                "isA" : "5745eaa53c6d3cd598a5a371"
+                "isA" : "5747254b3c6d3cd598a5a379"
             }
         }, 
-        "date" : {
+        "fromDate" : {
             "title" : "Date", 
-            "type" : "string", 
+            "type" : "date", 
             "format" : "date-time"
+        }, 
+        "toDate" : {
+            "title" : "Date", 
+            "type" : "date", 
+            "format" : "date-time"
+        }, 
+        "assetIds" : {
+            "type" : "array", 
+            "title" : "Assests on Offer", 
+            "items" : {
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}"
+            }, 
+            "query" : {
+                "isA" : "57343b823c6d3cd598a5a2e3"
+            }, 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
         }
     }, 
-    "parentId" : "56f86c6a5dde184ccfb9fc6a"
+    "parentId" : "573435803c6d3cd598a5a2dd"
 }
 { 
     "_id" : ObjectId("574237133c6d3cd598a5a30d"), 
@@ -632,32 +633,10 @@
             "type" : "string", 
             "maxLength" : NumberInt(2000)
         }, 
-        "what" : {
-            "title" : "What", 
+        "headline" : {
+            "title" : "Headline", 
             "type" : "string", 
-            "maxLength" : NumberInt(100000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[What are you doing, how is it different?]</p>"
-        }, 
-        "why" : {
-            "title" : "Why", 
-            "type" : "string", 
-            "maxLength" : NumberInt(100000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[Which opportunity are you taking advantage of?]</p>"
-        }, 
-        "how" : {
-            "title" : "How", 
-            "type" : "string", 
-            "maxLength" : NumberInt(100000), 
-            "media" : {
-                "mediaType" : "text/html"
-            }, 
-            "default" : "<p>[How are you doing it?]</p>"
+            "maxLength" : NumberInt(1000)
         }, 
         "parentOrgId" : {
             "title" : "Parent Organization", 
@@ -985,6 +964,21 @@
     "title" : "States", 
     "description" : "<p>States</p>", 
     "type" : "object", 
+    "properties" : {
+        "nextStateIds" : {
+            "type" : "array", 
+            "title" : "Next States", 
+            "items" : {
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}"
+            }, 
+            "query" : {
+                "isA" : "5745eaa53c6d3cd598a5a371"
+            }, 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
+        }
+    }, 
     "parentId" : "573435803c6d3cd598a5a2dd"
 }
 { 
@@ -1086,7 +1080,13 @@
     "tabs" : [
         {
             "name" : "Home", 
-            "pageId" : "578919763c6d3cd598a5a3a2"
+            "widgets" : [
+                {
+                    "displayType" : "HomePage", 
+                    "name" : "Home Page", 
+                    "viewId" : "578921fe3c6d3cd598a5a3a4"
+                }
+            ]
         }, 
         {
             "name" : "Document", 
@@ -1128,12 +1128,11 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83148"), 
     "docType" : "object", 
     "name" : "Neuralquest", 
-    "description" : "<p>The Neuralquest organization</p>", 
+    "description" : "<h1>What</h1><p>Neualquest is a platform that helps people organize and work together. As a visitor you can browse published information. As a participant you have your own space in which you can maintain blogs, foto albums, apps etc. and make them public as desired. You can also create organizations based on industy standard templates including basic business process, which you can then enhance as the need arises. Role based authorization ensures that only members of your organization assigned to a paticular organizational unit can read/modify data.<br></br></p><h1>Why</h1><p>The IT industry has been notably laking when it come to support for business processes. Today, a typical large organization might have thousands of systems running on tens of thousands of servers. Each of these systems requires a small army of experts to keep it from falling over. Gernally speaking, the processes themselves are not are not particulary complex. More often than not, its the interaction between the systems that causes</p><h1>How</h1><p>Neuralquest is an open source project that anyone can use, either standallone or in the cloud.</p>", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAGSSURBVDhPY2hgaMCDGpkaJ6lM2pq19cLCCzc23Hhy8glDr1QvmiJcqIm5qUOgg2H3uubNeasXuS7q4O9AU4EVMTQ3s06cqLxsUcDN40cOtx3uk+kDOgNNETJCMJuamJcu9T5ypOPCyeV7ps/fXLJ0Z/nWrdlbF7stnmU8a4L8BKDj23jbEBrgqLGRub2dt69PdsoU9fXrE86enH/nysFHV6+8vf/67e23DG1tPGgacKG2Nu45cywZnm/btHNnIdBINGlciOG/WPH/np0vl646u7N/1fLg/n7Zzk4hoGGNjUxoSiGI4T9DGghxZv9XqPxj1PCxaNq7eWvfbtz2+NGxffuqly71BGrGpgETqdT8D5j2v3Ldl57VLzpnPFmx9PquuSf3duPWgIwY0/7z5v2XKf+vWsPw/9jd//kr/lt2/BctRleHDTH8h4CP3//ff/N/2an/Dj3/BQtARmIohSCYBmTw99//68/+zzj4v3zt/7wV/5MW/Hfq/a9Z/1+q9D93LjYNmODrz/8vP/1/+Pb/rZcAE2mMw+k9hMEAAAAASUVORK5CYII=", 
+    "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
+    "headline" : "Neuralquest", 
     "pageId" : "575d4c3f2cf3d6dc3ed83147", 
-    "what" : "<p>Neualquest is a platform that helps people organize and work together. As a visitor you can browse published information. As a participant you have your own space in which you can maintain blogs, foto albums, apps etc. and make them public as desired. You can also create organizations based on industy standard templates including basic business process, which you can then enhance as the need arises. Role based authorization ensures that only members of your organization assigned to a paticular organizational unit can read/modify data.<br></br></p>", 
-    "why" : "<p>The IT industry has been notably laking when it come to support for business processes. Today, a typical large organization might have thousands of systems running on tens of thousands of servers. Each of these systems requires a small army of experts to keep it from falling over. Gernally speaking, the processes themselves are not are not particulary complex. More often than not, its the interaction between the systems that causes</p>", 
-    "how" : "<p>Neuralquest is an open source project that anyone can use, either standallone or in the cloud.</p>", 
     "classId" : "574243d23c6d3cd598a5a31b"
 }
 { 
@@ -1864,6 +1863,8 @@
     "name" : "Client", 
     "description" : "<p>The Neuralquest client</p>", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFWklEQVRYR62XbUxTVxjH/+faVigDqePN4JYwv2zGkGV8IUIkmYoDQgbRuExjSFCBdd1CAAETd3t7hQgIxCh2gEJCjJqYGdgMlKEugYjxi2YhxmmiM3tRuchAUcpL23uXc+lty7Wle7mnISTwO/f++5zn+T/PIQi/dLmN6HMDeR4RkFbgCYBVDKAD+gdqUADAHe7xdE+4FZ3diJme4jNYdIsAmBV4EQYdg6LugxiqQQyAV+Ee/k8ExG9twERHUSuG7laAbgi2iUaG/mRvakVpTwWu1yIBwHMtBCRsOwaheV85bv16AoSsIEAC0t8rR9W5E7h2GIkAJjQRsP0YBHZvIe6N9wb99spLaAQ2JhWCP9+Lq1oKyG6AULEnDX+8vL0U51BnQIB31qSh9cJtDNVqGIGcRggHi+Lwan5yeRlQIYFlQYDoiDic6ZmEo0Y7AfEfW9FriEKGRIvAu6SAKJAAEYQBFmcx+pMNhVolYTSAdwHEQS5x39JXltQ5WjqP5ABwBfyd1v4kgN+1KkP60kgAEarTN5VbDt0/0Xb8fQDTAQJoPOYBzP1XIzJYLJYF+kBJgrfsGBBaf77sC+aHypko/6Ob/bJOnjy5GsCiuiyD5bPJbDZP2e32NFVo1XuNZrP5lt1uTwfgXKHe9RaL5XZbW9taVaTkLYoAwvN8usfjcT148MAQExMz+vDhwx3JycluvV6/uru7+44q3+leKvS+3W5XH4Fai6msrOx+e3t7UGOiAvT19fWCx+MxieJSmtNwSzT+1PkZ2ft/YFn2M57nLwHIV7jAN3m5KyzL7lY4yVs2BAQS/Ui+5/WzLCs3Kyogluf56dIyM9zuN5uXTqdDR7sdLMsm8zz/ROGU/FB+h+LU4Qjg5GZFBSRwHCeUlH6Bn8fGlpkcjcGHqano7PgWHMdt5Djunoac3Kx8AvYfKMGjR4/lrF9KjaWQbdiQgq6znVRAKsdxYxpyck74BBTvP4DxceGNZE5KSkR311mfAA255QL2l5TixfS0r9coPSfWZEJXZ4c/AtpxfgFHeZtg/vIrzM855bB7T0A+johII+ynT+Eb1pp6lLeNacGdPn0KLGv1CYjnayt6o4zGDFGUIIJAJASMJIGBBIYheO2cG7E2tJTZaivb3zJGblFztMgIw+C1c2HE1tC0IgeGwYxzYbSuoUluVjQH1M1GX1Oyz9HYeU5pMkpzoX5vCmhK/5eTmxUVQJuNcW3xsXTiWnDPP3ms27Mp7scLdyd3RCSnuCX9at1U9+FbXh83hOQMRsNUV/XNf8FR+5aNSL++blBwiZJJlOgRMJAIAZGPQARDCPQMmfjzyCcp6+sGH7tEKUHNEYhYRRisgqfvKZu3Z33d4G8uUYoPyUme/qfWPL8TJvKO6dZdWfCINAMChg55zmdQ8d0wnDcuZRgzd4+G5W72bTZuLrgZjhPYHL8TxtsGhJZdWeCGBegYXxGAXgO4rERUUgGXj28z7jx0LRw3933z1shPq66H455bc/1OmGAbEI7kZ+LyLy/lm40y6tGb0M4P1qDuyg3M9jVtjyqovqoVN2HN9fsAFVCVk4k7404w3rmf2oEoAR8lGdHsuIHZ3pbsqMLKobCcV2g4bpmAJN4hVOVmYXLO9UYOxEXq0TwwjFlHZ35UTsmVcNxMf3teTF5ZfzhunM3xG9G66ou9iI7NoFmrXrQK8Gpq5FnTXsu66vNtiF67ZQVu+FnT3q+T+f4RkTBrQnMvRp81fR7SiNQaqBH9BeAFnR0AvK2ajhVeMSx6IaUMNa1gI9+yqVkxomBTr+8K4J1y6eitDzIdqzn6AjqAGkLMicum5r8BTGo/TgyrTmsAAAAASUVORK5CYII=", 
+    "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
+    "headline" : "Neuralquest", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -1876,6 +1877,7 @@
     "description" : "<p>The ACME Bicycle Shop</p>", 
     "pageId" : "578bff823c6d3cd598a5a3a6", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB5klEQVQ4T61Tv2sUURD+Zt7undFYqKTKsW/v7p0YDqwEGxst/EUKbcQiYKGIAUGRVIqKTYpYiBjQSiEGSSPIgYX5C+wEUSx8t7e3kassDAlL4vneyIKBxICFl2mGGeZ988038wgDGg34HjsLYKKoCeYRAIIgeG+t7Teq1WMiwuLU9/ZS+9PfjLcwaES1cWE/DZEFhOFsuVxeW19dvSJgFvgJKHUqSZLlzSDbRjBxPOkEUwz6srXQaxA9t2n6aBtAvVI3FLhx8ZQz4YJ4UT7kcxvd4jjeFQpeiHdjpNRTAXbDuZZdWmpTXeszLHRdQM9AuASSg/A0A0jdZumDQ6OjB34F4TwR3ohzt8HcIlHvAD8pih5TI4rflvbuOZ/n+T5ybg4+mKLAXyaBBmQGnqbBckuEriqhV57cHZtlp40xZem712R0dd52OxMFExG5ycxrIjgiwA8GxCs+myRJZqJowWbZRVOtnrSdzmKhQ03rl2S0nsv7/Wu9Xi8vko04PirAcZumD/+I5Qpvovg+SFq22/1QxM2R5vDPoZVZqlVqDSh3j4UXCbLfw49RqXTDWru+We1KpTJUUuETJvkMkWWATyj4uxtrVEbrw+KClfa3tv3XeRcb48ANf03TjwD8zp7y/3ysgRn8BlTuy14MbVpqAAAAAElFTkSuQmCC", 
+    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "classId" : "5742439f3c6d3cd598a5a319"
 }
 { 
@@ -1974,6 +1976,8 @@
     "name" : "Server", 
     "description" : "<p>The Neuralquest server</p>", 
     "icon" : "data:image/png;base64,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", 
+    "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
+    "headline" : "Neuralquest", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2360,14 +2364,14 @@
         "stateHistory" : {
             "items" : {
                 "properties" : {
-                    "stateId" : {
-
-                    }, 
                     "date" : {
 
                     }, 
+                    "stateId" : {
+                        "readOnly" : false
+                    }, 
                     "description" : {
-
+                        "readOnly" : false
                     }
                 }
             }
@@ -2403,9 +2407,16 @@
 { 
     "_id" : ObjectId("577909043c6d3cd598a5a39e"), 
     "docType" : "object", 
-    "description" : "<p>Defect confirmed</p>", 
-    "stateId" : "57790e503c6d3cd598a5a3a0", 
-    "date" : "2008-10-17T00:00:00Z", 
+    "name" : "Products for Sale", 
+    "description" : "<p>Products for Sale</p>", 
+    "initialStateId" : "57790e503c6d3cd598a5a3a0", 
+    "fromDate" : "2008-10-17T00:00:00Z", 
+    "assetIds" : [
+        "578c03fa3c6d3cd598a5a3a8", 
+        "578c06233c6d3cd598a5a3aa", 
+        "578c06793c6d3cd598a5a3ac"
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "classId" : "574234113c6d3cd598a5a30b"
 }
 { 
@@ -2413,12 +2424,17 @@
     "docType" : "object", 
     "name" : "Proposed", 
     "description" : "<p>Proposed</p>", 
+    "nextStateIds" : [
+        "57b715662d8cd20920e6d829", 
+        "57b719fe2d8cd20920e6d82b"
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "classId" : "5747254b3c6d3cd598a5a379"
 }
 { 
     "_id" : ObjectId("578919763c6d3cd598a5a3a2"), 
     "docType" : "object", 
-    "name" : "Neuralquest", 
+    "name" : "XXX Neuralquest", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
@@ -2461,6 +2477,12 @@
         "name" : {
             "readOnly" : false
         }, 
+        "bannerUrl" : {
+            "readOnly" : false
+        }, 
+        "headline" : {
+            "readOnly" : false
+        }, 
         "fileLocation" : {
             "title" : "File Location", 
             "type" : "file", 
@@ -2476,14 +2498,9 @@
         "icon" : {
             "readOnly" : false
         }, 
-        "what" : {
-            "readOnly" : false
-        }, 
-        "why" : {
-            "readOnly" : false
-        }, 
-        "how" : {
-            "readOnly" : false
+        "description" : {
+            "readOnly" : false, 
+            "default" : "<h1>What</h1><p>[What are you doing that is diffrent?]</p><h1>Why</h1><p>[Which opportunity are you taking advantage of?]</p><h1>How</h1><p>[How are you doing it?]</p>"
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2656,10 +2673,10 @@
     "name" : "Catalog Page", 
     "divider" : "Vertical", 
     "accordionOrTab" : "Tabs", 
-    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "tabs" : [
         {
             "name" : "Catalog Table", 
+            "banner" : true, 
             "widgets" : [
                 {
                     "displayType" : "Table", 
@@ -2774,30 +2791,39 @@
     "_id" : ObjectId("57a674592d8cd20920e6d815"), 
     "docType" : "object", 
     "name" : "Resources Page", 
-    "divider" : "Vertical", 
-    "accordionOrTab" : "Accordions", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
     "tabs" : [
         {
-            "name" : "Pages", 
+            "name" : "Organization", 
             "widgets" : [
                 {
-                    "displayType" : "Table", 
-                    "name" : "Page Table", 
-                    "viewId" : "57a67be02d8cd20920e6d81b", 
-                    "pageId" : "57a677652d8cd20920e6d817"
+                    "displayType" : "Form", 
+                    "name" : "Home Page", 
+                    "readOnly" : false, 
+                    "viewId" : "578921fe3c6d3cd598a5a3a4"
                 }
             ]
         }, 
         {
+            "name" : "Organizational Units", 
+            "pageId" : "57b762572d8cd20920e6d847"
+        }, 
+        {
+            "name" : "Pages", 
+            "pageId" : "57b762392d8cd20920e6d841"
+        }, 
+        {
             "name" : "Views", 
-            "widgets" : [
-                {
-                    "displayType" : "Table", 
-                    "name" : "View Table", 
-                    "viewId" : "57a67c2f2d8cd20920e6d81d", 
-                    "pageId" : "57a678162d8cd20920e6d819"
-                }
-            ]
+            "pageId" : "57b762472d8cd20920e6d843"
+        }, 
+        {
+            "name" : "States", 
+            "pageId" : "57b7624f2d8cd20920e6d845"
+        }, 
+        {
+            "name" : "Offerings", 
+            "pageId" : "57b762622d8cd20920e6d849"
         }
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2890,9 +2916,6 @@
         }, 
         "ownerId" : {
 
-        }, 
-        "bannerUrl" : {
-            "readOnly" : false
         }, 
         "name" : {
             "readOnly" : false
@@ -3019,8 +3042,8 @@
     "_id" : ObjectId("57af81b02d8cd20920e6d823"), 
     "docType" : "object", 
     "name" : "Front Desk", 
-    "description" : "<p>ACME Front Desk</p>", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFWklEQVRYR62XbUxTVxjH/+faVigDqePN4JYwv2zGkGV8IUIkmYoDQgbRuExjSFCBdd1CAAETd3t7hQgIxCh2gEJCjJqYGdgMlKEugYjxi2YhxmmiM3tRuchAUcpL23uXc+lty7Wle7mnISTwO/f++5zn+T/PIQi/dLmN6HMDeR4RkFbgCYBVDKAD+gdqUADAHe7xdE+4FZ3diJme4jNYdIsAmBV4EQYdg6LugxiqQQyAV+Ee/k8ExG9twERHUSuG7laAbgi2iUaG/mRvakVpTwWu1yIBwHMtBCRsOwaheV85bv16AoSsIEAC0t8rR9W5E7h2GIkAJjQRsP0YBHZvIe6N9wb99spLaAQ2JhWCP9+Lq1oKyG6AULEnDX+8vL0U51BnQIB31qSh9cJtDNVqGIGcRggHi+Lwan5yeRlQIYFlQYDoiDic6ZmEo0Y7AfEfW9FriEKGRIvAu6SAKJAAEYQBFmcx+pMNhVolYTSAdwHEQS5x39JXltQ5WjqP5ABwBfyd1v4kgN+1KkP60kgAEarTN5VbDt0/0Xb8fQDTAQJoPOYBzP1XIzJYLJYF+kBJgrfsGBBaf77sC+aHypko/6Ob/bJOnjy5GsCiuiyD5bPJbDZP2e32NFVo1XuNZrP5lt1uTwfgXKHe9RaL5XZbW9taVaTkLYoAwvN8usfjcT148MAQExMz+vDhwx3JycluvV6/uru7+44q3+leKvS+3W5XH4Fai6msrOx+e3t7UGOiAvT19fWCx+MxieJSmtNwSzT+1PkZ2ft/YFn2M57nLwHIV7jAN3m5KyzL7lY4yVs2BAQS/Ui+5/WzLCs3Kyogluf56dIyM9zuN5uXTqdDR7sdLMsm8zz/ROGU/FB+h+LU4Qjg5GZFBSRwHCeUlH6Bn8fGlpkcjcGHqano7PgWHMdt5Djunoac3Kx8AvYfKMGjR4/lrF9KjaWQbdiQgq6znVRAKsdxYxpyck74BBTvP4DxceGNZE5KSkR311mfAA255QL2l5TixfS0r9coPSfWZEJXZ4c/AtpxfgFHeZtg/vIrzM855bB7T0A+johII+ynT+Eb1pp6lLeNacGdPn0KLGv1CYjnayt6o4zGDFGUIIJAJASMJIGBBIYheO2cG7E2tJTZaivb3zJGblFztMgIw+C1c2HE1tC0IgeGwYxzYbSuoUluVjQH1M1GX1Oyz9HYeU5pMkpzoX5vCmhK/5eTmxUVQJuNcW3xsXTiWnDPP3ms27Mp7scLdyd3RCSnuCX9at1U9+FbXh83hOQMRsNUV/XNf8FR+5aNSL++blBwiZJJlOgRMJAIAZGPQARDCPQMmfjzyCcp6+sGH7tEKUHNEYhYRRisgqfvKZu3Z33d4G8uUYoPyUme/qfWPL8TJvKO6dZdWfCINAMChg55zmdQ8d0wnDcuZRgzd4+G5W72bTZuLrgZjhPYHL8TxtsGhJZdWeCGBegYXxGAXgO4rERUUgGXj28z7jx0LRw3933z1shPq66H455bc/1OmGAbEI7kZ+LyLy/lm40y6tGb0M4P1qDuyg3M9jVtjyqovqoVN2HN9fsAFVCVk4k7404w3rmf2oEoAR8lGdHsuIHZ3pbsqMLKobCcV2g4bpmAJN4hVOVmYXLO9UYOxEXq0TwwjFlHZ35UTsmVcNxMf3teTF5ZfzhunM3xG9G66ou9iI7NoFmrXrQK8Gpq5FnTXsu66vNtiF67ZQVu+FnT3q+T+f4RkTBrQnMvRp81fR7SiNQaqBH9BeAFnR0AvK2ajhVeMSx6IaUMNa1gI9+yqVkxomBTr+8K4J1y6eitDzIdqzn6AjqAGkLMicum5r8BTGo/TgyrTmsAAAAASUVORK5CYII=", 
+    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed8315b", 
@@ -3032,6 +3055,7 @@
     "name" : "Workshop", 
     "description" : "<p>ACME Workshop</p>", 
     "icon" : "data:image/png;base64,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", 
+    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed8315b", 
@@ -3046,7 +3070,14 @@
     "tabs" : [
         {
             "name" : "Home", 
-            "pageId" : "578919763c6d3cd598a5a3a2"
+            "banner" : true, 
+            "widgets" : [
+                {
+                    "displayType" : "HomePage", 
+                    "name" : "Home Page", 
+                    "viewId" : "578921fe3c6d3cd598a5a3a4"
+                }
+            ]
         }, 
         {
             "name" : "Document", 
@@ -3069,6 +3100,360 @@
         {
             "name" : "Resources", 
             "pageId" : "57a674592d8cd20920e6d815"
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57b715662d8cd20920e6d829"), 
+    "docType" : "object", 
+    "name" : "Accepted", 
+    "description" : "<p>Accepted</p>", 
+    "nextStateIds" : [
+        "57b71a302d8cd20920e6d82d"
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "classId" : "5747254b3c6d3cd598a5a379"
+}
+{ 
+    "_id" : ObjectId("57b719fe2d8cd20920e6d82b"), 
+    "docType" : "object", 
+    "name" : "Rejected", 
+    "description" : "<p>Rejected</p>", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "classId" : "574725673c6d3cd598a5a37b"
+}
+{ 
+    "_id" : ObjectId("57b71a302d8cd20920e6d82d"), 
+    "docType" : "object", 
+    "name" : "Fulfilled", 
+    "description" : "<p>Fulfilled</p>", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "classId" : "574725843c6d3cd598a5a37d"
+}
+{ 
+    "_id" : ObjectId("57b725602d8cd20920e6d82f"), 
+    "docType" : "object", 
+    "name" : "OfFerings Table View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "574234113c6d3cd598a5a30b"
+    }, 
+    "properties" : {
+        "name" : {
+
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57b725d32d8cd20920e6d831"), 
+    "docType" : "object", 
+    "name" : "Organizational Unit Table View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "574237133c6d3cd598a5a30d"
+    }, 
+    "properties" : {
+        "name" : {
+
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57b725f32d8cd20920e6d833"), 
+    "docType" : "object", 
+    "name" : "States Table View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "5745eaa53c6d3cd598a5a371"
+    }, 
+    "properties" : {
+        "name" : {
+
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57b729d52d8cd20920e6d835"), 
+    "docType" : "object", 
+    "name" : "Offerings Form Page", 
+    "tabs" : [
+        {
+            "name" : "Offerings", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Offerings Form", 
+                    "viewId" : "57b72d062d8cd20920e6d83b"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57b72a022d8cd20920e6d837"), 
+    "docType" : "object", 
+    "name" : "Organizational Unit Form Page", 
+    "tabs" : [
+        {
+            "name" : "Organizational Units", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Organizational Unit Form", 
+                    "viewId" : "57b72d5e2d8cd20920e6d83d"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57b72a3c2d8cd20920e6d839"), 
+    "docType" : "object", 
+    "name" : "States Form Page", 
+    "tabs" : [
+        {
+            "name" : "States", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "State Form", 
+                    "viewId" : "57b72d792d8cd20920e6d83f"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57b72d062d8cd20920e6d83b"), 
+    "docType" : "object", 
+    "name" : "Offering Form View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "574234113c6d3cd598a5a30b"
+    }, 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "classId" : {
+
+        }, 
+        "ownerId" : {
+
+        }, 
+        "name" : {
+            "readOnly" : false
+        }, 
+        "description" : {
+            "readOnly" : false
+        }, 
+        "initialStateId" : {
+            "readOnly" : false
+        }, 
+        "fromDate" : {
+            "readOnly" : false
+        }, 
+        "toDate" : {
+            "readOnly" : false
+        }, 
+        "assetIds" : {
+            "readOnly" : false
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57b72d5e2d8cd20920e6d83d"), 
+    "docType" : "object", 
+    "name" : "Organizational Unit Form View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "574237133c6d3cd598a5a30d"
+    }, 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "classId" : {
+
+        }, 
+        "ownerId" : {
+
+        }, 
+        "name" : {
+            "readOnly" : false
+        }, 
+        "parentOrgId" : {
+            "readOnly" : false
+        }, 
+        "pageId" : {
+            "readOnly" : false
+        }, 
+        "bannerUrl" : {
+            "readOnly" : false
+        }, 
+        "headlines" : {
+            "readOnly" : false
+        }, 
+        "description" : {
+            "readOnly" : false, 
+            "default" : "<h1>What</h1><p>[What are you doing that is diffrent?]</p><h1>Why</h1><p>[Which opportunity are you taking advantage of?]</p><h1>How</h1><p>[How are you doing it?]</p>"
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57b72d792d8cd20920e6d83f"), 
+    "docType" : "object", 
+    "name" : "State Form View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "5745eaa53c6d3cd598a5a371"
+    }, 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "classId" : {
+
+        }, 
+        "ownerId" : {
+
+        }, 
+        "name" : {
+            "readOnly" : false
+        }, 
+        "description" : {
+            "readOnly" : false
+        }, 
+        "nextStateIds" : {
+            "readOnly" : false
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57b762392d8cd20920e6d841"), 
+    "docType" : "object", 
+    "name" : "Resources Page Page", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Pages", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "Page Table", 
+                    "viewId" : "57a67be02d8cd20920e6d81b", 
+                    "pageId" : "57a677652d8cd20920e6d817"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57b762472d8cd20920e6d843"), 
+    "docType" : "object", 
+    "name" : "Resources View Page", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Views", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "View Table", 
+                    "viewId" : "57a67c2f2d8cd20920e6d81d", 
+                    "pageId" : "57a678162d8cd20920e6d819"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57b7624f2d8cd20920e6d845"), 
+    "docType" : "object", 
+    "name" : "Resources States Page", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "States", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "States Table", 
+                    "viewId" : "57b725f32d8cd20920e6d833", 
+                    "pageId" : "57b72a3c2d8cd20920e6d839"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57b762572d8cd20920e6d847"), 
+    "docType" : "object", 
+    "name" : "Resources Organizational Units Page", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Organizational Units", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "Organizational Units", 
+                    "viewId" : "57b725d32d8cd20920e6d831", 
+                    "pageId" : "57b72a022d8cd20920e6d837"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57b762622d8cd20920e6d849"), 
+    "docType" : "object", 
+    "name" : "Resources Offerings Page", 
+    "divider" : "Vertical", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Offerings", 
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "Offerings Table", 
+                    "viewId" : "57b725602d8cd20920e6d82f", 
+                    "pageId" : "57b729d52d8cd20920e6d835"
+                }
+            ]
         }
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 

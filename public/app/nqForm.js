@@ -31,7 +31,7 @@ define(['dojo/_base/declare', "app/nqWidgetBase","dojo/when",  "dojo/dom-attr"],
                         });
                     });
                 });
-                docCol.on('update', function(event){
+                this.own(docCol.on('update', function(event){
                     docCol.fetch().then(function(docsArr){
                         var doc = docsArr[0];
                         //self.setFromValues(self.schema.properties, doc, self.pane.containerNode);
@@ -39,7 +39,7 @@ define(['dojo/_base/declare', "app/nqWidgetBase","dojo/when",  "dojo/dom-attr"],
                             self.renderNewForm(self.schema.properties, doc, owner, self.pane.containerNode);
                         });
                     });
-                });
+                }));
             }
         });
     });

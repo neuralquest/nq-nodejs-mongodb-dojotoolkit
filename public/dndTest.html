@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>dojo.dnd :: Step 1 (programmatic)</title>
+    <meta charset="utf-8">
+    <style>
+        @import "https://cdn.rawgit.com/dojo/dojo/master/resources/dojo.css";
+        @import "https://cdn.rawgit.com/dojo/dojo/master/resources/dnd.css";
+    </style>
+    <script data-dojo-config="async: 1" src="https://cdn.rawgit.com/dojo/dojo/master/dojo.js"></script>
+
+    <script>
+        require([ "dojo/dnd/Source", "dojo/domReady!" ], function(Source){
+            var wishlist = new Source("wishlistNode");
+            wishlist.insertNodes(false, [
+                "Wrist watch",
+                "Life jacket",
+                "Toy bulldozer",
+                "Vintage microphone",
+                "TIE fighter"
+            ]);
+
+            new Source("tableNode");
+        });
+    </script>
+</head>
+<body id="demo1">
+<h1>DnD Test</h1>
+<div id="store">
+    <div>
+        <h2>Wishlist</h2>
+        <ol id="wishlistNode" class="container"></ol>
+        <h2>Table</h2>
+        <table id="tableNode" class="container">
+            <tr class="dojoDndItem"><td>ddddddddd</td><td>ssssssssssss</td></tr>
+            <tr class="dojoDndItem"><td>ddddddddd</td><td>ssssssssssss</td></tr>
+            <tr class="dojoDndItem"><td>ddddddddd</td><td>ssssssssssss</td></tr>
+            <tr class="dojoDndItem"><td>ddddddddd</td><td>ssssssssssss</td></tr>
+            <tr class="dojoDndItem"><td>ddddddddd</td><td>ssssssssssss</td></tr>
+        </table>
+    </div>
+    <p>End of list</p>
+</div>
+</body>
+</html>
