@@ -6,6 +6,7 @@ define(['dojo/_base/declare', "app/nqWidgetBase","dojo/when",  "dojo/dom-attr"],
                 domAttr.set(this.pane.containerNode, 'style', {'padding-left': '10px', 'padding-right': '10px'});
             },
             _setDocIdAttr: function(docId){
+                if(docId == this.docId) return;
                 this.inherited(arguments);
                 var self = this;
                 if(!this.docId) return;

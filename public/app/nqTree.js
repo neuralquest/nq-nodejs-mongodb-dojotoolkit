@@ -10,17 +10,23 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
             this.createMenusForWidget();
         },
         _setDocIdAttr: function(docId){
-            this.inherited(arguments);
             var self = this;
 
-            if(self.rootDocId == self.widget.rootDocId) return;
-            self.rootDocId = self.widget.rootDocId;
+            if(self.widget.rootDocId) {
+                if(self.docId == self.widget.rootDocId) return;
+                self.docId = self.widget.rootDocId;
+            }
+            else {
+                if(self.docId == docId) return;
+                this.inherited(arguments);
+            }
+
 			if(self.tree) self.tree.destroy();
 
 			this.treeModel = new nqObjectStoreModel({
 				//childrenAttr: this.viewIdsArr,
 				store : this.store,
-                query: {_id:  self.rootDocId},
+                query: {_id:  self.docId},
                 arrayNames: self.schema.childArrayNames,
                 schema: self.schema
             });

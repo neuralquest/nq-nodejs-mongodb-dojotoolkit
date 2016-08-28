@@ -2313,7 +2313,7 @@
                 {
                     "displayType" : "Process Model", 
                     "name" : "Process", 
-                    "viewId" : "577862b83c6d3cd598a5a39a"
+                    "viewId" : "57c0a53b2d8cd20920e6d84b"
                 }
             ]
         }
@@ -2647,6 +2647,14 @@
                 "view" : "575d4c3f2cf3d6dc3ed8315d"
             }
         ]
+    }, 
+    "Xquery" : {
+        "eq" : {
+            "classId" : "_id"
+        }
+    }, 
+    "childrenQuery" : {
+        "view" : "575d4c3f2cf3d6dc3ed8315d"
     }, 
     "properties" : {
         "_id" : {
@@ -3140,6 +3148,18 @@
     "query" : {
         "isA" : "574234113c6d3cd598a5a30b"
     }, 
+    "childrenQuery" : {
+        "or" : [
+            {
+                "eq" : {
+                    "parentId" : "_id"
+                }
+            }, 
+            {
+                "view" : "57c213652d8cd20920e6d84d"
+            }
+        ]
+    }, 
     "properties" : {
         "name" : {
 
@@ -3192,6 +3212,16 @@
                     "displayType" : "Form", 
                     "name" : "Offerings Form", 
                     "viewId" : "57b72d062d8cd20920e6d83b"
+                }
+            ]
+        }, 
+        {
+            "name" : "Process", 
+            "widgets" : [
+                {
+                    "displayType" : "Process Model", 
+                    "name" : "Process", 
+                    "viewId" : "57c0a53b2d8cd20920e6d84b"
                 }
             ]
         }
@@ -3454,8 +3484,102 @@
                     "pageId" : "57b729d52d8cd20920e6d835"
                 }
             ]
+        }, 
+        {
+            "name" : "Offerings", 
+            "widgets" : [
+                {
+                    "displayType" : "Tree", 
+                    "name" : "Offerings Table", 
+                    "viewId" : "57c213652d8cd20920e6d84d", 
+                    "pageId" : "57b729d52d8cd20920e6d835"
+                }
+            ]
         }
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("57c0a53b2d8cd20920e6d84b"), 
+    "docType" : "object", 
+    "name" : "States Process View", 
+    "type" : "object", 
+    "query" : {
+        "and" : [
+            {
+                "isA" : "5745eaa53c6d3cd598a5a371"
+            }, 
+            {
+                "eq" : {
+                    "ownerId" : "$selectedObj"
+                }
+            }
+        ]
+    }, 
+    "childrenQuery" : {
+        "in" : {
+            "_id" : "nextStateIds"
+        }
+    }, 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "name" : {
+            "readOnly" : false
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57c213652d8cd20920e6d84d"), 
+    "docType" : "object", 
+    "name" : "Offerings Tree View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "574234113c6d3cd598a5a30b"
+    }, 
+    "childrenQuery" : {
+        "or" : [
+            {
+                "isA" : "574234113c6d3cd598a5a30b"
+            }, 
+            {
+                "view" : "57c2141e2d8cd20920e6d84f"
+            }
+        ]
+    }, 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "name" : {
+
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("57c2141e2d8cd20920e6d84f"), 
+    "docType" : "object", 
+    "name" : "States Tree View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "5745eaa53c6d3cd598a5a371"
+    }, 
+    "childrenQuery" : {
+        "in" : {
+            "_id" : "childDocs"
+        }
+    }, 
+    "properties" : {
+        "name" : {
+
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }

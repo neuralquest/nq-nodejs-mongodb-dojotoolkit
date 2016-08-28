@@ -384,7 +384,7 @@ function(declare, lang, array, when, all, registry, request,
             return properties;
         },
         isASync: function(doc, id) {
-            if(doc._id == id) return true;
+            if(doc._id === id) return true;
             var parentId = doc.docType=='object'?doc.classId:doc.parentId;
             if(!parentId) return false;
             var parentDoc =  this.cachingStore.getSync(parentId);
@@ -392,7 +392,7 @@ function(declare, lang, array, when, all, registry, request,
         },
         isA: function(doc, id) {
             var self = this;
-            if(doc._id == id) return true;
+            if(doc._id === id) return true;
             var parentId = doc.docType=='object'?doc.classId:doc.parentId;
             if(!parentId) return false;
             return this.get(parentId).then(function(parentDoc){

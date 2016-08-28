@@ -1,9 +1,14 @@
 define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array", "app/nqWebGlChart", 'dojo/dom-construct', "dojo/_base/lang", 
-        "dojo/dom-geometry", "dojo/Deferred"],
-	function(declare, when, all, arrayUtil, nqWebGlChart, domConstruct, lang, domGeom, Deferred){
+        "dojo/dom-geometry", "dojo/Deferred", 'dojo/store/Memory'],
+	function(declare, when, all, arrayUtil, nqWebGlChart, domConstruct, lang, domGeom, Deferred, Memory){
+        var docPositionStore = new Memory({});
 
 	return declare("nqProcessChart", [nqWebGlChart], {
-		orgUnitRootId: null,
+        bodyViewHeight: 400,
+        bodyViewWidth: 800,
+        bodyViewDepth: 800,
+
+        orgUnitRootId: null,
 		orgUnitViewId: null,
 		orgUnitNameAttrId: null,
 		stateRootId: null,
@@ -41,6 +46,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 			this.swimlaneColors.push(new THREE.Color( 0x85D6FF ));
 			this.swimlaneColors.push(new THREE.Color( 0x85D6FF ));
 			this.swimlaneColors.push(new THREE.Color( 0x5CB8E6 ));
+/*
 return;
 			
 			var parentChildrenArray = [];
@@ -70,24 +76,187 @@ return;
 					
 					this.createDeferred.resolve(this);//tell the caller that the diagram is done
 				}));
-			}));
+			}));*/
 		},
-		buildHierarchy: function(objectId, cellPositionsObj, parentChildrenArray, viewId, nameAttrId){
-			if(objectId in cellPositionsObj) return;//loop protection
-			return when(this.store.get(objectId), lang.hitch(this, function(classItem){
-				parentChildrenArray.push(classItem.id);
+        _setDocIdAttr: function(docId){
+            if(docId == this.docId) return;
+            this.inherited(arguments);
+            var self = this;
+            if(!this.docId) return;
+            self.store.get(self.docId).then(function(doc){
+                var offeringsId =  '574234113c6d3cd598a5a30b';
+                when(self.store.isA(doc, offeringsId), function(res){
+                    if(res == true){
+                        var initialStateId = doc.initialStateId;
+                        if(initialStateId){
+                            when(self.buildStateHierarchy(initialStateId), function (res) {
+                                console.dir(docPositionStore);
+                                var newPos = new THREE.Vector3(0, 0, 0);
+                                self.positionStates(initialStateId, newPos);
+                                //find the lowest class
+                                /*var lowestY = 0;
+                                 docPositionStore.query({}).forEach(function (cellInfo) {
+                                 if(cellInfo.pos && cellInfo.pos.y < lowestY) lowestY = cellInfo.pos.y;
+                                 });
+                                 self.positionObjects(lowestY);
+                                 //shift all the cells
+                                 var positionInfo = docPositionStore.get(self.rootId);
+                                 var addPos = new THREE.Vector3(-positionInfo.pos.x, 0, 0);
+                                 docPositionStore.query({}).forEach(function (cellInfo) {
+                                 cellInfo.pos.add(addPos);
+                                 });*/
+                                self.clearScene();
+                                var sceneObject3D = self.fillScene(self.docId);
+                                self.addToScene(sceneObject3D);
+                                //self.drawAssociations();
+                            }, nq.errorDialog);
+                        }
+
+                    }
+                });
+            });
+        },
+        buildStateHierarchy: function(id) {
+			var self = this;
+			return when(self.store.get(id), function (doc) {
+				//if (cell.type == 'object') return cell;
+				var cellPosInfo = {
+					id:doc._id,
+					name: doc.docType == 'class'?doc.title:doc.name,
+					docType: doc.docType,
+					subStates:[]
+				};
+				docPositionStore.put(cellPosInfo);
+
 				var promisses = [];
-				var children = [];
-				var viewYArr = classItem[viewId];
-				for(var i=0;i<viewYArr.length;i++){
-					var subObjectId = viewYArr[i];
-					var result = this.buildHierarchy(subObjectId, cellPositionsObj, children, viewId, nameAttrId);
-					promisses.push(result);				
+				if(self.schema && self.schema.childrenQuery) {
+					var childrenFilter = self.store.buildFilterFromQuery(doc, self.schema.childrenQuery);
+					if(childrenFilter) {
+						var childrenCollection = self.store.filter(childrenFilter);
+						promisses.push(childrenCollection.fetch());
+					}
 				}
-				cellPositionsObj[objectId] = {children: children, name: classItem[nameAttrId], associations: classItem['1565']}; 
-				return all(promisses);
-			}));
+
+				return all(promisses).then(function(resArrArr) {
+					var childPromisses = [];
+					if(resArrArr.length>0) resArrArr[0].forEach(function(child) {
+						cellPosInfo.subStates.push(child._id);
+						childPromisses.push(self.buildStateHierarchy(child._id));
+					});
+
+					return all(childPromisses);
+				});
+			});
 		},
+        positionStates: function(id, ourPos){
+            var cellPositionsObj = docPositionStore.get(id);
+            if(!cellPositionsObj) return ourPos.x;
+            var x = ourPos.x;
+            var y = ourPos.y - this.bodyViewHeight;
+            var z = ourPos.z;
+            var maxXUntilNow = ourPos.x;
+            var subStates = cellPositionsObj.subStates;
+            for(var i=0;i<subStates.length;i++){
+                var subObjectId = subStates[i];
+                var newPos = new THREE.Vector3( x, y, z );
+                maxXUntilNow = this.positionStates(subObjectId, newPos);
+                x = maxXUntilNow + this.bodyViewWidth;
+            }
+
+            cellPositionsObj.pos = ourPos;
+            return maxXUntilNow;
+        },
+        fillScene: function(){
+            var self = this;
+            var connectorMaterial = new THREE.MeshLambertMaterial({color: 0xEFEFEF});
+            var textMaterial = new THREE.MeshLambertMaterial({color: 0x000000});
+
+            var sceneObject3D = new THREE.Object3D();
+            var cellPosArr = docPositionStore.query({});
+            for(var i=0;i<cellPosArr.length;i++) {
+                var positionInfo = cellPosArr[i];
+
+                var state3DObject = new THREE.Object3D();
+                state3DObject.position = positionInfo.pos;
+
+                //The cube
+                var cubeGeometry = new THREE.CubeGeometry(this.gridWidth/2, this.gridHeight/2, 25, 1, 1, 1);
+                this.colorVerticies(cubeGeometry, this.stateColors);
+                var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: THREE.VertexColors } );
+                var cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
+                cube.name = positionInfo.name;
+                this.selectableObjects.push(cube);
+                state3DObject.add(cube);
+
+                state3DObject.name = positionInfo.name;
+
+                //The Name
+                var name = positionInfo.name;
+                var text3d = new THREE.TextGeometry(name, {size: 30, height: 1, font: 'helvetiker'});
+                //var text3d = new THREE.TextGeometry( 'Organizations', {size: 70, height: 20, curveSegments: 4, font: 'helvetiker', weight: 'normal', style: 'normal',  });
+                text3d.computeBoundingBox();
+                var xOffset = -0.5 * ( text3d.boundingBox.max.x - text3d.boundingBox.min.x );
+                var yOffset = -0.5 * ( text3d.boundingBox.max.y - text3d.boundingBox.min.y );
+                var textMesh = new THREE.Mesh(text3d, textMaterial);
+                textMesh.position.x = xOffset;
+                textMesh.position.y = yOffset;
+                textMesh.position.z = 55;
+                textMesh.rotation.x = 0;
+                textMesh.rotation.y = Math.PI * 2;
+                state3DObject.add(textMesh);
+
+                sceneObject3D.add(state3DObject);
+
+            }
+            //now add connectors
+            for(var i=0;i<cellPosArr.length;i++) {
+                var positionInfo = cellPosArr[i];
+                //for the subclasses
+                if(positionInfo.subStates.length>0){
+                    //get the length of the vertical connector
+                    //vertical connectors to sub classes
+                    var highY = positionInfo.pos.y;
+                    var lowY = positionInfo.pos.y;
+                    for(var i=0;i<positionInfo.subStates.length;i++){
+                        var chlidClassItemId = positionInfo.subStates[i];
+                        var childPositionInfo = docPositionStore.get(chlidClassItemId);
+                        if(childPositionInfo.pos.y > highY) highY = childPositionInfo.pos.y;
+                        if(childPositionInfo.pos.y < lowY) lowY = childPositionInfo.pos.y;
+                    }
+                    var highPos = new THREE.Vector3(positionInfo.pos.x + this.gridWidth/2, highY, positionInfo.pos.z);
+                    var lowPos = new THREE.Vector3(positionInfo.pos.x + this.gridWidth/2, lowY, positionInfo.pos.z);
+                    this.drawBeam(highPos, lowPos, connectorMaterial, sceneObject3D);
+
+                    //sphere at the left end
+                    var connectorGeometry = new THREE.SphereGeometry( 10 );
+                    var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
+                    connectorMesh.position = highPos;
+                    sceneObject3D.add(connectorMesh);
+
+                    //sphere at the right end
+                    var connectorGeometry = new THREE.SphereGeometry( 10 );
+                    var connectorMesh = new THREE.Mesh( connectorGeometry, connectorMaterial );
+                    connectorMesh.position = lowPos;
+                    sceneObject3D.add(connectorMesh);
+
+                    //vertical connector to super attr
+                    var ourVec = new THREE.Vector3(positionInfo.pos.x + this.gridWidth/2, positionInfo.pos.y, positionInfo.pos.z);
+                    this.drawBeam(positionInfo.pos, ourVec, connectorMaterial, sceneObject3D);
+
+                    //vertical connectors to sub classes
+                    for(var i=0;i<positionInfo.subStates.length;i++){
+                        var chlidClassItemId = positionInfo.subStates[i];
+                        var childPositionInfo = docPositionStore.get(chlidClassItemId);
+                        var connectorDestPos = new THREE.Vector3();
+                        connectorDestPos.x = childPositionInfo.pos.x - this.gridWidth/2;
+                        connectorDestPos.y = childPositionInfo.pos.y;
+                        connectorDestPos.z = childPositionInfo.pos.z;
+                        this.drawBeam(connectorDestPos, childPositionInfo.pos, connectorMaterial, sceneObject3D);
+                    }
+                }
+            }
+            return sceneObject3D;
+        },
 		postionObjectsOrgUnit: function(objectId, ourPos, rowHeaderPositionsObj){
 			var x = ourPos.x + this.rowHeaderWidth;
 			var y = ourPos.y;
