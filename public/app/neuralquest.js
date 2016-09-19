@@ -1,16 +1,16 @@
 require([
-'dojo/_base/array', 'dojo/dom-style', 'dojo/_base/fx', 'dojo/ready', 'dojo/topic', "dojo/on", 'dojo/hash', 'dijit/registry', 
-'dojo/dom', 'dojo', 'dojo/_base/lang', 'dojo/_base/declare','dojo/_base/array', 'dojo/dom-construct',
-'dojo/Deferred', 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',
+'dojo/_base/array', 'dojo/ready', 'dojo/topic', "dojo/on", 'dojo/hash', 'dijit/registry',
+ 'dojo', 'dojo/_base/lang', 'dojo/dom-construct',
+ 'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
 'app/nqDocStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocumentRO','app/nqDocumentRW','app/nqTreeGrid','app/nqHome',
-"dojo/json","dijit/Dialog","dijit/form/Form","dijit/form/TextBox","dijit/form/Button","dojo/dom-attr",'dojox/html/styles', 'dojo/query!css2'],
-function(arrayUtil, domStyle, fx, ready, topic, on, hash, registry,
-		dom, dojo, lang, declare, array, domConstruct,
-		Deferred, when, all, query, BorderContainer,
+"dojo/json","dijit/Dialog", "dojo/dom-attr"],
+function(arrayUtil, ready, topic, on, hash, registry,
+		dojo, lang, domConstruct,
+		when, all, query, BorderContainer,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
         nqDocStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocumentRO, nqDocumentRW, nqTreeGrid, nqHome,
-		JSON, Dialog,Form,TextBox,Button,domAttr,styles, css2) {
+		JSON, Dialog, domAttr) {
 
     var nqStore = new nqDocStore();
     var user = {};

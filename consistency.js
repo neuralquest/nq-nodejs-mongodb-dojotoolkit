@@ -8,7 +8,7 @@ var ObjectID = require('mongodb').ObjectID;
 
 function check(){
     var checkPromises = [];
-    //checkPromises.push(cleanup());
+    //heckPromises.push(cleanup());
     checkPromises.push(findOrphans());
     checkPromises.push(validateObjects());
     return all(checkPromises).then(function(checkArr){
@@ -74,16 +74,23 @@ function validateObjects(){
     });
 }
 /**/
-function xcleanup(){
+function cleanup(){
 
     return Documents.find({docType:'object'}).then(function(objectsArr){
         var classPromises = [];
         var results = [];
         objectsArr.forEach(function(objDoc) {
-            delete(objDoc.parentId);
-            //console.log(objDoc);
-            var unset  = {'parentId': null};
-            Documents.update(objDoc, unset);
+            if(objDoc.classId == '573435c23c6d3cd598a5a2df'){
+                if(objDoc.query && objDoc.query.isA){
+                    objDoc.isA = objDoc.query.isA;
+                    console.log(objDoc);
+                    //Documents.update(objDoc);
+                }
+            }
+            //delete(objDoc.parentId);
+            //Documents.update(objDoc);
+            //var unset  = {'parentId': null};
+            //Documents.update(objDoc, unset);
             //Documents.insert(objDoc);
             //results.push(objDoc._id);
         });

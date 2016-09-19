@@ -1614,7 +1614,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "573435433c6d3cd598a5a2db"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314a"), 
@@ -1655,7 +1656,8 @@
     }, 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAE/SURBVDhPpZLdS8JQGIf9J7sNuoiokKKMQvqkQIoo+7opCFIiixApiAihgVcVCdmNYhEDTSxGH7qttbZf52wdP/AdFb7wXOyw5zkvbD4AbUEe/ofarJ+/I7R/50lg+qjhbWJWky8sCFiWBdM0YRgGdF1HtaoiJytOYO0g4x1ZOX2CbdtORAx/+jCBfEl3Ah17CsLRKzqyfFx0bhcjZPUTyBY1JyD4UZpnMf7gmmy4yFE0oKy6pG8BSQKGJxN0YCGWwxdbQIiNcl5xyT4DQ+NxOhDayUBj61aMuiy/ugj5pgwMBA/pwNzWpafM4fL1I+AfjdGBmY1UbWVKvii49Ad26cDUUvJXOSUDvYMROjAxf4LCW6ssAlyW2Ifq8W/TgeBsokVOl+q3c/nsHuju26QDI2NR/IXOrnBzgP03bQDfNy91dEbnT99iAAAAAElFTkSuQmCC", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "573435f03c6d3cd598a5a2e1"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314b"), 
@@ -1670,6 +1672,12 @@
         }
     }, 
     "childrenQuery" : {
+        "eq" : {
+            "parentId" : "_id"
+        }
+    }, 
+    "childrenView" : "579338e73c6d3cd598a5a3b2", 
+    "XchildrenQuery" : {
         "or" : [
             {
                 "eq" : {
@@ -2024,7 +2032,8 @@
         "name"
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "574237133c6d3cd598a5a30d"
 }
 { 
     "_id" : ObjectId("575de7f43c6d3cd598a5a387"), 
@@ -2082,7 +2091,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "573435f03c6d3cd598a5a2e1"
 }
 { 
     "_id" : ObjectId("576668623c6d3cd598a5a389"), 
@@ -2137,8 +2147,14 @@
             "label" : "Login", 
             "readOnly" : false, 
             "type" : "button", 
-            "post" : "/login", 
-            "iconClass" : "saveIcon"
+            "iconClass" : "saveIcon", 
+            "action" : {
+                "actionType" : "post", 
+                "post" : "/login", 
+                "newDoc" : {
+
+                }
+            }
         }, 
         "googlelogin" : {
             "label" : "Goggle Login", 
@@ -2249,7 +2265,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "574225cb3c6d3cd598a5a305"
 }
 { 
     "_id" : ObjectId("57783efc3c6d3cd598a5a394"), 
@@ -2378,7 +2395,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "574225cb3c6d3cd598a5a305"
 }
 { 
     "_id" : ObjectId("577863d83c6d3cd598a5a39c"), 
@@ -2402,7 +2420,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "574225cb3c6d3cd598a5a305"
 }
 { 
     "_id" : ObjectId("577909043c6d3cd598a5a39e"), 
@@ -2504,7 +2523,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "57343c283c6d3cd598a5a2e9"
 }
 { 
     "_id" : ObjectId("578bff823c6d3cd598a5a3a6"), 
@@ -2719,7 +2739,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "5742563e3c6d3cd598a5a32f"
 }
 { 
     "_id" : ObjectId("57979cdc3c6d3cd598a5a3b9"), 
@@ -2793,7 +2814,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "5742563e3c6d3cd598a5a32f"
 }
 { 
     "_id" : ObjectId("57a674592d8cd20920e6d815"), 
@@ -2889,7 +2911,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("57a67c2f2d8cd20920e6d81d"), 
@@ -2905,7 +2928,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57a67ef52d8cd20920e6d81f"), 
@@ -3001,7 +3025,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("57a67f252d8cd20920e6d821"), 
@@ -3044,7 +3069,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57af81b02d8cd20920e6d823"), 
@@ -3166,7 +3192,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "574234113c6d3cd598a5a30b"
 }
 { 
     "_id" : ObjectId("57b725d32d8cd20920e6d831"), 
@@ -3182,7 +3209,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "574237133c6d3cd598a5a30d"
 }
 { 
     "_id" : ObjectId("57b725f32d8cd20920e6d833"), 
@@ -3198,7 +3226,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "5745eaa53c6d3cd598a5a371"
 }
 { 
     "_id" : ObjectId("57b729d52d8cd20920e6d835"), 
@@ -3305,7 +3334,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "574234113c6d3cd598a5a30b"
 }
 { 
     "_id" : ObjectId("57b72d5e2d8cd20920e6d83d"), 
@@ -3346,7 +3376,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "574237133c6d3cd598a5a30d"
 }
 { 
     "_id" : ObjectId("57b72d792d8cd20920e6d83f"), 
@@ -3377,7 +3408,8 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "5745eaa53c6d3cd598a5a371"
 }
 { 
     "_id" : ObjectId("57b762392d8cd20920e6d841"), 
@@ -3531,26 +3563,18 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "5745eaa53c6d3cd598a5a371"
 }
 { 
     "_id" : ObjectId("57c213652d8cd20920e6d84d"), 
     "docType" : "object", 
-    "name" : "Offerings Tree View", 
+    "name" : "Offerings Tree Org View", 
     "type" : "object", 
     "query" : {
-        "isA" : "574234113c6d3cd598a5a30b"
+        "isA" : "57343c283c6d3cd598a5a2e9"
     }, 
-    "childrenQuery" : {
-        "or" : [
-            {
-                "isA" : "574234113c6d3cd598a5a30b"
-            }, 
-            {
-                "view" : "57c2141e2d8cd20920e6d84f"
-            }
-        ]
-    }, 
+    "childrenView" : "57c2141e2d8cd20920e6d84f", 
     "properties" : {
         "_id" : {
 
@@ -3560,19 +3584,38 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "57343c283c6d3cd598a5a2e9"
 }
 { 
     "_id" : ObjectId("57c2141e2d8cd20920e6d84f"), 
     "docType" : "object", 
-    "name" : "States Tree View", 
+    "name" : "Offerings Tree Offerings View", 
+    "type" : "object", 
+    "query" : {
+        "isA" : "574234113c6d3cd598a5a30b"
+    }, 
+    "childrenView" : "57ccb0162d8cd20920e6d851", 
+    "properties" : {
+        "name" : {
+
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "574234113c6d3cd598a5a30b"
+}
+{ 
+    "_id" : ObjectId("57ccb0162d8cd20920e6d851"), 
+    "docType" : "object", 
+    "name" : "Offerings Tree States View", 
     "type" : "object", 
     "query" : {
         "isA" : "5745eaa53c6d3cd598a5a371"
     }, 
     "childrenQuery" : {
         "in" : {
-            "_id" : "childDocs"
+            "_id" : "nextStateIds"
         }
     }, 
     "properties" : {
@@ -3581,5 +3624,6 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "5745eaa53c6d3cd598a5a371"
 }

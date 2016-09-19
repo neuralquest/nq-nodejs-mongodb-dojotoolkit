@@ -85,6 +85,7 @@ define([
 				self.onChange(obj);
 			});
 			collection.fetch().then(function(children){
+                children[0].viewId = self.schema._id;
                 onItem(children[0]);//we expect only one
             });
 		},
@@ -94,6 +95,66 @@ define([
 		getChildren: function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
             var self = this;
 
+            if(parentItem.viewId){
+                this.store.get(parentItem.viewId).then(function(viewObj){
+					var resultingChildren = [];
+                    var childrenQuery = viewObj.childrenQuery;
+					if(childrenQuery){
+						var childrenFilter = self.store.buildFilterFromQuery(parentItem, childrenQuery);
+						if (childrenFilter) {
+							var childrenCollection = self.store.filter(childrenFilter);
+							childrenCollection.fetch().then(function (childObjects) {
+								//See if there are any grandchildren
+								var grandChildrenPromises = [];
+								childObjects.forEach(function (childObj) {
+									childObj.viewId = parentItem.viewId;
+									var grandChildrenFilter = self.store.buildFilterFromQuery(childObj, childrenQuery);
+									if (grandChildrenFilter) {
+										var grandChildrenCollection = self.store.filter(grandChildrenFilter);
+										grandChildrenPromises.push(grandChildrenCollection.fetch().then(function (grandChildrenObjects) {
+											if (grandChildrenObjects.length > 0) childObj.hasChildren = true;
+											return true;
+										}));
+									}
+								});
+								all(grandChildrenPromises).then(function (res) {
+									resultingChildren = childObjects;
+								});
+							});
+						}
+					}
+					var childrenView = viewObj.childrenView;
+					if(childrenView){
+                        var subView = self.store.cachingStore.getSync(childrenView);
+                        if(subView) {
+                            var childrenFilter = self.store.buildFilterFromQuery(parentItem, subView.query);
+                            var childrenCollection = self.store.filter(childrenFilter);
+                            childrenCollection.fetch().then(function (childObjects) {
+                                //See if there are any grandchildren
+                                var grandChildrenPromises = [];
+                                childObjects.forEach(function (childObj) {
+                                    childObj.viewId = childrenView;
+									resultingChildren.push(childObj);
+                                    /*var grandChildrenFilter = self.store.buildFilterFromQuery(childObj, childrenQuery);
+                                    if (grandChildrenFilter) {
+                                        var grandChildrenCollection = self.store.filter(grandChildrenFilter);
+                                        grandChildrenPromises.push(grandChildrenCollection.fetch().then(function (grandChildrenObjects) {
+                                            if (grandChildrenObjects.length > 0) childObj.hasChildren = true;
+                                            return true;
+                                        }));
+                                    }*/
+                                });
+                                //all(grandChildrenPromises).then(function (res) {
+                                    //onComplete(childObjects);
+                                //});
+                            });
+                        }
+					}
+					onComplete(resultingChildren);
+                });
+            }
+            else onComplete([]);
+/*
             if(this.schema && this.schema.childrenQuery){
                 var docFilter = this.schema.childrenQuery;
                 var childrenFilter = this.store.buildFilterFromQuery(parentItem, docFilter);
@@ -103,6 +164,7 @@ define([
                         //See if there are any grandchildren
                         var grandChildrenPromises = [];
                         childObjects.forEach(function (childObj) {
+							childObj.viewId = self.schema._id;
                             var grandChildrenFilter = self.store.buildFilterFromQuery(childObj, docFilter);
                             if(grandChildrenFilter){
                                 var grandChildrenCollection = self.store.filter(grandChildrenFilter);
@@ -118,7 +180,7 @@ define([
                     });
                 }
                 else onComplete([]);
-            }
+            }*/
 
             /*
              recordStoreFilter= new recordStore.Filter()

@@ -1,7 +1,7 @@
-define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang', "dijit/registry", 'app/nqObjectStoreModel',/*"dijit/tree/ObjectStoreModel",*/ "dojo/hash","dojo/when", "dojo/promise/all",
+define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectStoreModel',
         'dojo/dom-construct', 'dijit/tree/dndSource', 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', "dojo/_base/array",
         'dojo/query!css2'],
-	function(declare, nqWidgetBase, Tree, lang, registry, nqObjectStoreModel, hash, when, all,
+	function(declare, nqWidgetBase, Tree, nqObjectStoreModel,
 			domConstruct, dndSource, Menu, MenuItem, PopupMenuItem, array){
 
 	return declare("nqTree", [nqWidgetBase], {
@@ -50,21 +50,26 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'dojo/_base/lang
                     var icon = '';
                     if(!item) return '';
                     else if(item.icon) icon = item.icon;
-                    else if(self.schema.icon) icon = self.schema.icon;
+                    else {
+                        var viewObj = self.store.cachingStore.getSync(item.viewId);
+                        if(viewObj.icon) icon = viewObj.icon;
+                    }
                     return {backgroundImage: "url('"+icon+"')"}
                 },
 				getRowClass: function(item, opened){
 					if(!item) return '';
                     //TODO if(!this.schema.updateAllowed(item)) return;
-					return 'css'+self.schema._id;//used by tree menu to determine which menu to show
+					return 'css'+item.viewId;//used by tree menu to determine which menu to show
 				},
 				getTooltip: function(item, opened){
 					if(!item) return '';
+                    var viewObj = self.store.cachingStore.getSync(item.viewId);
 					if(dojo.config.isDebug) return JSON.stringify({
                         _id: item._id,
-                        schema: self.schema.name,
-                        query: self.schema.query,
-                        childrenQuery: self.schema.childrenQuery
+                        schemaName: viewObj.name,
+                        query: viewObj.query,
+                        childrenQuery: viewObj.childrenQuery,
+                        childrenView: viewObj.childrenView
                     }, null, 4)
 				},
 				onClick: function(item, node, evt){

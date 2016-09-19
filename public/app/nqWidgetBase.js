@@ -1,5 +1,5 @@
 define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/_base/lang", 'dojo/on',
-        'dojo/_base/array', 'dojo/dom-attr', "dojo/Deferred", "dojo/promise/all", "dojo/when", 'dijit/registry', 'dojo/store/Memory', "dojo/dom-style",'dojo/query!css3',
+        'dojo/_base/array', 'dojo/dom-attr', 'dijit/registry', 'dojo/store/Memory', "dojo/dom-style",'dojo/query!css3',
         "dojo/sniff", "dojo/date", "dojox/form/Uploader", 'app/nqSubDocStore',
         'dijit/form/Select',
         'dijit/form/DateTextBox',
@@ -14,23 +14,20 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         'dgrid/OnDemandGrid',
         'dojox/form/CheckedMultiSelect',
         "dijit/form/Button",
-        'dgrid/Grid',
         'dgrid/Keyboard',
         'dgrid/Selection',
         'dgrid/extensions/DnD',
         'dojo/dnd/Source',
-        'dgrid/Tree',
-        'dgrid/extensions/ColumnResizer',
         "dgrid/extensions/DijitRegistry",
         "dojo/request",
 
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins'],
 	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, lang, on,
-			arrayUtil, domAttr, Deferred, all, when, registry, Memory, domStyle, css3, has, date, Uploader, nqSubDocStore,
+			arrayUtil, domAttr, registry, Memory, domStyle, css3, has, date, Uploader, nqSubDocStore,
              Select, DateTextBox, NumberTextBox, Textarea,
              CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton,
-             Toolbar, OnDemandGrid, CheckedMultiSelect, Button, Grid, Keyboard,
-             Selection, DnD, Source, Tree, ColumnResizer, DijitRegistry, request){
+             Toolbar, OnDemandGrid, CheckedMultiSelect, Button, Keyboard,
+             Selection, DnD, Source, DijitRegistry, request){
 	return declare("nqWidgetBase", [_WidgetBase], {
         widget: null,
 		store: null,
@@ -617,8 +614,17 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             self.store.put(updateDoc);
                         }
                         else if('actionType' in action && action.actionType == 'post'){
-                            //if(!form.validate()) return;
-                            request.post(this.post, {
+                            var userNameWid = null;
+                            var passwordWid = null;
+                            registry.findWidgets(self.pane.containerNode).forEach(function(wid){
+                                if(wid.name == 'username') userNameWid = wid;
+                                if(wid.name == 'password') passwordWid = wid;
+                            });
+                            var data = {
+                                username: userNameWid.getValue(),
+                                password: passwordWid.getValue()
+                            };
+                            request.post('login', {
                                 headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
                                 data: JSON.stringify(data)
                             }).then(function(result){

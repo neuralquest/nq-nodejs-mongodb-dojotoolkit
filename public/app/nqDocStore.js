@@ -1,7 +1,7 @@
-define(['dojo/_base/declare', "dojo/_base/lang", "dojo/_base/array", "dojo/when", "dojo/promise/all", 'dijit/registry',"dojo/request",
-		'dstore/RequestMemory', 'dstore/SimpleQuery', 'dstore/QueryMethod', 'dstore/QueryResults', 'dojo/dom-construct'],
-function(declare, lang, array, when, all, registry, request,
-		 RequestMemory, SimpleQuery, QueryMethod, QueryResults, domConstruct){
+define(['dojo/_base/declare', "dojo/_base/lang", "dojo/when", "dojo/promise/all", 'dijit/registry',"dojo/request",
+		'dstore/RequestMemory', 'dstore/QueryMethod', 'dojo/dom-construct'],
+function(declare, lang, when, all, registry, request,
+		 RequestMemory, QueryMethod, domConstruct){
 
     return declare("nqDocStore", [RequestMemory], {
         target: '/documents',
@@ -256,8 +256,9 @@ function(declare, lang, array, when, all, registry, request,
                 //console.log('viewObj',viewObj);
                 var inheritedClassSchemaPromise = {};
                 //var docFilter = viewObj.query;
-                if(viewObj.query) {
-                    if ('isA' in viewObj.query) {
+                if(viewObj.isA) {
+                    inheritedClassSchemaPromise = self.getInheritedClassSchema(viewObj.isA);
+                    /*if ('isA' in viewObj.query) {
                         var mapsToId = viewObj.query['isA'];
                         if (mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
                     }
@@ -267,7 +268,7 @@ function(declare, lang, array, when, all, registry, request,
                         if ('isA' in queryArray[0]) mapsToId = queryArray[0]['isA'];
                         else if ('isA' in queryArray[1]) mapsToId = queryArray[0]['isA'];
                         if (mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
-                    }
+                    }*/
                 }
                 return when(inheritedClassSchemaPromise, function(inheritedClassSchema){
                     //var properties = viewObj.properties;
