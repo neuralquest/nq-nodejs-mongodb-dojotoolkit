@@ -325,6 +325,16 @@
             "items" : {
                 "type" : "string"
             }
+        }, 
+        "isA" : {
+            "title" : "Is A", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "eq" : {
+                    "docType" : "class"
+                }
+            }
         }
     }, 
     "parentId" : "573435803c6d3cd598a5a2dd"
@@ -1662,13 +1672,13 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314b"), 
     "docType" : "object", 
-    "name" : "Class Model View", 
+    "name" : "Class Model Tree View", 
     "description" : "<p>Descibes the class model hierarchy, including a children array</p>", 
     "type" : "object", 
     "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
     "query" : {
         "eq" : {
-            "docType" : "class"
+            "_id" : "$docId"
         }
     }, 
     "childrenQuery" : {
@@ -1677,18 +1687,6 @@
         }
     }, 
     "childrenView" : "579338e73c6d3cd598a5a3b2", 
-    "XchildrenQuery" : {
-        "or" : [
-            {
-                "eq" : {
-                    "parentId" : "_id"
-                }
-            }, 
-            {
-                "view" : "579338e73c6d3cd598a5a3b2"
-            }
-        ]
-    }, 
     "properties" : {
         "_id" : {
             "title" : "_id", 
@@ -1784,26 +1782,26 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314d"), 
     "docType" : "object", 
-    "name" : "Owners Class View", 
+    "name" : "Owners Class Tree View", 
     "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
     "type" : "object", 
+    "Xquery" : {
+        "isA" : "xxxxx", 
+        "eq" : {
+            "_id" : "$docId"
+        }
+    }, 
     "query" : {
         "eq" : {
-            "docType" : "class"
+            "_id" : "$docId"
         }
     }, 
     "childrenQuery" : {
-        "or" : [
-            {
-                "eq" : {
-                    "parentId" : "_id"
-                }
-            }, 
-            {
-                "view" : "579357cf3c6d3cd598a5a3b4"
-            }
-        ]
+        "eq" : {
+            "parentId" : "_id"
+        }
     }, 
+    "childrenView" : "579357cf3c6d3cd598a5a3b4", 
     "properties" : {
         "name" : {
             "readOnly" : false
@@ -2001,18 +1999,6 @@
         "eq" : {
             "parentOrgId" : "_id"
         }
-    }, 
-    "xquery" : {
-        "and" : [
-            {
-                "isA" : "574237133c6d3cd598a5a30d"
-            }, 
-            {
-                "eq" : {
-                    "parentOrgId" : "_id"
-                }
-            }
-        ]
     }, 
     "childrenQuery" : {
         "eq" : {
@@ -2667,11 +2653,6 @@
                 "view" : "575d4c3f2cf3d6dc3ed8315d"
             }
         ]
-    }, 
-    "Xquery" : {
-        "eq" : {
-            "classId" : "_id"
-        }
     }, 
     "childrenQuery" : {
         "view" : "575d4c3f2cf3d6dc3ed8315d"
@@ -3572,7 +3553,9 @@
     "name" : "Offerings Tree Org View", 
     "type" : "object", 
     "query" : {
-        "isA" : "57343c283c6d3cd598a5a2e9"
+        "eq" : {
+            "_id" : "$docId"
+        }
     }, 
     "childrenView" : "57c2141e2d8cd20920e6d84f", 
     "properties" : {

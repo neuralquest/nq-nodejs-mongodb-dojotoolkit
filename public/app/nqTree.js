@@ -24,10 +24,9 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectSto
 			if(self.tree) self.tree.destroy();
 
 			this.treeModel = new nqObjectStoreModel({
-				//childrenAttr: this.viewIdsArr,
 				store : this.store,
                 query: {_id:  self.docId},
-                arrayNames: self.schema.childArrayNames,
+                //query: self.schema.query,
                 schema: self.schema
             });
 			this.tree = new Tree({
