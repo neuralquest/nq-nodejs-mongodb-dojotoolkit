@@ -1,7 +1,7 @@
 define(['dojo/_base/declare', "dojo/_base/lang", "dojo/when", "dojo/promise/all", 'dijit/registry',"dojo/request",
-		'dstore/RequestMemory', 'dstore/QueryMethod', 'dojo/dom-construct'],
+		'dstore/RequestMemory', 'app/nqMemoryStore', 'dstore/QueryMethod', 'dojo/dom-construct'],
 function(declare, lang, when, all, registry, request,
-		 RequestMemory, QueryMethod, domConstruct){
+		 RequestMemory, nqMemoryStore ,QueryMethod, domConstruct){
 
     return declare("nqDocStore", [RequestMemory], {
         target: '/documents',
@@ -9,7 +9,7 @@ function(declare, lang, when, all, registry, request,
         autoEmitEvents: false,
         transactionObj: {add:{}, update:{}, delete:{}},
         constructor: function () {
-
+            /*this.cachingStore = new nqMemoryStore();
             this.root = this;
             this.cachingStore.getChildren = function(parent){
                 var filter = {};
@@ -42,9 +42,26 @@ function(declare, lang, when, all, registry, request,
                     };
                 }
             });
+            this.isAChildren = new QueryMethod({
+                type: 'isA',
+                querierFactory: function (parent) {
+                    var parentId = this.getIdentity(parent);
+
+                    return function (data) {
+                        debugger;
+                        // note: in this case, the input data is ignored as this querier
+                        // returns an object's array of children instead
+
+                        // return the children of the parent
+                        // or an empty array if the parent no longer exists
+                        var parent = this.getSync(parentId);
+                        return parent ? parent.children : [];
+                    };
+                }
+            });
             this.mayHaveChildren = function(obj) {
                 return true;
-            }
+            }*/
         },
         add: function (item, directives) {
             var self = this;
@@ -400,25 +417,76 @@ function(declare, lang, when, all, registry, request,
                 return self.isA(parentDoc, id);
             });
         },
-        getInstances: function(id) {
+        buildBaseFilterFromQuery: function(docQuery, parentObj, isA){//(parentObj, docQuery, viewObj) {
+            var self = this;
+            var baseFilter = null;
+            if(isA) {
+                var isAFilter = self.Filter(function (obj) {
+                    if(obj.docType == 'class') return false;
+                    return self.isASync(obj, isA);
+                });
+                var isAClass = this.cachingStore.getSync(isA);
+                var isAResource = this.isASync(isAClass, "56f87bcc5dde184ccfb9fc70"); //Resources
+                if(1==2){ //isAResource
+                    var ownerFilter = self.Filter().eq('ownerId', nq.getOwner().id);
+                    baseFilter = self.Filter().and(ownerFilter, isAFilter);
+                }
+                else baseFilter = isAFilter;
+            }
+            else{
+                baseFilter = self.Filter().eq('docType', 'class');
+            }
+            //if(viewObj._id=="57c2141e2d8cd20920e6d84f") debugger;
+            var resFilter = null;
+            if(docQuery) {//docQuery
+                var queryFilter;
+                for(var opper in docQuery){
+                    if(opper == 'in') debugger;
+                    var qualifier = docQuery[opper];
+                    for(var attr in qualifier){
+                        var value = qualifier[attr];
+                        //if(value.substring(0, 1) == '$') debugger;
+                        if(value.substring(0, 1) == '$') value = parentObj[value.substring(1)];
+                        if(!value) value = [];
+                        queryFilter = self.Filter()[opper](attr, value);
+                    }
+                }
+                resFilter = self.Filter().and(queryFilter, baseFilter);
+                //resFilter = queryFilter;
+            }
+            else resFilter = baseFilter;
 
-        },
-        getSubclasses: function(id) {
+            var childrenCollection = this.filter(resFilter);
+            childrenCollection.fetch().then(function (childObjects) {
+                console.log('Doc Name: ', parentObj.name?parentObj.name:parentObj.title, 'isA', isA);
+                console.log(JSON.stringify(resFilter, null, 4));
+                console.dir(childObjects);
+            });
 
+            return resFilter;
         },
-        buildFilterFromQuery: function(parentObj, docQuery) {
+        /*buildFilterFromQuery: function(parentObj, docQuery) {
             var self = this;
             for(var filterType in docQuery){
                 var docFilter = docQuery[filterType];
                 switch (filterType) {
                     case 'eq':
                         for(var key in docFilter){
+                            //var value = docFilter[key];
                             var propName = docFilter[key];
-                            var value = parentObj[propName];
-                            return self.Filter().eq(key, value);
+                            if(propName == '_id') {
+                                var value = parentObj[propName];
+                                return self.Filter().eq(key, value);
+                            }
+                            else return self.Filter().eq(key, propName);
                         }
                         break;
                     case 'and':
+                        /*var filterArr = [];
+                        docFilter.forEach(function(query){
+                            filterArr.push(self.buildFilterFromQuery(parentObj, query));
+                        });
+                        return self.Filter().and[filterArr];* /
                         var firstDocQuery = docFilter[0];
                         var secondDocQuery = docFilter[1];
                         var firstFilter = this.buildFilterFromQuery(parentObj, firstDocQuery);
@@ -426,13 +494,18 @@ function(declare, lang, when, all, registry, request,
                         if (firstFilter && secondFilter) return self.Filter().and(firstFilter, secondFilter);
                         break;
                     case 'or':
-                        var firstDocQuery = docFilter[0];
+                        var filterArr = [];
+                        docFilter.forEach(function(query){
+                            filterArr.push(self.buildFilterFromQuery(parentObj, query));
+                        });
+                        return self.Filter().or[filterArr];
+                        /*var firstDocQuery = docFilter[0];
                         var secondDocQuery = docFilter[1];
                         var firstFilter = this.buildFilterFromQuery(parentObj, firstDocQuery);
                         var secondFilter = this.buildFilterFromQuery(parentObj, secondDocQuery);
                         if (firstFilter && secondFilter) return self.Filter().or(firstFilter, secondFilter);
                         if (firstFilter) return firstFilter;
-                        if (secondFilter) return secondFilter;
+                        if (secondFilter) return secondFilter;* /
                         break;
                     case 'in':
                         for(var key in docFilter){
@@ -448,7 +521,7 @@ function(declare, lang, when, all, registry, request,
                             return self.isASync(obj, docFilter);
                         });
                         break;
-                    case 'view':
+                    /*case 'view':
                         var subView = this.cachingStore.getSync(docFilter);
                         if (subView) {
                             var fil = this.buildFilterFromQuery(parentObj, subView.query);
@@ -459,12 +532,12 @@ function(declare, lang, when, all, registry, request,
                         break;
                     case 'array':
                         debugger;
-                        break;
+                        break;* /
                     default:
                         break;
                 }
             }
-        },
+        },*/
         amAuthorizedToUpdate: function(doc){
             return true;
             var user = nq.getUser();

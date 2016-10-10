@@ -130,8 +130,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
             var pDom = dojo.toDom(item.description);
             domConstruct.place(pDom, divDom, 'last');
 
-
-            var childrenFilter = this.store.buildFilterFromQuery(item, this.schema.childrenQuery);
+			var childrenFilter = self.store.buildBaseFilterFromQuery(this.schema.childrenQuery, item, this.schema.isA);
             if(childrenFilter){
                 var childrenCollection = this.store.filter(childrenFilter);
                 /*childrenCollection.on('update', function(event){
@@ -298,7 +297,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
                 });
                 if(paragraphContent) domConstruct.place(paragraphContent, divDom, 'last');
             }
-			var childrenFilter = this.store.buildFilterFromQuery(item, this.schema.childrenQuery);
+			var childrenFilter = self.store.buildBaseFilterFromQuery(this.schema.childrenQuery, item, this.schema.isA);
 			if(childrenFilter){
 				var childrenCollection = this.store.filter(childrenFilter);
 				/*childrenCollection.on('update', function(event){

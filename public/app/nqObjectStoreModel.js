@@ -92,82 +92,6 @@ define([
 		mayHaveChildren: function(item){
 			return item.hasChildren;
 		},
-		XgetChildren: function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError){
-            var self = this;
-            if(parentItem.viewId){
-                this.store.get(parentItem.viewId).then(function(viewObj){
-					var resultingChildren = [];
-                    var childrenQuery = viewObj.childrenQuery;
-					if(childrenQuery){
-						var childrenFilter = self.store.buildFilterFromQuery(parentItem, childrenQuery);
-						if (childrenFilter) {
-							var childrenCollection = self.store.filter(childrenFilter);
-							childrenCollection.fetch().then(function (childObjects) {
-								//See if there are any grandchildren
-								var grandChildrenPromises = [];
-								childObjects.forEach(function (childObj) {
-									childObj.viewId = parentItem.viewId;
-                                    childObj.hasChildren = true;
-
-                                    var grandChildrenFilter = self.store.buildFilterFromQuery(childObj, childrenQuery);
-									if (grandChildrenFilter) {
-										var grandChildrenCollection = self.store.filter(grandChildrenFilter);
-										grandChildrenPromises.push(grandChildrenCollection.fetch().then(function (grandChildrenObjects) {
-											if (grandChildrenObjects.length > 0) childObj.hasChildren = true;
-											return true;
-										}));
-									}
-								});
-								all(grandChildrenPromises).then(function (res) {
-									resultingChildren = childObjects;
-								});
-							});
-						}
-					}
-					var childrenView = viewObj.childrenView;
-					if(childrenView){
-                        var subView = self.store.cachingStore.getSync(childrenView);
-                        if(subView) {
-                            var childrenFilter = self.store.buildFilterFromQuery(parentItem, subView.query);
-                            var childrenCollection = self.store.filter(childrenFilter);
-                            childrenCollection.fetch().then(function (childObjects) {
-                                //See if there are any grandchildren
-                                var grandChildrenPromises = [];
-                                childObjects.forEach(function (childObj) {
-                                    childObj.viewId = childrenView;
-									resultingChildren.push(childObj);
-									childObj.hasChildren = true;
-                                    /*var grandChildrenFilter = self.store.buildFilterFromQuery(childObj, childrenQuery);
-                                    if (grandChildrenFilter) {
-                                        var grandChildrenCollection = self.store.filter(grandChildrenFilter);
-                                        grandChildrenPromises.push(grandChildrenCollection.fetch().then(function (grandChildrenObjects) {
-                                            if (grandChildrenObjects.length > 0) childObj.hasChildren = true;
-                                            return true;
-                                        }));
-                                    }*/
-                                });
-                                //all(grandChildrenPromises).then(function (res) {
-                                    //onComplete(childObjects);
-                                //});
-                            });
-                        }
-					}
-					onComplete(resultingChildren);
-                });
-            }
-            else onComplete([]);
-
-
-            /*
-             recordStoreFilter= new recordStore.Filter()
-             name1Filter= recordStoreFilter.eq({'name': 'Name1'})
-             age25Filter= recordStoreFilter.eq({'age', 25})
-             unionFilter= recordStoreFilter.or(name1Filter, age25Filter)
-             unionData= recordStore.filter(unionFilter)
-             //Set using the following
-             recordGrid.set('collection', unionData) //or intersectionData
-             */
-		},
         getChildren: function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError) {
             var self = this;
             var childrenPromises = [];
@@ -195,44 +119,8 @@ define([
         },
         getChildrenArray: function(parentItem, query, viewObj) {
             var self = this;
-            var baseQuery = {};
-            if(viewObj.isA) {
-                if(viewObj.ownerId){
-                    baseQuery = {
-                        and: [
-                            {isA: viewObj.isA},
-                            {eq:{ownerId: '$ownerId'}}
-                        ]
-                    }
-                }
-                else {
-                    baseQuery = {
-                        isA: viewObj.isA
-                    }
-                }
-            }
-            else{
-                if(viewObj.ownerId){
-                    baseQuery = {
-                        and: [
-                            {eq:{docType: 'class'}},
-                            {eq:{ownerId: '$ownerId'}}
-                        ]
-                    }
-                }
-                else {
-                    baseQuery = {
-                        eq: {docType: 'class'}
-                    }
-                }
-            }
-
-            for(var opper in query){
-                superQuery[opper] = query[opper];
-            }
-
-
-            var childrenFilter = self.store.buildFilterFromQuery(parentItem, query);
+			var childrenFilter = self.store.buildBaseFilterFromQuery(query, parentItem, viewObj.isA);
+            //var childrenFilter = self.store.buildFilterFromQuery(parentItem, query);
             if(childrenFilter) {
                 var childrenCollection = self.store.filter(childrenFilter);
                 return childrenCollection.fetch().then(function (childObjects) {
@@ -260,7 +148,9 @@ define([
             var self = this;
             var grandChildrenPromises = [];
             if(viewObj.childrenQuery) {
-                var grandChildrenFilter = self.store.buildFilterFromQuery(parentItem, viewObj.childrenQuery);
+				var grandChildrenFilter = self.store.buildBaseFilterFromQuery(viewObj.childrenQuery, parentItem, viewObj.isA);
+
+				//var grandChildrenFilter = self.store.buildFilterFromQuery(parentItem, viewObj.childrenQuery);
                 if(grandChildrenFilter) {
                     var grandChildrenCollection = self.store.filter(grandChildrenFilter);
                     grandChildrenPromises.push(grandChildrenCollection.fetch())
@@ -269,7 +159,9 @@ define([
             if(viewObj.childrenView) {
                 var subView = self.store.cachingStore.getSync(viewObj.childrenView);
                 if(subView){
-                    var grandChildrenFilter = self.store.buildFilterFromQuery(parentItem, subView.query);
+					var grandChildrenFilter = self.store.buildBaseFilterFromQuery(subView.query, parentItem, subView.isA);
+
+					//var grandChildrenFilter = self.store.buildFilterFromQuery(parentItem, subView.query);
                     if(grandChildrenFilter) {
                         var grandChildrenCollection = self.store.filter(grandChildrenFilter);
                         grandChildrenPromises.push(grandChildrenCollection.fetch())

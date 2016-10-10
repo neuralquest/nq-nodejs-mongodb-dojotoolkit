@@ -331,7 +331,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         node.innerHTML = refDoc.name?refDoc.name:refDoc.title;
                     }
                     else{
-                        var childrenFilter = self.store.buildFilterFromQuery(value, attrProps.query);
+                        var childrenFilter = self.store.buildBaseFilterFromQuery(attrProps.query, value, null);
                         if(childrenFilter) {
                             var childrenCollection = self.store.filter(childrenFilter);
                             data = [];
@@ -381,7 +381,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     style+='text-align: right;';
                     domAttr.set(node, 'style', style);
                     if(attrProps.query){
-                        var childrenFilter = self.store.buildFilterFromQuery(value, attrProps.query);
+                        var childrenFilter = self.store.buildBaseFilterFromQuery(attrProps.query, value, null);
                         if(childrenFilter) {
                             var childrenCollection = self.store.filter(childrenFilter);
                             childrenCollection.fetch().then(function (childObjects) {
@@ -732,7 +732,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 style+='text-align: right;';
                                 domAttr.set(td, 'style', style);
                                 if(attrProps.query){
-                                    var childrenFilter = self.store.buildFilterFromQuery(doc, attrProps.query);
+                                    var childrenFilter = self.store.buildBaseFilterFromQuery(attrProps.query, value, null);
                                     if(childrenFilter) {
                                         var childrenCollection = self.store.filter(childrenFilter);
                                         childrenCollection.fetch().then(function (childObjects) {

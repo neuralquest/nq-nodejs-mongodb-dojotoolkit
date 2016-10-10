@@ -130,7 +130,7 @@ return;
 
 				var promisses = [];
 				if(self.schema && self.schema.childrenQuery) {
-					var childrenFilter = self.store.buildFilterFromQuery(doc, self.schema.childrenQuery);
+					var childrenFilter = self.store.buildBaseFilterFromQuery(self.schema.childrenQuery, doc, self.schema.isA);
 					if(childrenFilter) {
 						var childrenCollection = self.store.filter(childrenFilter);
 						promisses.push(childrenCollection.fetch());

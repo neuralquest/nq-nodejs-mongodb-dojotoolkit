@@ -272,7 +272,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                     this.grid.set('collection', docCol);
                 }
                 else{
-                    var childrenFilter = this.store.buildFilterFromQuery(null, docFilter);
+                    var childrenFilter = self.store.buildBaseFilterFromQuery(this.schema.query, null, this.schema.isA);
                     if(childrenFilter) {
                         docCol = this.store.filter(childrenFilter);
                         this.grid.set('collection', docCol);

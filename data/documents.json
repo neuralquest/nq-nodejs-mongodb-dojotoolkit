@@ -184,7 +184,8 @@
                                     "title" : "Display Type", 
                                     "type" : "string", 
                                     "enum" : [
-                                        "Document", 
+                                        "Document Read", 
+                                        "Document Update", 
                                         "Tree", 
                                         "Table", 
                                         "3D Class Model", 
@@ -201,6 +202,14 @@
                                     "pattern" : "[a-f0-9]{24}", 
                                     "query" : {
                                         "isA" : "573435c23c6d3cd598a5a2df"
+                                    }
+                                }, 
+                                "rootId" : {
+                                    "title" : "View", 
+                                    "type" : "string", 
+                                    "pattern" : "[a-f0-9]{24}", 
+                                    "query" : {
+
                                     }
                                 }, 
                                 "rootDocId" : {
@@ -310,6 +319,14 @@
         "childrenQuery" : {
             "title" : "Children Query", 
             "type" : "object"
+        }, 
+        "childrenView" : {
+            "title" : "Children View", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "isA" : "573435c23c6d3cd598a5a2df"
+            }
         }, 
         "pageId" : {
             "title" : "Page", 
@@ -460,7 +477,7 @@
     "parentId" : "56f870a55dde184ccfb9fc6c", 
     "required" : [
         "email", 
-        "passwordEncrypt", 
+        "password", 
         "isActive"
     ]
 }
@@ -1633,21 +1650,9 @@
     "name" : "Document View", 
     "description" : "<p>Descibes the document hierarchy, including a header, a paragraph parts array and a subdocuments array</p>", 
     "type" : "object", 
-    "query" : {
-        "and" : [
-            {
-                "isA" : "573435f03c6d3cd598a5a2e1"
-            }, 
-            {
-                "eq" : {
-                    "ownerId" : "$selectedObj"
-                }
-            }
-        ]
-    }, 
     "childrenQuery" : {
         "in" : {
-            "_id" : "childDocs"
+            "_id" : "$childDocs"
         }
     }, 
     "properties" : {
@@ -1683,7 +1688,7 @@
     }, 
     "childrenQuery" : {
         "eq" : {
-            "parentId" : "_id"
+            "parentId" : "$_id"
         }
     }, 
     "childrenView" : "579338e73c6d3cd598a5a3b2", 
@@ -1785,20 +1790,9 @@
     "name" : "Owners Class Tree View", 
     "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
     "type" : "object", 
-    "Xquery" : {
-        "isA" : "xxxxx", 
-        "eq" : {
-            "_id" : "$docId"
-        }
-    }, 
-    "query" : {
-        "eq" : {
-            "_id" : "$docId"
-        }
-    }, 
     "childrenQuery" : {
         "eq" : {
-            "parentId" : "_id"
+            "parentId" : "$_id"
         }
     }, 
     "childrenView" : "579357cf3c6d3cd598a5a3b4", 
@@ -1843,7 +1837,7 @@
         {
             "url" : "app/resources/img/Neuralquest/3dClassModel.png", 
             "media" : {
-                "mediaType" : "img/png"
+                "mediaType" : "image/png"
             }, 
             "width" : "30%"
         }
@@ -1922,6 +1916,9 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314f"), 
     "docType" : "object", 
     "name" : "Platoscave", 
+    "isActive" : true, 
+    "password" : "$2a$10$WIx8rGcMeuPigotQqQi.b.HUhpgqd0bEaLQ1Eerq6Q9WA/Y6v/y92", 
+    "email" : "", 
     "description" : "<p>Platos Cave user</p>", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAALwSURBVDhPLY3dbxRVGMbPrSEkvRBDwpUQYwQlKGAMJIYLjDd6p3+ABPy405gI7uzH7HycM2dmzp6Zc87Mzux2u+3ObLvdFtay1FbImkYkEBTiR0ADwS9CZNsIFNpKU2AYom+eqzfP7/eAhZp7uy4W63ypIe43+GrEHo7ypO0nLe/RmEjG/QdNlj5XI7HcEPdGPNCv8FtD3mJd3B3iy3V3LfLWGiwZ85KJIJkIk1H/QeTdHxb/DvtpZ6HKwI2A3QxFP3RuVflSTawOi4exnxwtJxc6yTftdGqtIVaG2GKNz1fcvwMXXBXsGmfXPfdmmf8T8HtV91EcriycTf67bjPV3wndvu/c8Nlv3AEXKf2ROpcoveo6f3HaF3R5UKz2L/4PTI/frbK+cP9gzhXGLzMOThNyjtDzNvmJur9Q53eX9l2yUvOSXjfptJZCMS9Y2v6ZkNR73qZg1oBf29acaZ61S08wQn8t0esunxd8wRN/us4lm1yw7HMmOW3Zc3YJfGEYU8g4YaCvTPMUxnPYPmPa31mlH6wn8Pc2+dYwU90pbM5gPI0xGNNhGxptiDvImNJhVzdOqKiHSQ+aPYhPGngGoeMQdXQ0qcMJhEAEzRgakQobijZp03d373lr67YDe/e1ZaWj6B0FxlKhpcHUm3aaCINKUQ8KMPPeobdf3bN/67Zdz2x4Y8uzO9av2zUw8OaW5156ah06+GFTRXUFDmmophrg9e0v79uxc+/zL+zctKmqFlnmSDmf8TOfvfPabj9z2M9K5Vw2kGWWywpZcXIF8MrmzS9u3PA0AFUtP6hmB1WprkktS63LUgSVMPd5TSuEWt6TpfxH70sfHAIDAIwQWEPZuKS2HFhTDrdLaqQeOYblNLGaGbeKMc7HtjxaUpqkCCqwMGzrTaq1HO2YQONEmSDKyaA0y9AUKYbSJ02zEFuyyH48gnMpBmaq5HiAJ5nei/xUUEeSl/s0nfqyQjtUmQ1wl8OjVOuWrdkqma5YjwEfCcrTn7ebgwAAAABJRU5ErkJggg==", 
     "pageId" : "575d4c3f2cf3d6dc3ed83147", 
@@ -1997,12 +1994,12 @@
     "type" : "object", 
     "query" : {
         "eq" : {
-            "parentOrgId" : "_id"
+            "parentOrgId" : "$_id"
         }
     }, 
     "childrenQuery" : {
         "eq" : {
-            "parentOrgId" : "_id"
+            "parentOrgId" : "$_id"
         }
     }, 
     "properties" : {
@@ -2606,14 +2603,9 @@
     "description" : "<p>Displays objects</p>", 
     "type" : "object", 
     "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
-    "Xquery" : {
-        "eq" : {
-            "docType" : "object"
-        }
-    }, 
     "query" : {
         "eq" : {
-            "classId" : "_id"
+            "classId" : "$_id"
         }
     }, 
     "properties" : {
@@ -2643,20 +2635,11 @@
     "type" : "object", 
     "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
     "query" : {
-        "or" : [
-            {
-                "eq" : {
-                    "classId" : "_id"
-                }
-            }, 
-            {
-                "view" : "575d4c3f2cf3d6dc3ed8315d"
-            }
-        ]
+        "eq" : {
+            "classId" : "$_id"
+        }
     }, 
-    "childrenQuery" : {
-        "view" : "575d4c3f2cf3d6dc3ed8315d"
-    }, 
+    "childrenView" : "575d4c3f2cf3d6dc3ed8315d", 
     "properties" : {
         "_id" : {
 
@@ -2674,7 +2657,8 @@
     }, 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABvSURBVDhPY/j//z9FeNiD/4pAjwIxyQCq0ecYAxgTbxCaRnSM2yACGtExqkEkaETHEEOGgQGDAgBzVTYQewKxGhBLALEIEDMBMSMSBvFVgVgXiEuBOBmmnQmImYGYEQmzQzEHFMPkQepBGMr+zwUAa2Uzpn+czq8AAAAASUVORK5CYII=", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df", 
+    "isA" : "56f870a55dde184ccfb9fc6c"
 }
 { 
     "_id" : ObjectId("5794cd333c6d3cd598a5a3b5"), 
@@ -2900,9 +2884,6 @@
     "docType" : "object", 
     "name" : "View Table View", 
     "type" : "object", 
-    "query" : {
-        "isA" : "573435c23c6d3cd598a5a2df"
-    }, 
     "properties" : {
         "name" : {
 
@@ -3155,18 +3136,7 @@
     "query" : {
         "isA" : "574234113c6d3cd598a5a30b"
     }, 
-    "childrenQuery" : {
-        "or" : [
-            {
-                "eq" : {
-                    "parentId" : "_id"
-                }
-            }, 
-            {
-                "view" : "57c213652d8cd20920e6d84d"
-            }
-        ]
-    }, 
+    "childrenView" : "57c213652d8cd20920e6d84d", 
     "properties" : {
         "name" : {
 
@@ -3519,20 +3489,13 @@
     "name" : "States Process View", 
     "type" : "object", 
     "query" : {
-        "and" : [
-            {
-                "isA" : "5745eaa53c6d3cd598a5a371"
-            }, 
-            {
-                "eq" : {
-                    "ownerId" : "$selectedObj"
-                }
-            }
-        ]
+        "eq" : {
+            "ownerId" : "$selectedObj"
+        }
     }, 
     "childrenQuery" : {
         "in" : {
-            "_id" : "nextStateIds"
+            "_id" : "$nextStateIds"
         }
     }, 
     "properties" : {
@@ -3552,11 +3515,6 @@
     "docType" : "object", 
     "name" : "Offerings Tree Org View", 
     "type" : "object", 
-    "query" : {
-        "eq" : {
-            "_id" : "$docId"
-        }
-    }, 
     "childrenView" : "57c2141e2d8cd20920e6d84f", 
     "properties" : {
         "_id" : {
@@ -3575,9 +3533,6 @@
     "docType" : "object", 
     "name" : "Offerings Tree Offerings View", 
     "type" : "object", 
-    "query" : {
-        "isA" : "574234113c6d3cd598a5a30b"
-    }, 
     "childrenView" : "57ccb0162d8cd20920e6d851", 
     "properties" : {
         "name" : {
@@ -3594,11 +3549,13 @@
     "name" : "Offerings Tree States View", 
     "type" : "object", 
     "query" : {
-        "isA" : "5745eaa53c6d3cd598a5a371"
+        "eq" : {
+            "_id" : "$initialStateId"
+        }
     }, 
     "childrenQuery" : {
         "in" : {
-            "_id" : "nextStateIds"
+            "_id" : "$nextStateIds"
         }
     }, 
     "properties" : {
