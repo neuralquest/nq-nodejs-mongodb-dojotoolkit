@@ -257,9 +257,9 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
             if(!this.docId) return;
             //load the data
             var docCol = null;
-            if(this.schema && this.schema.query) {
+            if(this.schema && (this.schema.query || this.schema.isA)) {
                 var docFilter = this.schema.query;
-                if('subDoc' in docFilter){
+                if(docFilter && 'subDoc' in docFilter){
                     var subDocName = docFilter.subDoc;
                     var parentDoc = this.store.cachingStore.getSync(this.docId);
                     var subDocStore = new nqSubDocStore({

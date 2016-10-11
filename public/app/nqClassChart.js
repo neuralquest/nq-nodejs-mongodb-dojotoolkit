@@ -100,19 +100,32 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
                 docPositionStore.put(cellPosInfo);
                 
                 var promisses = [];
-                if(self.schema && self.schema.childrenQuery) {
-                    var childrenFilter = self.store.buildBaseFilterFromQuery(self.schema.childrenQuery, doc, null);
+                if(self.schema && (self.schema.childrenQuery || self.schema.isA)) {
+                    var childrenFilter = self.store.buildBaseFilterFromQuery(self.schema.childrenQuery, doc, self.schema.isA);
                     if(childrenFilter) {
                         var childrenCollection = self.store.filter(childrenFilter);
                         promisses.push(childrenCollection.fetch());
+                    }
+                }
+                if(self.schema && (self.schema.childrenView)) {
+                    var subView = self.store.cachingStore.getSync(self.schema.childrenView);
+                    if(subView){
+                        var childrenFilter = self.store.buildBaseFilterFromQuery(subView.query, doc, subView.isA);
+                        if(childrenFilter) {
+                            var childrenCollection = self.store.filter(childrenFilter);
+                            promisses.push(childrenCollection.fetch());
+                        }
                     }
                 }
 				
                 return all(promisses).then(function(resArrArr) {
                     var childPromisses = [];
                     resArrArr[0].forEach(function (child) {
-                        if(child.docType == 'class') cellPosInfo.subClasses.push(child._id);
-                        else cellPosInfo.instantiations.push(child._id);
+                        cellPosInfo.subClasses.push(child._id);
+                        childPromisses.push(self.buildHierarchy(child._id));
+                    });
+                    resArrArr[1].forEach(function (child) {
+                        cellPosInfo.instantiations.push(child._id);
                         childPromisses.push(self.buildHierarchy(child._id));
                     });
 

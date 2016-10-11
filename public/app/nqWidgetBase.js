@@ -325,13 +325,13 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         }
                     }
                 }
-                else if(attrProps.query) {
+                else if(attrProps.isA) {
                     if(readOnly){
                         var refDoc = self.store.cachingStore.getSync(value);
                         node.innerHTML = refDoc.name?refDoc.name:refDoc.title;
                     }
                     else{
-                        var childrenFilter = self.store.buildBaseFilterFromQuery(attrProps.query, value, null);
+                        var childrenFilter = self.store.buildBaseFilterFromQuery(attrProps.query, value, attrProps.isA);
                         if(childrenFilter) {
                             var childrenCollection = self.store.filter(childrenFilter);
                             data = [];
@@ -380,8 +380,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     var style = domAttr.get(node, 'style');
                     style+='text-align: right;';
                     domAttr.set(node, 'style', style);
-                    if(attrProps.query){
-                        var childrenFilter = self.store.buildBaseFilterFromQuery(attrProps.query, value, null);
+                    if(attrProps.isA){
+                        var childrenFilter = self.store.buildBaseFilterFromQuery(attrProps.query, value, attrProps.isA);
                         if(childrenFilter) {
                             var childrenCollection = self.store.filter(childrenFilter);
                             childrenCollection.fetch().then(function (childObjects) {
@@ -396,7 +396,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     else node.innerHTML = parseFloat(value).toFixed(2);
                 }
                 else{
-                    if(attrProps.query){
+                    if(attrProps.isA){
                         debugger;
                     }
                     else{
@@ -447,7 +447,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             });
                         }
                     }
-                    else if(attrProps.query){
+                    else if(attrProps.isA){
                         var refDoc = self.store.cachingStore.getSync(item);
                         domConstruct.create("p", {innerHTML:refDoc.name}, td);
                     }
@@ -471,7 +471,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             });
                             new Source(dndTbl, {skipForm: 'true', type: attrName});
                         }
-                        else if(attrProps.query){
+                        else if(attrProps.isA){
                             var childrenFilter = self.store.Filter().in('_id', value);
                             // Create a new constructor by mixing in the components
                             var CustomGrid = declare([OnDemandGrid, Keyboard, Selection, DnD, DijitRegistry]);
@@ -721,7 +721,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 else if(attrProps.media && attrProps.media.mediaType == 'image/webgl'){
                                 }
                                 else if(attrProps.enum) td.innerHTML = value;
-                                else if(attrProps.query) {
+                                else if(attrProps.isA) {
                                     var refDoc = self.store.cachingStore.getSync(value);
                                     td.innerHTML = refDoc.name?refDoc.name:refDoc.title;
                                 }
@@ -731,8 +731,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 var style = domAttr.get(td, 'style');
                                 style+='text-align: right;';
                                 domAttr.set(td, 'style', style);
-                                if(attrProps.query){
-                                    var childrenFilter = self.store.buildBaseFilterFromQuery(attrProps.query, value, null);
+                                if(attrProps.isA){
+                                    var childrenFilter = self.store.buildBaseFilterFromQuery(attrProps.query, value, attrProps.isA);
                                     if(childrenFilter) {
                                         var childrenCollection = self.store.filter(childrenFilter);
                                         childrenCollection.fetch().then(function (childObjects) {
@@ -754,7 +754,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             else if(attrProps.type == 'boolean') td.innerHTML = value?'true':'false';
                             else if(attrProps.type == 'array'){
                                 value.forEach(function(item){
-                                    if(attrProps.query){
+                                    if(attrProps.isA){
                                         var refDoc = self.store.cachingStore.getSync(item);
                                         domConstruct.create("p", {innerHTML:refDoc.name}, td);
                                     }
