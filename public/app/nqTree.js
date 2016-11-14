@@ -26,6 +26,7 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectSto
 			this.treeModel = new nqObjectStoreModel({
 				store : this.store,
                 query: {_id:  self.docId},
+                docId: self.docId,
                 //query: self.schema.query,
                 schema: self.schema
             });
@@ -48,10 +49,11 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectSto
                 getIconStyle: function(item, opened){
                     var icon = '';
                     if(!item) return '';
-                    else if(item.icon) icon = item.icon;
-                    else {
-                        var viewObj = self.store.cachingStore.getSync(item.viewId);
-                        if(viewObj.icon) icon = viewObj.icon;
+                    else if('$query' in item && 'icon' in item.$query) icon = item.$query.icon;
+                    else if('icon' in item) icon = item.icon;
+                    else if(item.classId){
+                        var type = this.store.cachingStore.getSync(item.classId);
+                        if(type && 'icon' in type) icon = type.icon;
                     }
                     return {backgroundImage: "url('"+icon+"')"}
                 },
@@ -62,14 +64,10 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectSto
 				},
 				getTooltip: function(item, opened){
 					if(!item) return '';
+                    var tt = {_id: item._id};
+                    if('$query' in item) tt.$query = item.$query;
                     var viewObj = self.store.cachingStore.getSync(item.viewId);
-					if(dojo.config.isDebug) return JSON.stringify({
-                        _id: item._id,
-                        schemaName: viewObj.name,
-                        query: viewObj.query,
-                        childrenQuery: viewObj.childrenQuery,
-                        childrenView: viewObj.childrenView
-                    }, null, 4)
+					if(dojo.config.isDebug) return JSON.stringify(tt, null, 4);
 				},
 				onClick: function(item, node, evt){
 					self.inherited('onClick',arguments);

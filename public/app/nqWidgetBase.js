@@ -331,7 +331,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         node.innerHTML = refDoc.name?refDoc.name:refDoc.title;
                     }
                     else{
-                        var childrenFilter = self.store.buildBaseFilterFromQuery(attrProps.query, value, attrProps.isA);
+                        var childrenFilter = self.store.buildFilterFromQuery(attrProps.query, value, attrProps.isA);
                         if(childrenFilter) {
                             var childrenCollection = self.store.filter(childrenFilter);
                             data = [];

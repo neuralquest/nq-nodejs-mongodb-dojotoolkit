@@ -1,7 +1,7 @@
 { 
     "_id" : ObjectId("56f86c6a5dde184ccfb9fc6a"), 
     "docType" : "class", 
-    "title" : "Problem Domain", 
+    "title" : "Standard Model", 
     "description" : "<p>The root of all classes and objects</p>", 
     "type" : "object", 
     "properties" : {
@@ -14,12 +14,7 @@
         "classId" : {
             "title" : "Class", 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "eq" : {
-                    "docType" : "class"
-                }
-            }
+            "pattern" : "[a-f0-9]{24}"
         }, 
         "name" : {
             "title" : "Name", 
@@ -73,9 +68,7 @@
             "title" : "Page", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "56f87ec55dde184ccfb9fc74"
-            }
+            "isA" : "56f87ec55dde184ccfb9fc74"
         }
     }, 
     "parentId" : "56f86c6a5dde184ccfb9fc6a"
@@ -91,9 +84,7 @@
             "title" : "Owner", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "56f870a55dde184ccfb9fc6c"
-            }
+            "isA" : "56f870a55dde184ccfb9fc6c"
         }
     }, 
     "required" : [
@@ -155,9 +146,7 @@
                         "title" : "Page", 
                         "type" : "string", 
                         "pattern" : "[a-f0-9]{24}", 
-                        "query" : {
-                            "isA" : "56f87ec55dde184ccfb9fc74"
-                        }
+                        "isA" : "56f87ec55dde184ccfb9fc74"
                     }, 
                     "widgets" : {
                         "title" : "Widgets", 
@@ -200,33 +189,25 @@
                                     "title" : "View", 
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
-                                    "query" : {
-                                        "isA" : "573435c23c6d3cd598a5a2df"
-                                    }
+                                    "isA" : "573435c23c6d3cd598a5a2df"
                                 }, 
                                 "rootId" : {
-                                    "title" : "View", 
+                                    "title" : "Root Id", 
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
-                                    "query" : {
-
-                                    }
+                                    "isA" : ""
                                 }, 
                                 "rootDocId" : {
                                     "title" : "Root Document", 
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
-                                    "query" : {
-                                        "isA" : "56f87ec55dde184ccfb9fc74"
-                                    }
+                                    "isA" : "56f87ec55dde184ccfb9fc74"
                                 }, 
                                 "pageId" : {
                                     "title" : "Page", 
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
-                                    "query" : {
-                                        "isA" : "56f87ec55dde184ccfb9fc74"
-                                    }
+                                    "isA" : "56f87ec55dde184ccfb9fc74"
                                 }
                             }, 
                             "additionalProperties" : false
@@ -237,7 +218,8 @@
             }
         }
     }, 
-    "parentId" : "573435803c6d3cd598a5a2dd"
+    "parentId" : "573435803c6d3cd598a5a2dd", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NUEzQUFDMTYxMDhEMTFFMzkwNDQ4NUQ1MkZFMjQ0OTciIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NUEzQUFDMTcxMDhEMTFFMzkwNDQ4NUQ1MkZFMjQ0OTciPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo1QTNBQUMxNDEwOEQxMUUzOTA0NDg1RDUyRkUyNDQ5NyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo1QTNBQUMxNTEwOEQxMUUzOTA0NDg1RDUyRkUyNDQ5NyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpD5Z40AAAHySURBVHjajJNRa1MxFMf/yc2USYsDVzbnupeCDz6OTmtvsW4vgjKtoqBFwYJ+i734vA8xFN/6YLu2K+vGNhl70TF9EfsFXEGQglbr1ptkSW7TVrStBy7JPSfnf345ScjynZU9IURcSgw0SgBC6R6lJNHrZ9wT8Rs3ZyGVAiGkv4BDsL524OpCveuY94uj1fRQqXyAhI7+naxdOok6VBUiklL6RpHcMwKzS1OYW4iilH+HxQcxaPF+JL6IIblrSZjX5CbYUiT8N8fG5se+JFbEUQ1RGFIR5Zj08xF9cQGXb82htPoet+9fsdwDmkpQWTtIMesQR8KMZ84zHP9sYXe3CkpJuwddIU0nhMS15CWMTo6AdSMEzaMmLj4J4epiDJHvEVNFWgHSUQAXAhNnQ/hW+QpmG6Y6a4Li2CdZzeaQTM7j3Pg4qp8/wdwTv3PmyCfcELiipo1GY6dYLMJxnD9QHz56jLc72zg1chqHX2pw4y5cN2HG2mHNh1FbYel0+pmajxUKhX0j0iZ6/eolnmYyptp0OIxsNtsRn56Z6Z5KuVw2k3q9vhUMBuc9z0MqlQLnXDVLdLbXeze0qC6Wz+e7TVQkzzWJcu7rf71AfwPfhxa2BNYUyXYgELhuqw9MJuTHv25KRJPg/4wTOewdD7ETAQYAteK9N9YYuvoAAAAASUVORK5CYII="
 }
 { 
     "_id" : ObjectId("573435433c6d3cd598a5a2db"), 
@@ -312,29 +294,13 @@
                 }
             }
         }, 
-        "query" : {
-            "title" : "Query", 
-            "type" : "object"
-        }, 
-        "childrenQuery" : {
+        "rootQuery" : {
             "title" : "Children Query", 
             "type" : "object"
         }, 
-        "childrenView" : {
-            "title" : "Children View", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "573435c23c6d3cd598a5a2df"
-            }
-        }, 
-        "pageId" : {
-            "title" : "Page", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "56f87ec55dde184ccfb9fc74"
-            }
+        "query" : {
+            "title" : "Query", 
+            "type" : "object"
         }, 
         "required" : {
             "title" : "Required", 
@@ -346,15 +312,11 @@
         "isA" : {
             "title" : "Is A", 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "eq" : {
-                    "docType" : "class"
-                }
-            }
+            "pattern" : "[a-f0-9]{24}"
         }
     }, 
-    "parentId" : "573435803c6d3cd598a5a2dd"
+    "parentId" : "573435803c6d3cd598a5a2dd", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RDQ2OENGNTYxMDdDMTFFM0FGOUJCRTk2Mzc1ODMxMjgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RDQ2OENGNTcxMDdDMTFFM0FGOUJCRTk2Mzc1ODMxMjgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpENDY4Q0Y1NDEwN0MxMUUzQUY5QkJFOTYzNzU4MzEyOCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpENDY4Q0Y1NTEwN0MxMUUzQUY5QkJFOTYzNzU4MzEyOCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PnZsAM4AAAKZSURBVHjajFNbS1RRFP72OfuMMzqOTk5EIDqZQ0EzyNB46SXEsNGgMYp66WdUEoOUhZaO4m+IHnqT8PLSdJGgZtIoG80KHEMjKMHRYCTyXFv7xDEfurhhs1l7rfWd7/vWPqy6P72hGWalZVnYzWKMQZGlb7LE/CLmorkv0QTDNCH9p9mkLUsSesZnKiUmExgB6NRY5ea4nP4ETgjsL82Cn04IwydrIHpckAUfAWDB71ZwKOCFzGCj7iC8DSgADFHrcdlABmVMxkkCBa21btq12O1SqUchBsniOLjjXX5xEZBkmKYBYShjEj4uLaKwtmazEHeBQADxzlPQyS2Vvv6DKZAc71/OTCM1OACfrwIry8soKyvDemEdsaYWRBubcZTOQqFg1wqAZPE+NCZb28Z3nTkLhXN4vV7EGpvg8ZTauhVFgYu24nL9NpTY6STBFCY6l5MTY6RARm72NbZUFeEjEQSDQWQzz7cbReyYa9rCdgDEOzrwLJNFsK4OmqZi8/sm6utDCEciqPD5sEZeGLpu11ZbGzaAYMidsT1MPwAnBiNDKSrUYJJpnCtobWtDItGFifExzM/NwdJVXHQp0FxuizETXJF+IZyOt2M6m0Wk/QL2hxrsyX/+MIvixhLu3b2DEi4jcuIcqg9HIZEHX/JzeP+UZJdyViy/kUZ4ZAol9LiCkUZED3ixz+/BwYYWLORySC5X4W3uDeoojgbLsddfgtpwjEZOz//rtc7jm73xWP7m+ZimG5mFJ6NYJXFyBcfC1Cg0Xc+sXE/ExPmO4lWh28cx/3gUqqq9YjW3H2GLHsWl4iS6+4dDV7uvvLBMc4/ttSStD6SGmnt7kvnevlv1lJt2cqDcYGro2J/+HWGAMx1he+5fuZ8CDAD/Sv46ZbrYXQAAAABJRU5ErkJggg=="
 }
 { 
     "_id" : ObjectId("573435f03c6d3cd598a5a2e1"), 
@@ -367,9 +329,7 @@
             "title" : "View", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "573435c23c6d3cd598a5a2df"
-            }
+            "isA" : "573435c23c6d3cd598a5a2df"
         }, 
         "insets" : {
             "title" : "Insets", 
@@ -426,14 +386,13 @@
                 "type" : "string", 
                 "pattern" : "[a-f0-9]{24}"
             }, 
-            "query" : {
-                "isA" : "573435f03c6d3cd598a5a2e1"
-            }, 
+            "isA" : "573435f03c6d3cd598a5a2e1", 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
         }
     }, 
-    "parentId" : "573435803c6d3cd598a5a2dd"
+    "parentId" : "573435803c6d3cd598a5a2dd", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAE/SURBVDhPpZLdS8JQGIf9J7sNuoiokKKMQvqkQIoo+7opCFIiixApiAihgVcVCdmNYhEDTSxGH7qttbZf52wdP/AdFb7wXOyw5zkvbD4AbUEe/ofarJ+/I7R/50lg+qjhbWJWky8sCFiWBdM0YRgGdF1HtaoiJytOYO0g4x1ZOX2CbdtORAx/+jCBfEl3Ah17CsLRKzqyfFx0bhcjZPUTyBY1JyD4UZpnMf7gmmy4yFE0oKy6pG8BSQKGJxN0YCGWwxdbQIiNcl5xyT4DQ+NxOhDayUBj61aMuiy/ugj5pgwMBA/pwNzWpafM4fL1I+AfjdGBmY1UbWVKvii49Ad26cDUUvJXOSUDvYMROjAxf4LCW6ssAlyW2Ifq8W/TgeBsokVOl+q3c/nsHuju26QDI2NR/IXOrnBzgP03bQDfNy91dEbnT99iAAAAAElFTkSuQmCC"
 }
 { 
     "_id" : ObjectId("57343b823c6d3cd598a5a2e3"), 
@@ -479,7 +438,8 @@
         "email", 
         "password", 
         "isActive"
-    ]
+    ], 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OTI0OTU2Mjc1NDE0MTFFMUIxRUJDMTA5NzgzMTIzMkIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OTI0OTU2Mjg1NDE0MTFFMUIxRUJDMTA5NzgzMTIzMkIiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5MjQ5NTYyNTU0MTQxMUUxQjFFQkMxMDk3ODMxMjMyQiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5MjQ5NTYyNjU0MTQxMUUxQjFFQkMxMDk3ODMxMjMyQiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PuG7TDUAAAHRSURBVHjafFJNaBNREP7e/iUSNiQSLHrReC54yK0ieMq1B68etMSDCEJAFPSQmIM9KC1GjUiDiFfvgrZYC60imEvwJP60FyMSQ1LT/G2y09nNJm6STT4Yvpl5M+/NzxNEhAG27wXJ7CHBrrwQeMF8iXmJ+TlzQpKRP3fnn3DnwDIGspXRqbKuE5V0enOLucl8s29XNnSyzsdzJLhgmkD4FCtNQvw6Gw0T8SRzy0Q42gN6BsahuA27MuIEsgI7jhNDlk3MvkBYUcLA3u95vPp8BR3DhyO+OiLBMkq1KPxzNazlatc49InnDDbTAaLvoAePn5IbK9mHQz2be0RTZ+CUYb9sqzx6C7KqDnUM2MHkBdyFpnSG1cEZy6e7wE5GwJT8f0fec+/0fVqn8xcN/KmexMuPSRhcid/fxuWFVYSO/8CHZ12cTeEM5xS9t2DVTwqOHd3FjQtX0e5GoO6X8WVLw0/SYMqqtePi7BZsl8a1BeALNSAFAwid0NBqyHwkz17j/8YEXt8XUPhB1WcNEag26e3icv325MxcK3mX4m/7leUbyy+WA502U/b3jbGc9spRvLZgS7cvzowLmALJ00tjMgMja+TPEpsSVxhve4BDAQYA4h0NK1GHkjIAAAAASUVORK5CYII="
 }
 { 
     "_id" : ObjectId("57343c283c6d3cd598a5a2e9"), 
@@ -512,27 +472,21 @@
             "title" : "Buyer", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "56f870a55dde184ccfb9fc6c"
-            }, 
+            "isA" : "56f870a55dde184ccfb9fc6c", 
             "default" : "$userId"
         }, 
         "sellerId" : {
             "title" : "Seller", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "56f870a55dde184ccfb9fc6c"
-            }, 
+            "isA" : "56f870a55dde184ccfb9fc6c", 
             "default" : "$ownerId"
         }, 
         "assetId" : {
             "title" : "Asset", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "56f87bcc5dde184ccfb9fc70"
-            }, 
+            "isA" : "56f87bcc5dde184ccfb9fc70", 
             "default" : "$docId"
         }, 
         "stateHistory" : {
@@ -545,9 +499,7 @@
                         "title" : "State", 
                         "type" : "string", 
                         "pattern" : "[a-f0-9]{24}", 
-                        "query" : {
-                            "isA" : "5745eaa53c6d3cd598a5a371"
-                        }
+                        "isA" : "5745eaa53c6d3cd598a5a371"
                     }, 
                     "date" : {
                         "title" : "Date", 
@@ -583,9 +535,7 @@
             "title" : "Organizational Unit", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "574237133c6d3cd598a5a30d"
-            }
+            "isA" : "574237133c6d3cd598a5a30d"
         }
     }, 
     "parentId" : "574225cb3c6d3cd598a5a305"
@@ -609,9 +559,7 @@
             "title" : "Initial State", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "5747254b3c6d3cd598a5a379"
-            }
+            "isA" : "5747254b3c6d3cd598a5a379"
         }, 
         "fromDate" : {
             "title" : "Date", 
@@ -630,14 +578,13 @@
                 "type" : "string", 
                 "pattern" : "[a-f0-9]{24}"
             }, 
-            "query" : {
-                "isA" : "57343b823c6d3cd598a5a2e3"
-            }, 
+            "isA" : "57343b823c6d3cd598a5a2e3", 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
         }
     }, 
-    "parentId" : "573435803c6d3cd598a5a2dd"
+    "parentId" : "573435803c6d3cd598a5a2dd", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAcRJREFUeNqkU1svA0EU/mZ3qVtLG42uWosmeHSJ4MmzNwkP/Anhl7j8CRIk4sWbxBMeWm+CpKhqd4VQirRRO86My7qF4mQ2M+fMfN9+58wcxjnHf4y9dbZn+xdpGhZBScvdU8x1lzrHN0Y+EcSm++ZCRmA0l+ewrBvooQro9VVyz0rfwLLvoOtVKPMw2MmL+a6JzbFXguhU71w4EhqtCfhkgCkMVuoa+3u2JGhtC0EP+8AdLlVkLq6Ritvz3ZNbYyw207dotjUN1wT98nDy4BTJxBkaW+rQ0FgrYyfH5zimuGEGYVBcWObsEom9ox0WnerhXYMDONlNIBE/RXNrGPUtOiVM/3Kcp/wUhWQxpA8sHO6nYEaIvN1EbHUdGvgDCr4h+M0o/E2KPJ/Nv1SPvytVtdGMDkOEHcJ007xGBMLuM8jFFyh34nt/MV9cG9XBKcATiEhfk+yFK2jlXlqWSKnfmkiN30uMwEoFzLmF6qmkhfrxaXzFQKNUYlwF5JSUldOWUhQBgyMxzwoYVOQBUsB/BLt1kBhBwETOpQWoXp9b9GIagDACq1Hps9vLK17nlz2lPD3ZrJg66FP/2IwP7L/t/CjAAHrBnVB4+4UBAAAAAElFTkSuQmCC"
 }
 { 
     "_id" : ObjectId("574237133c6d3cd598a5a30d"), 
@@ -651,9 +598,7 @@
             "readOnly" : true, 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "56f87ec55dde184ccfb9fc74"
-            }
+            "isA" : "56f87ec55dde184ccfb9fc74"
         }, 
         "bannerUrl" : {
             "title" : "Banner Url", 
@@ -669,12 +614,11 @@
             "title" : "Parent Organization", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "query" : {
-                "isA" : "57343c283c6d3cd598a5a2e9"
-            }
+            "isA" : "57343c283c6d3cd598a5a2e9"
         }
     }, 
-    "parentId" : "573435803c6d3cd598a5a2dd"
+    "parentId" : "573435803c6d3cd598a5a2dd", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODBDQUY3RkM2OUEzMTFFM0ExRDBGQzcyRDA1NTZFMEYiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODBDQUY3RkQ2OUEzMTFFM0ExRDBGQzcyRDA1NTZFMEYiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4MENBRjdGQTY5QTMxMUUzQTFEMEZDNzJEMDU1NkUwRiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4MENBRjdGQjY5QTMxMUUzQTFEMEZDNzJEMDU1NkUwRiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pj6+XOUAAAGRSURBVHjafFK/T8JAFH7XHtFECg0xwZ3EOLnILOpWaqJ/gLOLf4B/ibuDm4NiKN1EnHFxk4RRogugwcHSu/PelcPSUl7ycnfvu/vej/uIEAIIIaDt4ublfhryE8YFJM00COSo0bg62zudB5EgbufXXfEtg4NAiPeY4xnjiMfv02QWxjn8BABvw1QBsFOK8JUEqioDwF7H6gCwOUyJXWI8aSkC0zTBklFSjAg0AxLkSYSvJBBs+nh52zvSQ1SZxf8QEY/fJ8lfkFaRbuvD7nal+9rrV2P4WHo/k+Bgv6YSCsHBMAzpJnDOpHN5z1AdPT13SGYLG5YFntesQoa57nE31cJDszmSqyobs2ptUEo/XcfZ8nz/IwzDcjQToqqZ7ceqAsaY7dbr8MtC/WmwZlJo+b56FARBue44KdxrtWyq1chDBl/DkcZhs1SaZ8J1GY7v5jMwcxQsKw96qHhe0EcGTnVfOUqhWCgsPNK/swpXBJPJpHPXaNR4TOc4TBlvz/C2xA+X4B2tgwXxLBFNJv4nwABEa91VFnwXcgAAAABJRU5ErkJggg=="
 }
 { 
     "_id" : ObjectId("5742439f3c6d3cd598a5a319"), 
@@ -999,14 +943,13 @@
                 "type" : "string", 
                 "pattern" : "[a-f0-9]{24}"
             }, 
-            "query" : {
-                "isA" : "5745eaa53c6d3cd598a5a371"
-            }, 
+            "isA" : "5745eaa53c6d3cd598a5a371", 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
         }
     }, 
-    "parentId" : "573435803c6d3cd598a5a2dd"
+    "parentId" : "573435803c6d3cd598a5a2dd", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQ1JREFUeNpi/P//PwMlgImBQjDwBrAETGAkSiEopP79Y5j19z9DKjMjAyMT0GqwTlAgEotdOxn+33yy5L9zO4j7n8GvH2iITy/D+t9/GQKApjP8x2M90GYGG1UGBkVRBgYjhdkMxctTGfZU/Gdk+QPU3BWTyvDrzx8GfDH67z/ItcwMl5/OYTjzNJWhNbyNwbOb8T8LyB/X3s8GGsCA1wCQ3F+gKxnYIUH/9c87sDijSy3DOlZehsB/BDSDvGhtDPSCPAOD8P9UhokbZjPsqWQwAckDhRiMicHuHQz/N9wK+e/WDg4uY3Ag+vcTH+cfnzFM4xZnyNxawmAC1HyWkYx0Iwl1DRwwDv3MBBBgAJlZhvyadk3fAAAAAElFTkSuQmCC"
 }
 { 
     "_id" : ObjectId("574724823c6d3cd598a5a373"), 
@@ -1014,7 +957,8 @@
     "title" : "Open", 
     "description" : "<p>Open</p>", 
     "type" : "object", 
-    "parentId" : "5745eaa53c6d3cd598a5a371"
+    "parentId" : "5745eaa53c6d3cd598a5a371", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQ1JREFUeNpi/P//PwMlgImBQjDwBrAETGAkSiEopP79Y5j19z9DKjMjAyMT0GqwTlAgEotdOxn+33yy5L9zO4j7n8GvH2iITy/D+t9/GQKApjP8x2M90GYGG1UGBkVRBgYjhdkMxctTGfZU/Gdk+QPU3BWTyvDrzx8GfDH67z/ItcwMl5/OYTjzNJWhNbyNwbOb8T8LyB/X3s8GGsCA1wCQ3F+gKxnYIUH/9c87sDijSy3DOlZehsB/BDSDvGhtDPSCPAOD8P9UhokbZjPsqWQwAckDhRiMicHuHQz/N9wK+e/WDg4uY3Ag+vcTH+cfnzFM4xZnyNxawmAC1HyWkYx0Iwl1DRwwDv3MBBBgAJlZhvyadk3fAAAAAElFTkSuQmCC"
 }
 { 
     "_id" : ObjectId("574724b43c6d3cd598a5a375"), 
@@ -1022,7 +966,8 @@
     "title" : "Closed", 
     "description" : "<p>Closed</p>", 
     "type" : "object", 
-    "parentId" : "5745eaa53c6d3cd598a5a371"
+    "parentId" : "5745eaa53c6d3cd598a5a371", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQ1JREFUeNpi/P//PwMlgImBQjDwBrAETGAkSiEopP79Y5j19z9DKjMjAyMT0GqwTlAgEotdOxn+33yy5L9zO4j7n8GvH2iITy/D+t9/GQKApjP8x2M90GYGG1UGBkVRBgYjhdkMxctTGfZU/Gdk+QPU3BWTyvDrzx8GfDH67z/ItcwMl5/OYTjzNJWhNbyNwbOb8T8LyB/X3s8GGsCA1wCQ3F+gKxnYIUH/9c87sDijSy3DOlZehsB/BDSDvGhtDPSCPAOD8P9UhokbZjPsqWQwAckDhRiMicHuHQz/N9wK+e/WDg4uY3Ag+vcTH+cfnzFM4xZnyNxawmAC1HyWkYx0Iwl1DRwwDv3MBBBgAJlZhvyadk3fAAAAAElFTkSuQmCC"
 }
 { 
     "_id" : ObjectId("5747251e3c6d3cd598a5a377"), 
@@ -1030,7 +975,8 @@
     "title" : "Buyer", 
     "description" : "<p>Buyer</p>", 
     "type" : "object", 
-    "parentId" : "574724823c6d3cd598a5a373"
+    "parentId" : "574724823c6d3cd598a5a373", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQ1JREFUeNpi/P//PwMlgImBQjDwBrAETGAkSiEopP79Y5j19z9DKjMjAyMT0GqwTlAgEotdOxn+33yy5L9zO4j7n8GvH2iITy/D+t9/GQKApjP8x2M90GYGG1UGBkVRBgYjhdkMxctTGfZU/Gdk+QPU3BWTyvDrzx8GfDH67z/ItcwMl5/OYTjzNJWhNbyNwbOb8T8LyB/X3s8GGsCA1wCQ3F+gKxnYIUH/9c87sDijSy3DOlZehsB/BDSDvGhtDPSCPAOD8P9UhokbZjPsqWQwAckDhRiMicHuHQz/N9wK+e/WDg4uY3Ag+vcTH+cfnzFM4xZnyNxawmAC1HyWkYx0Iwl1DRwwDv3MBBBgAJlZhvyadk3fAAAAAElFTkSuQmCC"
 }
 { 
     "_id" : ObjectId("5747254b3c6d3cd598a5a379"), 
@@ -1038,7 +984,8 @@
     "title" : "Seller", 
     "description" : "<p>Seller</p>", 
     "type" : "object", 
-    "parentId" : "574724823c6d3cd598a5a373"
+    "parentId" : "574724823c6d3cd598a5a373", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQ1JREFUeNpi/P//PwMlgImBQjDwBrAETGAkSiEopP79Y5j19z9DKjMjAyMT0GqwTlAgEotdOxn+33yy5L9zO4j7n8GvH2iITy/D+t9/GQKApjP8x2M90GYGG1UGBkVRBgYjhdkMxctTGfZU/Gdk+QPU3BWTyvDrzx8GfDH67z/ItcwMl5/OYTjzNJWhNbyNwbOb8T8LyB/X3s8GGsCA1wCQ3F+gKxnYIUH/9c87sDijSy3DOlZehsB/BDSDvGhtDPSCPAOD8P9UhokbZjPsqWQwAckDhRiMicHuHQz/N9wK+e/WDg4uY3Ag+vcTH+cfnzFM4xZnyNxawmAC1HyWkYx0Iwl1DRwwDv3MBBBgAJlZhvyadk3fAAAAAElFTkSuQmCC"
 }
 { 
     "_id" : ObjectId("574725673c6d3cd598a5a37b"), 
@@ -1046,7 +993,8 @@
     "title" : "Rejected", 
     "description" : "<p>Rejected</p>", 
     "type" : "object", 
-    "parentId" : "574724b43c6d3cd598a5a375"
+    "parentId" : "574724b43c6d3cd598a5a375", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MTU5MTFFM0Y1OThGMTFFMkFFMTI4QjhBRDBGQjUzMEMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MTU5MTFFNDA1OThGMTFFMkFFMTI4QjhBRDBGQjUzMEMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDoxNTkxMUUzRDU5OEYxMUUyQUUxMjhCOEFEMEZCNTMwQyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoxNTkxMUUzRTU5OEYxMUUyQUUxMjhCOEFEMEZCNTMwQyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PrjNqwoAAAGUSURBVHjavJPLK0RhGMbfc1EueysbC5e5uMWIGXNlJHtMUVNWsrBSFrJSrEkp/4eFGjNzxhgyg5DYygKJxgwmOec8vvNhXBeD8tRbX9/5fr/enjoCAPrXKO0mGPMrONxajUdlmU+ktQY/htX4Cs79tbjoNkHbCEFxWCAUBNuq4J5bpKuZcSKpiERRIJmRe5c5yguibbV8Jc/msfAZ9iwsUXp2giAzWJJIlkRKnV6Td22/Jf8IWxE+xvk9jKSCdJ8d6YAbN0M+3AX9iDjrjTfNz63azcBOAtkBF7L9TgbEEGqq5GOcMwzMDHbhNtiD3HAvws66N5hFUDqsMFeUU1lJMWm6ToKmUunYFP94Pz/N15ZkmW5zD3R4ckbe+IGx9nZeYNjCDmvK1WimR1UlXdOImIRHkkmUJSpigtjuEfnWP8KvAnqWWFIeWwOTaKTrGr8URQOWKJrcY/DhF/i9gEtW7ZaUz2EjXX0RsMbDiSR1Jr6Hv4uxCbKjAWByBEz4obBC0xxlTUc/tf1jSaGw8Nff+UmAAQBRQcj5KRqAfgAAAABJRU5ErkJggg=="
 }
 { 
     "_id" : ObjectId("574725843c6d3cd598a5a37d"), 
@@ -1054,7 +1002,8 @@
     "title" : "Fulfilled", 
     "description" : "<p>Fulfilled</p>", 
     "type" : "object", 
-    "parentId" : "574724b43c6d3cd598a5a375"
+    "parentId" : "574724b43c6d3cd598a5a375", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAWVJREFUeNpi/P//PwNdgVsnw38QJkuzYxvD/3c/JoIxiE2y5idfmv/P2sQAxk+/NoJdwkKs5sV5zQzbj9QyMLAyMDACxb7/f4eqyB1omjsWvzkBNd/+XPR/1h6G/zOBePZehv+XPsX/d4J4wRiu6MqnOCCGS0DEW4GKPyb8n30Q6OwDQM2HQJoTUDWDbD37we//7GNABUcZ/p967//foZkBjEFskPgsoPgcIH36gz+qZiBggfuHmYHhH1Dqwq2NDLVpNmBJEJuBCehnIFZTsWOomLaRYV8VgwlQ6izMAJB+Y5c2hjOlqboMj59cZvj3j4EBlrYYgbJMQM2yMroMXbMvM+xF0wwCQHsZnt/by7DlheCrNAd7WYYfPz4x/AfZCpRhBsaRiIQsw4Q5t7FqRgcgl/xf+Zz7/9wbDGAMYrug+ZkQMHYFalj9khuMXUnUDDfEExgznp3kaYYbQqxmRkqzM0CAAQBWbMG1YQFlxwAAAABJRU5ErkJggg=="
 }
 { 
     "_id" : ObjectId("574726f43c6d3cd598a5a37f"), 
@@ -1062,7 +1011,8 @@
     "title" : "Withdrawn", 
     "description" : "<p>Withdrawn</p>", 
     "type" : "object", 
-    "parentId" : "574724b43c6d3cd598a5a375"
+    "parentId" : "574724b43c6d3cd598a5a375", 
+    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MTU5MTFFM0Y1OThGMTFFMkFFMTI4QjhBRDBGQjUzMEMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MTU5MTFFNDA1OThGMTFFMkFFMTI4QjhBRDBGQjUzMEMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDoxNTkxMUUzRDU5OEYxMUUyQUUxMjhCOEFEMEZCNTMwQyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoxNTkxMUUzRTU5OEYxMUUyQUUxMjhCOEFEMEZCNTMwQyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PrjNqwoAAAGUSURBVHjavJPLK0RhGMbfc1EueysbC5e5uMWIGXNlJHtMUVNWsrBSFrJSrEkp/4eFGjNzxhgyg5DYygKJxgwmOec8vvNhXBeD8tRbX9/5fr/enjoCAPrXKO0mGPMrONxajUdlmU+ktQY/htX4Cs79tbjoNkHbCEFxWCAUBNuq4J5bpKuZcSKpiERRIJmRe5c5yguibbV8Jc/msfAZ9iwsUXp2giAzWJJIlkRKnV6Td22/Jf8IWxE+xvk9jKSCdJ8d6YAbN0M+3AX9iDjrjTfNz63azcBOAtkBF7L9TgbEEGqq5GOcMwzMDHbhNtiD3HAvws66N5hFUDqsMFeUU1lJMWm6ToKmUunYFP94Pz/N15ZkmW5zD3R4ckbe+IGx9nZeYNjCDmvK1WimR1UlXdOImIRHkkmUJSpigtjuEfnWP8KvAnqWWFIeWwOTaKTrGr8URQOWKJrcY/DhF/i9gEtW7ZaUz2EjXX0RsMbDiSR1Jr6Hv4uxCbKjAWByBEz4obBC0xxlTUc/tf1jSaGw8Nff+UmAAQBRQcj5KRqAfgAAAABJRU5ErkJggg=="
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83146"), 
@@ -1159,6 +1109,7 @@
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAGSSURBVDhPY2hgaMCDGpkaJ6lM2pq19cLCCzc23Hhy8glDr1QvmiJcqIm5qUOgg2H3uubNeasXuS7q4O9AU4EVMTQ3s06cqLxsUcDN40cOtx3uk+kDOgNNETJCMJuamJcu9T5ypOPCyeV7ps/fXLJ0Z/nWrdlbF7stnmU8a4L8BKDj23jbEBrgqLGRub2dt69PdsoU9fXrE86enH/nysFHV6+8vf/67e23DG1tPGgacKG2Nu45cywZnm/btHNnIdBINGlciOG/WPH/np0vl646u7N/1fLg/n7Zzk4hoGGNjUxoSiGI4T9DGghxZv9XqPxj1PCxaNq7eWvfbtz2+NGxffuqly71BGrGpgETqdT8D5j2v3Ldl57VLzpnPFmx9PquuSf3duPWgIwY0/7z5v2XKf+vWsPw/9jd//kr/lt2/BctRleHDTH8h4CP3//ff/N/2an/Dj3/BQtARmIohSCYBmTw99//68/+zzj4v3zt/7wV/5MW/Hfq/a9Z/1+q9D93LjYNmODrz/8vP/1/+Pb/rZcAE2mMw+k9hMEAAAAASUVORK5CYII=", 
     "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
     "headline" : "Neuralquest", 
+    "initialDocId" : "575d4c3f2cf3d6dc3ed83151", 
     "pageId" : "575d4c3f2cf3d6dc3ed83147", 
     "classId" : "574243d23c6d3cd598a5a31b"
 }
@@ -1168,9 +1119,7 @@
     "name" : "Balance Sheet View", 
     "description" : "<p>The standard balance sheet view</p>", 
     "type" : "object", 
-    "query" : {
-        "isA" : "573435433c6d3cd598a5a2db"
-    }, 
+    "isA" : "573435433c6d3cd598a5a2db", 
     "properties" : {
         "assets" : {
             "title" : "Assets", 
@@ -1194,9 +1143,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "574256343c6d3cd598a5a329"
-            }
+            "isA" : "574256343c6d3cd598a5a329"
         }, 
         "temporaryInvestments" : {
             "title" : "Temporary Investments", 
@@ -1205,9 +1152,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "574256373c6d3cd598a5a32b"
-            }
+            "isA" : "574256373c6d3cd598a5a32b"
         }, 
         "accountReceivibale" : {
             "title" : "Accounts Receivible -net", 
@@ -1216,9 +1161,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "5742563a3c6d3cd598a5a32d"
-            }
+            "isA" : "5742563a3c6d3cd598a5a32d"
         }, 
         "inventory" : {
             "title" : "Inventory", 
@@ -1227,9 +1170,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "5742563e3c6d3cd598a5a32f"
-            }
+            "isA" : "5742563e3c6d3cd598a5a32f"
         }, 
         "supplies" : {
             "title" : "Supplies", 
@@ -1238,9 +1179,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "574256413c6d3cd598a5a331"
-            }
+            "isA" : "574256413c6d3cd598a5a331"
         }, 
         "prepaidInsurance" : {
             "title" : "Prepaid Insurance", 
@@ -1249,9 +1188,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "574256453c6d3cd598a5a333"
-            }
+            "isA" : "574256453c6d3cd598a5a333"
         }, 
         "totalCurrentAssests" : {
             "title" : "Total Current Assents", 
@@ -1261,9 +1198,7 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "query" : {
-                "isA" : "5742561f3c6d3cd598a5a327"
-            }
+            "isA" : "5742561f3c6d3cd598a5a327"
         }, 
         "investments" : {
             "title" : "Investments", 
@@ -1273,9 +1208,7 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "query" : {
-                "isA" : "574256493c6d3cd598a5a335"
-            }
+            "isA" : "574256493c6d3cd598a5a335"
         }, 
         "propertyPlantEquipment" : {
             "title" : "Property, Plant and Equipment", 
@@ -1291,9 +1224,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "5742564f3c6d3cd598a5a339"
-            }
+            "isA" : "5742564f3c6d3cd598a5a339"
         }, 
         "landImprovements" : {
             "title" : "Land Improvements", 
@@ -1302,9 +1233,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "574256573c6d3cd598a5a33d"
-            }
+            "isA" : "574256573c6d3cd598a5a33d"
         }, 
         "buildings" : {
             "title" : "Buildings", 
@@ -1313,9 +1242,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "5742565b3c6d3cd598a5a33f"
-            }
+            "isA" : "5742565b3c6d3cd598a5a33f"
         }, 
         "equipment" : {
             "title" : "Equipment", 
@@ -1324,9 +1251,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "5742565e3c6d3cd598a5a341"
-            }
+            "isA" : "5742565e3c6d3cd598a5a341"
         }, 
         "lessAccumDeprecation" : {
             "title" : "Less: Accum Deprecation", 
@@ -1335,9 +1260,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "574256613c6d3cd598a5a343"
-            }
+            "isA" : "574256613c6d3cd598a5a343"
         }, 
         "totalPropPlantEquipment" : {
             "title" : "Total Property, Plant and Equipment", 
@@ -1347,9 +1270,7 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "query" : {
-                "isA" : "5742564c3c6d3cd598a5a337"
-            }
+            "isA" : "5742564c3c6d3cd598a5a337"
         }, 
         "intangibleAssets" : {
             "title" : "Intangible Assets", 
@@ -1365,9 +1286,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "5742566a3c6d3cd598a5a349"
-            }
+            "isA" : "5742566a3c6d3cd598a5a349"
         }, 
         "tradeNames" : {
             "title" : "Trade Names", 
@@ -1376,9 +1295,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "query" : {
-                "isA" : "574256713c6d3cd598a5a34d"
-            }
+            "isA" : "574256713c6d3cd598a5a34d"
         }, 
         "totalIntangibleAssests" : {
             "title" : "Total Intabgible Assets", 
@@ -1388,9 +1305,7 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "query" : {
-                "isA" : "574256643c6d3cd598a5a345"
-            }
+            "isA" : "574256643c6d3cd598a5a345"
         }, 
         "totalAssests" : {
             "title" : "Total Assests", 
@@ -1401,9 +1316,7 @@
             "col" : NumberInt(1), 
             "size" : "1.2em", 
             "bold" : true, 
-            "query" : {
-                "isA" : "57343b823c6d3cd598a5a2e3"
-            }
+            "isA" : "57343b823c6d3cd598a5a2e3"
         }, 
         "libilities" : {
             "title" : "Liabilities", 
@@ -1427,9 +1340,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "574256773c6d3cd598a5a351"
-            }
+            "isA" : "574256773c6d3cd598a5a351"
         }, 
         "accountsPayable" : {
             "title" : "Accounts Payable", 
@@ -1438,9 +1349,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "5742567a3c6d3cd598a5a353"
-            }
+            "isA" : "5742567a3c6d3cd598a5a353"
         }, 
         "wagesPayable" : {
             "title" : "Wages Payable", 
@@ -1449,9 +1358,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "5742567d3c6d3cd598a5a355"
-            }
+            "isA" : "5742567d3c6d3cd598a5a355"
         }, 
         "intrestPayable" : {
             "title" : "Intrest Payable", 
@@ -1460,9 +1367,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "574256833c6d3cd598a5a359"
-            }
+            "isA" : "574256833c6d3cd598a5a359"
         }, 
         "taxesPayable" : {
             "title" : "Taxes Payable", 
@@ -1471,9 +1376,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "574256863c6d3cd598a5a35b"
-            }
+            "isA" : "574256863c6d3cd598a5a35b"
         }, 
         "warantyLiability" : {
             "title" : "Waranty Liability", 
@@ -1482,9 +1385,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "574256893c6d3cd598a5a35d"
-            }
+            "isA" : "574256893c6d3cd598a5a35d"
         }, 
         "Unearned Revenues" : {
             "title" : "Unearned Revenues", 
@@ -1493,9 +1394,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "5742568e3c6d3cd598a5a35f"
-            }
+            "isA" : "5742568e3c6d3cd598a5a35f"
         }, 
         "totalCurrentLiabilities" : {
             "title" : "Total Current Liabilities", 
@@ -1505,9 +1404,7 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "query" : {
-                "isA" : "574256743c6d3cd598a5a34f"
-            }
+            "isA" : "574256743c6d3cd598a5a34f"
         }, 
         "longTermLiabilities" : {
             "title" : "Long-Term Libilities", 
@@ -1523,9 +1420,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "574261583c6d3cd598a5a363"
-            }
+            "isA" : "574261583c6d3cd598a5a363"
         }, 
         "bondsPayable" : {
             "title" : "Bonds Payable", 
@@ -1534,9 +1429,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "574261633c6d3cd598a5a365"
-            }
+            "isA" : "574261633c6d3cd598a5a365"
         }, 
         "totalLongTermLiabilities" : {
             "title" : "Total Long-Term Liabilities", 
@@ -1546,9 +1439,7 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "query" : {
-                "isA" : "574256923c6d3cd598a5a361"
-            }
+            "isA" : "574256923c6d3cd598a5a361"
         }, 
         "totalLiabilities" : {
             "title" : "Total Liabilities", 
@@ -1558,9 +1449,7 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "query" : {
-                "isA" : "574256743c6d3cd598a5a34f"
-            }
+            "isA" : "574256743c6d3cd598a5a34f"
         }, 
         "stockoldersEquity" : {
             "title" : "Stockholder's Equity", 
@@ -1577,9 +1466,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "574261743c6d3cd598a5a369"
-            }
+            "isA" : "574261743c6d3cd598a5a369"
         }, 
         "retainedEarnings" : {
             "title" : "Retained Earnings", 
@@ -1588,9 +1475,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "574261793c6d3cd598a5a36b"
-            }
+            "isA" : "574261793c6d3cd598a5a36b"
         }, 
         "accumOtherComprehesiveIncome" : {
             "title" : "Accum Other Comprehensive Income", 
@@ -1599,9 +1484,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "5742617f3c6d3cd598a5a36d"
-            }
+            "isA" : "5742617f3c6d3cd598a5a36d"
         }, 
         "lessTreasuryStock" : {
             "title" : "Less: Treasury Stock", 
@@ -1610,9 +1493,7 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "query" : {
-                "isA" : "574261843c6d3cd598a5a36f"
-            }
+            "isA" : "574261843c6d3cd598a5a36f"
         }, 
         "totalStockholdersEquity" : {
             "title" : "Total Stockholders Equity", 
@@ -1622,9 +1503,7 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "query" : {
-                "isA" : "5742616e3c6d3cd598a5a367"
-            }
+            "isA" : "5742616e3c6d3cd598a5a367"
         }, 
         "totalLibilitiesAndStock" : {
             "title" : "Total Libilities and<br>Stockholder's Equity", 
@@ -1635,14 +1514,11 @@
             "col" : NumberInt(2), 
             "size" : "1.2em", 
             "bold" : true, 
-            "query" : {
-                "isA" : "57343bba3c6d3cd598a5a2e5"
-            }
+            "isA" : "57343bba3c6d3cd598a5a2e5"
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "573435433c6d3cd598a5a2db"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314a"), 
@@ -1650,6 +1526,28 @@
     "name" : "Document View", 
     "description" : "<p>Descibes the document hierarchy, including a header, a paragraph parts array and a subdocuments array</p>", 
     "type" : "object", 
+    "rootQuery" : {
+        "comment" : "Root Document", 
+        "select" : "name", 
+        "from" : "573435f03c6d3cd598a5a2e1", 
+        "where" : {
+            "eq" : {
+                "_id" : "$initialDocId"
+            }
+        }, 
+        "recursive" : "schema"
+    }, 
+    "query" : {
+        "comment" : "Paragraphs", 
+        "select" : "name", 
+        "from" : "573435f03c6d3cd598a5a2e1", 
+        "where" : {
+            "in" : {
+                "_id" : "$childDocs"
+            }
+        }, 
+        "recursive" : "same"
+    }, 
     "childrenQuery" : {
         "in" : {
             "_id" : "$childDocs"
@@ -1669,7 +1567,6 @@
             "readOnly" : false
         }
     }, 
-    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAE/SURBVDhPpZLdS8JQGIf9J7sNuoiokKKMQvqkQIoo+7opCFIiixApiAihgVcVCdmNYhEDTSxGH7qttbZf52wdP/AdFb7wXOyw5zkvbD4AbUEe/ofarJ+/I7R/50lg+qjhbWJWky8sCFiWBdM0YRgGdF1HtaoiJytOYO0g4x1ZOX2CbdtORAx/+jCBfEl3Ah17CsLRKzqyfFx0bhcjZPUTyBY1JyD4UZpnMf7gmmy4yFE0oKy6pG8BSQKGJxN0YCGWwxdbQIiNcl5xyT4DQ+NxOhDayUBj61aMuiy/ugj5pgwMBA/pwNzWpafM4fL1I+AfjdGBmY1UbWVKvii49Ad26cDUUvJXOSUDvYMROjAxf4LCW6ssAlyW2Ifq8W/TgeBsokVOl+q3c/nsHuju26QDI2NR/IXOrnBzgP03bQDfNy91dEbnT99iAAAAAElFTkSuQmCC", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435c23c6d3cd598a5a2df", 
     "isA" : "573435f03c6d3cd598a5a2e1"
@@ -1681,11 +1578,44 @@
     "description" : "<p>Descibes the class model hierarchy, including a children array</p>", 
     "type" : "object", 
     "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
-    "query" : {
-        "eq" : {
-            "_id" : "$docId"
-        }
+    "rootQuery" : {
+        "comment" : "Standard Model", 
+        "select" : "title", 
+        "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
+        "where" : {
+            "eq" : {
+                "_id" : "56f86c6a5dde184ccfb9fc6a"
+            }
+        }, 
+        "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABTSURBVDhPYxjm4D/Dnf8gDOUSD2AaNzH8B2OiDULXiI5xGkRIIzpGMYgUjegYxRBSDIKpB2tGBoQMwqkRHaAbRLRGdEC2RvoCkA8pwVgFicf/GQD/KjucAgshDwAAAABJRU5ErkJggg==", 
+        "recursive" : "schema"
     }, 
+    "query" : [
+        {
+            "comment" : "Classes", 
+            "select" : "title", 
+            "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
+            "where" : {
+                "eq" : {
+                    "parentId" : "$_id"
+                }
+            }, 
+            "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABTSURBVDhPYxjm4D/Dnf8gDOUSD2AaNzH8B2OiDULXiI5xGkRIIzpGMYgUjegYxRBSDIKpB2tGBoQMwqkRHaAbRLRGdEC2RvoCkA8pwVgFicf/GQD/KjucAgshDwAAAABJRU5ErkJggg==", 
+            "recursive" : "schema"
+        }, 
+        {
+            "comment" : "Objects", 
+            "select" : "name", 
+            "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
+            "from" : "56f86c6a5dde184ccfb9fc6a", 
+            "where" : {
+                "eq" : {
+                    "classId" : "$_id"
+                }
+            }, 
+            "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABvSURBVDhPY/j//z9FeNiD/4pAjwIxyQCq0ecYAxgTbxCaRnSM2yACGtExqkEkaETHEEOGgQGDAgBzVTYQewKxGhBLALEIEDMBMSMSBvFVgVgXiEuBOBmmnQmImYGYEQmzQzEHFMPkQepBGMr+zwUAa2Uzpn+czq8AAAAASUVORK5CYII="
+        }
+    ], 
     "childrenQuery" : {
         "eq" : {
             "parentId" : "$_id"
@@ -1736,10 +1666,6 @@
                 "maxLength" : NumberInt(1000), 
                 "pattern" : "[a-f0-9]{24}"
             }, 
-            "query" : {
-                "_id" : "560b1407434ec958241693e8", 
-                "association" : "ordered"
-            }, 
             "type" : "array", 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
@@ -1749,7 +1675,6 @@
         "_id", 
         "name"
     ], 
-    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABTSURBVDhPYxjm4D/Dnf8gDOUSD2AaNzH8B2OiDULXiI5xGkRIIzpGMYgUjegYxRBSDIKpB2tGBoQMwqkRHaAbRLRGdEC2RvoCkA8pwVgFicf/GQD/KjucAgshDwAAAABJRU5ErkJggg==", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435c23c6d3cd598a5a2df"
 }
@@ -1790,6 +1715,51 @@
     "name" : "Owners Class Tree View", 
     "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
     "type" : "object", 
+    "rootQuery" : {
+        "comment" : "Owners Class", 
+        "select" : "title", 
+        "where" : {
+            "eq" : {
+                "_id" : "56f870a55dde184ccfb9fc6c"
+            }
+        }, 
+        "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAADxSURBVDhPY/j//z9FmLrgzEyT/yB8eobx/5PTDP+fmGpAvBUgjahgFxgf6tcibAhI8+3thUAchAUX/t/bpfp/V7vS/+0t8v+3Nsn+39wo/X9DnQTCYJCTSQVrqkQQBoD8+///TCCeQySe+X95KT/CgONT9MGCpODFhdwIA45O0oVI/JhMHAaqXZDHgTAAFNJgA953EoeBauflsCEMONCrATHgST1xGKh2ThYLwgBQNIENuF1KHAaqnZXBhDAAFMdgA67kE4eBamemMyIMAAHkBLKuRuz/6krh/yvKBP4vLeYFhzgo0ED+BjkdQ/MAAgYGAKPFDB0e1bt2AAAAAElFTkSuQmCC", 
+        "recursive" : "schema"
+    }, 
+    "query" : [
+        {
+            "comment" : "Owner Classes", 
+            "select" : "title", 
+            "where" : {
+                "eq" : {
+                    "parentId" : "$_id"
+                }
+            }, 
+            "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAADxSURBVDhPY/j//z9FmLrgzEyT/yB8eobx/5PTDP+fmGpAvBUgjahgFxgf6tcibAhI8+3thUAchAUX/t/bpfp/V7vS/+0t8v+3Nsn+39wo/X9DnQTCYJCTSQVrqkQQBoD8+///TCCeQySe+X95KT/CgONT9MGCpODFhdwIA45O0oVI/JhMHAaqXZDHgTAAFNJgA953EoeBauflsCEMONCrATHgST1xGKh2ThYLwgBQNIENuF1KHAaqnZXBhDAAFMdgA67kE4eBamemMyIMAAHkBLKuRuz/6krh/yvKBP4vLeYFhzgo0ED+BjkdQ/MAAgYGAKPFDB0e1bt2AAAAAElFTkSuQmCC", 
+            "recursive" : "schema"
+        }, 
+        {
+            "comment" : "Owners", 
+            "select" : "name", 
+            "from" : "56f870a55dde184ccfb9fc6c", 
+            "where" : {
+                "eq" : {
+                    "classId" : "$_id"
+                }
+            }, 
+            "join" : {
+                "comment" : "Organizatinal Units", 
+                "select" : "name", 
+                "from" : "574237133c6d3cd598a5a30d", 
+                "where" : {
+                    "eq" : {
+                        "parentOrgId" : "$_id"
+                    }
+                }, 
+                "recursive" : "same"
+            }
+        }
+    ], 
     "childrenQuery" : {
         "eq" : {
             "parentId" : "$_id"
@@ -1801,7 +1771,6 @@
             "readOnly" : false
         }
     }, 
-    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAADxSURBVDhPY/j//z9FmLrgzEyT/yB8eobx/5PTDP+fmGpAvBUgjahgFxgf6tcibAhI8+3thUAchAUX/t/bpfp/V7vS/+0t8v+3Nsn+39wo/X9DnQTCYJCTSQVrqkQQBoD8+///TCCeQySe+X95KT/CgONT9MGCpODFhdwIA45O0oVI/JhMHAaqXZDHgTAAFNJgA953EoeBauflsCEMONCrATHgST1xGKh2ThYLwgBQNIENuF1KHAaqnZXBhDAAFMdgA67kE4eBamemMyIMAAHkBLKuRuz/6krh/yvKBP4vLeYFhzgo0ED+BjkdQ/MAAgYGAKPFDB0e1bt2AAAAAElFTkSuQmCC", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435c23c6d3cd598a5a2df"
 }
@@ -1862,7 +1831,6 @@
     "docType" : "object", 
     "name" : "Client", 
     "description" : "<p>The Neuralquest client</p>", 
-    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFWklEQVRYR62XbUxTVxjH/+faVigDqePN4JYwv2zGkGV8IUIkmYoDQgbRuExjSFCBdd1CAAETd3t7hQgIxCh2gEJCjJqYGdgMlKEugYjxi2YhxmmiM3tRuchAUcpL23uXc+lty7Wle7mnISTwO/f++5zn+T/PIQi/dLmN6HMDeR4RkFbgCYBVDKAD+gdqUADAHe7xdE+4FZ3diJme4jNYdIsAmBV4EQYdg6LugxiqQQyAV+Ee/k8ExG9twERHUSuG7laAbgi2iUaG/mRvakVpTwWu1yIBwHMtBCRsOwaheV85bv16AoSsIEAC0t8rR9W5E7h2GIkAJjQRsP0YBHZvIe6N9wb99spLaAQ2JhWCP9+Lq1oKyG6AULEnDX+8vL0U51BnQIB31qSh9cJtDNVqGIGcRggHi+Lwan5yeRlQIYFlQYDoiDic6ZmEo0Y7AfEfW9FriEKGRIvAu6SAKJAAEYQBFmcx+pMNhVolYTSAdwHEQS5x39JXltQ5WjqP5ABwBfyd1v4kgN+1KkP60kgAEarTN5VbDt0/0Xb8fQDTAQJoPOYBzP1XIzJYLJYF+kBJgrfsGBBaf77sC+aHypko/6Ob/bJOnjy5GsCiuiyD5bPJbDZP2e32NFVo1XuNZrP5lt1uTwfgXKHe9RaL5XZbW9taVaTkLYoAwvN8usfjcT148MAQExMz+vDhwx3JycluvV6/uru7+44q3+leKvS+3W5XH4Fai6msrOx+e3t7UGOiAvT19fWCx+MxieJSmtNwSzT+1PkZ2ft/YFn2M57nLwHIV7jAN3m5KyzL7lY4yVs2BAQS/Ui+5/WzLCs3Kyogluf56dIyM9zuN5uXTqdDR7sdLMsm8zz/ROGU/FB+h+LU4Qjg5GZFBSRwHCeUlH6Bn8fGlpkcjcGHqano7PgWHMdt5Djunoac3Kx8AvYfKMGjR4/lrF9KjaWQbdiQgq6znVRAKsdxYxpyck74BBTvP4DxceGNZE5KSkR311mfAA255QL2l5TixfS0r9coPSfWZEJXZ4c/AtpxfgFHeZtg/vIrzM855bB7T0A+johII+ynT+Eb1pp6lLeNacGdPn0KLGv1CYjnayt6o4zGDFGUIIJAJASMJIGBBIYheO2cG7E2tJTZaivb3zJGblFztMgIw+C1c2HE1tC0IgeGwYxzYbSuoUluVjQH1M1GX1Oyz9HYeU5pMkpzoX5vCmhK/5eTmxUVQJuNcW3xsXTiWnDPP3ms27Mp7scLdyd3RCSnuCX9at1U9+FbXh83hOQMRsNUV/XNf8FR+5aNSL++blBwiZJJlOgRMJAIAZGPQARDCPQMmfjzyCcp6+sGH7tEKUHNEYhYRRisgqfvKZu3Z33d4G8uUYoPyUme/qfWPL8TJvKO6dZdWfCINAMChg55zmdQ8d0wnDcuZRgzd4+G5W72bTZuLrgZjhPYHL8TxtsGhJZdWeCGBegYXxGAXgO4rERUUgGXj28z7jx0LRw3933z1shPq66H455bc/1OmGAbEI7kZ+LyLy/lm40y6tGb0M4P1qDuyg3M9jVtjyqovqoVN2HN9fsAFVCVk4k7404w3rmf2oEoAR8lGdHsuIHZ3pbsqMLKobCcV2g4bpmAJN4hVOVmYXLO9UYOxEXq0TwwjFlHZ35UTsmVcNxMf3teTF5ZfzhunM3xG9G66ou9iI7NoFmrXrQK8Gpq5FnTXsu66vNtiF67ZQVu+FnT3q+T+f4RkTBrQnMvRp81fR7SiNQaqBH9BeAFnR0AvK2ajhVeMSx6IaUMNa1gI9+yqVkxomBTr+8K4J1y6eitDzIdqzn6AjqAGkLMicum5r8BTGo/TgyrTmsAAAAASUVORK5CYII=", 
     "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
     "headline" : "Neuralquest", 
     "pageId" : "57afa6372d8cd20920e6d827", 
@@ -1978,7 +1946,6 @@
     "docType" : "object", 
     "name" : "Server", 
     "description" : "<p>The Neuralquest server</p>", 
-    "icon" : "data:image/png;base64,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", 
     "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
     "headline" : "Neuralquest", 
     "pageId" : "57afa6372d8cd20920e6d827", 
@@ -1989,10 +1956,10 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315d"), 
     "docType" : "object", 
-    "name" : "Oganizational Unit View", 
+    "name" : "XXX Oganizational Unit View", 
     "description" : "<p>Descibes the organizational unit hierarchy, including a children array</p>", 
     "type" : "object", 
-    "query" : {
+    "rootQuery" : {
         "eq" : {
             "parentOrgId" : "$_id"
         }
@@ -2024,9 +1991,6 @@
     "name" : "Paragraph View", 
     "description" : "<p>Paragraph View</p>", 
     "type" : "object", 
-    "query" : {
-        "isA" : "573435f03c6d3cd598a5a2e1"
-    }, 
     "properties" : {
         "_id" : {
 
@@ -2209,7 +2173,6 @@
     "password" : "$2a$10$WIx8rGcMeuPigotQqQi.b.HUhpgqd0bEaLQ1Eerq6Q9WA/Y6v/y92", 
     "email" : "", 
     "docType" : "object", 
-    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABPSURBVDhPY6AY/P//nyKMKQAFLm5u/5ExVBhTPYYAFAy8AQ0N//8jY6gwpnp0AZBt6JphGCSHrh6FA8KjBgAFgACbZhAmKhaGgQGk4f8MAIqza92/3MmUAAAAAElFTkSuQmCC", 
     "classId" : "57343beb3c6d3cd598a5a2e7"
 }
 { 
@@ -2229,9 +2192,6 @@
     "name" : "Backlog View", 
     "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
     "type" : "object", 
-    "query" : {
-        "isA" : "574225cb3c6d3cd598a5a305"
-    }, 
     "properties" : {
         "date" : {
             "title" : "Date", 
@@ -2326,9 +2286,6 @@
     "docType" : "object", 
     "name" : "Service Request View", 
     "type" : "object", 
-    "query" : {
-        "isA" : "574225cb3c6d3cd598a5a305"
-    }, 
     "properties" : {
         "_id" : {
 
@@ -2387,10 +2344,6 @@
     "name" : "XXX State History Table View", 
     "description" : "<p>State History Table View</p>", 
     "type" : "object", 
-    "query" : {
-        "isA" : "574225cb3c6d3cd598a5a305", 
-        "subDoc" : "stateHistory"
-    }, 
     "properties" : {
         "date" : {
 
@@ -2472,9 +2425,6 @@
     "name" : "Home Page View", 
     "description" : "<p>Descibes home page of the organization</p>", 
     "type" : "object", 
-    "query" : {
-        "isA" : "57343c283c6d3cd598a5a2e9"
-    }, 
     "properties" : {
         "name" : {
             "readOnly" : false
@@ -2599,11 +2549,11 @@
 { 
     "_id" : ObjectId("579338e73c6d3cd598a5a3b2"), 
     "docType" : "object", 
-    "name" : "Object View", 
+    "name" : "XXX Object View", 
     "description" : "<p>Displays objects</p>", 
     "type" : "object", 
     "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
-    "query" : {
+    "rootQuery" : {
         "eq" : {
             "classId" : "$_id"
         }
@@ -2623,6 +2573,7 @@
 
         }
     }, 
+    "isA" : "56f86c6a5dde184ccfb9fc6a", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABvSURBVDhPY/j//z9FeNiD/4pAjwIxyQCq0ecYAxgTbxCaRnSM2yACGtExqkEkaETHEEOGgQGDAgBzVTYQewKxGhBLALEIEDMBMSMSBvFVgVgXiEuBOBmmnQmImYGYEQmzQzEHFMPkQepBGMr+zwUAa2Uzpn+czq8AAAAASUVORK5CYII=", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435c23c6d3cd598a5a2df"
@@ -2630,11 +2581,11 @@
 { 
     "_id" : ObjectId("579357cf3c6d3cd598a5a3b4"), 
     "docType" : "object", 
-    "name" : "Owner Object View", 
+    "name" : "XXX Owner Object View", 
     "description" : "<p>Displays owners</p>", 
     "type" : "object", 
     "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
-    "query" : {
+    "rootQuery" : {
         "eq" : {
             "classId" : "$_id"
         }
@@ -2689,9 +2640,6 @@
     "name" : "Catalog View", 
     "description" : "<p>View useed for the catalog</p>", 
     "type" : "object", 
-    "query" : {
-        "isA" : "5742563e3c6d3cd598a5a32f"
-    }, 
     "properties" : {
         "imageUrl" : {
             "styleColumn" : "width : 100px"
@@ -2739,9 +2687,6 @@
     "name" : "Purchase View", 
     "description" : "<p>View useed for the product</p>", 
     "type" : "object", 
-    "query" : {
-        "isA" : "5742563e3c6d3cd598a5a32f"
-    }, 
     "properties" : {
         "_id" : {
 
@@ -2865,11 +2810,61 @@
 { 
     "_id" : ObjectId("57a67be02d8cd20920e6d81b"), 
     "docType" : "object", 
-    "name" : "Page Table View", 
+    "name" : "Page Tree View", 
     "type" : "object", 
-    "query" : {
-        "isA" : "56f87ec55dde184ccfb9fc74"
+    "rootQuery" : {
+        "comment" : "Owner", 
+        "select" : "name", 
+        "from" : "56f870a55dde184ccfb9fc6c", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }, 
+        "recursive" : "schema"
     }, 
+    "query" : [
+        {
+            "comment" : "Pages", 
+            "select" : "name", 
+            "from" : "56f87ec55dde184ccfb9fc74", 
+            "where" : {
+                "eq" : {
+                    "ownerId" : "$_id"
+                }
+            }, 
+            "join" : {
+                "comment" : "Tabs", 
+                "select" : "name", 
+                "subDoc" : "tabs", 
+                "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OUJGMEI5RkI2OUExMTFFM0IyNENGMTlBRjA3REE4OEMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OUJGMEI5RkM2OUExMTFFM0IyNENGMTlBRjA3REE4OEMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5QkYwQjlGOTY5QTExMUUzQjI0Q0YxOUFGMDdEQTg4QyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5QkYwQjlGQTY5QTExMUUzQjI0Q0YxOUFGMDdEQTg4QyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pgl1Uy4AAAHGSURBVHjanFM7SwNBEP52b5ML8VnoL/BHWKqdaCHYiO/WgFgp2FiIlaSRiGinGHwgCAY1aqVi53+wMU0KRQwqedztObOXO08FkQzsze7NN9/MzswKz/OweXD14jpuu6Z9IFIKKMt6So31d24dXB1rrYcjZgjBGJlTfGDn2ckBlMoO4PnGpoTCRjbfwXZ27uvtRumjEhK0Jm1c39wPGQKOrMmx+FQKCVoIUKnWsLZz6lWrDi4u7xBJAJaUiMUVDAGnpkkrS4aAeMxCamKQyAREHYOQQiBpW1jP5n0CBtCVYRMjIwUdyhS1XHOMo6i7hkS0SdrN4PrJOqHZLKRzSMRjRheKL0bbMYX59MmXpiD8Pywms2R2z725qUG8flS5YIY5kJ+V5ytR9dGWjLMfZKQumFk+oqsIvybaX0zG50CznXGBqCjB9sooao5r6vEVWITa9J4+jAvnJUowvbRvOkED9MeSBvctg+Ceh6uTcF0NpaRfB4FfXeAMGBf4fctgZCFrIowv7uGh8IwJ0rayzDnQbGdcpMoeTduZ14iwnwweTiNiHhxvyu9vt5lsvkebvv3D03+J1Gf30QwSDUcX/W5vIInKpwADAKBBAEGN5kJNAAAAAElFTkSuQmCC", 
+                "join" : [
+                    {
+                        "comment" : "Widgets", 
+                        "select" : "name", 
+                        "subDoc" : "widgets", 
+                        "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAa9JREFUeNqck7tKA0EUhv+5bGIheCkEiWgKu0SNNoJgYoiCMQn4NKltbHwaURAREzWFICgoWPgCFlHxUtiYZNZzZjYma1TU2Z1lmZnvP3P+MyPGNg92Gi1Tavk+AO6/aQJKCHhK7uo3grfW50EifxIgGOXtsxILID7ch63TWx7n98fmB5/yQgzM6iYFzowaZEoj6MHFdwrUIgbMamMHBS6ubwiQXSw9slfBZ6+MwdxsAszq9oQX6SNAO4gW8bqry3ML+MaFdYICqZnZD8GOgPZwWDmEkhKGoNzyCmLjcWTTi6EdVE9qkEp2CQTVU1piNZ+3UTiioW2mksmeFFJTU7i/q6PNaT9whiP7wmYOSFfnx+dnPDw92ZRcDnYWmnbLjB9OgX6lgmShAKhWKx3jLO9MzWWzX3jgRbC3v28XMbCWL2BsIo7cUiaUQuXomILoTwIECKVQKBbJAxk4bzCdSPR4ME2+tJqNj7S0cJVBVCvYaongBCkWMriv10MpcI962p1a6trj2hI81B/9dBV+uBfCMcxq8/pSG9w4Tjc4/O/vkoWZ5Q1PUh/A/9rLuwADAK8loV8tdNaPAAAAAElFTkSuQmCC"
+                    }, 
+                    {
+                        "comment" : "SubPages", 
+                        "select" : "name", 
+                        "from" : "56f87ec55dde184ccfb9fc74", 
+                        "where" : {
+                            "eq" : {
+                                "_id" : "$pageId"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ], 
+    "childrenQuery" : {
+        "eq" : {
+            "ownerId" : "$_id"
+        }
+    }, 
+    "childrenView" : "58267ecf1915d3c3eee971f1", 
     "properties" : {
         "name" : {
 
@@ -2882,8 +2877,31 @@
 { 
     "_id" : ObjectId("57a67c2f2d8cd20920e6d81d"), 
     "docType" : "object", 
-    "name" : "View Table View", 
+    "name" : "View Tree View", 
     "type" : "object", 
+    "rootQuery" : {
+        "comment" : "Owner", 
+        "select" : "name", 
+        "from" : "56f870a55dde184ccfb9fc6c", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }, 
+        "recursive" : "schema"
+    }, 
+    "query" : [
+        {
+            "comment" : "Views", 
+            "select" : "name", 
+            "from" : "573435c23c6d3cd598a5a2df", 
+            "where" : {
+                "eq" : {
+                    "ownerId" : "$_id"
+                }
+            }
+        }
+    ], 
     "properties" : {
         "name" : {
 
@@ -2898,9 +2916,6 @@
     "docType" : "object", 
     "name" : "Page Form View", 
     "type" : "object", 
-    "query" : {
-        "isA" : "56f87ec55dde184ccfb9fc74"
-    }, 
     "properties" : {
         "_id" : {
 
@@ -2995,9 +3010,6 @@
     "docType" : "object", 
     "name" : "View Form View", 
     "type" : "object", 
-    "query" : {
-        "isA" : "573435c23c6d3cd598a5a2df"
-    }, 
     "properties" : {
         "_id" : {
 
@@ -3038,7 +3050,6 @@
     "_id" : ObjectId("57af81b02d8cd20920e6d823"), 
     "docType" : "object", 
     "name" : "Front Desk", 
-    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFWklEQVRYR62XbUxTVxjH/+faVigDqePN4JYwv2zGkGV8IUIkmYoDQgbRuExjSFCBdd1CAAETd3t7hQgIxCh2gEJCjJqYGdgMlKEugYjxi2YhxmmiM3tRuchAUcpL23uXc+lty7Wle7mnISTwO/f++5zn+T/PIQi/dLmN6HMDeR4RkFbgCYBVDKAD+gdqUADAHe7xdE+4FZ3diJme4jNYdIsAmBV4EQYdg6LugxiqQQyAV+Ee/k8ExG9twERHUSuG7laAbgi2iUaG/mRvakVpTwWu1yIBwHMtBCRsOwaheV85bv16AoSsIEAC0t8rR9W5E7h2GIkAJjQRsP0YBHZvIe6N9wb99spLaAQ2JhWCP9+Lq1oKyG6AULEnDX+8vL0U51BnQIB31qSh9cJtDNVqGIGcRggHi+Lwan5yeRlQIYFlQYDoiDic6ZmEo0Y7AfEfW9FriEKGRIvAu6SAKJAAEYQBFmcx+pMNhVolYTSAdwHEQS5x39JXltQ5WjqP5ABwBfyd1v4kgN+1KkP60kgAEarTN5VbDt0/0Xb8fQDTAQJoPOYBzP1XIzJYLJYF+kBJgrfsGBBaf77sC+aHypko/6Ob/bJOnjy5GsCiuiyD5bPJbDZP2e32NFVo1XuNZrP5lt1uTwfgXKHe9RaL5XZbW9taVaTkLYoAwvN8usfjcT148MAQExMz+vDhwx3JycluvV6/uru7+44q3+leKvS+3W5XH4Fai6msrOx+e3t7UGOiAvT19fWCx+MxieJSmtNwSzT+1PkZ2ft/YFn2M57nLwHIV7jAN3m5KyzL7lY4yVs2BAQS/Ui+5/WzLCs3Kyogluf56dIyM9zuN5uXTqdDR7sdLMsm8zz/ROGU/FB+h+LU4Qjg5GZFBSRwHCeUlH6Bn8fGlpkcjcGHqano7PgWHMdt5Djunoac3Kx8AvYfKMGjR4/lrF9KjaWQbdiQgq6znVRAKsdxYxpyck74BBTvP4DxceGNZE5KSkR311mfAA255QL2l5TixfS0r9coPSfWZEJXZ4c/AtpxfgFHeZtg/vIrzM855bB7T0A+johII+ynT+Eb1pp6lLeNacGdPn0KLGv1CYjnayt6o4zGDFGUIIJAJASMJIGBBIYheO2cG7E2tJTZaivb3zJGblFztMgIw+C1c2HE1tC0IgeGwYxzYbSuoUluVjQH1M1GX1Oyz9HYeU5pMkpzoX5vCmhK/5eTmxUVQJuNcW3xsXTiWnDPP3ms27Mp7scLdyd3RCSnuCX9at1U9+FbXh83hOQMRsNUV/XNf8FR+5aNSL++blBwiZJJlOgRMJAIAZGPQARDCPQMmfjzyCcp6+sGH7tEKUHNEYhYRRisgqfvKZu3Z33d4G8uUYoPyUme/qfWPL8TJvKO6dZdWfCINAMChg55zmdQ8d0wnDcuZRgzd4+G5W72bTZuLrgZjhPYHL8TxtsGhJZdWeCGBegYXxGAXgO4rERUUgGXj28z7jx0LRw3933z1shPq66H455bc/1OmGAbEI7kZ+LyLy/lm40y6tGb0M4P1qDuyg3M9jVtjyqovqoVN2HN9fsAFVCVk4k7404w3rmf2oEoAR8lGdHsuIHZ3pbsqMLKobCcV2g4bpmAJN4hVOVmYXLO9UYOxEXq0TwwjFlHZ35UTsmVcNxMf3teTF5ZfzhunM3xG9G66ou9iI7NoFmrXrQK8Gpq5FnTXsu66vNtiF67ZQVu+FnT3q+T+f4RkTBrQnMvRp81fR7SiNQaqBH9BeAFnR0AvK2ajhVeMSx6IaUMNa1gI9+yqVkxomBTr+8K4J1y6eitDzIdqzn6AjqAGkLMicum5r8BTGo/TgyrTmsAAAAASUVORK5CYII=", 
     "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
@@ -3050,7 +3061,6 @@
     "docType" : "object", 
     "name" : "Workshop", 
     "description" : "<p>ACME Workshop</p>", 
-    "icon" : "data:image/png;base64,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", 
     "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
@@ -3131,11 +3141,8 @@
 { 
     "_id" : ObjectId("57b725602d8cd20920e6d82f"), 
     "docType" : "object", 
-    "name" : "OfFerings Table View", 
+    "name" : "XXX OfFerings Table View", 
     "type" : "object", 
-    "query" : {
-        "isA" : "574234113c6d3cd598a5a30b"
-    }, 
     "childrenView" : "57c213652d8cd20920e6d84d", 
     "properties" : {
         "name" : {
@@ -3151,9 +3158,6 @@
     "docType" : "object", 
     "name" : "Organizational Unit Table View", 
     "type" : "object", 
-    "query" : {
-        "isA" : "574237133c6d3cd598a5a30d"
-    }, 
     "properties" : {
         "name" : {
 
@@ -3166,10 +3170,39 @@
 { 
     "_id" : ObjectId("57b725f32d8cd20920e6d833"), 
     "docType" : "object", 
-    "name" : "States Table View", 
+    "name" : "States Tree View", 
     "type" : "object", 
+    "rootQuery" : {
+        "comment" : "Owner", 
+        "select" : "name", 
+        "from" : "56f870a55dde184ccfb9fc6c", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }, 
+        "recursive" : "schema"
+    }, 
     "query" : {
-        "isA" : "5745eaa53c6d3cd598a5a371"
+        "comment" : "States", 
+        "select" : "name", 
+        "from" : "5745eaa53c6d3cd598a5a371", 
+        "where" : {
+            "eq" : {
+                "ownerId" : "$_id"
+            }
+        }, 
+        "join" : {
+            "comment" : "State", 
+            "select" : "name", 
+            "from" : "5745eaa53c6d3cd598a5a371", 
+            "where" : {
+                "in" : {
+                    "_id" : "$nextStateIds"
+                }
+            }, 
+            "recursive" : "same"
+        }
     }, 
     "properties" : {
         "name" : {
@@ -3252,9 +3285,6 @@
     "docType" : "object", 
     "name" : "Offering Form View", 
     "type" : "object", 
-    "query" : {
-        "isA" : "574234113c6d3cd598a5a30b"
-    }, 
     "properties" : {
         "_id" : {
 
@@ -3293,9 +3323,6 @@
     "docType" : "object", 
     "name" : "Organizational Unit Form View", 
     "type" : "object", 
-    "query" : {
-        "isA" : "574237133c6d3cd598a5a30d"
-    }, 
     "properties" : {
         "_id" : {
 
@@ -3335,9 +3362,6 @@
     "docType" : "object", 
     "name" : "State Form View", 
     "type" : "object", 
-    "query" : {
-        "isA" : "5745eaa53c6d3cd598a5a371"
-    }, 
     "properties" : {
         "_id" : {
 
@@ -3373,7 +3397,7 @@
             "name" : "Pages", 
             "widgets" : [
                 {
-                    "displayType" : "Table", 
+                    "displayType" : "Tree", 
                     "name" : "Page Table", 
                     "viewId" : "57a67be02d8cd20920e6d81b", 
                     "pageId" : "57a677652d8cd20920e6d817"
@@ -3395,8 +3419,8 @@
             "name" : "Views", 
             "widgets" : [
                 {
-                    "displayType" : "Table", 
-                    "name" : "View Table", 
+                    "displayType" : "Tree", 
+                    "name" : "View Tree", 
                     "viewId" : "57a67c2f2d8cd20920e6d81d", 
                     "pageId" : "57a678162d8cd20920e6d819"
                 }
@@ -3417,8 +3441,8 @@
             "name" : "States", 
             "widgets" : [
                 {
-                    "displayType" : "Table", 
-                    "name" : "States Table", 
+                    "displayType" : "Tree", 
+                    "name" : "States Tree", 
                     "viewId" : "57b725f32d8cd20920e6d833", 
                     "pageId" : "57b72a3c2d8cd20920e6d839"
                 }
@@ -3461,17 +3485,6 @@
             "name" : "Offerings", 
             "widgets" : [
                 {
-                    "displayType" : "Table", 
-                    "name" : "Offerings Table", 
-                    "viewId" : "57b725602d8cd20920e6d82f", 
-                    "pageId" : "57b729d52d8cd20920e6d835"
-                }
-            ]
-        }, 
-        {
-            "name" : "Offerings", 
-            "widgets" : [
-                {
                     "displayType" : "Tree", 
                     "name" : "Offerings Table", 
                     "viewId" : "57c213652d8cd20920e6d84d", 
@@ -3488,7 +3501,7 @@
     "docType" : "object", 
     "name" : "States Process View", 
     "type" : "object", 
-    "query" : {
+    "rootQuery" : {
         "eq" : {
             "ownerId" : "$selectedObj"
         }
@@ -3513,8 +3526,52 @@
 { 
     "_id" : ObjectId("57c213652d8cd20920e6d84d"), 
     "docType" : "object", 
-    "name" : "Offerings Tree Org View", 
+    "name" : "Offerings Tree View", 
     "type" : "object", 
+    "rootQuery" : {
+        "comment" : "Owner", 
+        "select" : "name", 
+        "from" : "56f870a55dde184ccfb9fc6c", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }, 
+        "recursive" : "schema"
+    }, 
+    "query" : [
+        {
+            "comment" : "Offerings", 
+            "select" : "name", 
+            "from" : "574234113c6d3cd598a5a30b", 
+            "where" : {
+                "eq" : {
+                    "ownerId" : "$_id"
+                }
+            }, 
+            "join" : {
+                "comment" : "State", 
+                "select" : "name", 
+                "from" : "5745eaa53c6d3cd598a5a371", 
+                "where" : {
+                    "eq" : {
+                        "_id" : "$initialStateId"
+                    }
+                }, 
+                "join" : {
+                    "comment" : "State", 
+                    "select" : "name", 
+                    "from" : "5745eaa53c6d3cd598a5a371", 
+                    "where" : {
+                        "in" : {
+                            "_id" : "$nextStateIds"
+                        }
+                    }, 
+                    "recursive" : "same"
+                }
+            }
+        }
+    ], 
     "childrenView" : "57c2141e2d8cd20920e6d84f", 
     "properties" : {
         "_id" : {
@@ -3531,7 +3588,7 @@
 { 
     "_id" : ObjectId("57c2141e2d8cd20920e6d84f"), 
     "docType" : "object", 
-    "name" : "Offerings Tree Offerings View", 
+    "name" : "XXX Offerings Tree Offerings View", 
     "type" : "object", 
     "childrenView" : "57ccb0162d8cd20920e6d851", 
     "properties" : {
@@ -3546,9 +3603,9 @@
 { 
     "_id" : ObjectId("57ccb0162d8cd20920e6d851"), 
     "docType" : "object", 
-    "name" : "Offerings Tree States View", 
+    "name" : "XXX Offerings Tree States View", 
     "type" : "object", 
-    "query" : {
+    "rootQuery" : {
         "eq" : {
             "_id" : "$initialStateId"
         }
@@ -3566,4 +3623,46 @@
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435c23c6d3cd598a5a2df", 
     "isA" : "5745eaa53c6d3cd598a5a371"
+}
+{ 
+    "_id" : ObjectId("58267ecf1915d3c3eee971f1"), 
+    "docType" : "object", 
+    "name" : "XXX Tabs subDocument", 
+    "type" : "object", 
+    "childrenSubDoc" : "tabs", 
+    "properties" : {
+        "name" : {
+            "readOnly" : false
+        }, 
+        "pageId" : {
+            "readOnly" : false
+        }, 
+        "widgets" : {
+            "readOnly" : false, 
+            "items" : {
+                "properties" : {
+                    "name" : {
+                        "readOnly" : false
+                    }, 
+                    "description" : {
+                        "readOnly" : false
+                    }, 
+                    "displayType" : {
+                        "readOnly" : false
+                    }, 
+                    "viewId" : {
+                        "readOnly" : false
+                    }, 
+                    "rootDocId" : {
+                        "readOnly" : false
+                    }, 
+                    "pageId" : {
+                        "readOnly" : false
+                    }
+                }
+            }
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }

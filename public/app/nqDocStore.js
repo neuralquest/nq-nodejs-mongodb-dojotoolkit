@@ -417,7 +417,83 @@ function(declare, lang, when, all, registry, request,
                 return self.isA(parentDoc, id);
             });
         },
-        buildBaseFilterFromQuery: function(docQuery, parentObj, isA){//(parentObj, docQuery, viewObj) {
+        buildFilterFromQuery: function(docQuery, parentObj, isA){//(parentObj, docQuery, viewObj) {
+            var self = this;
+
+            var filter = self.Filter(function (obj) {
+
+                if(isA) {
+                    if(obj.docType == 'class') return false;
+                    else if(!self.isASync(obj, isA)) return false;
+                }
+                else if(obj.docType != 'class') return false;
+
+                if(docQuery) {
+                    var qualifier = Object.keys(docQuery)[0];
+                    var key = Object.keys(docQuery[qualifier])[0];
+                    var value = docQuery[qualifier][key];
+                    if(value.substring(0, 1) == '$') value = parentObj[value.substring(1)];
+                    if(qualifier == 'in'){
+                        if(!value in obj[key]) return false;
+                    }
+                    if(qualifier == 'eq'){
+                        if(value != obj[key]) return false;
+                    }
+                    if('and' in docQuery){
+                        debugger;
+                    }
+                }
+
+                return true;
+            });
+            return filter;
+        },
+        buildFilterFromQueryNew: function(query, parentObj){//(parentObj, docQuery, viewObj) {
+            var self = this;
+            var filter = self.Filter(function (obj) {
+
+                if(query.from) {
+                    if(obj.docType == 'class') return false;
+                    else if(!self.isASync(obj, query.from)) return false;
+                }
+                else if(obj.docType != 'class') return false;
+
+                if(query.where) {
+                    var where = query.where;
+                    var qualifier = Object.keys(where)[0];
+                    var key = Object.keys(where[qualifier])[0];
+                    var value = where[qualifier][key];
+                    if(value.substring(0, 1) == '$') value = parentObj[value.substring(1)];
+                    if(!value) return false;
+                    if(qualifier == 'in'){
+                        var found = false;
+                        value.forEach(function(idValue){
+                            if(idValue == obj[key]) found = true;
+                        });
+                        if(!found) return false;
+                    }
+                    else if(qualifier == 'eq'){
+                        if(value != obj[key]) return false;
+                    }
+                    else if('and' in where){
+                        debugger;
+                    }
+                }
+                else return false;
+
+                return true;
+            });
+
+            var childrenCollection = this.filter(filter);
+            childrenCollection.fetch().then(function (childObjects) {
+                if(parentObj)console.log('Doc Name: ', parentObj.name?parentObj.name:parentObj.title);
+                console.log(JSON.stringify(query, null, 4));
+                console.dir(childObjects);
+            });
+
+            return filter;
+        },
+        /* buildBaseFilterFromQuery: function(docQuery, parentObj, isA){//(parentObj, docQuery, viewObj) {
             var self = this;
             var baseFilter = null;
             if(isA) {
@@ -456,16 +532,16 @@ function(declare, lang, when, all, registry, request,
             }
             else resFilter = baseFilter;
 
-            var childrenCollection = this.filter(resFilter);
+            /*var childrenCollection = this.filter(resFilter);
             childrenCollection.fetch().then(function (childObjects) {
                 console.log('Doc Name: ', parentObj.name?parentObj.name:parentObj.title, 'isA', isA);
                 console.log(JSON.stringify(resFilter, null, 4));
                 console.dir(childObjects);
-            });
+            });* /
 
             return resFilter;
         },
-        /*buildFilterFromQuery: function(parentObj, docQuery) {
+        buildFilterFromQuery: function(parentObj, docQuery) {
             var self = this;
             for(var filterType in docQuery){
                 var docFilter = docQuery[filterType];
