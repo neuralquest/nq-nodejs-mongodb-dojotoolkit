@@ -255,13 +255,13 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
             this.inherited(arguments);
             var self = this;
             if(!this.docId) return;
+            var parentDoc = this.store.cachingStore.getSync(this.docId);
             //load the data
             var docCol = null;
             if(this.schema && (this.schema.query || this.schema.isA)) {
-                var docFilter = this.schema.query;
-                if(docFilter && 'subDoc' in docFilter){
-                    var subDocName = docFilter.subDoc;
-                    var parentDoc = this.store.cachingStore.getSync(this.docId);
+                var query = this.schema.query;
+                if(query && 'subDoc' in query){
+                    var subDocName = query.subDoc;
                     var subDocStore = new nqSubDocStore({
                         idProperty: "name",
                         data: parentDoc[subDocName]?parentDoc[subDocName]:[]
@@ -272,11 +272,9 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                     this.grid.set('collection', docCol);
                 }
                 else{
-                    var childrenFilter = self.store.buildBaseFilterFromQuery(this.schema.query, null, this.schema.isA);
-                    if(childrenFilter) {
-                        docCol = this.store.filter(childrenFilter);
-                        this.grid.set('collection', docCol);
-                    }
+                    var childrenFilter = self.store.buildFilterFromQueryNew(query, parentDoc, self.docId);
+                    docCol = this.store.filter(childrenFilter);
+                    this.grid.set('collection', docCol);
                 }
             }
             if(docCol) {

@@ -14,7 +14,10 @@
         "classId" : {
             "title" : "Class", 
             "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "from" : "classes"
+            }
         }, 
         "name" : {
             "title" : "Name", 
@@ -68,7 +71,27 @@
             "title" : "Page", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "isA" : "56f87ec55dde184ccfb9fc74"
+            "query" : {
+                "from" : "56f87ec55dde184ccfb9fc74", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
+        }, 
+        "initialDocId" : {
+            "title" : "Inital Paragraph", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "from" : "573435f03c6d3cd598a5a2e1", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }
     }, 
     "parentId" : "56f86c6a5dde184ccfb9fc6a"
@@ -84,7 +107,14 @@
             "title" : "Owner", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "isA" : "56f870a55dde184ccfb9fc6c"
+            "query" : {
+                "from" : "56f870a55dde184ccfb9fc6c", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }
     }, 
     "required" : [
@@ -146,7 +176,14 @@
                         "title" : "Page", 
                         "type" : "string", 
                         "pattern" : "[a-f0-9]{24}", 
-                        "isA" : "56f87ec55dde184ccfb9fc74"
+                        "query" : {
+                            "from" : "56f87ec55dde184ccfb9fc74", 
+                            "where" : {
+                                "eq" : {
+                                    "ownerId" : "$docId"
+                                }
+                            }
+                        }
                     }, 
                     "widgets" : {
                         "title" : "Widgets", 
@@ -189,25 +226,40 @@
                                     "title" : "View", 
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
-                                    "isA" : "573435c23c6d3cd598a5a2df"
-                                }, 
-                                "rootId" : {
-                                    "title" : "Root Id", 
-                                    "type" : "string", 
-                                    "pattern" : "[a-f0-9]{24}", 
-                                    "isA" : ""
+                                    "query" : {
+                                        "from" : "573435c23c6d3cd598a5a2df", 
+                                        "where" : {
+                                            "eq" : {
+                                                "ownerId" : "$docId"
+                                            }
+                                        }
+                                    }
                                 }, 
                                 "rootDocId" : {
                                     "title" : "Root Document", 
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
-                                    "isA" : "56f87ec55dde184ccfb9fc74"
+                                    "query" : {
+                                        "from" : "56f87ec55dde184ccfb9fc74", 
+                                        "where" : {
+                                            "eq" : {
+                                                "ownerId" : "$docId"
+                                            }
+                                        }
+                                    }
                                 }, 
                                 "pageId" : {
                                     "title" : "Page", 
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
-                                    "isA" : "56f87ec55dde184ccfb9fc74"
+                                    "query" : {
+                                        "from" : "56f87ec55dde184ccfb9fc74", 
+                                        "where" : {
+                                            "eq" : {
+                                                "ownerId" : "$docId"
+                                            }
+                                        }
+                                    }
                                 }
                             }, 
                             "additionalProperties" : false
@@ -299,8 +351,7 @@
             "type" : "object"
         }, 
         "query" : {
-            "title" : "Query", 
-            "type" : "object"
+            "title" : "Query"
         }, 
         "required" : {
             "title" : "Required", 
@@ -308,11 +359,6 @@
             "items" : {
                 "type" : "string"
             }
-        }, 
-        "isA" : {
-            "title" : "Is A", 
-            "type" : "string", 
-            "pattern" : "[a-f0-9]{24}"
         }
     }, 
     "parentId" : "573435803c6d3cd598a5a2dd", 
@@ -329,7 +375,14 @@
             "title" : "View", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "isA" : "573435c23c6d3cd598a5a2df"
+            "query" : {
+                "from" : "573435c23c6d3cd598a5a2df", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "insets" : {
             "title" : "Insets", 
@@ -375,7 +428,7 @@
                     }
                 }, 
                 "required" : [
-                    "mediaType"
+                    "media"
                 ]
             }
         }, 
@@ -386,7 +439,14 @@
                 "type" : "string", 
                 "pattern" : "[a-f0-9]{24}"
             }, 
-            "isA" : "573435f03c6d3cd598a5a2e1", 
+            "query" : {
+                "from" : "573435f03c6d3cd598a5a2e1", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }, 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
         }
@@ -472,21 +532,27 @@
             "title" : "Buyer", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "isA" : "56f870a55dde184ccfb9fc6c", 
+            "query" : {
+                "from" : "56f870a55dde184ccfb9fc6c"
+            }, 
             "default" : "$userId"
         }, 
         "sellerId" : {
             "title" : "Seller", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "isA" : "56f870a55dde184ccfb9fc6c", 
+            "query" : {
+                "from" : "56f870a55dde184ccfb9fc6c"
+            }, 
             "default" : "$ownerId"
         }, 
         "assetId" : {
             "title" : "Asset", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "isA" : "56f87bcc5dde184ccfb9fc70", 
+            "query" : {
+                "from" : "56f87bcc5dde184ccfb9fc70"
+            }, 
             "default" : "$docId"
         }, 
         "stateHistory" : {
@@ -499,7 +565,14 @@
                         "title" : "State", 
                         "type" : "string", 
                         "pattern" : "[a-f0-9]{24}", 
-                        "isA" : "5745eaa53c6d3cd598a5a371"
+                        "query" : {
+                            "from" : "5745eaa53c6d3cd598a5a371", 
+                            "where" : {
+                                "eq" : {
+                                    "ownerId" : "$docId"
+                                }
+                            }
+                        }
                     }, 
                     "date" : {
                         "title" : "Date", 
@@ -535,7 +608,9 @@
             "title" : "Organizational Unit", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "isA" : "574237133c6d3cd598a5a30d"
+            "query" : {
+                "from" : "574237133c6d3cd598a5a30d"
+            }
         }
     }, 
     "parentId" : "574225cb3c6d3cd598a5a305"
@@ -559,7 +634,14 @@
             "title" : "Initial State", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "isA" : "5747254b3c6d3cd598a5a379"
+            "query" : {
+                "from" : "5747254b3c6d3cd598a5a379", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "fromDate" : {
             "title" : "Date", 
@@ -578,7 +660,14 @@
                 "type" : "string", 
                 "pattern" : "[a-f0-9]{24}"
             }, 
-            "isA" : "57343b823c6d3cd598a5a2e3", 
+            "query" : {
+                "from" : "57343b823c6d3cd598a5a2e3", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }, 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
         }
@@ -598,7 +687,14 @@
             "readOnly" : true, 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "isA" : "56f87ec55dde184ccfb9fc74"
+            "query" : {
+                "from" : "56f87ec55dde184ccfb9fc74", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "bannerUrl" : {
             "title" : "Banner Url", 
@@ -614,7 +710,14 @@
             "title" : "Parent Organization", 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
-            "isA" : "57343c283c6d3cd598a5a2e9"
+            "query" : {
+                "from" : "57343c283c6d3cd598a5a2e9", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }
     }, 
     "parentId" : "573435803c6d3cd598a5a2dd", 
@@ -943,7 +1046,14 @@
                 "type" : "string", 
                 "pattern" : "[a-f0-9]{24}"
             }, 
-            "isA" : "5745eaa53c6d3cd598a5a371", 
+            "query" : {
+                "from" : "5745eaa53c6d3cd598a5a371", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }, 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
         }
@@ -1039,8 +1149,7 @@
                     "displayType" : "Tree", 
                     "name" : "Class Model Tree", 
                     "rootDocId" : "56f86c6a5dde184ccfb9fc6a", 
-                    "viewId" : "575d4c3f2cf3d6dc3ed8314b", 
-                    "pageId" : "575d4c3f2cf3d6dc3ed8314c"
+                    "viewId" : "575d4c3f2cf3d6dc3ed8314b"
                 }
             ]
         }
@@ -1074,26 +1183,6 @@
             "pageId" : "577853123c6d3cd598a5a396"
         }, 
         {
-            "name" : "Members", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Home Page", 
-                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
-                }
-            ]
-        }, 
-        {
-            "name" : "Balance Sheet", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Balance Sheet Form", 
-                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
-                }
-            ]
-        }, 
-        {
             "name" : "Resources", 
             "pageId" : "57a674592d8cd20920e6d815"
         }
@@ -1119,7 +1208,6 @@
     "name" : "Balance Sheet View", 
     "description" : "<p>The standard balance sheet view</p>", 
     "type" : "object", 
-    "isA" : "573435433c6d3cd598a5a2db", 
     "properties" : {
         "assets" : {
             "title" : "Assets", 
@@ -1143,7 +1231,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "574256343c6d3cd598a5a329"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256343c6d3cd598a5a329", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "temporaryInvestments" : {
             "title" : "Temporary Investments", 
@@ -1152,7 +1248,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "574256373c6d3cd598a5a32b"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256373c6d3cd598a5a32b", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "accountReceivibale" : {
             "title" : "Accounts Receivible -net", 
@@ -1161,7 +1265,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "5742563a3c6d3cd598a5a32d"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742563a3c6d3cd598a5a32d", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "inventory" : {
             "title" : "Inventory", 
@@ -1170,7 +1282,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "5742563e3c6d3cd598a5a32f"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742563e3c6d3cd598a5a32f", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "supplies" : {
             "title" : "Supplies", 
@@ -1179,7 +1299,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "574256413c6d3cd598a5a331"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256413c6d3cd598a5a331", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "prepaidInsurance" : {
             "title" : "Prepaid Insurance", 
@@ -1188,7 +1316,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "574256453c6d3cd598a5a333"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256453c6d3cd598a5a333", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "totalCurrentAssests" : {
             "title" : "Total Current Assents", 
@@ -1198,7 +1334,15 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "isA" : "5742561f3c6d3cd598a5a327"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742561f3c6d3cd598a5a327", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "investments" : {
             "title" : "Investments", 
@@ -1208,7 +1352,15 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "isA" : "574256493c6d3cd598a5a335"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256493c6d3cd598a5a335", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "propertyPlantEquipment" : {
             "title" : "Property, Plant and Equipment", 
@@ -1224,7 +1376,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "5742564f3c6d3cd598a5a339"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742564f3c6d3cd598a5a339", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "landImprovements" : {
             "title" : "Land Improvements", 
@@ -1233,7 +1393,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "574256573c6d3cd598a5a33d"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256573c6d3cd598a5a33d", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "buildings" : {
             "title" : "Buildings", 
@@ -1242,7 +1410,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "5742565b3c6d3cd598a5a33f"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742565b3c6d3cd598a5a33f", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "equipment" : {
             "title" : "Equipment", 
@@ -1251,7 +1427,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "5742565e3c6d3cd598a5a341"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742565e3c6d3cd598a5a341", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "lessAccumDeprecation" : {
             "title" : "Less: Accum Deprecation", 
@@ -1260,7 +1444,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "574256613c6d3cd598a5a343"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256613c6d3cd598a5a343", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "totalPropPlantEquipment" : {
             "title" : "Total Property, Plant and Equipment", 
@@ -1270,7 +1462,15 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "isA" : "5742564c3c6d3cd598a5a337"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742564c3c6d3cd598a5a337", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "intangibleAssets" : {
             "title" : "Intangible Assets", 
@@ -1286,7 +1486,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "5742566a3c6d3cd598a5a349"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742566a3c6d3cd598a5a349", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "tradeNames" : {
             "title" : "Trade Names", 
@@ -1295,7 +1503,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "isA" : "574256713c6d3cd598a5a34d"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256713c6d3cd598a5a34d", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "totalIntangibleAssests" : {
             "title" : "Total Intabgible Assets", 
@@ -1305,7 +1521,15 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
             "bold" : true, 
-            "isA" : "574256643c6d3cd598a5a345"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256643c6d3cd598a5a345", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "totalAssests" : {
             "title" : "Total Assests", 
@@ -1316,7 +1540,15 @@
             "col" : NumberInt(1), 
             "size" : "1.2em", 
             "bold" : true, 
-            "isA" : "57343b823c6d3cd598a5a2e3"
+            "query" : {
+                "select" : "value", 
+                "from" : "57343b823c6d3cd598a5a2e3", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "libilities" : {
             "title" : "Liabilities", 
@@ -1340,7 +1572,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "574256773c6d3cd598a5a351"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256773c6d3cd598a5a351", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "accountsPayable" : {
             "title" : "Accounts Payable", 
@@ -1349,7 +1589,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "5742567a3c6d3cd598a5a353"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742567a3c6d3cd598a5a353", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "wagesPayable" : {
             "title" : "Wages Payable", 
@@ -1358,7 +1606,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "5742567d3c6d3cd598a5a355"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742567d3c6d3cd598a5a355", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "intrestPayable" : {
             "title" : "Intrest Payable", 
@@ -1367,7 +1623,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "574256833c6d3cd598a5a359"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256833c6d3cd598a5a359", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "taxesPayable" : {
             "title" : "Taxes Payable", 
@@ -1376,7 +1640,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "574256863c6d3cd598a5a35b"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256863c6d3cd598a5a35b", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "warantyLiability" : {
             "title" : "Waranty Liability", 
@@ -1385,16 +1657,32 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "574256893c6d3cd598a5a35d"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256893c6d3cd598a5a35d", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
-        "Unearned Revenues" : {
+        "unearnedRevenues" : {
             "title" : "Unearned Revenues", 
             "default" : NumberInt(0), 
             "readOnly" : true, 
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "5742568e3c6d3cd598a5a35f"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742568e3c6d3cd598a5a35f", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "totalCurrentLiabilities" : {
             "title" : "Total Current Liabilities", 
@@ -1404,7 +1692,15 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "isA" : "574256743c6d3cd598a5a34f"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256743c6d3cd598a5a34f", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "longTermLiabilities" : {
             "title" : "Long-Term Libilities", 
@@ -1420,7 +1716,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "574261583c6d3cd598a5a363"
+            "query" : {
+                "select" : "value", 
+                "from" : "574261583c6d3cd598a5a363", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "bondsPayable" : {
             "title" : "Bonds Payable", 
@@ -1429,7 +1733,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "574261633c6d3cd598a5a365"
+            "query" : {
+                "select" : "value", 
+                "from" : "574261633c6d3cd598a5a365", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "totalLongTermLiabilities" : {
             "title" : "Total Long-Term Liabilities", 
@@ -1439,7 +1751,15 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "isA" : "574256923c6d3cd598a5a361"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256923c6d3cd598a5a361", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "totalLiabilities" : {
             "title" : "Total Liabilities", 
@@ -1449,7 +1769,15 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "isA" : "574256743c6d3cd598a5a34f"
+            "query" : {
+                "select" : "value", 
+                "from" : "574256743c6d3cd598a5a34f", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "stockoldersEquity" : {
             "title" : "Stockholder's Equity", 
@@ -1466,7 +1794,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "574261743c6d3cd598a5a369"
+            "query" : {
+                "select" : "value", 
+                "from" : "574261743c6d3cd598a5a369", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "retainedEarnings" : {
             "title" : "Retained Earnings", 
@@ -1475,7 +1811,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "574261793c6d3cd598a5a36b"
+            "query" : {
+                "select" : "value", 
+                "from" : "574261793c6d3cd598a5a36b", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "accumOtherComprehesiveIncome" : {
             "title" : "Accum Other Comprehensive Income", 
@@ -1484,7 +1828,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "5742617f3c6d3cd598a5a36d"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742617f3c6d3cd598a5a36d", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "lessTreasuryStock" : {
             "title" : "Less: Treasury Stock", 
@@ -1493,7 +1845,15 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "isA" : "574261843c6d3cd598a5a36f"
+            "query" : {
+                "select" : "value", 
+                "from" : "574261843c6d3cd598a5a36f", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "totalStockholdersEquity" : {
             "title" : "Total Stockholders Equity", 
@@ -1503,7 +1863,15 @@
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
             "bold" : true, 
-            "isA" : "5742616e3c6d3cd598a5a367"
+            "query" : {
+                "select" : "value", 
+                "from" : "5742616e3c6d3cd598a5a367", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }, 
         "totalLibilitiesAndStock" : {
             "title" : "Total Libilities and<br>Stockholder's Equity", 
@@ -1514,7 +1882,15 @@
             "col" : NumberInt(2), 
             "size" : "1.2em", 
             "bold" : true, 
-            "isA" : "57343bba3c6d3cd598a5a2e5"
+            "query" : {
+                "select" : "value", 
+                "from" : "57343bba3c6d3cd598a5a2e5", 
+                "where" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -1523,13 +1899,13 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314a"), 
     "docType" : "object", 
-    "name" : "Document View", 
-    "description" : "<p>Descibes the document hierarchy, including a header, a paragraph parts array and a subdocuments array</p>", 
+    "name" : "Document Tree View", 
     "type" : "object", 
     "rootQuery" : {
         "comment" : "Root Document", 
         "select" : "name", 
         "from" : "573435f03c6d3cd598a5a2e1", 
+        "pageId" : "575d4c3f2cf3d6dc3ed83154", 
         "where" : {
             "eq" : {
                 "_id" : "$initialDocId"
@@ -1541,17 +1917,13 @@
         "comment" : "Paragraphs", 
         "select" : "name", 
         "from" : "573435f03c6d3cd598a5a2e1", 
+        "pageId" : "575d4c3f2cf3d6dc3ed83154", 
         "where" : {
             "in" : {
                 "_id" : "$childDocs"
             }
         }, 
         "recursive" : "same"
-    }, 
-    "childrenQuery" : {
-        "in" : {
-            "_id" : "$childDocs"
-        }
     }, 
     "properties" : {
         "_id" : {
@@ -1568,8 +1940,7 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "573435f03c6d3cd598a5a2e1"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314b"), 
@@ -1577,10 +1948,10 @@
     "name" : "Class Model Tree View", 
     "description" : "<p>Descibes the class model hierarchy, including a children array</p>", 
     "type" : "object", 
-    "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
     "rootQuery" : {
         "comment" : "Standard Model", 
         "select" : "title", 
+        "from" : "classes", 
         "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
         "where" : {
             "eq" : {
@@ -1594,6 +1965,7 @@
         {
             "comment" : "Classes", 
             "select" : "title", 
+            "from" : "classes", 
             "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
             "where" : {
                 "eq" : {
@@ -1606,8 +1978,8 @@
         {
             "comment" : "Objects", 
             "select" : "name", 
-            "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
             "from" : "56f86c6a5dde184ccfb9fc6a", 
+            "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
             "where" : {
                 "eq" : {
                     "classId" : "$_id"
@@ -1616,12 +1988,6 @@
             "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABvSURBVDhPY/j//z9FeNiD/4pAjwIxyQCq0ecYAxgTbxCaRnSM2yACGtExqkEkaETHEEOGgQGDAgBzVTYQewKxGhBLALEIEDMBMSMSBvFVgVgXiEuBOBmmnQmImYGYEQmzQzEHFMPkQepBGMr+zwUAa2Uzpn+czq8AAAAASUVORK5CYII="
         }
     ], 
-    "childrenQuery" : {
-        "eq" : {
-            "parentId" : "$_id"
-        }
-    }, 
-    "childrenView" : "579338e73c6d3cd598a5a3b2", 
     "properties" : {
         "_id" : {
             "title" : "_id", 
@@ -1718,6 +2084,7 @@
     "rootQuery" : {
         "comment" : "Owners Class", 
         "select" : "title", 
+        "from" : "classes", 
         "where" : {
             "eq" : {
                 "_id" : "56f870a55dde184ccfb9fc6c"
@@ -1730,6 +2097,7 @@
         {
             "comment" : "Owner Classes", 
             "select" : "title", 
+            "from" : "classes", 
             "where" : {
                 "eq" : {
                     "parentId" : "$_id"
@@ -1760,12 +2128,6 @@
             }
         }
     ], 
-    "childrenQuery" : {
-        "eq" : {
-            "parentId" : "$_id"
-        }
-    }, 
-    "childrenView" : "579357cf3c6d3cd598a5a3b4", 
     "properties" : {
         "name" : {
             "readOnly" : false
@@ -1788,8 +2150,7 @@
                     "displayType" : "Tree", 
                     "name" : "Document Tree", 
                     "rootDocId" : "575d4c3f2cf3d6dc3ed83151", 
-                    "viewId" : "575d4c3f2cf3d6dc3ed8314a", 
-                    "pageId" : "575d4c3f2cf3d6dc3ed83154"
+                    "viewId" : "575d4c3f2cf3d6dc3ed8314a"
                 }
             ]
         }
@@ -1853,32 +2214,8 @@
     "docType" : "object", 
     "name" : "ACME Health Care Clinic", 
     "description" : "<p>The ACME Health Care Clinic</p>", 
-    "pageId" : "", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABtklEQVQ4T5WSsUtbURTGz3dfiFEzFKFL1Xtv8p4g2sFOFdql0E5tQTJlkHZ16FQo/gOdnBw6dA4dhKKTdHDKIJKpUy2heUneTYKLIBLakERzT3liIAlJSO50z3e+8zv3XA6o57hSPgPECRHN9eo99wYTvyoac9bV0AdQiQ+wt5/Icd4RUV/uzmdthuHsFU35y2gA8Y5vgsfDXuAp/YsJX/sArtb7zIiHBYJ5jUCrlnA0DCCIU8SUt8DvMO+QbcBT+goCW50O7Ii5R8qC7Xckla6VTLA06Fp/uB5vRVsPQn2mPXN9fnn+d9DjSpkfCfBU4hsRxe6Lmr4pb08FcJf1Yaw5/z4sasf+ZQrVIDURwNP6hBltEDtLRr/NUpY9KQ+JRRQC0YIpv+yCho7gqcSpb8rPB7tprWORTifnV6sbYwFJpXIA9pm5XjLmR2heUeo1s1iwxB9LleDJWICr1AuwWCTY3cbNzdPQPBuJ/AQ5n0lwzQ+C7FhAN+lJecBCHIQxrE37lUp6ok/smlZk8g2BN+9iRq5QKR0PBbhKXxRN8GjaLQz9ntZ/kJSyTkBTWJ5ulZlAjoj/B4u9x9M8LUgYAAAAAElFTkSuQmCC", 
     "classId" : "574243d23c6d3cd598a5a31b"
-}
-{ 
-    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314e"), 
-    "docType" : "object", 
-    "name" : "Resources Page", 
-    "divider" : "Vertical", 
-    "accordionOrTab" : "Accordions", 
-    "tabs" : [
-        {
-            "name" : "Resources Tree", 
-            "widgets" : [
-                {
-                    "displayType" : "Tree", 
-                    "name" : "Resources Tree", 
-                    "rootDocId" : "56f87bcc5dde184ccfb9fc70", 
-                    "viewId" : "575d4c3f2cf3d6dc3ed8314b", 
-                    "pageId" : "575d4c3f2cf3d6dc3ed8314c"
-                }
-            ]
-        }
-    ], 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "56f87ec55dde184ccfb9fc74"
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314f"), 
@@ -1954,43 +2291,19 @@
     "classId" : "574237133c6d3cd598a5a30d"
 }
 { 
-    "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315d"), 
-    "docType" : "object", 
-    "name" : "XXX Oganizational Unit View", 
-    "description" : "<p>Descibes the organizational unit hierarchy, including a children array</p>", 
-    "type" : "object", 
-    "rootQuery" : {
-        "eq" : {
-            "parentOrgId" : "$_id"
-        }
-    }, 
-    "childrenQuery" : {
-        "eq" : {
-            "parentOrgId" : "$_id"
-        }
-    }, 
-    "properties" : {
-        "icon" : {
-            "readOnly" : false
-        }, 
-        "subUnits" : {
-            "readOnly" : false
-        }
-    }, 
-    "required" : [
-        "_id", 
-        "name"
-    ], 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "574237133c6d3cd598a5a30d"
-}
-{ 
     "_id" : ObjectId("575de7f43c6d3cd598a5a387"), 
     "docType" : "object", 
     "name" : "Paragraph View", 
     "description" : "<p>Paragraph View</p>", 
     "type" : "object", 
+    "rootQuery" : {
+        "from" : "573435f03c6d3cd598a5a2e1", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }
+    }, 
     "properties" : {
         "_id" : {
 
@@ -2038,8 +2351,7 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "573435f03c6d3cd598a5a2e1"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("576668623c6d3cd598a5a389"), 
@@ -2189,16 +2501,25 @@
 { 
     "_id" : ObjectId("5777a04e3c6d3cd598a5a392"), 
     "docType" : "object", 
-    "name" : "Backlog View", 
-    "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
+    "name" : "Backlog Table View", 
+    "query" : {
+        "comment" : "Blacklog", 
+        "select" : "name", 
+        "from" : "574225cb3c6d3cd598a5a305", 
+        "where" : {
+            "eq" : {
+                "sellerId" : "$docId"
+            }
+        }
+    }, 
     "type" : "object", 
     "properties" : {
-        "date" : {
+        "stateHistory[date[0]]" : {
             "title" : "Date", 
             "type" : "string", 
             "format" : "date-time"
         }, 
-        "state" : {
+        "stateHistory[state[0]]" : {
             "title" : "Sate", 
             "type" : "string", 
             "query" : ""
@@ -2208,8 +2529,7 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "574225cb3c6d3cd598a5a305"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57783efc3c6d3cd598a5a394"), 
@@ -2241,8 +2561,7 @@
                 {
                     "displayType" : "Table", 
                     "name" : "Backlog Table", 
-                    "viewId" : "5777a04e3c6d3cd598a5a392", 
-                    "pageId" : "57785c393c6d3cd598a5a398"
+                    "viewId" : "5777a04e3c6d3cd598a5a392"
                 }
             ]
         }
@@ -2286,6 +2605,14 @@
     "docType" : "object", 
     "name" : "Service Request View", 
     "type" : "object", 
+    "rootQuery" : {
+        "from" : "574225cb3c6d3cd598a5a305", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }
+    }, 
     "properties" : {
         "_id" : {
 
@@ -2335,29 +2662,7 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "574225cb3c6d3cd598a5a305"
-}
-{ 
-    "_id" : ObjectId("577863d83c6d3cd598a5a39c"), 
-    "docType" : "object", 
-    "name" : "XXX State History Table View", 
-    "description" : "<p>State History Table View</p>", 
-    "type" : "object", 
-    "properties" : {
-        "date" : {
-
-        }, 
-        "stateId" : {
-
-        }, 
-        "description" : {
-
-        }
-    }, 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "574225cb3c6d3cd598a5a305"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("577909043c6d3cd598a5a39e"), 
@@ -2387,44 +2692,19 @@
     "classId" : "5747254b3c6d3cd598a5a379"
 }
 { 
-    "_id" : ObjectId("578919763c6d3cd598a5a3a2"), 
-    "docType" : "object", 
-    "name" : "XXX Neuralquest", 
-    "divider" : "None", 
-    "accordionOrTab" : "Tabs", 
-    "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
-    "tabs" : [
-        {
-            "name" : "Read", 
-            "widgets" : [
-                {
-                    "displayType" : "HomePage", 
-                    "name" : "Home Page", 
-                    "viewId" : "578921fe3c6d3cd598a5a3a4"
-                }
-            ]
-        }, 
-        {
-            "name" : "Update", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Home Page", 
-                    "readOnly" : false, 
-                    "viewId" : "578921fe3c6d3cd598a5a3a4"
-                }
-            ]
-        }
-    ], 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "56f87ec55dde184ccfb9fc74"
-}
-{ 
     "_id" : ObjectId("578921fe3c6d3cd598a5a3a4"), 
     "docType" : "object", 
     "name" : "Home Page View", 
     "description" : "<p>Descibes home page of the organization</p>", 
     "type" : "object", 
+    "rootQuery" : {
+        "from" : "57343c283c6d3cd598a5a2e9", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }
+    }, 
     "properties" : {
         "name" : {
             "readOnly" : false
@@ -2456,8 +2736,7 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "57343c283c6d3cd598a5a2e9"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("578bff823c6d3cd598a5a3a6"), 
@@ -2465,7 +2744,6 @@
     "name" : "ACME Bicycle Page", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
-    "displayBanner" : true, 
     "tabs" : [
         {
             "name" : "Catalog", 
@@ -2478,26 +2756,6 @@
         {
             "name" : "Who Are We?", 
             "pageId" : "575d4c3f2cf3d6dc3ed83150"
-        }, 
-        {
-            "name" : "Members", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Home Page", 
-                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
-                }
-            ]
-        }, 
-        {
-            "name" : "Balance Sheet", 
-            "widgets" : [
-                {
-                    "displayType" : "Form", 
-                    "name" : "Balance Sheet Form", 
-                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
-                }
-            ]
         }, 
         {
             "name" : "Resources", 
@@ -2547,71 +2805,6 @@
     "classId" : "574261743c6d3cd598a5a369"
 }
 { 
-    "_id" : ObjectId("579338e73c6d3cd598a5a3b2"), 
-    "docType" : "object", 
-    "name" : "XXX Object View", 
-    "description" : "<p>Displays objects</p>", 
-    "type" : "object", 
-    "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
-    "rootQuery" : {
-        "eq" : {
-            "classId" : "$_id"
-        }
-    }, 
-    "properties" : {
-        "_id" : {
-
-        }, 
-        "name" : {
-
-        }, 
-        "icon" : {
-            "title" : "Icon", 
-            "type" : "string"
-        }, 
-        "description" : {
-
-        }
-    }, 
-    "isA" : "56f86c6a5dde184ccfb9fc6a", 
-    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABvSURBVDhPY/j//z9FeNiD/4pAjwIxyQCq0ecYAxgTbxCaRnSM2yACGtExqkEkaETHEEOGgQGDAgBzVTYQewKxGhBLALEIEDMBMSMSBvFVgVgXiEuBOBmmnQmImYGYEQmzQzEHFMPkQepBGMr+zwUAa2Uzpn+czq8AAAAASUVORK5CYII=", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df"
-}
-{ 
-    "_id" : ObjectId("579357cf3c6d3cd598a5a3b4"), 
-    "docType" : "object", 
-    "name" : "XXX Owner Object View", 
-    "description" : "<p>Displays owners</p>", 
-    "type" : "object", 
-    "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
-    "rootQuery" : {
-        "eq" : {
-            "classId" : "$_id"
-        }
-    }, 
-    "childrenView" : "575d4c3f2cf3d6dc3ed8315d", 
-    "properties" : {
-        "_id" : {
-
-        }, 
-        "name" : {
-
-        }, 
-        "icon" : {
-            "title" : "Icon", 
-            "type" : "string"
-        }, 
-        "description" : {
-
-        }
-    }, 
-    "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABvSURBVDhPY/j//z9FeNiD/4pAjwIxyQCq0ecYAxgTbxCaRnSM2yACGtExqkEkaETHEEOGgQGDAgBzVTYQewKxGhBLALEIEDMBMSMSBvFVgVgXiEuBOBmmnQmImYGYEQmzQzEHFMPkQepBGMr+zwUAa2Uzpn+czq8AAAAASUVORK5CYII=", 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "56f870a55dde184ccfb9fc6c"
-}
-{ 
     "_id" : ObjectId("5794cd333c6d3cd598a5a3b5"), 
     "docType" : "object", 
     "name" : "Catalog Page", 
@@ -2620,13 +2813,11 @@
     "tabs" : [
         {
             "name" : "Catalog Table", 
-            "banner" : true, 
             "widgets" : [
                 {
                     "displayType" : "Table", 
                     "name" : "Catalog Table", 
-                    "viewId" : "579529973c6d3cd598a5a3b7", 
-                    "pageId" : "57979cdc3c6d3cd598a5a3b9"
+                    "viewId" : "579529973c6d3cd598a5a3b7"
                 }
             ]
         }
@@ -2637,9 +2828,20 @@
 { 
     "_id" : ObjectId("579529973c6d3cd598a5a3b7"), 
     "docType" : "object", 
-    "name" : "Catalog View", 
-    "description" : "<p>View useed for the catalog</p>", 
+    "name" : "Catalog Table View", 
+    "description" : "<p>View used for the catalog table</p>", 
     "type" : "object", 
+    "query" : {
+        "comment" : "Items on sale", 
+        "select" : "name", 
+        "from" : "5742563e3c6d3cd598a5a32f", 
+        "pageId" : "57979cdc3c6d3cd598a5a3b9", 
+        "where" : {
+            "eq" : {
+                "ownerId" : "$docId"
+            }
+        }
+    }, 
     "properties" : {
         "imageUrl" : {
             "styleColumn" : "width : 100px"
@@ -2652,8 +2854,7 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "5742563e3c6d3cd598a5a32f"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57979cdc3c6d3cd598a5a3b9"), 
@@ -2687,6 +2888,14 @@
     "name" : "Purchase View", 
     "description" : "<p>View useed for the product</p>", 
     "type" : "object", 
+    "rootQuery" : {
+        "from" : "5742563e3c6d3cd598a5a32f", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }
+    }, 
     "properties" : {
         "_id" : {
 
@@ -2724,8 +2933,7 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "5742563e3c6d3cd598a5a32f"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57a674592d8cd20920e6d815"), 
@@ -2740,7 +2948,6 @@
                 {
                     "displayType" : "Form", 
                     "name" : "Home Page", 
-                    "readOnly" : false, 
                     "viewId" : "578921fe3c6d3cd598a5a3a4"
                 }
             ]
@@ -2764,6 +2971,16 @@
         {
             "name" : "Offerings", 
             "pageId" : "57b762622d8cd20920e6d849"
+        }, 
+        {
+            "name" : "Balance Sheet", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Balance Sheet Form", 
+                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
+                }
+            ]
         }
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2828,6 +3045,7 @@
             "comment" : "Pages", 
             "select" : "name", 
             "from" : "56f87ec55dde184ccfb9fc74", 
+            "pageId" : "57a677652d8cd20920e6d817", 
             "where" : {
                 "eq" : {
                     "ownerId" : "$_id"
@@ -2837,18 +3055,21 @@
                 "comment" : "Tabs", 
                 "select" : "name", 
                 "subDoc" : "tabs", 
+                "pageId" : "582bbb0815456a300beb7e07", 
                 "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OUJGMEI5RkI2OUExMTFFM0IyNENGMTlBRjA3REE4OEMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OUJGMEI5RkM2OUExMTFFM0IyNENGMTlBRjA3REE4OEMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5QkYwQjlGOTY5QTExMUUzQjI0Q0YxOUFGMDdEQTg4QyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5QkYwQjlGQTY5QTExMUUzQjI0Q0YxOUFGMDdEQTg4QyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pgl1Uy4AAAHGSURBVHjanFM7SwNBEP52b5ML8VnoL/BHWKqdaCHYiO/WgFgp2FiIlaSRiGinGHwgCAY1aqVi53+wMU0KRQwqedztObOXO08FkQzsze7NN9/MzswKz/OweXD14jpuu6Z9IFIKKMt6So31d24dXB1rrYcjZgjBGJlTfGDn2ckBlMoO4PnGpoTCRjbfwXZ27uvtRumjEhK0Jm1c39wPGQKOrMmx+FQKCVoIUKnWsLZz6lWrDi4u7xBJAJaUiMUVDAGnpkkrS4aAeMxCamKQyAREHYOQQiBpW1jP5n0CBtCVYRMjIwUdyhS1XHOMo6i7hkS0SdrN4PrJOqHZLKRzSMRjRheKL0bbMYX59MmXpiD8Pywms2R2z725qUG8flS5YIY5kJ+V5ytR9dGWjLMfZKQumFk+oqsIvybaX0zG50CznXGBqCjB9sooao5r6vEVWITa9J4+jAvnJUowvbRvOkED9MeSBvctg+Ceh6uTcF0NpaRfB4FfXeAMGBf4fctgZCFrIowv7uGh8IwJ0rayzDnQbGdcpMoeTduZ14iwnwweTiNiHhxvyu9vt5lsvkebvv3D03+J1Gf30QwSDUcX/W5vIInKpwADAKBBAEGN5kJNAAAAAElFTkSuQmCC", 
                 "join" : [
                     {
                         "comment" : "Widgets", 
                         "select" : "name", 
                         "subDoc" : "widgets", 
+                        "pageId" : "582bbb2415456a300beb7e09", 
                         "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAa9JREFUeNqck7tKA0EUhv+5bGIheCkEiWgKu0SNNoJgYoiCMQn4NKltbHwaURAREzWFICgoWPgCFlHxUtiYZNZzZjYma1TU2Z1lmZnvP3P+MyPGNg92Gi1Tavk+AO6/aQJKCHhK7uo3grfW50EifxIgGOXtsxILID7ch63TWx7n98fmB5/yQgzM6iYFzowaZEoj6MHFdwrUIgbMamMHBS6ubwiQXSw9slfBZ6+MwdxsAszq9oQX6SNAO4gW8bqry3ML+MaFdYICqZnZD8GOgPZwWDmEkhKGoNzyCmLjcWTTi6EdVE9qkEp2CQTVU1piNZ+3UTiioW2mksmeFFJTU7i/q6PNaT9whiP7wmYOSFfnx+dnPDw92ZRcDnYWmnbLjB9OgX6lgmShAKhWKx3jLO9MzWWzX3jgRbC3v28XMbCWL2BsIo7cUiaUQuXomILoTwIECKVQKBbJAxk4bzCdSPR4ME2+tJqNj7S0cJVBVCvYaongBCkWMriv10MpcI962p1a6trj2hI81B/9dBV+uBfCMcxq8/pSG9w4Tjc4/O/vkoWZ5Q1PUh/A/9rLuwADAK8loV8tdNaPAAAAAElFTkSuQmCC"
                     }, 
                     {
                         "comment" : "SubPages", 
                         "select" : "name", 
                         "from" : "56f87ec55dde184ccfb9fc74", 
+                        "pageId" : "57a677652d8cd20920e6d817", 
                         "where" : {
                             "eq" : {
                                 "_id" : "$pageId"
@@ -2859,20 +3080,13 @@
             }
         }
     ], 
-    "childrenQuery" : {
-        "eq" : {
-            "ownerId" : "$_id"
-        }
-    }, 
-    "childrenView" : "58267ecf1915d3c3eee971f1", 
     "properties" : {
         "name" : {
 
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "56f87ec55dde184ccfb9fc74"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57a67c2f2d8cd20920e6d81d"), 
@@ -2890,32 +3104,38 @@
         }, 
         "recursive" : "schema"
     }, 
-    "query" : [
-        {
-            "comment" : "Views", 
-            "select" : "name", 
-            "from" : "573435c23c6d3cd598a5a2df", 
-            "where" : {
-                "eq" : {
-                    "ownerId" : "$_id"
-                }
+    "query" : {
+        "comment" : "Views", 
+        "select" : "name", 
+        "from" : "573435c23c6d3cd598a5a2df", 
+        "pageId" : "57a678162d8cd20920e6d819", 
+        "where" : {
+            "eq" : {
+                "ownerId" : "$_id"
             }
         }
-    ], 
+    }, 
     "properties" : {
         "name" : {
 
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57a67ef52d8cd20920e6d81f"), 
     "docType" : "object", 
     "name" : "Page Form View", 
     "type" : "object", 
+    "rootQuery" : {
+        "from" : "56f87ec55dde184ccfb9fc74", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }
+    }, 
     "properties" : {
         "_id" : {
 
@@ -3002,14 +3222,21 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "56f87ec55dde184ccfb9fc74"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57a67f252d8cd20920e6d821"), 
     "docType" : "object", 
     "name" : "View Form View", 
     "type" : "object", 
+    "rootQuery" : {
+        "from" : "573435c23c6d3cd598a5a2df", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }
+    }, 
     "properties" : {
         "_id" : {
 
@@ -3026,16 +3253,13 @@
         "description" : {
             "readOnly" : false
         }, 
-        "pageId" : {
-            "readOnly" : false
-        }, 
         "required" : {
 
         }, 
-        "query" : {
+        "rootQuery" : {
             "readOnly" : false
         }, 
-        "childrenQuery" : {
+        "query" : {
             "readOnly" : false
         }, 
         "properties" : {
@@ -3043,8 +3267,7 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "573435c23c6d3cd598a5a2df"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57af81b02d8cd20920e6d823"), 
@@ -3076,7 +3299,6 @@
     "tabs" : [
         {
             "name" : "Home", 
-            "banner" : true, 
             "widgets" : [
                 {
                     "displayType" : "HomePage", 
@@ -3094,18 +3316,19 @@
             "pageId" : "577853123c6d3cd598a5a396"
         }, 
         {
-            "name" : "Members", 
+            "name" : "Oeganization", 
             "widgets" : [
                 {
                     "displayType" : "Form", 
-                    "name" : "Home Page", 
-                    "viewId" : "575d4c3f2cf3d6dc3ed83149"
+                    "name" : "Organizational Unit Form", 
+                    "viewId" : "57b72d5e2d8cd20920e6d83d"
+                }, 
+                {
+                    "displayType" : "Table", 
+                    "name" : "Members", 
+                    "viewId" : "582b9ae215456a300beb7e01"
                 }
             ]
-        }, 
-        {
-            "name" : "Resources", 
-            "pageId" : "57a674592d8cd20920e6d815"
         }
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -3139,33 +3362,39 @@
     "classId" : "574725843c6d3cd598a5a37d"
 }
 { 
-    "_id" : ObjectId("57b725602d8cd20920e6d82f"), 
-    "docType" : "object", 
-    "name" : "XXX OfFerings Table View", 
-    "type" : "object", 
-    "childrenView" : "57c213652d8cd20920e6d84d", 
-    "properties" : {
-        "name" : {
-
-        }
-    }, 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "574234113c6d3cd598a5a30b"
-}
-{ 
     "_id" : ObjectId("57b725d32d8cd20920e6d831"), 
     "docType" : "object", 
-    "name" : "Organizational Unit Table View", 
+    "name" : "Organizational Unit Tree View", 
     "type" : "object", 
+    "rootQuery" : {
+        "comment" : "Owner", 
+        "select" : "name", 
+        "from" : "56f870a55dde184ccfb9fc6c", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }, 
+        "recursive" : "schema"
+    }, 
+    "query" : {
+        "comment" : "Org Unit", 
+        "select" : "name", 
+        "from" : "574237133c6d3cd598a5a30d", 
+        "where" : {
+            "eq" : {
+                "parentOrgId" : "$_id"
+            }
+        }, 
+        "recursive" : "same"
+    }, 
     "properties" : {
         "name" : {
 
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "574237133c6d3cd598a5a30d"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57b725f32d8cd20920e6d833"), 
@@ -3187,6 +3416,7 @@
         "comment" : "States", 
         "select" : "name", 
         "from" : "5745eaa53c6d3cd598a5a371", 
+        "pageId" : "57b72a3c2d8cd20920e6d839", 
         "where" : {
             "eq" : {
                 "ownerId" : "$_id"
@@ -3196,6 +3426,7 @@
             "comment" : "State", 
             "select" : "name", 
             "from" : "5745eaa53c6d3cd598a5a371", 
+            "pageId" : "57b72a3c2d8cd20920e6d839", 
             "where" : {
                 "in" : {
                     "_id" : "$nextStateIds"
@@ -3210,8 +3441,7 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "5745eaa53c6d3cd598a5a371"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57b729d52d8cd20920e6d835"), 
@@ -3254,6 +3484,11 @@
                     "displayType" : "Form", 
                     "name" : "Organizational Unit Form", 
                     "viewId" : "57b72d5e2d8cd20920e6d83d"
+                }, 
+                {
+                    "displayType" : "Table", 
+                    "name" : "Members", 
+                    "viewId" : "582b9ae215456a300beb7e01"
                 }
             ]
         }
@@ -3285,6 +3520,14 @@
     "docType" : "object", 
     "name" : "Offering Form View", 
     "type" : "object", 
+    "rootQuery" : {
+        "from" : "574234113c6d3cd598a5a30b", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }
+    }, 
     "properties" : {
         "_id" : {
 
@@ -3315,14 +3558,21 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "574234113c6d3cd598a5a30b"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57b72d5e2d8cd20920e6d83d"), 
     "docType" : "object", 
     "name" : "Organizational Unit Form View", 
     "type" : "object", 
+    "rootQuery" : {
+        "from" : "574237133c6d3cd598a5a30d", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }
+    }, 
     "properties" : {
         "_id" : {
 
@@ -3354,14 +3604,21 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "574237133c6d3cd598a5a30d"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57b72d792d8cd20920e6d83f"), 
     "docType" : "object", 
     "name" : "State Form View", 
     "type" : "object", 
+    "rootQuery" : {
+        "from" : "5745eaa53c6d3cd598a5a371", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }
+    }, 
     "properties" : {
         "_id" : {
 
@@ -3383,8 +3640,7 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "5745eaa53c6d3cd598a5a371"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57b762392d8cd20920e6d841"), 
@@ -3502,13 +3758,11 @@
     "name" : "States Process View", 
     "type" : "object", 
     "rootQuery" : {
-        "eq" : {
-            "ownerId" : "$selectedObj"
-        }
-    }, 
-    "childrenQuery" : {
-        "in" : {
-            "_id" : "$nextStateIds"
+        "from" : "5745eaa53c6d3cd598a5a371", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
         }
     }, 
     "properties" : {
@@ -3520,8 +3774,7 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "5745eaa53c6d3cd598a5a371"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
     "_id" : ObjectId("57c213652d8cd20920e6d84d"), 
@@ -3544,6 +3797,7 @@
             "comment" : "Offerings", 
             "select" : "name", 
             "from" : "574234113c6d3cd598a5a30b", 
+            "pageId" : "57b729d52d8cd20920e6d835", 
             "where" : {
                 "eq" : {
                     "ownerId" : "$_id"
@@ -3553,6 +3807,7 @@
                 "comment" : "State", 
                 "select" : "name", 
                 "from" : "5745eaa53c6d3cd598a5a371", 
+                "pageId" : "57b72a3c2d8cd20920e6d839", 
                 "where" : {
                     "eq" : {
                         "_id" : "$initialStateId"
@@ -3562,6 +3817,7 @@
                     "comment" : "State", 
                     "select" : "name", 
                     "from" : "5745eaa53c6d3cd598a5a371", 
+                    "pageId" : "57b72a3c2d8cd20920e6d839", 
                     "where" : {
                         "in" : {
                             "_id" : "$nextStateIds"
@@ -3572,7 +3828,6 @@
             }
         }
     ], 
-    "childrenView" : "57c2141e2d8cd20920e6d84f", 
     "properties" : {
         "_id" : {
 
@@ -3582,87 +3837,136 @@
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "57343c283c6d3cd598a5a2e9"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
-    "_id" : ObjectId("57c2141e2d8cd20920e6d84f"), 
+    "_id" : ObjectId("582b9ae215456a300beb7e01"), 
     "docType" : "object", 
-    "name" : "XXX Offerings Tree Offerings View", 
+    "name" : "Backlog Table View", 
+    "query" : {
+        "comment" : "Blacklog", 
+        "select" : "name", 
+        "from" : "574225cb3c6d3cd598a5a305", 
+        "where" : {
+            "eq" : {
+                "memberId" : "$docId"
+            }
+        }
+    }, 
     "type" : "object", 
-    "childrenView" : "57ccb0162d8cd20920e6d851", 
     "properties" : {
         "name" : {
 
+        }, 
+        "stateHistory[date[0]]" : {
+            "title" : "Date", 
+            "type" : "string", 
+            "format" : "date-time"
+        }, 
+        "stateHistory[state[0]]" : {
+            "title" : "Sate", 
+            "type" : "string", 
+            "query" : ""
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "574234113c6d3cd598a5a30b"
+    "classId" : "573435c23c6d3cd598a5a2df"
 }
 { 
-    "_id" : ObjectId("57ccb0162d8cd20920e6d851"), 
+    "_id" : ObjectId("582bb92815456a300beb7e03"), 
     "docType" : "object", 
-    "name" : "XXX Offerings Tree States View", 
+    "name" : "Page Tab Form View", 
     "type" : "object", 
     "rootQuery" : {
-        "eq" : {
-            "_id" : "$initialStateId"
+        "from" : "56f87ec55dde184ccfb9fc74", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
         }
     }, 
-    "childrenQuery" : {
-        "in" : {
-            "_id" : "$nextStateIds"
-        }
-    }, 
-    "properties" : {
-        "name" : {
-
-        }
-    }, 
-    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435c23c6d3cd598a5a2df", 
-    "isA" : "5745eaa53c6d3cd598a5a371"
-}
-{ 
-    "_id" : ObjectId("58267ecf1915d3c3eee971f1"), 
-    "docType" : "object", 
-    "name" : "XXX Tabs subDocument", 
-    "type" : "object", 
-    "childrenSubDoc" : "tabs", 
     "properties" : {
         "name" : {
             "readOnly" : false
         }, 
         "pageId" : {
             "readOnly" : false
-        }, 
-        "widgets" : {
-            "readOnly" : false, 
-            "items" : {
-                "properties" : {
-                    "name" : {
-                        "readOnly" : false
-                    }, 
-                    "description" : {
-                        "readOnly" : false
-                    }, 
-                    "displayType" : {
-                        "readOnly" : false
-                    }, 
-                    "viewId" : {
-                        "readOnly" : false
-                    }, 
-                    "rootDocId" : {
-                        "readOnly" : false
-                    }, 
-                    "pageId" : {
-                        "readOnly" : false
-                    }
-                }
-            }
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("582bb9da15456a300beb7e05"), 
+    "docType" : "object", 
+    "name" : "Page Widget Form View", 
+    "type" : "object", 
+    "rootQuery" : {
+        "from" : "56f87ec55dde184ccfb9fc74", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }
+    }, 
+    "properties" : {
+        "name" : {
+            "readOnly" : false
+        }, 
+        "description" : {
+            "readOnly" : false
+        }, 
+        "displayType" : {
+            "readOnly" : false
+        }, 
+        "viewId" : {
+            "readOnly" : false
+        }, 
+        "rootDocId" : {
+            "readOnly" : false
+        }, 
+        "pageId" : {
+            "readOnly" : false
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("582bbb0815456a300beb7e07"), 
+    "docType" : "object", 
+    "name" : "Page Tab Form", 
+    "tabs" : [
+        {
+            "name" : "Pages", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Page Tab Form", 
+                    "viewId" : "582bb92815456a300beb7e03"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("582bbb2415456a300beb7e09"), 
+    "docType" : "object", 
+    "name" : "Page Widget Form", 
+    "tabs" : [
+        {
+            "name" : "Pages", 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Page Form", 
+                    "viewId" : "582bb9da15456a300beb7e05"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
 }

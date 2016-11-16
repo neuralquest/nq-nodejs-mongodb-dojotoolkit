@@ -10,24 +10,16 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectSto
             this.createMenusForWidget();
         },
         _setDocIdAttr: function(docId){
-            var self = this;
+            if(docId == this.docId) return;
+            this.inherited(arguments);
 
-            if(self.widget.rootDocId) {
-                if(self.docId == self.widget.rootDocId) return;
-                self.docId = self.widget.rootDocId;
-            }
-            else {
-                if(self.docId == docId) return;
-                this.inherited(arguments);
-            }
+            var self = this;
 
 			if(self.tree) self.tree.destroy();
 
 			this.treeModel = new nqObjectStoreModel({
 				store : this.store,
-                query: {_id:  self.docId},
                 docId: self.docId,
-                //query: self.schema.query,
                 schema: self.schema
             });
 			this.tree = new Tree({
@@ -73,8 +65,10 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectSto
 					self.inherited('onClick',arguments);
                     //var pageId = item.pageId;
                     //if(!pageId) pageId = self.widget.pageId;
-                    var pageId = self.widget.pageId;
-                    if(!pageId) pageId = item.pageId;
+                    //var pageId = self.widget.pageId;
+                    var pageId;
+                    if('$query' in item && 'pageId' in item.$query) pageId = item.$query.pageId;
+                    if(!pageId && 'pageId' in item) pageId = item.pageId;
                     if(pageId) nq.setHash(item._id, pageId, self.tabNum, self.widNum, self.level+1);
 				},
                 checkItemAcceptance: function(target, source, position){

@@ -74,20 +74,10 @@ define([
             var query = self.schema.rootQuery;
             if(query) {
                 var parentItem = this.store.cachingStore.getSync(this.docId);
-                if(query.where) {
-                    var where = query.where;
-                    var qualifier = Object.keys(where)[0];
-                    var key = Object.keys(where[qualifier])[0];
-                    var value = where[qualifier][key];
-                    if(value == '$docId') {
-                        query = lang.clone(query);
-                        query.where[qualifier][key] = self.docId;
-                    }
-                }
-                var childrenFilter = self.store.buildFilterFromQueryNew(query, parentItem);
+                var childrenFilter = self.store.buildFilterFromQueryNew(query, parentItem, this.docId);
                 collection = self.store.filter(childrenFilter);
             }
-            else collection = this.store.filter(this.query);
+            else onItem([]);
 			/*collection.on('remove, add', function(event){
 				var parent = event.target;
 				var collection = self.childrenCache[parent.id];
@@ -102,9 +92,13 @@ define([
 				self.onChange(obj);
 			});
 			collection.fetch().then(function(children){
-                var newChild = lang.clone(children[0]);
-                newChild.$query = query;
-                onItem(newChild);//we expect only one
+				if(children.length == 0) onItem([]);
+                else {
+                    var newChild = lang.clone(children[0]);
+                    newChild.$query = query;
+                    newChild.hasChildren = true;
+                    onItem(newChild);//we expect only one
+                }
             });
 		},
 		mayHaveChildren: function(item){

@@ -272,20 +272,11 @@ function(declare, lang, when, all, registry, request,
                 if(!viewObj) throw new Error('View Object not found');
                 //console.log('viewObj',viewObj);
                 var inheritedClassSchemaPromise = {};
-                //var docFilter = viewObj.query;
-                if(viewObj.isA) {
-                    inheritedClassSchemaPromise = self.getInheritedClassSchema(viewObj.isA);
-                    /*if ('isA' in viewObj.query) {
-                        var mapsToId = viewObj.query['isA'];
-                        if (mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
-                    }
-                    else if ('and' in viewObj.query) {
-                        var queryArray = viewObj.query['and'];
-                        var mapsToId = null;
-                        if ('isA' in queryArray[0]) mapsToId = queryArray[0]['isA'];
-                        else if ('isA' in queryArray[1]) mapsToId = queryArray[0]['isA'];
-                        if (mapsToId) inheritedClassSchemaPromise = self.getInheritedClassSchema(mapsToId);
-                    }*/
+                if('rootQuery' in viewObj && 'from' in viewObj.rootQuery && viewObj.rootQuery.from != 'classes') {
+                    inheritedClassSchemaPromise = self.getInheritedClassSchema(viewObj.rootQuery.from);
+                }
+                else if('query' in viewObj && 'from' in viewObj.query && viewObj.query.from != 'classes') {
+                    inheritedClassSchemaPromise = self.getInheritedClassSchema(viewObj.query.from);
                 }
                 return when(inheritedClassSchemaPromise, function(inheritedClassSchema){
                     //var properties = viewObj.properties;
@@ -417,203 +408,56 @@ function(declare, lang, when, all, registry, request,
                 return self.isA(parentDoc, id);
             });
         },
-        buildFilterFromQuery: function(docQuery, parentObj, isA){//(parentObj, docQuery, viewObj) {
+        buildFilterFromQueryNew: function(query, parentObj, docId){
             var self = this;
+            return self.Filter(function (obj) {
+                if(!query) return false;
 
-            var filter = self.Filter(function (obj) {
-
-                if(isA) {
-                    if(obj.docType == 'class') return false;
-                    else if(!self.isASync(obj, isA)) return false;
+                if(!'from' in query) return false;
+                if(query.from == 'classes'){
+                    if(obj.docType != 'class') return false;
                 }
-                else if(obj.docType != 'class') return false;
+                else if(!self.isASync(obj, query.from)) return false;
 
-                if(docQuery) {
-                    var qualifier = Object.keys(docQuery)[0];
-                    var key = Object.keys(docQuery[qualifier])[0];
-                    var value = docQuery[qualifier][key];
-                    if(value.substring(0, 1) == '$') value = parentObj[value.substring(1)];
-                    if(qualifier == 'in'){
-                        if(!value in obj[key]) return false;
-                    }
-                    if(qualifier == 'eq'){
-                        if(value != obj[key]) return false;
-                    }
-                    if('and' in docQuery){
-                        debugger;
-                    }
-                }
-
-                return true;
-            });
-            return filter;
-        },
-        buildFilterFromQueryNew: function(query, parentObj){//(parentObj, docQuery, viewObj) {
-            var self = this;
-            var filter = self.Filter(function (obj) {
-
-                if(query.from) {
-                    if(obj.docType == 'class') return false;
-                    else if(!self.isASync(obj, query.from)) return false;
-                }
-                else if(obj.docType != 'class') return false;
-
-                if(query.where) {
+                if('where' in query) {
                     var where = query.where;
                     var qualifier = Object.keys(where)[0];
                     var key = Object.keys(where[qualifier])[0];
                     var value = where[qualifier][key];
-                    if(value.substring(0, 1) == '$') value = parentObj[value.substring(1)];
-                    if(!value) return false;
-                    if(qualifier == 'in'){
+                    if (value.substring(0, 1) == '$') {
+                        if (value == "$docId") value = docId;
+                        else value = parentObj[value.substring(1)];
+                    }
+                    if (!value) return false;
+                    if (qualifier == 'in') {
                         var found = false;
-                        value.forEach(function(idValue){
-                            if(idValue == obj[key]) found = true;
+                        value.forEach(function (idValue) {
+                            if (idValue == obj[key]) found = true;
                         });
-                        if(!found) return false;
+                        if (!found) return false;
                     }
-                    else if(qualifier == 'eq'){
-                        if(value != obj[key]) return false;
+                    else if (qualifier == 'eq') {
+                        if (value != obj[key]) return false;
                     }
-                    else if('and' in where){
+                    else if ('and' in where) {
+                        var andArr = query.and;
                         debugger;
+                        andArr.forEach(function(subQuery){
+                            if(!self.buildFilterFromQueryNew(subQuery, parentObj, docId)) return false;
+                        });
+                    }
+                    else if ('or' in where) {
+                        var orArr = query.or;
+                        debugger;
+                        orArr.forEach(function(subQuery){
+                            if(!self.buildFilterFromQueryNew(subQuery, parentObj, docId)) return false;
+                        });
                     }
                 }
-                else return false;
 
                 return true;
             });
-
-            var childrenCollection = this.filter(filter);
-            childrenCollection.fetch().then(function (childObjects) {
-                if(parentObj)console.log('Doc Name: ', parentObj.name?parentObj.name:parentObj.title);
-                console.log(JSON.stringify(query, null, 4));
-                console.dir(childObjects);
-            });
-
-            return filter;
         },
-        /* buildBaseFilterFromQuery: function(docQuery, parentObj, isA){//(parentObj, docQuery, viewObj) {
-            var self = this;
-            var baseFilter = null;
-            if(isA) {
-                var isAFilter = self.Filter(function (obj) {
-                    if(obj.docType == 'class') return false;
-                    return self.isASync(obj, isA);
-                });
-                var isAClass = this.cachingStore.getSync(isA);
-                var isAResource = this.isASync(isAClass, "56f87bcc5dde184ccfb9fc70"); //Resources
-                if(1==2){ //isAResource
-                    var ownerFilter = self.Filter().eq('ownerId', nq.getOwner().id);
-                    baseFilter = self.Filter().and(ownerFilter, isAFilter);
-                }
-                else baseFilter = isAFilter;
-            }
-            else{
-                baseFilter = self.Filter().eq('docType', 'class');
-            }
-            //if(viewObj._id=="57c2141e2d8cd20920e6d84f") debugger;
-            var resFilter = null;
-            if(docQuery) {//docQuery
-                var queryFilter;
-                for(var opper in docQuery){
-                    if(opper == 'in') debugger;
-                    var qualifier = docQuery[opper];
-                    for(var attr in qualifier){
-                        var value = qualifier[attr];
-                        //if(value.substring(0, 1) == '$') debugger;
-                        if(value.substring(0, 1) == '$') value = parentObj[value.substring(1)];
-                        if(!value) value = [];
-                        queryFilter = self.Filter()[opper](attr, value);
-                    }
-                }
-                resFilter = self.Filter().and(queryFilter, baseFilter);
-                //resFilter = queryFilter;
-            }
-            else resFilter = baseFilter;
-
-            /*var childrenCollection = this.filter(resFilter);
-            childrenCollection.fetch().then(function (childObjects) {
-                console.log('Doc Name: ', parentObj.name?parentObj.name:parentObj.title, 'isA', isA);
-                console.log(JSON.stringify(resFilter, null, 4));
-                console.dir(childObjects);
-            });* /
-
-            return resFilter;
-        },
-        buildFilterFromQuery: function(parentObj, docQuery) {
-            var self = this;
-            for(var filterType in docQuery){
-                var docFilter = docQuery[filterType];
-                switch (filterType) {
-                    case 'eq':
-                        for(var key in docFilter){
-                            //var value = docFilter[key];
-                            var propName = docFilter[key];
-                            if(propName == '_id') {
-                                var value = parentObj[propName];
-                                return self.Filter().eq(key, value);
-                            }
-                            else return self.Filter().eq(key, propName);
-                        }
-                        break;
-                    case 'and':
-                        /*var filterArr = [];
-                        docFilter.forEach(function(query){
-                            filterArr.push(self.buildFilterFromQuery(parentObj, query));
-                        });
-                        return self.Filter().and[filterArr];* /
-                        var firstDocQuery = docFilter[0];
-                        var secondDocQuery = docFilter[1];
-                        var firstFilter = this.buildFilterFromQuery(parentObj, firstDocQuery);
-                        var secondFilter = this.buildFilterFromQuery(parentObj, secondDocQuery);
-                        if (firstFilter && secondFilter) return self.Filter().and(firstFilter, secondFilter);
-                        break;
-                    case 'or':
-                        var filterArr = [];
-                        docFilter.forEach(function(query){
-                            filterArr.push(self.buildFilterFromQuery(parentObj, query));
-                        });
-                        return self.Filter().or[filterArr];
-                        /*var firstDocQuery = docFilter[0];
-                        var secondDocQuery = docFilter[1];
-                        var firstFilter = this.buildFilterFromQuery(parentObj, firstDocQuery);
-                        var secondFilter = this.buildFilterFromQuery(parentObj, secondDocQuery);
-                        if (firstFilter && secondFilter) return self.Filter().or(firstFilter, secondFilter);
-                        if (firstFilter) return firstFilter;
-                        if (secondFilter) return secondFilter;* /
-                        break;
-                    case 'in':
-                        for(var key in docFilter){
-                            var idArrName = docFilter[key];
-                            var idArr = parentObj[idArrName];
-                            if(!idArr) return;
-                            return this.Filter().in(key, idArr);
-                        }
-                        break;
-                    case 'isA':
-                        return self.cachingStore.Filter(function (obj) {
-                            if(obj.docType == 'class') return false;
-                            return self.isASync(obj, docFilter);
-                        });
-                        break;
-                    /*case 'view':
-                        var subView = this.cachingStore.getSync(docFilter);
-                        if (subView) {
-                            var fil = this.buildFilterFromQuery(parentObj, subView.query);
-                            fil.viewId = docFilter;
-                            return fil;//TODO how to determin viewId from object?
-                            //return this.buildFilterFromQuery(parentObj, subView.query);
-                        }
-                        break;
-                    case 'array':
-                        debugger;
-                        break;* /
-                    default:
-                        break;
-                }
-            }
-        },*/
         amAuthorizedToUpdate: function(doc){
             return true;
             var user = nq.getUser();

@@ -42,12 +42,10 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
             if(item.insets){
                 item.insets.forEach(function(inset){
                     if(inset.media){
-                        if(inset.media.mediaType == 'img/png'){
-                            //image
+                        if(inset.media.mediaType == 'image/png'){
                             domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: inset.url, width: 300}, divDom);
                         }
                         if(inset.media.mediaType == 'widget/3D Class Model'){
-                            //image
                             domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: inset.url, width: 300}, divDom);
                             var parms = {
                                 id: pageId + '.' + tabPane.tabNum + '.' + widNum,
@@ -69,18 +67,15 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
             var pDom = dojo.toDom(item.description);
             domConstruct.place(pDom, divDom, 'last');
 
-            var childrenFilter = self.store.buildBaseFilterFromQuery(this.schema.childrenQuery, item, this.schema.isA);
-            if(childrenFilter){
-                var childrenCollection = this.store.filter(childrenFilter);
-                var childDocPromises = [];
-                childrenCollection.forEach(function(childItem){
-                    var previousParagraphHasRightFloat = false;
-                    childDocPromises.push(self.generateNextLevelContents(docDom, childItem, headerLevel+1, item._id, previousParagraphHasRightFloat));
-                    //previousParagraphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
-                });
-                return all(childDocPromises);
-            }
-            return true;
+            var childrenFilter = self.store.buildFilterFromQueryNew(this.schema.childrenQuery, item);
+            var childrenCollection = this.store.filter(childrenFilter);
+            var childDocPromises = [];
+            childrenCollection.forEach(function(childItem){
+                var previousParagraphHasRightFloat = false;
+                childDocPromises.push(self.generateNextLevelContents(docDom, childItem, headerLevel+1, item._id, previousParagraphHasRightFloat));
+                //previousParagraphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
+            });
+            return all(childDocPromises);
         }
 	});
 });
