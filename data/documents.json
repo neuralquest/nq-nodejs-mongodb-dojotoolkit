@@ -73,7 +73,7 @@
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
                 "from" : "56f87ec55dde184ccfb9fc74", 
-                "where" : {
+                "Xwhere" : {
                     "eq" : {
                         "ownerId" : "$docId"
                     }
@@ -109,7 +109,7 @@
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
                 "from" : "56f870a55dde184ccfb9fc6c", 
-                "where" : {
+                "Xwhere" : {
                     "eq" : {
                         "ownerId" : "$docId"
                     }
@@ -178,7 +178,7 @@
                         "pattern" : "[a-f0-9]{24}", 
                         "query" : {
                             "from" : "56f87ec55dde184ccfb9fc74", 
-                            "where" : {
+                            "Xwhere" : {
                                 "eq" : {
                                     "ownerId" : "$docId"
                                 }
@@ -228,20 +228,7 @@
                                     "pattern" : "[a-f0-9]{24}", 
                                     "query" : {
                                         "from" : "573435c23c6d3cd598a5a2df", 
-                                        "where" : {
-                                            "eq" : {
-                                                "ownerId" : "$docId"
-                                            }
-                                        }
-                                    }
-                                }, 
-                                "rootDocId" : {
-                                    "title" : "Root Document", 
-                                    "type" : "string", 
-                                    "pattern" : "[a-f0-9]{24}", 
-                                    "query" : {
-                                        "from" : "56f87ec55dde184ccfb9fc74", 
-                                        "where" : {
+                                        "Xwhere" : {
                                             "eq" : {
                                                 "ownerId" : "$docId"
                                             }
@@ -254,7 +241,7 @@
                                     "pattern" : "[a-f0-9]{24}", 
                                     "query" : {
                                         "from" : "56f87ec55dde184ccfb9fc74", 
-                                        "where" : {
+                                        "Xwhere" : {
                                             "eq" : {
                                                 "ownerId" : "$docId"
                                             }
@@ -347,11 +334,41 @@
             }
         }, 
         "rootQuery" : {
-            "title" : "Children Query", 
-            "type" : "object"
+            "title" : "Root Query", 
+            "type" : "object", 
+            "properties" : {
+                "queryName" : {
+                    "title" : "Query Name", 
+                    "type" : "string", 
+                    "maxLength" : NumberInt(1000), 
+                    "minLength" : NumberInt(0)
+                }, 
+                "fromId" : {
+                    "title" : "From", 
+                    "type" : "string", 
+                    "pattern" : "[a-f0-9]{24}", 
+                    "query" : {
+                        "from" : "classes"
+                    }
+                }, 
+                "where" : {
+                    "title" : "Where", 
+                    "type" : "object", 
+                    "properties" : {
+                        "type" : "object"
+                    }
+                }, 
+                "recursive" : {
+                    "title" : "Recursive Query Name", 
+                    "type" : "string", 
+                    "maxLength" : NumberInt(1000), 
+                    "minLength" : NumberInt(0)
+                }
+            }
         }, 
         "query" : {
-            "title" : "Query"
+            "title" : "Query", 
+            "type" : "object"
         }, 
         "required" : {
             "title" : "Required", 
@@ -508,16 +525,7 @@
     "description" : "<p>Organizations owned by users/organizations</p>", 
     "type" : "object", 
     "properties" : {
-        "bannerUrl" : {
-            "title" : "Banner Url", 
-            "type" : "string", 
-            "maxLength" : NumberInt(2000)
-        }, 
-        "headline" : {
-            "title" : "Headline", 
-            "type" : "string", 
-            "maxLength" : NumberInt(1000)
-        }
+
     }, 
     "parentId" : "56f870a55dde184ccfb9fc6c"
 }
@@ -684,27 +692,16 @@
     "properties" : {
         "pageId" : {
             "title" : "Page", 
-            "readOnly" : true, 
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
                 "from" : "56f87ec55dde184ccfb9fc74", 
-                "where" : {
+                "Xwhere" : {
                     "eq" : {
                         "ownerId" : "$docId"
                     }
                 }
             }
-        }, 
-        "bannerUrl" : {
-            "title" : "Banner Url", 
-            "type" : "string", 
-            "maxLength" : NumberInt(2000)
-        }, 
-        "headline" : {
-            "title" : "Headline", 
-            "type" : "string", 
-            "maxLength" : NumberInt(1000)
         }, 
         "parentOrgId" : {
             "title" : "Parent Organization", 
@@ -712,12 +709,30 @@
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
                 "from" : "57343c283c6d3cd598a5a2e9", 
-                "where" : {
+                "Xwhere" : {
                     "eq" : {
                         "ownerId" : "$docId"
                     }
                 }
             }
+        }, 
+        "responsibleStates" : {
+            "type" : "array", 
+            "title" : "Responsible for States", 
+            "items" : {
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}"
+            }, 
+            "query" : {
+                "from" : "5745eaa53c6d3cd598a5a371", 
+                "Xwhere" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }, 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
         }
     }, 
     "parentId" : "573435803c6d3cd598a5a2dd", 
@@ -1048,7 +1063,7 @@
             }, 
             "query" : {
                 "from" : "5745eaa53c6d3cd598a5a371", 
-                "where" : {
+                "Xwhere" : {
                     "eq" : {
                         "ownerId" : "$docId"
                     }
@@ -1194,10 +1209,8 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83148"), 
     "docType" : "object", 
     "name" : "Neuralquest", 
-    "description" : "<h1>What</h1><p>Neualquest is a platform that helps people organize and work together. As a visitor you can browse published information. As a participant you have your own space in which you can maintain blogs, foto albums, apps etc. and make them public as desired. You can also create organizations based on industy standard templates including basic business process, which you can then enhance as the need arises. Role based authorization ensures that only members of your organization assigned to a paticular organizational unit can read/modify data.<br></br></p><h1>Why</h1><p>The IT industry has been notably laking when it come to support for business processes. Today, a typical large organization might have thousands of systems running on tens of thousands of servers. Each of these systems requires a small army of experts to keep it from falling over. Gernally speaking, the processes themselves are not are not particulary complex. More often than not, its the interaction between the systems that causes</p><h1>How</h1><p>Neuralquest is an open source project that anyone can use, either standallone or in the cloud.</p>", 
+    "description" : "<div style='position: relative;'><img src='app/resources/img/Neuralquest/lefkasHome1.png' width='100%' height='100px'><div class='headline'>Neuralquest</div></div><h1>What</h1><p>Neualquest is a platform that helps people organize and work together. As a visitor you can browse published information. As a participant you have your own space in which you can maintain blogs, foto albums, apps etc. and make them public as desired. You can also create organizations based on industy standard templates including basic business process, which you can then enhance as the need arises. Role based authorization ensures that only members of your organization assigned to a paticular organizational unit can read/modify data.<br></br></p><h1>Why</h1><p>The IT industry has been notably laking when it come to support for business processes. Today, a typical large organization might have thousands of systems running on tens of thousands of servers. Each of these systems requires a small army of experts to keep it from falling over. Gernally speaking, the processes themselves are not are not particulary complex. More often than not, its the interaction between the systems that causes</p><h1>How</h1><p>Neuralquest is an open source project that anyone can use, either standallone or in the cloud.</p>", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAGSSURBVDhPY2hgaMCDGpkaJ6lM2pq19cLCCzc23Hhy8glDr1QvmiJcqIm5qUOgg2H3uubNeasXuS7q4O9AU4EVMTQ3s06cqLxsUcDN40cOtx3uk+kDOgNNETJCMJuamJcu9T5ypOPCyeV7ps/fXLJ0Z/nWrdlbF7stnmU8a4L8BKDj23jbEBrgqLGRub2dt69PdsoU9fXrE86enH/nysFHV6+8vf/67e23DG1tPGgacKG2Nu45cywZnm/btHNnIdBINGlciOG/WPH/np0vl646u7N/1fLg/n7Zzk4hoGGNjUxoSiGI4T9DGghxZv9XqPxj1PCxaNq7eWvfbtz2+NGxffuqly71BGrGpgETqdT8D5j2v3Ldl57VLzpnPFmx9PquuSf3duPWgIwY0/7z5v2XKf+vWsPw/9jd//kr/lt2/BctRleHDTH8h4CP3//ff/N/2an/Dj3/BQtARmIohSCYBmTw99//68/+zzj4v3zt/7wV/5MW/Hfq/a9Z/1+q9D93LjYNmODrz/8vP/1/+Pb/rZcAE2mMw+k9hMEAAAAASUVORK5CYII=", 
-    "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
-    "headline" : "Neuralquest", 
     "initialDocId" : "575d4c3f2cf3d6dc3ed83151", 
     "pageId" : "575d4c3f2cf3d6dc3ed83147", 
     "classId" : "574243d23c6d3cd598a5a31b"
@@ -1902,7 +1915,7 @@
     "name" : "Document Tree View", 
     "type" : "object", 
     "rootQuery" : {
-        "comment" : "Root Document", 
+        "queryName" : "rootParagraphs", 
         "select" : "name", 
         "from" : "573435f03c6d3cd598a5a2e1", 
         "pageId" : "575d4c3f2cf3d6dc3ed83154", 
@@ -1911,10 +1924,10 @@
                 "_id" : "$initialDocId"
             }
         }, 
-        "recursive" : "schema"
+        "recursive" : "schemaQuery"
     }, 
     "query" : {
-        "comment" : "Paragraphs", 
+        "queryName" : "paragraphs", 
         "select" : "name", 
         "from" : "573435f03c6d3cd598a5a2e1", 
         "pageId" : "575d4c3f2cf3d6dc3ed83154", 
@@ -1923,7 +1936,7 @@
                 "_id" : "$childDocs"
             }
         }, 
-        "recursive" : "same"
+        "recursive" : "paragraphs"
     }, 
     "properties" : {
         "_id" : {
@@ -1949,7 +1962,7 @@
     "description" : "<p>Descibes the class model hierarchy, including a children array</p>", 
     "type" : "object", 
     "rootQuery" : {
-        "comment" : "Standard Model", 
+        "queryName" : "standardModel", 
         "select" : "title", 
         "from" : "classes", 
         "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
@@ -1959,11 +1972,11 @@
             }
         }, 
         "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABTSURBVDhPYxjm4D/Dnf8gDOUSD2AaNzH8B2OiDULXiI5xGkRIIzpGMYgUjegYxRBSDIKpB2tGBoQMwqkRHaAbRLRGdEC2RvoCkA8pwVgFicf/GQD/KjucAgshDwAAAABJRU5ErkJggg==", 
-        "recursive" : "schema"
+        "recursive" : "schemaQuery"
     }, 
     "query" : [
         {
-            "comment" : "Classes", 
+            "queryName" : "classes", 
             "select" : "title", 
             "from" : "classes", 
             "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
@@ -1973,10 +1986,10 @@
                 }
             }, 
             "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABTSURBVDhPYxjm4D/Dnf8gDOUSD2AaNzH8B2OiDULXiI5xGkRIIzpGMYgUjegYxRBSDIKpB2tGBoQMwqkRHaAbRLRGdEC2RvoCkA8pwVgFicf/GQD/KjucAgshDwAAAABJRU5ErkJggg==", 
-            "recursive" : "schema"
+            "recursive" : "schemaQuery"
         }, 
         {
-            "comment" : "Objects", 
+            "queryName" : "objects", 
             "select" : "name", 
             "from" : "56f86c6a5dde184ccfb9fc6a", 
             "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
@@ -2082,7 +2095,7 @@
     "description" : "<p>Descibes the owner hierarchy, including a children array</p>", 
     "type" : "object", 
     "rootQuery" : {
-        "comment" : "Owners Class", 
+        "queryName" : "Owners Class", 
         "select" : "title", 
         "from" : "classes", 
         "where" : {
@@ -2091,11 +2104,11 @@
             }
         }, 
         "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAADxSURBVDhPY/j//z9FmLrgzEyT/yB8eobx/5PTDP+fmGpAvBUgjahgFxgf6tcibAhI8+3thUAchAUX/t/bpfp/V7vS/+0t8v+3Nsn+39wo/X9DnQTCYJCTSQVrqkQQBoD8+///TCCeQySe+X95KT/CgONT9MGCpODFhdwIA45O0oVI/JhMHAaqXZDHgTAAFNJgA953EoeBauflsCEMONCrATHgST1xGKh2ThYLwgBQNIENuF1KHAaqnZXBhDAAFMdgA67kE4eBamemMyIMAAHkBLKuRuz/6krh/yvKBP4vLeYFhzgo0ED+BjkdQ/MAAgYGAKPFDB0e1bt2AAAAAElFTkSuQmCC", 
-        "recursive" : "schema"
+        "recursive" : "schemaQuery"
     }, 
     "query" : [
         {
-            "comment" : "Owner Classes", 
+            "queryName" : "ownerClasses", 
             "select" : "title", 
             "from" : "classes", 
             "where" : {
@@ -2104,10 +2117,10 @@
                 }
             }, 
             "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAADxSURBVDhPY/j//z9FmLrgzEyT/yB8eobx/5PTDP+fmGpAvBUgjahgFxgf6tcibAhI8+3thUAchAUX/t/bpfp/V7vS/+0t8v+3Nsn+39wo/X9DnQTCYJCTSQVrqkQQBoD8+///TCCeQySe+X95KT/CgONT9MGCpODFhdwIA45O0oVI/JhMHAaqXZDHgTAAFNJgA953EoeBauflsCEMONCrATHgST1xGKh2ThYLwgBQNIENuF1KHAaqnZXBhDAAFMdgA67kE4eBamemMyIMAAHkBLKuRuz/6krh/yvKBP4vLeYFhzgo0ED+BjkdQ/MAAgYGAKPFDB0e1bt2AAAAAElFTkSuQmCC", 
-            "recursive" : "schema"
+            "recursive" : "schemaQuery"
         }, 
         {
-            "comment" : "Owners", 
+            "queryName" : "owners", 
             "select" : "name", 
             "from" : "56f870a55dde184ccfb9fc6c", 
             "where" : {
@@ -2116,7 +2129,7 @@
                 }
             }, 
             "join" : {
-                "comment" : "Organizatinal Units", 
+                "queryName" : "organizatinalUnits", 
                 "select" : "name", 
                 "from" : "574237133c6d3cd598a5a30d", 
                 "where" : {
@@ -2124,7 +2137,7 @@
                         "parentOrgId" : "$_id"
                     }
                 }, 
-                "recursive" : "same"
+                "recursive" : "organizatinalUnits"
             }
         }
     ], 
@@ -2191,9 +2204,7 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315a"), 
     "docType" : "object", 
     "name" : "Client", 
-    "description" : "<p>The Neuralquest client</p>", 
-    "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
-    "headline" : "Neuralquest", 
+    "description" : "<div style='position: relative;'><img src='app/resources/img/Neuralquest/lefkasHome1.png' width='100%' height='100px'><div class='headline'>Client</div></div><p>The Neuralquest client</p>", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2203,10 +2214,9 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315b"), 
     "docType" : "object", 
     "name" : "ACME Bicycle Shop", 
-    "description" : "<p>The ACME Bicycle Shop</p>", 
+    "description" : "<div style='position: relative;'><img src='app/resources/img/Neuralquest/ACMEBicyleShop.png' width='100%' height='100px'><div class='headline'>ACME Bicyle Shop</div></div><p>The ACME Bicycle Shop</p>", 
     "pageId" : "578bff823c6d3cd598a5a3a6", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB5klEQVQ4T61Tv2sUURD+Zt7undFYqKTKsW/v7p0YDqwEGxst/EUKbcQiYKGIAUGRVIqKTYpYiBjQSiEGSSPIgYX5C+wEUSx8t7e3kassDAlL4vneyIKBxICFl2mGGeZ988038wgDGg34HjsLYKKoCeYRAIIgeG+t7Teq1WMiwuLU9/ZS+9PfjLcwaES1cWE/DZEFhOFsuVxeW19dvSJgFvgJKHUqSZLlzSDbRjBxPOkEUwz6srXQaxA9t2n6aBtAvVI3FLhx8ZQz4YJ4UT7kcxvd4jjeFQpeiHdjpNRTAXbDuZZdWmpTXeszLHRdQM9AuASSg/A0A0jdZumDQ6OjB34F4TwR3ohzt8HcIlHvAD8pih5TI4rflvbuOZ/n+T5ybg4+mKLAXyaBBmQGnqbBckuEriqhV57cHZtlp40xZem712R0dd52OxMFExG5ycxrIjgiwA8GxCs+myRJZqJowWbZRVOtnrSdzmKhQ03rl2S0nsv7/Wu9Xi8vko04PirAcZumD/+I5Qpvovg+SFq22/1QxM2R5vDPoZVZqlVqDSh3j4UXCbLfw49RqXTDWru+We1KpTJUUuETJvkMkWWATyj4uxtrVEbrw+KClfa3tv3XeRcb48ANf03TjwD8zp7y/3ysgRn8BlTuy14MbVpqAAAAAElFTkSuQmCC", 
-    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
     "classId" : "5742439f3c6d3cd598a5a319"
 }
 { 
@@ -2282,9 +2292,7 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83159"), 
     "docType" : "object", 
     "name" : "Server", 
-    "description" : "<p>The Neuralquest server</p>", 
-    "bannerUrl" : "app/resources/img/Neuralquest/lefkasHome1.png", 
-    "headline" : "Neuralquest", 
+    "description" : "<div style='position: relative;'><img src='app/resources/img/Neuralquest/lefkasHome1.png' width='100%' height='100px'><div class='headline'>Server</div></div><p>The Neuralquest server</p>", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2501,7 +2509,7 @@
 { 
     "_id" : ObjectId("5777a04e3c6d3cd598a5a392"), 
     "docType" : "object", 
-    "name" : "Backlog Table View", 
+    "name" : "Service Request Table View", 
     "query" : {
         "comment" : "Blacklog", 
         "select" : "name", 
@@ -2551,7 +2559,7 @@
 { 
     "_id" : ObjectId("577853123c6d3cd598a5a396"), 
     "docType" : "object", 
-    "name" : "Backlog Page", 
+    "name" : "Service Request Table Page", 
     "divider" : "Vertical", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
@@ -2561,7 +2569,8 @@
                 {
                     "displayType" : "Table", 
                     "name" : "Backlog Table", 
-                    "viewId" : "5777a04e3c6d3cd598a5a392"
+                    "viewId" : "5777a04e3c6d3cd598a5a392", 
+                    "pageId" : "57785c393c6d3cd598a5a398"
                 }
             ]
         }
@@ -2572,7 +2581,7 @@
 { 
     "_id" : ObjectId("57785c393c6d3cd598a5a398"), 
     "docType" : "object", 
-    "name" : "Service Request Page", 
+    "name" : "Service Request Detail Page", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
@@ -2603,7 +2612,7 @@
 { 
     "_id" : ObjectId("577862b83c6d3cd598a5a39a"), 
     "docType" : "object", 
-    "name" : "Service Request View", 
+    "name" : "Service Request Detail View", 
     "type" : "object", 
     "rootQuery" : {
         "from" : "574225cb3c6d3cd598a5a305", 
@@ -2694,7 +2703,7 @@
 { 
     "_id" : ObjectId("578921fe3c6d3cd598a5a3a4"), 
     "docType" : "object", 
-    "name" : "Home Page View", 
+    "name" : "Organization Form View", 
     "description" : "<p>Descibes home page of the organization</p>", 
     "type" : "object", 
     "rootQuery" : {
@@ -2706,26 +2715,14 @@
         }
     }, 
     "properties" : {
+        "_id" : {
+
+        }, 
+        "classId" : {
+
+        }, 
         "name" : {
             "readOnly" : false
-        }, 
-        "bannerUrl" : {
-            "readOnly" : false
-        }, 
-        "headline" : {
-            "readOnly" : false
-        }, 
-        "fileLocation" : {
-            "title" : "File Location", 
-            "type" : "file", 
-            "readOnly" : false, 
-            "post" : "/upload"
-        }, 
-        "uploadButton" : {
-            "type" : "button", 
-            "title" : "Upload", 
-            "readOnly" : false, 
-            "post" : "/upload"
         }, 
         "icon" : {
             "readOnly" : false
@@ -2745,6 +2742,16 @@
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
+        {
+            "name" : "Home", 
+            "widgets" : [
+                {
+                    "displayType" : "HomePage", 
+                    "name" : "Home Page", 
+                    "viewId" : "578921fe3c6d3cd598a5a3a4"
+                }
+            ]
+        }, 
         {
             "name" : "Catalog", 
             "pageId" : "5794cd333c6d3cd598a5a3b5"
@@ -2817,7 +2824,8 @@
                 {
                     "displayType" : "Table", 
                     "name" : "Catalog Table", 
-                    "viewId" : "579529973c6d3cd598a5a3b7"
+                    "viewId" : "579529973c6d3cd598a5a3b7", 
+                    "pageId" : "57979cdc3c6d3cd598a5a3b9"
                 }
             ]
         }
@@ -2859,7 +2867,7 @@
 { 
     "_id" : ObjectId("57979cdc3c6d3cd598a5a3b9"), 
     "docType" : "object", 
-    "name" : "Purchase Page", 
+    "name" : "Catalog Purchase Form Page", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
@@ -2885,7 +2893,7 @@
 { 
     "_id" : ObjectId("57979de93c6d3cd598a5a3bd"), 
     "docType" : "object", 
-    "name" : "Purchase View", 
+    "name" : "Catalog Form View", 
     "description" : "<p>View useed for the product</p>", 
     "type" : "object", 
     "rootQuery" : {
@@ -3030,7 +3038,7 @@
     "name" : "Page Tree View", 
     "type" : "object", 
     "rootQuery" : {
-        "comment" : "Owner", 
+        "queryName" : "owner", 
         "select" : "name", 
         "from" : "56f870a55dde184ccfb9fc6c", 
         "where" : {
@@ -3038,11 +3046,11 @@
                 "_id" : "$docId"
             }
         }, 
-        "recursive" : "schema"
+        "recursive" : "schemaQuery"
     }, 
     "query" : [
         {
-            "comment" : "Pages", 
+            "queryName" : "pages", 
             "select" : "name", 
             "from" : "56f87ec55dde184ccfb9fc74", 
             "pageId" : "57a677652d8cd20920e6d817", 
@@ -3052,29 +3060,30 @@
                 }
             }, 
             "join" : {
-                "comment" : "Tabs", 
+                "queryName" : "tabs", 
                 "select" : "name", 
                 "subDoc" : "tabs", 
                 "pageId" : "582bbb0815456a300beb7e07", 
                 "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OUJGMEI5RkI2OUExMTFFM0IyNENGMTlBRjA3REE4OEMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OUJGMEI5RkM2OUExMTFFM0IyNENGMTlBRjA3REE4OEMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5QkYwQjlGOTY5QTExMUUzQjI0Q0YxOUFGMDdEQTg4QyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5QkYwQjlGQTY5QTExMUUzQjI0Q0YxOUFGMDdEQTg4QyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pgl1Uy4AAAHGSURBVHjanFM7SwNBEP52b5ML8VnoL/BHWKqdaCHYiO/WgFgp2FiIlaSRiGinGHwgCAY1aqVi53+wMU0KRQwqedztObOXO08FkQzsze7NN9/MzswKz/OweXD14jpuu6Z9IFIKKMt6So31d24dXB1rrYcjZgjBGJlTfGDn2ckBlMoO4PnGpoTCRjbfwXZ27uvtRumjEhK0Jm1c39wPGQKOrMmx+FQKCVoIUKnWsLZz6lWrDi4u7xBJAJaUiMUVDAGnpkkrS4aAeMxCamKQyAREHYOQQiBpW1jP5n0CBtCVYRMjIwUdyhS1XHOMo6i7hkS0SdrN4PrJOqHZLKRzSMRjRheKL0bbMYX59MmXpiD8Pywms2R2z725qUG8flS5YIY5kJ+V5ytR9dGWjLMfZKQumFk+oqsIvybaX0zG50CznXGBqCjB9sooao5r6vEVWITa9J4+jAvnJUowvbRvOkED9MeSBvctg+Ceh6uTcF0NpaRfB4FfXeAMGBf4fctgZCFrIowv7uGh8IwJ0rayzDnQbGdcpMoeTduZ14iwnwweTiNiHhxvyu9vt5lsvkebvv3D03+J1Gf30QwSDUcX/W5vIInKpwADAKBBAEGN5kJNAAAAAElFTkSuQmCC", 
                 "join" : [
                     {
-                        "comment" : "Widgets", 
+                        "queryName" : "widgets", 
                         "select" : "name", 
                         "subDoc" : "widgets", 
                         "pageId" : "582bbb2415456a300beb7e09", 
                         "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAa9JREFUeNqck7tKA0EUhv+5bGIheCkEiWgKu0SNNoJgYoiCMQn4NKltbHwaURAREzWFICgoWPgCFlHxUtiYZNZzZjYma1TU2Z1lmZnvP3P+MyPGNg92Gi1Tavk+AO6/aQJKCHhK7uo3grfW50EifxIgGOXtsxILID7ch63TWx7n98fmB5/yQgzM6iYFzowaZEoj6MHFdwrUIgbMamMHBS6ubwiQXSw9slfBZ6+MwdxsAszq9oQX6SNAO4gW8bqry3ML+MaFdYICqZnZD8GOgPZwWDmEkhKGoNzyCmLjcWTTi6EdVE9qkEp2CQTVU1piNZ+3UTiioW2mksmeFFJTU7i/q6PNaT9whiP7wmYOSFfnx+dnPDw92ZRcDnYWmnbLjB9OgX6lgmShAKhWKx3jLO9MzWWzX3jgRbC3v28XMbCWL2BsIo7cUiaUQuXomILoTwIECKVQKBbJAxk4bzCdSPR4ME2+tJqNj7S0cJVBVCvYaongBCkWMriv10MpcI962p1a6trj2hI81B/9dBV+uBfCMcxq8/pSG9w4Tjc4/O/vkoWZ5Q1PUh/A/9rLuwADAK8loV8tdNaPAAAAAElFTkSuQmCC"
                     }, 
                     {
-                        "comment" : "SubPages", 
+                        "queryName" : "SubPages", 
                         "select" : "name", 
                         "from" : "56f87ec55dde184ccfb9fc74", 
                         "pageId" : "57a677652d8cd20920e6d817", 
-                        "where" : {
+                        "Xwhere" : {
                             "eq" : {
                                 "_id" : "$pageId"
                             }
-                        }
+                        }, 
+                        "recursive" : "tabs"
                     }
                 ]
             }
@@ -3094,7 +3103,7 @@
     "name" : "View Tree View", 
     "type" : "object", 
     "rootQuery" : {
-        "comment" : "Owner", 
+        "queryName" : "owner", 
         "select" : "name", 
         "from" : "56f870a55dde184ccfb9fc6c", 
         "where" : {
@@ -3105,7 +3114,7 @@
         "recursive" : "schema"
     }, 
     "query" : {
-        "comment" : "Views", 
+        "queryName" : "views", 
         "select" : "name", 
         "from" : "573435c23c6d3cd598a5a2df", 
         "pageId" : "57a678162d8cd20920e6d819", 
@@ -3273,7 +3282,7 @@
     "_id" : ObjectId("57af81b02d8cd20920e6d823"), 
     "docType" : "object", 
     "name" : "Front Desk", 
-    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
+    "description" : "<div style='position: relative;'><img src='app/resources/img/Neuralquest/ACMEBicyleShop.png' width='100%' height='100px'><div class='headline'>Front Desk</div></div>", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed8315b", 
@@ -3283,8 +3292,7 @@
     "_id" : ObjectId("57af88862d8cd20920e6d825"), 
     "docType" : "object", 
     "name" : "Workshop", 
-    "description" : "<p>ACME Workshop</p>", 
-    "bannerUrl" : "app/resources/img/Neuralquest/ACMEBicyleShop.png", 
+    "description" : "<div style='position: relative;'><img src='app/resources/img/Neuralquest/ACMEBicyleShop.png' width='100%' height='100px'><div class='headline'>Workshop</div></div><p>ACME Workshop</p>", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed8315b", 
@@ -3312,23 +3320,23 @@
             "pageId" : "575d4c3f2cf3d6dc3ed83150"
         }, 
         {
-            "name" : "Backlog", 
+            "name" : "Service Requests", 
             "pageId" : "577853123c6d3cd598a5a396"
         }, 
         {
-            "name" : "Oeganization", 
+            "name" : "Organization", 
             "widgets" : [
                 {
                     "displayType" : "Form", 
                     "name" : "Organizational Unit Form", 
                     "viewId" : "57b72d5e2d8cd20920e6d83d"
-                }, 
-                {
-                    "displayType" : "Table", 
-                    "name" : "Members", 
-                    "viewId" : "582b9ae215456a300beb7e01"
                 }
             ]
+        }, 
+        {
+            "displayType" : "Table", 
+            "name" : "Members", 
+            "viewId" : "582b9ae215456a300beb7e01"
         }
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -3367,7 +3375,7 @@
     "name" : "Organizational Unit Tree View", 
     "type" : "object", 
     "rootQuery" : {
-        "comment" : "Owner", 
+        "queryName" : "owner", 
         "select" : "name", 
         "from" : "56f870a55dde184ccfb9fc6c", 
         "where" : {
@@ -3375,10 +3383,10 @@
                 "_id" : "$docId"
             }
         }, 
-        "recursive" : "schema"
+        "recursive" : "schemaQuery"
     }, 
     "query" : {
-        "comment" : "Org Unit", 
+        "comment" : "orgUnit", 
         "select" : "name", 
         "from" : "574237133c6d3cd598a5a30d", 
         "where" : {
@@ -3386,7 +3394,7 @@
                 "parentOrgId" : "$_id"
             }
         }, 
-        "recursive" : "same"
+        "recursive" : "schemaQuery"
     }, 
     "properties" : {
         "name" : {
@@ -3592,10 +3600,7 @@
         "pageId" : {
             "readOnly" : false
         }, 
-        "bannerUrl" : {
-            "readOnly" : false
-        }, 
-        "headlines" : {
+        "responsibleStates" : {
             "readOnly" : false
         }, 
         "description" : {
@@ -3637,6 +3642,24 @@
         }, 
         "nextStateIds" : {
             "readOnly" : false
+        }, 
+        "orgUnits" : {
+            "type" : "array", 
+            "title" : "Organizational Units", 
+            "items" : {
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}"
+            }, 
+            "query" : {
+                "from" : "573435f03c6d3cd598a5a2e1", 
+                "Xwhere" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }, 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 

@@ -24,8 +24,9 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectSto
             });
 			this.tree = new Tree({
                 id: 'tree.'+self.id,
-				store: this.store,
-                model: this.treeModel,
+				store: self.store,
+                schema: self.schema,
+                model: self.treeModel,
 				dndController: dndSource,
 				betweenThreshold: 5, 
 				persist: true,//doesnt deal well with recursion. Tends to expand everything
@@ -39,13 +40,21 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectSto
 					return '';//for some reason this override is required
 				},
                 getIconStyle: function(item, opened){
-                    var icon = '';
+                    var self = this;
+                    var icon;
                     if(!item) return '';
-                    else if('$query' in item && 'icon' in item.$query) icon = item.$query.icon;
-                    else if('icon' in item) icon = item.icon;
-                    else if(item.classId){
-                        var type = this.store.cachingStore.getSync(item.classId);
-                        if(type && 'icon' in type) icon = type.icon;
+                    if('$queryName' in item) {
+                        var query;
+                        if(item.$queryName == 'rootQuery') query = self.schema.rootQuery;
+                        else query = self.model.getSubQueryByName(self.schema.query, item.$queryName);
+                        if('icon' in query) icon = query.icon;
+                    }
+                    if(!icon){
+                        if('icon' in item) icon = item.icon;
+                        else if(item.docType == 'object'){
+                            var classType = self.store.cachingStore.getSync(item.classId);
+                            if('icon' in classType) icon = classType.icon;
+                        }
                     }
                     return {backgroundImage: "url('"+icon+"')"}
                 },

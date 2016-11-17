@@ -95,7 +95,7 @@ define([
 				if(children.length == 0) onItem([]);
                 else {
                     var newChild = lang.clone(children[0]);
-                    newChild.$query = query;
+                    newChild.$queryName = 'rootQuery';
                     newChild.hasChildren = true;
                     onItem(newChild);//we expect only one
                 }
@@ -106,96 +106,44 @@ define([
 		},
         getChildren: function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError) {
 			var self = this;
-			if(self.schema.query){
-				var query;
-				if('$query' in parentItem){
-					var prevQuery = parentItem.$query;
-					if('recursive' in prevQuery){
-						if(prevQuery.recursive == 'schema') query = self.schema.query;
-						else if(prevQuery.recursive == 'same') query = prevQuery;
+			var query;
+			if('$queryName' in parentItem) {
+				if (parentItem.$queryName == 'rootQuery') query = self.schema.query;
+				else {
+					var prevQuery = self.getSubQueryByName(self.schema.query, parentItem.$queryName);
+					if ('recursive' in prevQuery) {
+						if(prevQuery.recursive == 'schemaQuery') query = self.schema.query;
+						else if (prevQuery.recursive == 'same') query = prevQuery;
 					}
-					else if('join' in prevQuery) query = prevQuery.join;
+					else if ('join' in prevQuery) query = prevQuery.join;
 				}
-				else query = self.schema.query;
-				if(!query) {
-					var childrenArr = [];
-					onComplete(childrenArr);
-					return;
-				}
-
-				var childrenPromises = [];
-
-				if(Array.isArray(query)){
-					query.forEach(function (subQuery) {
-						childrenPromises.push(self.getChildrenArrayNew(parentItem, subQuery));
-					});
-				}
-				else childrenPromises.push(self.getChildrenArrayNew(parentItem, query));
-
-				all(childrenPromises).then(function(childrenArrs){
-					var resultingChildren = [];
-					childrenArrs.forEach(function(childrenArr){
-						resultingChildren = resultingChildren.concat(childrenArr);
-					});
-					onComplete(resultingChildren);
-				});
-
 			}
-			else {
-				var childrenPromises = [];
-				var viewId = parentItem.viewId;
-				if (viewId) {
-					this.store.get(viewId).then(function (viewObj) {
-						if (viewObj.childrenQuery) {
-							childrenPromises.push(self.getChildrenArray(parentItem, viewObj.childrenQuery, viewObj));
-						}
-						if (viewObj.childrenView) {
-							var subView = self.store.cachingStore.getSync(viewObj.childrenView);
-							if (subView) {
-								childrenPromises.push(self.getChildrenArray(parentItem, subView.query, subView));
-							}
-						}
-						if (viewObj.subDocView) {
-							childrenPromises.push(parentItem[viewObj.subDocView]);
-						}
-					});
-				}
-				all(childrenPromises).then(function (childrenArrs) {
-					var resultingChildren = [];
-					childrenArrs.forEach(function (childrenArr) {
-						resultingChildren = resultingChildren.concat(childrenArr);
-					});
-					onComplete(resultingChildren);
+			else query = self.schema.query;
+			if(!query) {
+				var childrenArr = [];
+				onComplete(childrenArr);
+				return;
+			}
+
+			var childrenPromises = [];
+
+			if(Array.isArray(query)){
+				query.forEach(function (subQuery) {
+					childrenPromises.push(self.getChildrenArray(parentItem, subQuery));
 				});
 			}
-        },
-        getChildrenArray: function(parentItem, query, viewObj) {
-            var self = this;
-			var childrenFilter = self.store.buildFilterFromQuery(query, parentItem, viewObj.isA);
+			else childrenPromises.push(self.getChildrenArray(parentItem, query));
 
-            if(childrenFilter) {
-                var childrenCollection = self.store.filter(childrenFilter);
-                return childrenCollection.fetch().then(function (childObjects) {
-                    var hasChildrenPromises = [];
-                    childObjects.forEach(function (childObj) {
-                        childObj.viewId = viewObj._id;
-                        //hasChildrenPromises.push(true);
-                        //See if there are any grandchildren
-                        hasChildrenPromises.push(self.hasGrandChildren(childObj, viewObj));
-                    });
-                    return all(hasChildrenPromises).then(function(hasChildrenPromisesArr){
-                        var counter = 0;
-                        hasChildrenPromisesArr.forEach(function(hasChildrenPromise){
-                            childObjects[counter].hasChildren = hasChildrenPromise;
-                            counter ++;
-                        });
-                        return childObjects;
-                    });
-                });
-            }
-            else return [];
+			all(childrenPromises).then(function(childrenArrs){
+				var resultingChildren = [];
+				childrenArrs.forEach(function(childrenArr){
+					resultingChildren = resultingChildren.concat(childrenArr);
+				});
+				onComplete(resultingChildren);
+			});
         },
-		getChildrenArrayNew: function(parentItem, query) {
+
+		getChildrenArray: function(parentItem, query) {
 			var self = this;
 			if('subDoc' in query) {
 				var childObjects = parentItem[query.subDoc];
@@ -204,7 +152,7 @@ define([
 				var num = 0;
 				childObjects.forEach(function (childObj) {
 					var newChildObj = lang.clone(childObj);
-					newChildObj.$query = query;
+                    newChildObj.$queryName = query.queryName;
 					newChildObj.hasChildren = true;
 					newChildObj.name = childObj.name?childObj.name:query.subDoc+' '+num;
 					//See if there are any grandchildren
@@ -229,7 +177,7 @@ define([
 						var newChildObjs = [];
 						hasChildrenPromisesArr.forEach(function(hasChildrenPromise){
 							var newChildObj = lang.clone(childObjects[counter]);
-                            newChildObj.$query = query;
+                            newChildObj.$queryName = query.queryName;
 							newChildObj.hasChildren = hasChildrenPromise;
 							newChildObjs.push(newChildObj);
 							counter ++;
@@ -273,6 +221,17 @@ define([
                 return grandChildren;
             });
         },
+		getSubQueryByName: function(query, queryName) {
+			if(Array.isArray(query)){
+				for(var i=0;i<query.length;i++){
+                    var subQuery = query[i];
+					var foundQuery = this.getSubQueryByName(subQuery, queryName);
+                    if(foundQuery) return foundQuery;
+				}
+			}
+			else if(query.queryName == queryName) return query;
+            else if('join' in query) return this.getSubQueryByName(query.join, queryName);
+		},
 		// =======================================================================
 		// Inspecting items
 
