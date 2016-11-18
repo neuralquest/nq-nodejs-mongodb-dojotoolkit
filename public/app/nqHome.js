@@ -4,7 +4,14 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "app/nqWidgetBase", "dojo/do
 	return declare("nqHome", [nqWidgetBase], {
         buildRendering: function(){
             this.inherited(arguments);
-            domAttr.set(this.pane.containerNode, 'style', {'max-width':'800px', 'padding-left': '10px', 'padding-right': '10px', background:'backgroundClass'});
+            domAttr.set(this.pane.containerNode, 'style', {
+                '-webkit-column-width': '300px', /* Chrome, Safari, Opera */
+                '-moz-column-width': '300px', /* Firefox */
+                'column-width': '300px',
+                'max-width':'900px',
+                'padding-left': '10px',
+                'padding-right': '10px',
+                background:'backgroundClass'});
         },
         _setDocIdAttr: function(docId){
             //if(docId == this.docId) return;

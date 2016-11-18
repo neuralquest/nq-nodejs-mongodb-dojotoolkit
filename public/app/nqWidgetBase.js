@@ -331,7 +331,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         node.innerHTML = refDoc.name?refDoc.name:refDoc.title;
                     }
                     else{
-                        var childrenFilter = self.store.buildFilterFromQueryNew(attrProps.query, null, self.docId);
+                        var childrenFilter = self.store.buildFilterFromQuery(attrProps.query, null, self.docId);
                         var childrenCollection = self.store.filter(childrenFilter);
                         data = [];
                         childrenCollection.forEach(function (childObject) {
@@ -379,7 +379,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     style+='text-align: right;';
                     domAttr.set(node, 'style', style);
                     if(attrProps.query){
-                        var childrenFilter = self.store.buildFilterFromQueryNew(attrProps.query, null, self.docId);
+                        var childrenFilter = self.store.buildFilterFromQuery(attrProps.query, null, self.docId);
                         var childrenCollection = self.store.filter(childrenFilter);
                         childrenCollection.fetch().then(function (childObjects) {
                             var sum = 0;
@@ -463,7 +463,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             new Source(dndTbl, {skipForm: 'true', type: attrName});
                         }
                         else if(attrProps.query){
-                            var childrenFilter = self.store.buildFilterFromQueryNew(attrProps.query, null, self.docId);
+                            var childrenFilter = self.store.buildFilterFromQuery(attrProps.query, null, self.docId);
                             // Create a new constructor by mixing in the components
                             var CustomGrid = declare([OnDemandGrid, Keyboard, Selection, DnD, DijitRegistry]);
                             var columns = [{

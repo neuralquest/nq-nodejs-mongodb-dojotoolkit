@@ -74,7 +74,7 @@ define([
             var query = self.schema.rootQuery;
             if(query) {
                 var parentItem = this.store.cachingStore.getSync(this.docId);
-                var childrenFilter = self.store.buildFilterFromQueryNew(query, parentItem, this.docId);
+                var childrenFilter = self.store.buildFilterFromQuery(query, parentItem, this.docId);
                 collection = self.store.filter(childrenFilter);
             }
             else onItem([]);
@@ -163,7 +163,7 @@ define([
 				return newChildObjs;
 			}
 			else if('where' in query) {
-				var childrenFilter = self.store.buildFilterFromQueryNew(query, parentItem);
+				var childrenFilter = self.store.buildFilterFromQuery(query, parentItem);
 				var childrenCollection = self.store.filter(childrenFilter);
 				return childrenCollection.fetch().then(function (childObjects) {
 					var hasChildrenPromises = [];

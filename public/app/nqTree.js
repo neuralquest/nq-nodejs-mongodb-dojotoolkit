@@ -9,9 +9,19 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectSto
             this.inherited(arguments);
             this.createMenusForWidget();
         },
-        _setDocIdAttr: function(docId){
-            if(docId == this.docId) return;
+        _setDocIdAttr: function(docId) {
+            if (docId == this.docId) return;
             this.inherited(arguments);
+
+            if(this.tree &&
+                'rootQuery' in this.schema &&
+                'where' in this.schema.rootQuery &&
+                'eq' in this.schema.rootQuery.where &&
+                '_id' in this.schema.rootQuery.where.eq)
+            {
+                var value = this.schema.rootQuery.where.eq._id;
+                if(value.substring(0, 1) != '$') return;
+            }
 
             var self = this;
 
@@ -64,19 +74,28 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectSto
 					return 'css'+item.viewId;//used by tree menu to determine which menu to show
 				},
 				getTooltip: function(item, opened){
+                    var self = this;
 					if(!item) return '';
-                    var tt = {_id: item._id};
-                    if('$query' in item) tt.$query = item.$query;
-                    var viewObj = self.store.cachingStore.getSync(item.viewId);
-					if(dojo.config.isDebug) return JSON.stringify(tt, null, 4);
+                    if(dojo.config.isDebug) {
+                        var tt = {_id: item._id};
+                        if ('$queryName' in item) {
+                            var query;
+                            if (item.$queryName == 'rootQuery') query = self.schema.rootQuery;
+                            else query = self.model.getSubQueryByName(self.schema.query, item.$queryName);
+                            tt.$query = query;
+                        }
+                        return JSON.stringify(tt, null, 4);
+                    }
 				},
 				onClick: function(item, node, evt){
 					self.inherited('onClick',arguments);
-                    //var pageId = item.pageId;
-                    //if(!pageId) pageId = self.widget.pageId;
-                    //var pageId = self.widget.pageId;
                     var pageId;
-                    if('$query' in item && 'pageId' in item.$query) pageId = item.$query.pageId;
+                    if ('$queryName' in item) {
+                        var query;
+                        if (item.$queryName == 'rootQuery') query = self.schema.rootQuery;
+                        else query = self.treeModel.getSubQueryByName(self.schema.query, item.$queryName);
+                        pageId = query.pageId;
+                    }
                     if(!pageId && 'pageId' in item) pageId = item.pageId;
                     if(pageId) nq.setHash(item._id, pageId, self.tabNum, self.widNum, self.level+1);
 				},

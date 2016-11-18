@@ -67,7 +67,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
             var pDom = dojo.toDom(item.description);
             domConstruct.place(pDom, divDom, 'last');
 
-            var childrenFilter = self.store.buildFilterFromQueryNew(this.schema.childrenQuery, item);
+            var childrenFilter = self.store.buildFilterFromQuery(this.schema.query, item);
             var childrenCollection = this.store.filter(childrenFilter);
             var childDocPromises = [];
             childrenCollection.forEach(function(childItem){

@@ -12,7 +12,7 @@ define(['dojo/_base/declare', "app/nqWidgetBase","dojo/when",  "dojo/dom-attr"],
                 if(!this.docId) return;
                 if('rootQuery' in this.schema){
                     var query = this.schema.rootQuery;
-                    var childrenFilter = self.store.buildFilterFromQueryNew(query, null, self.docId);
+                    var childrenFilter = self.store.buildFilterFromQuery(query, null, self.docId);
                     var docCol = this.store.filter(childrenFilter);
                     docCol.fetch().then(function(docsArr){
                         var doc = docsArr[0];

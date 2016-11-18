@@ -408,7 +408,7 @@ function(declare, lang, when, all, registry, request,
                 return self.isA(parentDoc, id);
             });
         },
-        buildFilterFromQueryNew: function(query, parentObj, docId){
+        buildFilterFromQuery: function(query, parentObj, docId){
             var self = this;
             return self.Filter(function (obj) {
                 if(!query) return false;
@@ -443,14 +443,14 @@ function(declare, lang, when, all, registry, request,
                         var andArr = query.and;
                         debugger;
                         andArr.forEach(function(subQuery){
-                            if(!self.buildFilterFromQueryNew(subQuery, parentObj, docId)) return false;
+                            if(!self.buildFilterFromQuery(subQuery, parentObj, docId)) return false;
                         });
                     }
                     else if ('or' in where) {
                         var orArr = query.or;
                         debugger;
                         orArr.forEach(function(subQuery){
-                            if(!self.buildFilterFromQueryNew(subQuery, parentObj, docId)) return false;
+                            if(!self.buildFilterFromQuery(subQuery, parentObj, docId)) return false;
                         });
                     }
                 }
