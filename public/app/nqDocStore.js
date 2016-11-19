@@ -1,7 +1,7 @@
-define(['dojo/_base/declare', "dojo/_base/lang", "dojo/when", "dojo/promise/all", 'dijit/registry',"dojo/request",
-		'dstore/RequestMemory', 'app/nqMemoryStore', 'dstore/QueryMethod', 'dojo/dom-construct'],
-function(declare, lang, when, all, registry, request,
-		 RequestMemory, nqMemoryStore ,QueryMethod, domConstruct){
+define(['dojo/_base/declare', "dojo/_base/lang", "dojo/_base/array","dojo/when", "dojo/promise/all", 'dijit/registry',"dojo/request",
+		'dstore/RequestMemory', 'dojo/dom-construct'],
+function(declare, lang, array, when, all, registry, request,
+		 RequestMemory,  domConstruct){
 
     return declare("nqDocStore", [RequestMemory], {
         target: '/documents',
@@ -408,7 +408,7 @@ function(declare, lang, when, all, registry, request,
                 return self.isA(parentDoc, id);
             });
         },
-        buildFilterFromQuery: function(query, parentObj, docId){
+        buildFilterFromQuery: function(query){
             var self = this;
             return self.Filter(function (obj) {
                 if(!query) return false;
@@ -424,17 +424,10 @@ function(declare, lang, when, all, registry, request,
                     var qualifier = Object.keys(where)[0];
                     var key = Object.keys(where[qualifier])[0];
                     var value = where[qualifier][key];
-                    if (value.substring(0, 1) == '$') {
-                        if (value == "$docId") value = docId;
-                        else value = parentObj[value.substring(1)];
-                    }
                     if (!value) return false;
                     if (qualifier == 'in') {
-                        var found = false;
-                        value.forEach(function (idValue) {
-                            if (idValue == obj[key]) found = true;
-                        });
-                        if (!found) return false;
+                        var position = array.indexOf(value, obj[key]);
+                        if(position == -1) return false;
                     }
                     else if (qualifier == 'eq') {
                         if (value != obj[key]) return false;
@@ -443,20 +436,41 @@ function(declare, lang, when, all, registry, request,
                         var andArr = query.and;
                         debugger;
                         andArr.forEach(function(subQuery){
-                            if(!self.buildFilterFromQuery(subQuery, parentObj, docId)) return false;
+                            if(!self.buildFilterFromQuery(subQuery)) return false;
                         });
                     }
                     else if ('or' in where) {
                         var orArr = query.or;
                         debugger;
                         orArr.forEach(function(subQuery){
-                            if(!self.buildFilterFromQuery(subQuery, parentObj, docId)) return false;
+                            if(!self.buildFilterFromQuery(subQuery)) return false;
                         });
                     }
                 }
 
                 return true;
             });
+        },
+        substituteVariablesInQuery: function(query, parentObj, docId) {
+            if(Array.isArray(query)){
+                for(var i=0;i<query.length;i++){
+                    var subQuery = query[i];
+                    this.substituteVariablesInQuery(subQuery, parentObj, docId);
+                }
+            }
+            else {
+                var where = query.where;
+                var qualifier = Object.keys(where)[0];
+                var key = Object.keys(where[qualifier])[0];
+                var value = where[qualifier][key];
+                if (value.substring(0, 1) == '$') {
+                    if (value == "$docId") where[qualifier][key] = docId;
+                    else if (value == "$userId") where[qualifier][key] = nq.getUser().id;
+                    else if (value == "$ownerId") where[qualifier][key] = nq.getOwner().id;
+                    else where[qualifier][key] = parentObj[value.substring(1)];
+                }
+                if('join' in query) this.substituteVariablesInQuery(query.join, parentObj, docId);
+            }
         },
         amAuthorizedToUpdate: function(doc){
             return true;

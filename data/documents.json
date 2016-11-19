@@ -1209,7 +1209,7 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83148"), 
     "docType" : "object", 
     "name" : "Neuralquest", 
-    "description" : "<div style='position: relative;'><img src='app/resources/img/Neuralquest/lefkasHome1.png' width='100%' height='100px'><div class='headline'>Neuralquest</div></div><h1>What</h1><p>Neualquest is a platform that helps people organize and work together. As a visitor you can browse published information. As a participant you have your own space in which you can maintain blogs, foto albums, apps etc. and make them public as desired. You can also create organizations based on industy standard templates including basic business process, which you can then enhance as the need arises. Role based authorization ensures that only members of your organization assigned to a paticular organizational unit can read/modify data.<br></br></p><h1>Why</h1><p>The IT industry has been notably laking when it come to support for business processes. Today, a typical large organization might have thousands of systems running on tens of thousands of servers. Each of these systems requires a small army of experts to keep it from falling over. Gernally speaking, the processes themselves are not are not particulary complex. More often than not, its the interaction between the systems that causes</p><h1>How</h1><p>Neuralquest is an open source project that anyone can use, either standallone or in the cloud.</p>", 
+    "description" : "<h1 style='position: relative;'><img src='app/resources/img/Neuralquest/lefkasHome1.png' width='100%' height='100px'><div class='headline'>Neuralquest</div></h1><p><b>Experimental: </b>Neuralquest is an experimental application. Visit Roadmap for details.</p><h1>What</h1><p>Neualquest is a platform that helps people organize and work together. <br>As a visitor you can browse published information. <br>As a participant you have your own space in which you can maintain blogs, foto albums, apps etc. and make them public as desired. You can also create organizations based on industy standard templates including basic business process, which you can then evolve as the need arises. <br>Role based authorization ensures that only members of your organization assigned to a paticular organizational unit can read/modify data.<br></br></p><h1>Why</h1><p>The IT industry has been notably laking when it come to support for business processes. Today, a typical large organization might have hudreds of systems running on thousands of servers. Each of these systems requires a small army of experts to keep it from falling over. Maitanance come at huge expence.<br>Why don't we have a single system that regards the entire business as a single process? Any CIO will tell you that no one system can deliver the fixiblity and robustness required by our ever evolving business needs.<br>The key word here is <b>flexibilty</b>. Neuralquest aims to achive this fleibility: self documenting and can easilly be modified to reflect evolving business needs,\r\n then we will have achived our goal.</p><h1>How</h1><p>Neuralquest is an open source project that anyone can use, either standallone or in the cloud.</p>", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAGSSURBVDhPY2hgaMCDGpkaJ6lM2pq19cLCCzc23Hhy8glDr1QvmiJcqIm5qUOgg2H3uubNeasXuS7q4O9AU4EVMTQ3s06cqLxsUcDN40cOtx3uk+kDOgNNETJCMJuamJcu9T5ypOPCyeV7ps/fXLJ0Z/nWrdlbF7stnmU8a4L8BKDj23jbEBrgqLGRub2dt69PdsoU9fXrE86enH/nysFHV6+8vf/67e23DG1tPGgacKG2Nu45cywZnm/btHNnIdBINGlciOG/WPH/np0vl646u7N/1fLg/n7Zzk4hoGGNjUxoSiGI4T9DGghxZv9XqPxj1PCxaNq7eWvfbtz2+NGxffuqly71BGrGpgETqdT8D5j2v3Ldl57VLzpnPFmx9PquuSf3duPWgIwY0/7z5v2XKf+vWsPw/9jd//kr/lt2/BctRleHDTH8h4CP3//ff/N/2an/Dj3/BQtARmIohSCYBmTw99//68/+zzj4v3zt/7wV/5MW/Hfq/a9Z/1+q9D93LjYNmODrz/8vP/1/+Pb/rZcAE2mMw+k9hMEAAAAASUVORK5CYII=", 
     "initialDocId" : "575d4c3f2cf3d6dc3ed83151", 
     "pageId" : "575d4c3f2cf3d6dc3ed83147", 
@@ -2175,7 +2175,7 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83151"), 
     "docType" : "object", 
     "name" : "The Neuralquest Document", 
-    "description" : "<p>Boy desirous families prepared gay reserved add ecstatic say. Replied joy age visitor nothing cottage. Mrs door paid led loud sure easy read. Hastily at perhaps as neither or ye fertile tedious visitor. Use fine bed none call busy dull when. Quiet ought match my right by table means. Principles up do in me favourable affronting. Twenty mother denied effect we to do on.</p>", 
+    "description" : "<p>Our species is unique in that we ask and attempt to answer the \"Why\" question</p>", 
     "insets" : [
         {
             "url" : "app/resources/img/Neuralquest/3dClassModel.png", 
@@ -2186,6 +2186,7 @@
         }
     ], 
     "childDocs" : [
+        "582e4dea425310133a49f109", 
         "575d4c3f2cf3d6dc3ed83152", 
         "575d4c3f2cf3d6dc3ed83153"
     ], 
@@ -2195,8 +2196,12 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83152"), 
     "docType" : "object", 
-    "name" : "Par 1", 
-    "description" : "<p>May indulgence difficulty ham can put especially. Bringing remember for supplied her why was confined. Middleton principle did she procuring extensive believing add. Weather adapted prepare oh is calling. These wrong of he which there smile to my front. He fruit oh enjoy it of whose table. Cultivated occasional old her unpleasing unpleasant. At as do be against pasture covered viewing started. Enjoyed me settled mr respect no spirits civilly.</p>", 
+    "name" : "Why", 
+    "description" : "<p>The question Neuralquest set out to answer is:<br><br><b>What is the least amount of complexity it takes to do business processes?</b><br><br>The resulting model will be baselined and made available to the public so the can extend and share models to their hearts content.</p>", 
+    "childDocs" : [
+        "582e3f25425310133a49f105", 
+        "582e3f51425310133a49f107"
+    ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435f03c6d3cd598a5a2e1"
 }
@@ -2242,8 +2247,8 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83153"), 
     "docType" : "object", 
-    "name" : "Par 2", 
-    "description" : "<p>He my polite be object oh change. Consider no mr am overcame yourself throwing sociable children. Hastily her totally conduct may. My solid by stuff first smile fanny. Humoured how advanced mrs elegance sir who. Home sons when them dine do want to. Estimating themselves unsatiable imprudence an he at an. Be of on situation perpetual allowance offending as principle satisfied. Improved carriage securing are desirous too.</p>", 
+    "name" : "How", 
+    "description" : "<p></p>", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435f03c6d3cd598a5a2e1"
 }
@@ -2522,18 +2527,36 @@
     }, 
     "type" : "object", 
     "properties" : {
-        "stateHistory[date[0]]" : {
+        "stateHistoryDate" : {
+            "readOnly" : true, 
+            "subDoc" : "stateHistory", 
+            "prop" : "date", 
             "title" : "Date", 
             "type" : "string", 
             "format" : "date-time"
         }, 
-        "stateHistory[state[0]]" : {
-            "title" : "Sate", 
+        "stateHistoryState" : {
+            "readOnly" : true, 
+            "subDoc" : "stateHistory", 
+            "prop" : "stateId", 
+            "title" : "State", 
             "type" : "string", 
-            "query" : ""
+            "query" : {
+                "from" : "5745eaa53c6d3cd598a5a371", 
+                "Xwhere" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
+        }, 
+        "buyerId" : {
+            "title" : "From", 
+            "readOnly" : true
         }, 
         "name" : {
-
+            "title" : "Subject", 
+            "readOnly" : true
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2612,7 +2635,7 @@
 { 
     "_id" : ObjectId("577862b83c6d3cd598a5a39a"), 
     "docType" : "object", 
-    "name" : "Service Request Detail View", 
+    "name" : "Service Request Form View", 
     "type" : "object", 
     "rootQuery" : {
         "from" : "574225cb3c6d3cd598a5a305", 
@@ -2627,19 +2650,19 @@
 
         }, 
         "name" : {
-
+            "readOnly" : true
         }, 
         "assetId" : {
-
+            "readOnly" : true
         }, 
         "buyerId" : {
-
+            "readOnly" : true
         }, 
         "sellerId" : {
-
+            "readOnly" : true
         }, 
         "description" : {
-
+            "readOnly" : true
         }, 
         "newStateButton" : {
             "type" : "button", 
@@ -2658,13 +2681,13 @@
             "items" : {
                 "properties" : {
                     "date" : {
-
+                        "readOnly" : true
                     }, 
                     "stateId" : {
-                        "readOnly" : false
+                        "readOnly" : true
                     }, 
                     "description" : {
-                        "readOnly" : false
+                        "readOnly" : true
                     }
                 }
             }
@@ -3992,4 +4015,28 @@
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("582e3f25425310133a49f105"), 
+    "docType" : "object", 
+    "name" : "Complexity", 
+    "description" : "<p></p>", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
+}
+{ 
+    "_id" : ObjectId("582e3f51425310133a49f107"), 
+    "docType" : "object", 
+    "name" : "Business Processes", 
+    "description" : "<p></p>", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
+}
+{ 
+    "_id" : ObjectId("582e4dea425310133a49f109"), 
+    "docType" : "object", 
+    "name" : "What", 
+    "description" : "<p></p>", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
 }

@@ -1,9 +1,17 @@
-define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promise/all", 'dojo/when', 'dijit/registry', 'dijit/layout/ContentPane'],
-	function(declare, domConstruct, domAttr, all, when, registry, ContentPane){
+define(['dojo/_base/declare', "dojo/_base/array",'dojo/dom-construct', "dojo/dom-attr", "dojo/promise/all", "dojo/_base/lang",'dojo/when'],
+	function(declare, array, domConstruct, domAttr, all, lang, when){
 	return declare("nqDocumentRO", [nqWidgetBase], {
         buildRendering: function(){
             this.inherited(arguments);
             domAttr.set(this.pane.containerNode, 'style', {'padding-left': '10px', 'padding-right': '10px'});
+            /*domAttr.set(this.pane.containerNode, 'style', {
+                '-webkit-column-width': '300px', /* Chrome, Safari, Opera * /
+                '-moz-column-width': '300px', /* Firefox * /
+                'column-width': '300px',
+                'max-width':'900px',
+                'padding-left': '10px',
+                'padding-right': '10px',
+                background:'backgroundClass'});*/
         },
         _setDocIdAttr: function(docId){
             this.inherited(arguments);
@@ -25,28 +33,28 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
             var self = this;
 			self.pane.destroyDescendants(false);//destroy all the widgets but leave the pane intact
             var docDom = domConstruct.create('div');
-            when(self.generateNextLevelContents(docDom, item, 1, null, false), function(obj){
+            when(self.generateNextLevelContents(docDom, item, 1), function(obj){
 				domConstruct.place(docDom, self.pane.containerNode, 'last');
             });
         },
 		//Create an ordinary HTML page recursively by obtaining data from the server
-        generateNextLevelContents: function(docDom, item, headerLevel, parentId, previousParagraphHasRightFloat){
+        generateNextLevelContents: function(docDom, item, headerLevel){
             var self = this;
             var divDom = domConstruct.create('div', {id: item._id}, docDom);
             //Header
             domConstruct.create(
                 'h'+headerLevel,
-                {innerHTML: item.name, style: {'clear': previousParagraphHasRightFloat?'both':'none'}},
+                {innerHTML: item.name, style: {'clear': headerLevel<3?'both':'none'}},
                 divDom
             );
             if(item.insets){
                 item.insets.forEach(function(inset){
                     if(inset.media){
                         if(inset.media.mediaType == 'image/png'){
-                            domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: inset.url, width: 300}, divDom);
+                            domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: inset.url, width: inset.width}, divDom);
                         }
                         if(inset.media.mediaType == 'widget/3D Class Model'){
-                            domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: inset.url, width: 300}, divDom);
+                            domConstruct.create("img", {style:{float :'right', 'margin-left':'10px'}, src: inset.url, width: inset.width}, divDom);
                             var parms = {
                                 id: pageId + '.' + tabPane.tabNum + '.' + widNum,
                                 pageId: pageId,
@@ -67,13 +75,18 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "dojo/dom-attr", "dojo/promi
             var pDom = dojo.toDom(item.description);
             domConstruct.place(pDom, divDom, 'last');
 
-            var childrenFilter = self.store.buildFilterFromQuery(this.schema.query, item);
+            var clonedQuery = lang.clone(this.schema.query);
+            this.store.substituteVariablesInQuery(clonedQuery, item, this.docId);
+            var childrenFilter = self.store.buildFilterFromQuery(clonedQuery);
             var childrenCollection = this.store.filter(childrenFilter);
+            var correctChildObjArr = [];
+            childrenCollection.forEach(function(childObj){
+                var position = array.indexOf(item.childDocs, childObj._id);
+                correctChildObjArr[position] = childObj;
+            });
             var childDocPromises = [];
-            childrenCollection.forEach(function(childItem){
-                var previousParagraphHasRightFloat = false;
-                childDocPromises.push(self.generateNextLevelContents(docDom, childItem, headerLevel+1, item._id, previousParagraphHasRightFloat));
-                //previousParagraphHasRightFloat = childItem.description && childItem.description.indexOf('floatright')==-1?false:true;
+            correctChildObjArr.forEach(function(childItem){
+                childDocPromises.push(self.generateNextLevelContents(docDom, childItem, headerLevel+1));
             });
             return all(childDocPromises);
         }

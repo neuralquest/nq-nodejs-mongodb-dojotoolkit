@@ -1,13 +1,11 @@
 define([
 	"dojo/_base/array", // array.filter array.forEach array.indexOf array.some
-	"dojo/aspect", // aspect.before, aspect.after
 	"dojo/_base/declare", // declare
 	"dojo/Deferred",
 	"dojo/_base/lang", // lang.hitch
-	"dojo/when",
     "dojo/promise/all",
 	"dijit/Destroyable"
-], function(array, aspect, declare, Deferred, lang, when, all, Destroyable){
+], function(array, declare, Deferred, lang, all, Destroyable){
 
 	// module:
 	//		dijit/tree/ObjectStoreModel
@@ -74,7 +72,9 @@ define([
             var query = self.schema.rootQuery;
             if(query) {
                 var parentItem = this.store.cachingStore.getSync(this.docId);
-                var childrenFilter = self.store.buildFilterFromQuery(query, parentItem, this.docId);
+                var clonedQuery = lang.clone(query);
+                this.store.substituteVariablesInQuery(clonedQuery, parentItem, this.docId);
+                var childrenFilter = self.store.buildFilterFromQuery(clonedQuery);
                 collection = self.store.filter(childrenFilter);
             }
             else onItem([]);
@@ -125,14 +125,16 @@ define([
 				return;
 			}
 
+            var clonedQuery = lang.clone(query);
+            this.store.substituteVariablesInQuery(clonedQuery, parentItem, this.docId);
 			var childrenPromises = [];
 
-			if(Array.isArray(query)){
-				query.forEach(function (subQuery) {
+			if(Array.isArray(clonedQuery)){
+                clonedQuery.forEach(function (subQuery) {
 					childrenPromises.push(self.getChildrenArray(parentItem, subQuery));
 				});
 			}
-			else childrenPromises.push(self.getChildrenArray(parentItem, query));
+			else childrenPromises.push(self.getChildrenArray(parentItem, clonedQuery));
 
 			all(childrenPromises).then(function(childrenArrs){
 				var resultingChildren = [];
@@ -163,11 +165,27 @@ define([
 				return newChildObjs;
 			}
 			else if('where' in query) {
-				var childrenFilter = self.store.buildFilterFromQuery(query, parentItem);
+				var childrenFilter = self.store.buildFilterFromQuery(query);
 				var childrenCollection = self.store.filter(childrenFilter);
 				return childrenCollection.fetch().then(function (childObjects) {
+                    var correctChildObjArr = [];
+                    // in the case of in array, we have reorder because the query returns the natural order
+                    if('in' in query.where){
+                        var qualifier = query.where.in;
+                        var key = Object.keys(qualifier)[0];
+                        var correctOrder = qualifier[key];
+                        childObjects.forEach(function(childObj){
+                            var position = array.indexOf(correctOrder, childObj._id);
+                            correctChildObjArr[position] = childObj;
+                        });
+                    }
+                    else {
+                        childObjects.forEach(function(childObj){
+                            correctChildObjArr.push(childObj);
+                        });
+                    }
 					var hasChildrenPromises = [];
-					childObjects.forEach(function (childObj) {
+                    correctChildObjArr.forEach(function (childObj) {
 						//See if there are any grandchildren
 						//hasChildrenPromises.push(self.hasGrandChildren(childObj, viewObj));
 						hasChildrenPromises.push(true);
@@ -176,7 +194,7 @@ define([
 						var counter = 0;
 						var newChildObjs = [];
 						hasChildrenPromisesArr.forEach(function(hasChildrenPromise){
-							var newChildObj = lang.clone(childObjects[counter]);
+							var newChildObj = lang.clone(correctChildObjArr[counter]);
                             newChildObj.$queryName = query.queryName;
 							newChildObj.hasChildren = hasChildrenPromise;
 							newChildObjs.push(newChildObj);
@@ -193,7 +211,7 @@ define([
             var self = this;
             var grandChildrenPromises = [];
             if(viewObj.childrenQuery) {
-				var grandChildrenFilter = self.store.buildFilterFromQuery(viewObj.childrenQuery, parentItem, viewObj.isA);
+				var grandChildrenFilter = self.store.buildFilterFromQuery(viewObj.childrenQuery);
 
 				//var grandChildrenFilter = self.store.buildFilterFromQuery(parentItem, viewObj.childrenQuery);
                 if(grandChildrenFilter) {
@@ -232,6 +250,7 @@ define([
 			else if(query.queryName == queryName) return query;
             else if('join' in query) return this.getSubQueryByName(query.join, queryName);
 		},
+
 		// =======================================================================
 		// Inspecting items
 

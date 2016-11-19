@@ -76,6 +76,17 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                     return self.store.amAuthorizedToUpdate(object);
                 };
                 columns.push(attrProps);
+                if(attrProps.subDoc){
+                    var subDoc = attrProps.subDoc;
+                    var prop = attrProps.prop;
+                    attrProps.get = function(item){
+                        var subArr = item[subDoc];
+                        var subObj = subArr[0];
+                        var value = subObj[prop];
+                        return value;
+                    };
+                }
+
                 if(attrProps.enum){
                     attrProps.renderCell = function(object, value, node, options){
                         if(!value) html.set(node, '[not selected]');
@@ -113,10 +124,10 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                             //html.set(node, date.toLocaleDateString());
                             div.appendChild(document.createTextNode(date));
                             return div;
-                        };
+                        };*/
                         attrProps.renderCell = function(object, value, node, options) {
                             console.log('value', value);
-                            if(!value || value=='') html.set(node, '[no date selected]');
+                            if(!value || value=='') html.set(node, '[no date]');
                             else {
                                 var date = null;
                                 if(lang.isObject(value)) date = value;//the date widget returns an date object
@@ -124,13 +135,13 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                                 html.set(node, date.toLocaleDateString());
                             }
                         };
-                        */
+                        /*
                         attrProps.get = function(item) {
                             var value = item[this.field];
                             if(!value) return '[no date]';
                             var date = dojo.date.stamp.fromISOString(value);
                             return date.toLocaleDateString();
-                        };
+                        };*/
                         //attrProps.autoSave = true;
                         attrProps.editor = DateTextBox;
                     }
@@ -140,11 +151,20 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                         };
                     }
                     else if(attrProps.query){
-                        attrProps.get = function(item) {
+                        /*attrProps.get = function(item) {
                             var value = item[this.field];
                             if(!value) return '[null]';
                             //var date = dojo.date.stamp.fromISOString(value);
                             return self.store.cachingStore.getSync(value).name;
+                        };*/
+                        attrProps.renderCell = function(object, value, node, options){
+                            if(!value) html.set(node, '[not selected]');
+                            else{
+                                var selectedOption = self.store.cachingStore.getSync(value);
+                                html.set(node, selectedOption.name);
+                                //if(selectedOption) node.appendChild(document.createTextNode(selectedOption.name));
+                                //else node.appendChild(document.createTextNode('id: '+value));
+                            }
                         };
                         //attrProps.autoSave = true;
                         attrProps.editor =  'text';
@@ -272,7 +292,10 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                     this.grid.set('collection', docCol);
                 }
                 else{
-                    var childrenFilter = self.store.buildFilterFromQuery(query, parentDoc, self.docId);
+                    var clonedQuery = lang.clone(query);
+                    var parentItem = this.store.cachingStore.getSync(this.docId);
+                    this.store.substituteVariablesInQuery(clonedQuery, parentItem, this.docId);
+                    var childrenFilter = self.store.buildFilterFromQuery(clonedQuery);
                     docCol = this.store.filter(childrenFilter);
                     this.grid.set('collection', docCol);
                 }
