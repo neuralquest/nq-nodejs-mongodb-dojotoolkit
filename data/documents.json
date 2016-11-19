@@ -2527,6 +2527,14 @@
     }, 
     "type" : "object", 
     "properties" : {
+        "buyerIcon" : {
+            "title" : "I", 
+            "readOnly" : true
+        }, 
+        "buyerId" : {
+            "title" : "From", 
+            "readOnly" : true
+        }, 
         "stateHistoryDate" : {
             "readOnly" : true, 
             "subDoc" : "stateHistory", 
@@ -2549,10 +2557,6 @@
                     }
                 }
             }
-        }, 
-        "buyerId" : {
-            "title" : "From", 
-            "readOnly" : true
         }, 
         "name" : {
             "title" : "Subject", 
@@ -3094,14 +3098,25 @@
                         "select" : "name", 
                         "subDoc" : "widgets", 
                         "pageId" : "582bbb2415456a300beb7e09", 
-                        "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAa9JREFUeNqck7tKA0EUhv+5bGIheCkEiWgKu0SNNoJgYoiCMQn4NKltbHwaURAREzWFICgoWPgCFlHxUtiYZNZzZjYma1TU2Z1lmZnvP3P+MyPGNg92Gi1Tavk+AO6/aQJKCHhK7uo3grfW50EifxIgGOXtsxILID7ch63TWx7n98fmB5/yQgzM6iYFzowaZEoj6MHFdwrUIgbMamMHBS6ubwiQXSw9slfBZ6+MwdxsAszq9oQX6SNAO4gW8bqry3ML+MaFdYICqZnZD8GOgPZwWDmEkhKGoNzyCmLjcWTTi6EdVE9qkEp2CQTVU1piNZ+3UTiioW2mksmeFFJTU7i/q6PNaT9whiP7wmYOSFfnx+dnPDw92ZRcDnYWmnbLjB9OgX6lgmShAKhWKx3jLO9MzWWzX3jgRbC3v28XMbCWL2BsIo7cUiaUQuXomILoTwIECKVQKBbJAxk4bzCdSPR4ME2+tJqNj7S0cJVBVCvYaongBCkWMriv10MpcI962p1a6trj2hI81B/9dBV+uBfCMcxq8/pSG9w4Tjc4/O/vkoWZ5Q1PUh/A/9rLuwADAK8loV8tdNaPAAAAAElFTkSuQmCC"
+                        "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAa9JREFUeNqck7tKA0EUhv+5bGIheCkEiWgKu0SNNoJgYoiCMQn4NKltbHwaURAREzWFICgoWPgCFlHxUtiYZNZzZjYma1TU2Z1lmZnvP3P+MyPGNg92Gi1Tavk+AO6/aQJKCHhK7uo3grfW50EifxIgGOXtsxILID7ch63TWx7n98fmB5/yQgzM6iYFzowaZEoj6MHFdwrUIgbMamMHBS6ubwiQXSw9slfBZ6+MwdxsAszq9oQX6SNAO4gW8bqry3ML+MaFdYICqZnZD8GOgPZwWDmEkhKGoNzyCmLjcWTTi6EdVE9qkEp2CQTVU1piNZ+3UTiioW2mksmeFFJTU7i/q6PNaT9whiP7wmYOSFfnx+dnPDw92ZRcDnYWmnbLjB9OgX6lgmShAKhWKx3jLO9MzWWzX3jgRbC3v28XMbCWL2BsIo7cUiaUQuXomILoTwIECKVQKBbJAxk4bzCdSPR4ME2+tJqNj7S0cJVBVCvYaongBCkWMriv10MpcI962p1a6trj2hI81B/9dBV+uBfCMcxq8/pSG9w4Tjc4/O/vkoWZ5Q1PUh/A/9rLuwADAK8loV8tdNaPAAAAAElFTkSuQmCC", 
+                        "join" : {
+                            "queryName" : "views", 
+                            "select" : "name", 
+                            "from" : "573435c23c6d3cd598a5a2df", 
+                            "pageId" : "57a678162d8cd20920e6d819", 
+                            "where" : {
+                                "eq" : {
+                                    "_id" : "$viewId"
+                                }
+                            }
+                        }
                     }, 
                     {
                         "queryName" : "SubPages", 
                         "select" : "name", 
                         "from" : "56f87ec55dde184ccfb9fc74", 
                         "pageId" : "57a677652d8cd20920e6d817", 
-                        "Xwhere" : {
+                        "where" : {
                             "eq" : {
                                 "_id" : "$pageId"
                             }
@@ -3134,7 +3149,7 @@
                 "_id" : "$docId"
             }
         }, 
-        "recursive" : "schema"
+        "recursive" : "schemaQuery"
     }, 
     "query" : {
         "queryName" : "views", 
@@ -3190,18 +3205,6 @@
         "accordionOrTab" : {
             "readOnly" : false
         }, 
-        "newTabButton" : {
-            "type" : "button", 
-            "label" : "Add Tab", 
-            "readOnly" : false, 
-            "action" : {
-                "actionType" : "insertSubDocArray", 
-                "arrayName" : "tabs", 
-                "newDoc" : {
-
-                }
-            }
-        }, 
         "tabs" : {
             "readOnly" : false, 
             "items" : {
@@ -3211,18 +3214,6 @@
                     }, 
                     "pageId" : {
                         "readOnly" : false
-                    }, 
-                    "newWidgetButton" : {
-                        "type" : "button", 
-                        "label" : "Add Widget", 
-                        "readOnly" : false, 
-                        "action" : {
-                            "actionType" : "insertSubDocArray", 
-                            "arrayName" : "widgets", 
-                            "newDoc" : {
-
-                            }
-                        }
                     }, 
                     "widgets" : {
                         "readOnly" : false, 
@@ -3238,12 +3229,6 @@
                                     "readOnly" : false
                                 }, 
                                 "viewId" : {
-                                    "readOnly" : false
-                                }, 
-                                "rootDocId" : {
-                                    "readOnly" : false
-                                }, 
-                                "pageId" : {
                                     "readOnly" : false
                                 }
                             }
@@ -3966,12 +3951,6 @@
             "readOnly" : false
         }, 
         "viewId" : {
-            "readOnly" : false
-        }, 
-        "rootDocId" : {
-            "readOnly" : false
-        }, 
-        "pageId" : {
             "readOnly" : false
         }
     }, 

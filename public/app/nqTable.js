@@ -77,14 +77,14 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                 };
                 columns.push(attrProps);
                 if(attrProps.subDoc){
-                    var subDoc = attrProps.subDoc;
-                    var prop = attrProps.prop;
-                    attrProps.get = function(item){
+                    attrProps.get = lang.hitch(attrProps, function(item){
+                        var subDoc = this.subDoc;
+                        var prop = this.prop;
                         var subArr = item[subDoc];
                         var subObj = subArr[0];
                         var value = subObj[prop];
                         return value;
-                    };
+                    });
                 }
 
                 if(attrProps.enum){
@@ -130,6 +130,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                             if(!value || value=='') html.set(node, '[no date]');
                             else {
                                 var date = null;
+                                //var value = "2008-10-17T00:00:00Z";
                                 if(lang.isObject(value)) date = value;//the date widget returns an date object
                                 else date = dojo.date.stamp.fromISOString(value);
                                 html.set(node, date.toLocaleDateString());
@@ -292,11 +293,12 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                     this.grid.set('collection', docCol);
                 }
                 else{
-                    var clonedQuery = lang.clone(query);
+                    /*var clonedQuery = lang.clone(query);
                     var parentItem = this.store.cachingStore.getSync(this.docId);
                     this.store.substituteVariablesInQuery(clonedQuery, parentItem, this.docId);
                     var childrenFilter = self.store.buildFilterFromQuery(clonedQuery);
-                    docCol = this.store.filter(childrenFilter);
+                    docCol = this.store.filter(childrenFilter);*/
+                    var docCol = self.store.getCollectionForSubstitutedQuery(query, this.docId, this.docId);
                     this.grid.set('collection', docCol);
                 }
             }

@@ -408,6 +408,37 @@ function(declare, lang, array, when, all, registry, request,
                 return self.isA(parentDoc, id);
             });
         },
+        getCollectionForSubstitutedQuery: function(query, parent, docId) {
+            var parentObj = parent;
+            if(typeof parent == 'string') parentObj = this.cachingStore.getSync(parent);
+            var clonedQuery = lang.clone(query);
+            this.substituteVariablesInQuery(clonedQuery, parentObj, docId);
+            var filter = this.buildFilterFromQuery(clonedQuery);
+            return this.filter(filter);
+        },
+        substituteVariablesInQuery: function(query, parentObj, docId) {
+            if(Array.isArray(query)){
+                for(var i=0;i<query.length;i++){
+                    var subQuery = query[i];
+                    this.substituteVariablesInQuery(subQuery, parentObj, docId);
+                }
+            }
+            else {
+                if('where' in query) {
+                    var where = query.where;
+                    var qualifier = Object.keys(where)[0];
+                    var key = Object.keys(where[qualifier])[0];
+                    var value = where[qualifier][key];
+                    if (value.substring(0, 1) == '$') {
+                        if (value == "$docId") where[qualifier][key] = docId;
+                        else if (value == "$userId") where[qualifier][key] = nq.getUser().id;
+                        else if (value == "$ownerId") where[qualifier][key] = nq.getOwner().id;
+                        else where[qualifier][key] = parentObj[value.substring(1)];
+                    }
+                }
+                if('join' in query) this.substituteVariablesInQuery(query.join, parentObj, docId);
+            }
+        },
         buildFilterFromQuery: function(query){
             var self = this;
             return self.Filter(function (obj) {
@@ -450,27 +481,6 @@ function(declare, lang, array, when, all, registry, request,
 
                 return true;
             });
-        },
-        substituteVariablesInQuery: function(query, parentObj, docId) {
-            if(Array.isArray(query)){
-                for(var i=0;i<query.length;i++){
-                    var subQuery = query[i];
-                    this.substituteVariablesInQuery(subQuery, parentObj, docId);
-                }
-            }
-            else {
-                var where = query.where;
-                var qualifier = Object.keys(where)[0];
-                var key = Object.keys(where[qualifier])[0];
-                var value = where[qualifier][key];
-                if (value.substring(0, 1) == '$') {
-                    if (value == "$docId") where[qualifier][key] = docId;
-                    else if (value == "$userId") where[qualifier][key] = nq.getUser().id;
-                    else if (value == "$ownerId") where[qualifier][key] = nq.getOwner().id;
-                    else where[qualifier][key] = parentObj[value.substring(1)];
-                }
-                if('join' in query) this.substituteVariablesInQuery(query.join, parentObj, docId);
-            }
         },
         amAuthorizedToUpdate: function(doc){
             return true;

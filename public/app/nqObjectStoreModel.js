@@ -68,16 +68,17 @@ define([
 
 		getRoot: function(onItem, onError){
             var self = this;
-            var collection = null;
-            var query = self.schema.rootQuery;
+            var collection = self.store.getCollectionForSubstitutedQuery(self.schema.rootQuery, this.docId, this.docId);
+            /*var query = self.schema.rootQuery;
             if(query) {
                 var parentItem = this.store.cachingStore.getSync(this.docId);
                 var clonedQuery = lang.clone(query);
                 this.store.substituteVariablesInQuery(clonedQuery, parentItem, this.docId);
                 var childrenFilter = self.store.buildFilterFromQuery(clonedQuery);
+                var collection = self.store.getCollectionForSubstitutedQuery(query, this.docId, this.docId);
                 collection = self.store.filter(childrenFilter);
             }
-            else onItem([]);
+            else onItem([]);*/
 			/*collection.on('remove, add', function(event){
 				var parent = event.target;
 				var collection = self.childrenCache[parent.id];
@@ -107,19 +108,22 @@ define([
         getChildren: function(/*Object*/ parentItem, /*function(items)*/ onComplete, /*function*/ onError) {
 			var self = this;
 			var query;
+            // Find the query that we'll be using
 			if('$queryName' in parentItem) {
+                if (parentItem.$queryName == "tabs") debugger;
 				if (parentItem.$queryName == 'rootQuery') query = self.schema.query;
 				else {
 					var prevQuery = self.getSubQueryByName(self.schema.query, parentItem.$queryName);
-					if ('recursive' in prevQuery) {
+					if('recursive' in prevQuery) {
 						if(prevQuery.recursive == 'schemaQuery') query = self.schema.query;
-						else if (prevQuery.recursive == 'same') query = prevQuery;
+						//else if (prevQuery.recursive == 'same') query = prevQuery;
+                        else query = self.getSubQueryByName(self.schema.query, prevQuery.recursive);
 					}
 					else if ('join' in prevQuery) query = prevQuery.join;
 				}
 			}
 			else query = self.schema.query;
-			if(!query) {
+			if(!query) {// return empty array
 				var childrenArr = [];
 				onComplete(childrenArr);
 				return;
