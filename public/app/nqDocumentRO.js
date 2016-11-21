@@ -75,10 +75,11 @@ define(['dojo/_base/declare', "dojo/_base/array",'dojo/dom-construct', "dojo/dom
             var pDom = dojo.toDom(item.description);
             domConstruct.place(pDom, divDom, 'last');
 
-            var clonedQuery = lang.clone(this.schema.query);
+            /*var clonedQuery = lang.clone(this.schema.query);
             this.store.substituteVariablesInQuery(clonedQuery, item, this.docId);
             var childrenFilter = self.store.buildFilterFromQuery(clonedQuery);
-            var childrenCollection = this.store.filter(childrenFilter);
+            var childrenCollection = this.store.filter(childrenFilter);*/
+            var childrenCollection = self.store.getCollectionForSubstitutedQuery(this.schema.query, item, this.docId);
             var correctChildObjArr = [];
             childrenCollection.forEach(function(childObj){
                 var position = array.indexOf(item.childDocs, childObj._id);

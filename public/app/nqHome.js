@@ -8,7 +8,7 @@ define(['dojo/_base/declare', 'dojo/dom-construct', "app/nqWidgetBase", "dojo/do
                 '-webkit-column-width': '300px', /* Chrome, Safari, Opera */
                 '-moz-column-width': '300px', /* Firefox */
                 'column-width': '300px',
-                'max-width':'900px',
+                'max-width':'800px',
                 'padding-left': '10px',
                 'padding-right': '10px',
                 background:'backgroundClass'});

@@ -1,7 +1,7 @@
-define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectStoreModel',
+define(["dojo/_base/declare", "dojo/_base/lang", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectStoreModel',
         'dojo/dom-construct', 'dijit/tree/dndSource', 'dijit/Menu', 'dijit/MenuItem', 'dijit/PopupMenuItem', "dojo/_base/array",
         'dojo/query!css2'],
-	function(declare, nqWidgetBase, Tree, nqObjectStoreModel,
+	function(declare, lang, nqWidgetBase, Tree, nqObjectStoreModel,
 			domConstruct, dndSource, Menu, MenuItem, PopupMenuItem, array){
 
 	return declare("nqTree", [nqWidgetBase], {
@@ -82,7 +82,10 @@ define(["dojo/_base/declare", "app/nqWidgetBase", "dijit/Tree", 'app/nqObjectSto
                             var query;
                             if (item.$queryName == 'rootQuery') query = self.schema.rootQuery;
                             else query = self.model.getSubQueryByName(self.schema.query, item.$queryName);
-                            tt.$query = query;
+                            var clonedQuery = lang.clone(query);
+                            if(clonedQuery.icon) clonedQuery.icon = 'yes';
+                            if(clonedQuery.join && clonedQuery.join.icon) clonedQuery.join.icon = 'yes';
+                            tt.$query = clonedQuery;
                         }
                         return JSON.stringify(tt, null, 4);
                     }

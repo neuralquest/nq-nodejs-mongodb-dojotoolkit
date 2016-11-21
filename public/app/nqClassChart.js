@@ -105,7 +105,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
                     if(childItem.docType == 'class') cellPosInfo.subClasses.push(childItem._id);
                     else cellPosInfo.instantiations.push(childItem._id);
                     promisses.push(self.buildHierarchy(childItem._id));
-                });
+                });// temp hack because get collection cant do array of queries
                 var childrenCollection1 = self.store.getCollectionForSubstitutedQuery(self.schema.query[1], doc, self.docId)
                 childrenCollection1.forEach(function(childItem){
                     if(childItem.docType == 'class') cellPosInfo.subClasses.push(childItem._id);

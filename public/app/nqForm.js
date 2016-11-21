@@ -11,11 +11,6 @@ define(['dojo/_base/declare', "dojo/_base/lang", "app/nqWidgetBase","dojo/when",
                 var self = this;
                 if(!this.docId) return;
                 if('rootQuery' in this.schema){
-                    /*var clonedQuery = lang.clone(this.schema.rootQuery);
-                    var parentItem = this.store.cachingStore.getSync(this.docId);
-                    this.store.substituteVariablesInQuery(clonedQuery, parentItem, this.docId);
-                    var childrenFilter = self.store.buildFilterFromQuery(clonedQuery);
-                    var docCol = this.store.filter(childrenFilter);*/
                     var docCol = self.store.getCollectionForSubstitutedQuery(this.schema.rootQuery, this.docId, this.docId);
                     docCol.fetch().then(function(docsArr){
                         var doc = docsArr[0];

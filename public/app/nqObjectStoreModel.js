@@ -69,24 +69,6 @@ define([
 		getRoot: function(onItem, onError){
             var self = this;
             var collection = self.store.getCollectionForSubstitutedQuery(self.schema.rootQuery, this.docId, this.docId);
-            /*var query = self.schema.rootQuery;
-            if(query) {
-                var parentItem = this.store.cachingStore.getSync(this.docId);
-                var clonedQuery = lang.clone(query);
-                this.store.substituteVariablesInQuery(clonedQuery, parentItem, this.docId);
-                var childrenFilter = self.store.buildFilterFromQuery(clonedQuery);
-                var collection = self.store.getCollectionForSubstitutedQuery(query, this.docId, this.docId);
-                collection = self.store.filter(childrenFilter);
-            }
-            else onItem([]);*/
-			/*collection.on('remove, add', function(event){
-				var parent = event.target;
-				var collection = self.childrenCache[parent.id];
-				if(collection){
-					var children = collection.fetch();
-					self.onChildrenChange(parent, children);
-				}
-			});*/
 			collection.on('update', function(event){
                 //TODO the tree cookie screws hasChildren so we dont get auto expand
 				var obj = event.target;
@@ -110,7 +92,7 @@ define([
 			var query;
             // Find the query that we'll be using
 			if('$queryName' in parentItem) {
-                if (parentItem.$queryName == "tabs") debugger;
+                if (parentItem.$queryName == "widgets") debugger;
 				if (parentItem.$queryName == 'rootQuery') query = self.schema.query;
 				else {
 					var prevQuery = self.getSubQueryByName(self.schema.query, parentItem.$queryName);
@@ -129,16 +111,13 @@ define([
 				return;
 			}
 
-            var clonedQuery = lang.clone(query);
-            this.store.substituteVariablesInQuery(clonedQuery, parentItem, this.docId);
 			var childrenPromises = [];
-
-			if(Array.isArray(clonedQuery)){
-                clonedQuery.forEach(function (subQuery) {
-					childrenPromises.push(self.getChildrenArray(parentItem, subQuery));
+			if(Array.isArray(query)){
+                query.forEach(function (subQuery) {
+					childrenPromises.push(self.getChildrenArray(subQuery, parentItem, self.docId, true));
 				});
 			}
-			else childrenPromises.push(self.getChildrenArray(parentItem, clonedQuery));
+			else childrenPromises.push(self.getChildrenArray(query, parentItem, self.docId, true));
 
 			all(childrenPromises).then(function(childrenArrs){
 				var resultingChildren = [];
@@ -146,10 +125,10 @@ define([
 					resultingChildren = resultingChildren.concat(childrenArr);
 				});
 				onComplete(resultingChildren);
-			});
+			}, nq.errorDialog);
         },
 
-		getChildrenArray: function(parentItem, query) {
+		getChildrenArray: function(query, parentItem, docId, checkHasGrandChildren) {
 			var self = this;
 			if('subDoc' in query) {
 				var childObjects = parentItem[query.subDoc];
@@ -158,6 +137,7 @@ define([
 				var num = 0;
 				childObjects.forEach(function (childObj) {
 					var newChildObj = lang.clone(childObj);
+                    newChildObj._id = parentItem._id + ':' + query.subDoc+num;
                     newChildObj.$queryName = query.queryName;
 					newChildObj.hasChildren = true;
 					newChildObj.name = childObj.name?childObj.name:query.subDoc+' '+num;
@@ -169,78 +149,74 @@ define([
 				return newChildObjs;
 			}
 			else if('where' in query) {
-				var childrenFilter = self.store.buildFilterFromQuery(query);
-				var childrenCollection = self.store.filter(childrenFilter);
+                var childrenCollection = self.store.getCollectionForSubstitutedQuery(query, parentItem, docId);
 				return childrenCollection.fetch().then(function (childObjects) {
                     var correctChildObjArr = [];
                     // in the case of in array, we have reorder because the query returns the natural order
                     if('in' in query.where){
                         var qualifier = query.where.in;
                         var key = Object.keys(qualifier)[0];
-                        var correctOrder = qualifier[key];
+                        var value = qualifier[key];
+                        if(value.substring(0, 1) == '$') value = parentItem[value.substring(1)];
                         childObjects.forEach(function(childObj){
-                            var position = array.indexOf(correctOrder, childObj._id);
-                            correctChildObjArr[position] = childObj;
+                            var position = array.indexOf(value, childObj._id);
+                            correctChildObjArr[position] = lang.clone(childObj);
                         });
                     }
                     else {
                         childObjects.forEach(function(childObj){
-                            correctChildObjArr.push(childObj);
+                            correctChildObjArr.push(lang.clone(childObj));
                         });
                     }
-					var hasChildrenPromises = [];
+					var hasGrandChildrenPromises = [];
                     correctChildObjArr.forEach(function (childObj) {
+                        childObj.$queryName = query.queryName;
 						//See if there are any grandchildren
-						//hasChildrenPromises.push(self.hasGrandChildren(childObj, viewObj));
-						hasChildrenPromises.push(true);
+						if(checkHasGrandChildren) hasGrandChildrenPromises.push(self.hasGrandChildren(childObj, false));
+						else hasGrandChildrenPromises.push(true);
 					});
-					return all(hasChildrenPromises).then(function(hasChildrenPromisesArr){
+					return all(hasGrandChildrenPromises).then(function(hasGrandChildrenPromisesArr){
 						var counter = 0;
-						var newChildObjs = [];
-						hasChildrenPromisesArr.forEach(function(hasChildrenPromise){
-							var newChildObj = lang.clone(correctChildObjArr[counter]);
-                            newChildObj.$queryName = query.queryName;
-							newChildObj.hasChildren = hasChildrenPromise;
-							newChildObjs.push(newChildObj);
+                        hasGrandChildrenPromisesArr.forEach(function(hasGrandChildrenPromises){
+                            var newChildObj = correctChildObjArr[counter];
+							newChildObj.hasChildren = hasGrandChildrenPromises.length>0?true:false;
 							counter ++;
 						});
-						return newChildObjs;
+						return correctChildObjArr;
 					});
 				});
 			}
 			else return [];
 		},
-        hasGrandChildren: function(parentItem, viewObj) {
-            //return true;
+        hasGrandChildren: function(parentItem, checkHasGrandChildren) {
             var self = this;
-            var grandChildrenPromises = [];
-            if(viewObj.childrenQuery) {
-				var grandChildrenFilter = self.store.buildFilterFromQuery(viewObj.childrenQuery);
-
-				//var grandChildrenFilter = self.store.buildFilterFromQuery(parentItem, viewObj.childrenQuery);
-                if(grandChildrenFilter) {
-                    var grandChildrenCollection = self.store.filter(grandChildrenFilter);
-                    grandChildrenPromises.push(grandChildrenCollection.fetch())
+            var query;
+            // Find the query that we'll be using
+            if('$queryName' in parentItem) {
+                var prevQuery = self.getSubQueryByName(self.schema.query, parentItem.$queryName);
+                if('recursive' in prevQuery) {
+                    if(prevQuery.recursive == 'schemaQuery') query = self.schema.query;
+                    //else if (prevQuery.recursive == 'same') query = prevQuery;
+                    else query = self.getSubQueryByName(self.schema.query, prevQuery.recursive);
                 }
+                else if ('join' in prevQuery) query = prevQuery.join;
             }
-            if(viewObj.childrenView) {
-                var subView = self.store.cachingStore.getSync(viewObj.childrenView);
-                if(subView){
-					var grandChildrenFilter = self.store.buildFilterFromQuery(subView.query, parentItem, subView.isA);
+            if(!query) return[];
 
-					//var grandChildrenFilter = self.store.buildFilterFromQuery(parentItem, subView.query);
-                    if(grandChildrenFilter) {
-                        var grandChildrenCollection = self.store.filter(grandChildrenFilter);
-                        grandChildrenPromises.push(grandChildrenCollection.fetch())
-                    }
-                }
-            }
-            return all(grandChildrenPromises).then(function(grandChildrenArrs){
-                var grandChildren = false;
-                grandChildrenArrs.forEach(function(grandChildrenArr){
-                    if(grandChildrenArr.length > 0) grandChildren = true;
+            var childrenPromises = [];
+            if(Array.isArray(query)){
+                query.forEach(function (subQuery) {
+                    childrenPromises.push(self.getChildrenArray(subQuery, parentItem, self.docId, checkHasGrandChildren));
                 });
-                return grandChildren;
+            }
+            else childrenPromises.push(self.getChildrenArray(query, parentItem, self.docId, checkHasGrandChildren));
+
+            return all(childrenPromises).then(function(childrenArrs){
+                var resultingChildren = [];
+                childrenArrs.forEach(function(childrenArr){
+                    resultingChildren = resultingChildren.concat(childrenArr);
+                });
+                return resultingChildren;
             });
         },
 		getSubQueryByName: function(query, queryName) {

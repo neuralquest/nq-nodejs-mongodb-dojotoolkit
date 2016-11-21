@@ -293,11 +293,6 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                     this.grid.set('collection', docCol);
                 }
                 else{
-                    /*var clonedQuery = lang.clone(query);
-                    var parentItem = this.store.cachingStore.getSync(this.docId);
-                    this.store.substituteVariablesInQuery(clonedQuery, parentItem, this.docId);
-                    var childrenFilter = self.store.buildFilterFromQuery(clonedQuery);
-                    docCol = this.store.filter(childrenFilter);*/
                     var docCol = self.store.getCollectionForSubstitutedQuery(query, this.docId, this.docId);
                     this.grid.set('collection', docCol);
                 }
