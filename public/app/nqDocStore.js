@@ -7,7 +7,7 @@ function(declare, lang, array, when, all, registry, request,
         target: '/documents',
         idProperty: '_id',
         autoEmitEvents: false,
-        transactionObj: {add:{}, update:{}, delete:{}},
+        transactionArr: [],
         constructor: function () {
             /*this.cachingStore = new nqMemoryStore();
             this.root = this;
@@ -154,7 +154,14 @@ function(declare, lang, array, when, all, registry, request,
         put: function (item, directives) {
             var self = this;
             this.enableTransactionButtons();
-            if(!item._id in self.transactionObj.add) self.transactionObj.update[item._id] = item;
+            this.transactionArr.push(
+                {
+                    action: 'update',
+                    viewId: directives.viewId,
+                    _id: item._id,
+                    doc: item
+                }
+            );
             //if(!directives.viewId) directives.viewId = item._viewId;//TODO pastItem should send viewID in directives
             this.processDirectives(item, directives);
             return this.cachingStore.put(item, directives).then(function(item){
@@ -509,13 +516,15 @@ function(declare, lang, array, when, all, registry, request,
         },
         commit: function(){
             var self = this;
+
+
             request.post('/documents', {
                 // send all the operations in the body
                 headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
-                data: JSON.stringify(self.transactionObj)
+                data: JSON.stringify(self.transactionArr)
             }).then(function(data){
                 console.log('data', data);
-                self.transactionObj = {};
+                self.transactionArr = [];
                 var domNode = domConstruct.create("div", {
                     style:{
                         border: '2px solid gray','border-radius': '5px',position: 'fixed','z-index': 2,opacity: 0,

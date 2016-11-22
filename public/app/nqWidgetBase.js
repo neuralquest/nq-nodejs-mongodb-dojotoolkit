@@ -671,7 +671,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             if(docPart[attrName] !== value){
                                 if(!value || value == attrDefault) docPart.delete(attrName);
                                 else docPart[attrName] = value;
-                                self.store.put(doc);
+                                self.store.put(doc, {viewId: self.schema._id});
                             }
                         },nq.errorDialog);
                     }));

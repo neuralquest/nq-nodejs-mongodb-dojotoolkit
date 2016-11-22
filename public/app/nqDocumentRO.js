@@ -3,7 +3,7 @@ define(['dojo/_base/declare', "dojo/_base/array",'dojo/dom-construct', "dojo/dom
 	return declare("nqDocumentRO", [nqWidgetBase], {
         buildRendering: function(){
             this.inherited(arguments);
-            domAttr.set(this.pane.containerNode, 'style', {'padding-left': '10px', 'padding-right': '10px'});
+            domAttr.set(this.pane.containerNode, 'style', {'padding-left': '10px', 'padding-right': '10px',  'max-width':'800px'});
             /*domAttr.set(this.pane.containerNode, 'style', {
                 '-webkit-column-width': '300px', /* Chrome, Safari, Opera * /
                 '-moz-column-width': '300px', /* Firefox * /
@@ -75,10 +75,6 @@ define(['dojo/_base/declare', "dojo/_base/array",'dojo/dom-construct', "dojo/dom
             var pDom = dojo.toDom(item.description);
             domConstruct.place(pDom, divDom, 'last');
 
-            /*var clonedQuery = lang.clone(this.schema.query);
-            this.store.substituteVariablesInQuery(clonedQuery, item, this.docId);
-            var childrenFilter = self.store.buildFilterFromQuery(clonedQuery);
-            var childrenCollection = this.store.filter(childrenFilter);*/
             var childrenCollection = self.store.getCollectionForSubstitutedQuery(this.schema.query, item, this.docId);
             var correctChildObjArr = [];
             childrenCollection.forEach(function(childObj){
