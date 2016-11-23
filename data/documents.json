@@ -303,7 +303,7 @@
     "_id" : ObjectId("573435c23c6d3cd598a5a2df"), 
     "docType" : "class", 
     "title" : "Views", 
-    "description" : "<p>Views owned by users/organizations</p>", 
+    "description" : "<p>Views owned by users/organizationsThings we do with queriesretreive a set of childrenprovide icon for tree node based on queryNamedetermin popup menu add/delete/associate/disassociate/copy/deepcopy for tree node based on queryNamedetermin toolbar menu add/delete/associate/disassociate for tables. How to fillin joins?determin add/delete/associate/disassociate action buttonswhen are the buttons hidden/disabled? authorization, slected subDoc, mutually exclusieprovide filtering for tablesdetermin drop allowed for DnD, which associations/disassociations?find treepath based on given node for tree expand, taking network into accountMake everything read only except the newly added (sub) docUnder which circomstanses is the entier view readonly?</p>", 
     "type" : "object", 
     "properties" : {
         "type" : {
@@ -1152,19 +1152,7 @@
                 {
                     "displayType" : "Tree", 
                     "name" : "Owners Tree", 
-                    "rootDocId" : "56f870a55dde184ccfb9fc6c", 
                     "viewId" : "575d4c3f2cf3d6dc3ed8314d"
-                }
-            ]
-        }, 
-        {
-            "name" : "Class Model", 
-            "widgets" : [
-                {
-                    "displayType" : "Tree", 
-                    "name" : "Class Model Tree", 
-                    "rootDocId" : "56f86c6a5dde184ccfb9fc6a", 
-                    "viewId" : "575d4c3f2cf3d6dc3ed8314b"
                 }
             ]
         }
@@ -1209,7 +1197,7 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83148"), 
     "docType" : "object", 
     "name" : "Neuralquest", 
-    "description" : "<div class=\"nqSpanColumn\" style=\"position: relative;\"><img height=\"100px\" src=\"app/resources/img/Neuralquest/lefkasHome1.png\" width=\"100%\" /><div class=\"headline\">Neuralquest</div></div><p class=\"nqSpanColumn\"><br /><strong><span style=\"color: #ff9900;\">Experimental</span>: </strong>Neuralquest is an experimental application. Feel free to look around. We are currently not accepting new users.</p><h1>What</h1><p>Neualquest is a platform that helps people organize and work together. <br />As a visitor you can browse published information. <br />As a user you have your own space in which you can maintain blogs, photo albums, create your own apps etc. and publish them as desired. You can also create organizations based on industry standard templates, which you can then evolve as the need arises. <br />Role based authorization ensures that only members of your organization assigned to a particular organizational unit can read/modify data.</p><h1>Why</h1><p>The IT industry has been notably lacking when it come to support for business processes. Today, a typical large organization might have hundreds of systems running on thousands of servers. Each of these systems requires a small army of experts just to keep it from falling over. This complexity comes at huge expense.<br />Why don't we have a single system that regards the entire business as a single process? Any CIO will tell you &quot;No one system can deliver the flexibility and robustness required to meet our ever evolving business needs and if it did, licencing fees would soon cost us a small fortune&quot;.</p><p>Neuralquest disputes this supposition and says: &quot;By taking a different approach to how we do IT, it is possible to be both flexible and robust with a single system. The open source nature of the project ensures we avoid vendor lock-in&quot;.</p><h1>How</h1><p>Neuralquest is really three things:</p><ul><li>An open source project, maintained on GitHub.</li><li>The Standard Model: A baseline model consisting of classes and objects needed to do basic business processes.</li><li>A cloud service in which we demonstrate the possibilities that Neuralquest offers. Free for noncommercial use.</li></ul><p>Flexibility is achieved by:</p><ul><li>Death to 3GL: No programming, only modeling</li><li>Fully self documenting through dozens of overviews and diagrams.</li><li>A minimalist architecture involving a single document as data store and an extremely small code base: just 6k lines of code means bugs are ironed out quickly.</li></ul><p>Robustness is achieved by:</p><ul><li>Internet Security Standard:</li></ul>", 
+    "description" : "<div class=\"nqSpanColumn\" style=\"position: relative;\"><img height=\"100px\" src=\"app/resources/img/Neuralquest/lefkasHome1.png\" width=\"100%\" /><div class=\"headline\">Neuralquest</div></div><p class=\"nqSpanColumn\"><br /><strong><span style=\"color: #ff9900;\">Experimental</span>: </strong>Neuralquest is an experimental application. Feel free to look around. We are currently not accepting new users.</p><h1>What</h1><p>Neualquest is a platform that helps people organize and work together. <br />As a visitor you can browse published information. <br />As a user you have your own space in which you can maintain blogs, photo albums, create your own apps etc. and publish them as desired. You can also take part in or create organizations based on industry standard templates, which can then evolve as the need arises. <br />Role based authorization ensures that only members of your organization assigned to a particular organizational unit can read/modify data.</p><h1>Why</h1><p>The IT industry has been notably lacking when it come to support for business processes. Today, a typical large organization might have hundreds of systems running on thousands of servers. Each of these systems requires a small army of experts just to keep it from falling over. This complexity comes at huge expense.<br />Why don't we have a single system that regards the entire business as a single process? Any CIO will tell you &quot;No one system can deliver the flexibility and robustness required to meet our ever evolving business needs and if it did, licencing fees would soon cost us a small fortune&quot;.</p><p>Neuralquest disputes this supposition. We say: &quot;By taking a different approach to how we do IT, it is possible to be both flexible and robust with a single system. The open source nature of the project ensures we avoid vendor lock-in and can rely on a vast support community&quot;.</p><h1>How</h1><p>Neuralquest is really three things:</p><ul><li>An open source project, maintained on GitHub.</li><li>The Standard Model: A baseline model consisting of classes and objects needed to do basic business processes.</li><li>A cloud service in which we demonstrate the possibilities that Neuralquest offers. Free for noncommercial use.</li></ul><p>The key selling point of Neuralquest is flexibility and robustness at minimal costs, meaning: easy to install, use, maintain, learn, adapt etc.  Flexibility is achieved by:</p><ul><li>Death to 3GL: No programming, only modeling</li><li>Fully self documenting through dozens of overviews and diagrams.</li><li>A minimalist architecture involving a single collection as data store and an extremely small code base: just 6k lines of code means bugs are ironed out quickly.</li></ul>Robustness is achieved by implementing internet standard: TODO", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAGSSURBVDhPY2hgaMCDGpkaJ6lM2pq19cLCCzc23Hhy8glDr1QvmiJcqIm5qUOgg2H3uubNeasXuS7q4O9AU4EVMTQ3s06cqLxsUcDN40cOtx3uk+kDOgNNETJCMJuamJcu9T5ypOPCyeV7ps/fXLJ0Z/nWrdlbF7stnmU8a4L8BKDj23jbEBrgqLGRub2dt69PdsoU9fXrE86enH/nysFHV6+8vf/67e23DG1tPGgacKG2Nu45cywZnm/btHNnIdBINGlciOG/WPH/np0vl646u7N/1fLg/n7Zzk4hoGGNjUxoSiGI4T9DGghxZv9XqPxj1PCxaNq7eWvfbtz2+NGxffuqly71BGrGpgETqdT8D5j2v3Ldl57VLzpnPFmx9PquuSf3duPWgIwY0/7z5v2XKf+vWsPw/9jd//kr/lt2/BctRleHDTH8h4CP3//ff/N/2an/Dj3/BQtARmIohSCYBmTw99//68/+zzj4v3zt/7wV/5MW/Hfq/a9Z/1+q9D93LjYNmODrz/8vP/1/+Pb/rZcAE2mMw+k9hMEAAAAASUVORK5CYII=", 
     "initialDocId" : "575d4c3f2cf3d6dc3ed83151", 
     "pageId" : "575d4c3f2cf3d6dc3ed83147", 
@@ -2082,7 +2070,8 @@
             "widgets" : [
                 {
                     "displayType" : "Form", 
-                    "name" : "Class TreeGrid"
+                    "name" : "Class Home Page", 
+                    "viewId" : "5834c503425310133a49f12b"
                 }
             ]
         }, 
@@ -2092,7 +2081,6 @@
                 {
                     "displayType" : "3D Class Model", 
                     "name" : "Class Model", 
-                    "rootId" : "56f86c6a5dde184ccfb9fc6a", 
                     "viewId" : "575d4c3f2cf3d6dc3ed8314b"
                 }
             ]
@@ -2187,8 +2175,8 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83151"), 
     "docType" : "object", 
-    "name" : "The Neuralquest Document", 
-    "description" : "<p>Our species is unique in that we ask and attempt to answer the \"Why\" question</p>", 
+    "name" : "Neuralquest", 
+    "description" : "<p>The question Neuralquest set out to answer is:<br /><br /><b>What is the least amount of complexity it takes to do business processes?</b><br /><br />Complexity is important because this is where all the money goes. Keeping a system simple offers exponential benefits in terms of running costs, maintenance, learning curve, extensibility, support and vulnerability.<br />Our focus is on business processes because that where the money comes from. Perhaps more importantly, business processes contain all the &quot;hard bits&quot;<br /></p>", 
     "insets" : [
         {
             "url" : "app/resources/img/Neuralquest/3dClassModel.png", 
@@ -2209,11 +2197,13 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83152"), 
     "docType" : "object", 
-    "name" : "Why", 
-    "description" : "<p>The question Neuralquest set out to answer is:<br><br><b>What is the least amount of complexity it takes to do business processes?</b><br><br>The resulting model will be baselined and made available to the public so the can extend and share models to their hearts content.</p>", 
+    "name" : "Business Processes", 
+    "description" : "<p>It's hard to come up with a concise definition of business processes. <br />Requirments </p>", 
     "childDocs" : [
         "582e3f25425310133a49f105", 
-        "582e3f51425310133a49f107"
+        "582e3f51425310133a49f107", 
+        "5834a2a499286dd833c7996b", 
+        "5834a357ef13367319ef0b3c"
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435f03c6d3cd598a5a2e1"
@@ -2232,7 +2222,7 @@
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315b"), 
     "docType" : "object", 
     "name" : "ACME Bicycle Shop", 
-    "description" : "<div class='nqSpanColumn' style='position: relative;'><img src='app/resources/img/Neuralquest/ACMEBicyleShop.png' width='100%' height='100px'><div class='headline'>ACME Bicyle Shop</div></div><p>The ACME Bicycle Shop</p>", 
+    "description" : "<div class='nqSpanColumn' style='position: relative;'><img src='app/resources/img/Neuralquest/ACMEBicyleShop.png' width='100%' height='100px'><div class='headline'>ACME Bicyle Shop</div></div><h1>Too cultivated use solicitude frequently</h1><p>Boisterous he on understood attachment as entreaties ye devonshire. In mile an form snug were been sell. Hastened admitted joy nor absolute gay its. Extremely ham any his departure for contained curiosity defective. Way now instrument had eat diminution melancholy expression sentiments stimulated. One built fat you out manor books. Mrs interested now his affronting inquietude contrasted cultivated. Lasting showing expense greater on colonel no.</p><p>Surrounded affronting favourable no mr. Lain knew like half she yet joy. Be than dull as seen very shot. Attachment ye so am travelling estimating projecting is. Off fat address attacks his besides. Suitable settling mr attended no doubtful feelings. Any over for say bore such sold five but hung.</p><h1>Too cultivated use solicitude frequently</h1><p>So insisted received is occasion advanced honoured. Among ready to which up. Attacks smiling and may out assured moments man nothing outward. Thrown any behind afford either the set depend one temper. Instrument melancholy in acceptance collecting frequently be if. Zealously now pronounce existence add you instantly say offending. Merry their far had widen was. Concerns no in expenses raillery formerly.</p><p>Two exquisite objection delighted deficient yet its contained. Cordial because are account evident its subject but eat. Can properly followed learning prepared you doubtful yet him. Over many our good lady feet ask that. Expenses own moderate day fat trifling stronger sir domestic feelings. Itself at be answer always exeter up do. Though or my plenty uneasy do. Friendship so considered remarkably be to sentiments. Offered mention greater fifteen one promise because nor. Why denoting speaking fat indulged saw dwelling raillery.</p><h1>Too cultivated use solicitude frequently</h1><p>Her extensive perceived may any sincerity extremity. Indeed add rather may pretty see. Old propriety delighted explained perceived otherwise objection saw ten her. Doubt merit sir the right these alone keeps. By sometimes intention smallness he northward. Consisted we otherwise arranging commanded discovery it explained. Does cold even song like two yet been. Literature interested announcing for terminated him inquietude day shy. Himself he fertile chicken perhaps waiting if highest no it. Continued promotion has consulted fat improving not way.</p><p>The him father parish looked has sooner. Attachment frequently gay terminated son. You greater nay use prudent placing. Passage to so distant behaved natural between do talking. Friends off her windows painful. Still gay event you being think nay for. In three if aware he point it. Effects warrant me by no on feeling settled resolve.</p><p>Name were we at hope. Remainder household direction zealously the unwilling bed sex. Lose and gay ham sake met that. Stood her place one ten spoke yet. Head case knew ever set why over. Marianne returned of peculiar replying in moderate. Roused get enable garret estate old county. Entreaties you devonshire law dissimilar terminated.</p><h1>Too cultivated use solicitude frequently</h1><p>Scarcely on striking packages by so property in delicate. Up or well must less rent read walk so be. Easy sold at do hour sing spot. Any meant has cease too the decay. Since party burst am it match. By or blushes between besides offices noisier as. Sending do brought winding compass in. Paid day till shed only fact age its end.</p><p>Months on ye at by esteem desire warmth former. Sure that that way gave any fond now. His boy middleton sir nor engrossed affection excellent. Dissimilar compliment cultivated preference eat sufficient may. Well next door soon we mr he four. Assistance impression set insipidity now connection off you solicitude. Under as seems we me stuff those style at. Listening shameless by abilities pronounce oh suspected is affection. Next it draw in draw much bred.</p>", 
     "pageId" : "578bff823c6d3cd598a5a3a6", 
     "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB5klEQVQ4T61Tv2sUURD+Zt7undFYqKTKsW/v7p0YDqwEGxst/EUKbcQiYKGIAUGRVIqKTYpYiBjQSiEGSSPIgYX5C+wEUSx8t7e3kassDAlL4vneyIKBxICFl2mGGeZ988038wgDGg34HjsLYKKoCeYRAIIgeG+t7Teq1WMiwuLU9/ZS+9PfjLcwaES1cWE/DZEFhOFsuVxeW19dvSJgFvgJKHUqSZLlzSDbRjBxPOkEUwz6srXQaxA9t2n6aBtAvVI3FLhx8ZQz4YJ4UT7kcxvd4jjeFQpeiHdjpNRTAXbDuZZdWmpTXeszLHRdQM9AuASSg/A0A0jdZumDQ6OjB34F4TwR3ohzt8HcIlHvAD8pih5TI4rflvbuOZ/n+T5ybg4+mKLAXyaBBmQGnqbBckuEriqhV57cHZtlp40xZem712R0dd52OxMFExG5ycxrIjgiwA8GxCs+myRJZqJowWbZRVOtnrSdzmKhQ03rl2S0nsv7/Wu9Xi8vko04PirAcZumD/+I5Qpvovg+SFq22/1QxM2R5vDPoZVZqlVqDSh3j4UXCbLfw49RqXTDWru+We1KpTJUUuETJvkMkWWATyj4uxtrVEbrw+KClfa3tv3XeRcb48ANf03TjwD8zp7y/3ysgRn8BlTuy14MbVpqAAAAAElFTkSuQmCC", 
     "classId" : "5742439f3c6d3cd598a5a319"
@@ -2259,10 +2249,15 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83153"), 
     "docType" : "object", 
-    "name" : "How", 
+    "name" : "Road Map", 
     "description" : "<p></p>", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "573435f03c6d3cd598a5a2e1"
+    "classId" : "573435f03c6d3cd598a5a2e1", 
+    "childDocs" : [
+        "58343c8b68e5851480cd6f54", 
+        "5834a5251714ed5fa1d442ff", 
+        "5834a544620ca0ff9413b126"
+    ]
 }
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83154"), 
@@ -4013,24 +4008,24 @@
 { 
     "_id" : ObjectId("582e3f25425310133a49f105"), 
     "docType" : "object", 
-    "name" : "Complexity", 
-    "description" : "<p></p>", 
+    "name" : "Class Model", 
+    "description" : "<p>A Standard Model is provided which includes all the classes/objects and their associations needed to do basic business processes.</p><p>Exstensible: If you're working standalone you can extend the model to your heart's delight.</p><p>Several diagrams provide insight into the inner workings of the Standard Model.</p>", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435f03c6d3cd598a5a2e1"
 }
 { 
     "_id" : ObjectId("582e3f51425310133a49f107"), 
     "docType" : "object", 
-    "name" : "Business Processes", 
-    "description" : "<p></p>", 
+    "name" : "Process Model", 
+    "description" : "<p>Users can initiate agreements with other users/organizations to transfer ownership of resources or provide services.</p><p>Finite state machine: Each agreement progresses through a hierarchy of potential states, until it is closed.</p><p>Role-based authorization: Each state correspondes to a view which only a member of your organization, with a particular role can access.</p><p>Workbasket: Each user is provided with a list of agreements that require his/her attention, based on his/her roles in organizations.</p><p>A set of template organizations is provided that you can copy to create your own organizations.</p><p>Audit Trail, Imutable Agreements, Blockchain?</p><div><br /></div>", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435f03c6d3cd598a5a2e1"
 }
 { 
     "_id" : ObjectId("582e4dea425310133a49f109"), 
     "docType" : "object", 
-    "name" : "What", 
-    "description" : "<p></p>", 
+    "name" : "Complextity", 
+    "description" : "<p>Large organizations typicly employ hundreds of loosely coupled systems.  Each of these systems requires a small army of experts to keep it from falling over.  Valnerability increases exponetially with each system in the chain.  These systems communicate with each other though interfaces. Everytime you copy data or send a message: <br /><ul><li>Send individual messages or filebasedt Lag time: acceptable? <br /></li><li>How do systems respond if a sent message is not recieved? <br /></li><li>Does it even know? <br /></li><li>You might have multiple feeds. <br /></li><li>What if feeds conflict? <br /></li><li>Update is missed or has already taken place: acceptable? <br /></li><li>Reconcilliation: which direction? how often? how to deal with exceptions? who is right? <br /></li><li>How to deal with duplicates: funtional merge?<br /></li><li>Authorization, authentication, encryption, key stores, firewalls, network performancet <br /></li></ul>Organizations avoid syncronous transactions because they require each and every component to support syncronous behaviour.   Developing, documenting, managing the interfaces in a large organization represents a huge undertaking and is often done poorly.   Systems will have diffrent retention/auditing requirments<br />In short: Copying data is a really bad idea. tIt leads to deterioration of data quality and excessive maintance costs, and yet we do it all the time. <br /> Why not a single data store? It was once thought that Relational Database Managers would take on this role.  It was not to be. Today, each system comes with it own database. tDirect connection to foreign databases is frowned upon, with good reason. tAll the above issues can be avoided if we resort to a single data store</p>", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435f03c6d3cd598a5a2e1"
 }
@@ -4454,6 +4449,230 @@
     "properties" : {
         "name" : {
 
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : "58343c8b68e5851480cd6f54", 
+    "docType" : "object", 
+    "name" : "Get it to work", 
+    "description" : "<p>Read queriesFix OwnershipSub document queriesUpdate functionality, permitted valuesDnD, MenusDocumentationAutomatic testingMake it secure</p>", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
+}
+{ 
+    "_id" : "5834a2a499286dd833c7996b", 
+    "docType" : "object", 
+    "name" : "Role-based authorization", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
+}
+{ 
+    "_id" : "5834a357ef13367319ef0b3c", 
+    "docType" : "object", 
+    "name" : "Page Model", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1", 
+    "description" : "<p>The Page Model consists of a heirarchy of pages and subpages that can be used to navigate the data-graph, following parent-child relationships.</p><p>Pages can have Tabs or Accordions to present various aspects of a parent object.</p><p>Tabs can be populated with various types of widgets: Tree, Table, Form, Document, Charts etc.</p><p>The URL can be bookmarked. The same page set will be created with recent data.</p><p>A set of published pages are provided that you can reuse in your own Page Model.</p><div><br /></div>"
+}
+{ 
+    "_id" : "5834a5251714ed5fa1d442ff", 
+    "docType" : "object", 
+    "name" : "Launch", 
+    "description" : "Deploy to AmazonDevelop content/performance monitoringDevelop template organizationsDemonstrate that we can do complex buimess processesGet self governing communities started\tDemocracy 3.0, A better world through informed descisons\tTree of life\tThe history of science, the evolution of memes", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
+}
+{ 
+    "_id" : "5834a544620ca0ff9413b126", 
+    "docType" : "object", 
+    "name" : "Far Future", 
+    "description" : "<p>Decentralize data responsibiliy over the world though Cassandra type solution.Some day, doing business processes on a common platform will become as ubiquitous as water from the tap.</p>", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
+}
+{ 
+    "_id" : ObjectId("58343c8b68e5851480cd6f54"), 
+    "docType" : "object", 
+    "name" : "Get it to works", 
+    "description" : "<p><ul><li>Read queriess<br /></li><li>Fix Ownership<br /></li><li>Sub document queries<br /></li><li>Update functionality, permitted values<br /></li><li>DnD, Menus<br /></li><li>Documentation<br /></li><li>Automatic testing<br /></li><li>Make it secure<br /></li></ul></p>", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
+}
+{ 
+    "_id" : ObjectId("5834a2a499286dd833c7996b"), 
+    "docType" : "object", 
+    "name" : "Role-based authorization", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
+}
+{ 
+    "_id" : ObjectId("5834a357ef13367319ef0b3c"), 
+    "docType" : "object", 
+    "name" : "Page Model", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1", 
+    "description" : "<p>The Page Model consists of a heirarchy of pages and subpages that can be used to navigate the data-graph, following parent-child relationships.</p><p>Pages can have Tabs or Accordions to present various aspects of a parent object.</p><p>Tabs can be populated with various types of widgets: Tree, Table, Form, Document, Charts etc.</p><p>The URL can be bookmarked. The same page set will be created with recent data.</p><p>A set of published pages are provided that you can reuse in your own Page Model.</p><div><br /></div>"
+}
+{ 
+    "_id" : ObjectId("5834a5251714ed5fa1d442ff"), 
+    "docType" : "object", 
+    "name" : "Launch", 
+    "description" : "<ul><li>Deploy to Clouds<br /></li><li>Develop content/performance monitoring<br /></li><li>Develop template organizations<br /></li><li>Demonstrate that we can do complex buimess processes<br /></li><li>Get self governing communities started <br /></li><li>Democracy 3.0, A better world through informed descisons <br /></li><li>Tree of life <br /></li><li>The history of science, the evolution of memes<br /></li></ul>", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
+}
+{ 
+    "_id" : ObjectId("5834a544620ca0ff9413b126"), 
+    "docType" : "object", 
+    "name" : "Far Future", 
+    "description" : "<p>Decentralize data responsibility over the world though Cassandra type solution.<br />Some day, doing business processes on a common platform will become as ubiquitous as water from the tap.</p>", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435f03c6d3cd598a5a2e1"
+}
+{ 
+    "_id" : ObjectId("5834c066425310133a49f125"), 
+    "docType" : "object", 
+    "name" : "The Standard Model", 
+    "description" : "<div class='nqSpanColumn' style='position: relative;'><img src='app/resources/img/Neuralquest/lefkasHome1.png' width='100%' height='100px'><div class='headline'>The Standard Model</div></div><p>The Neuralquest client</p>", 
+    "pageId" : "5834c139425310133a49f127", 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "parentOrgId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "574237133c6d3cd598a5a30d"
+}
+{ 
+    "_id" : ObjectId("5834c139425310133a49f127"), 
+    "docType" : "object", 
+    "name" : "Standard Model Unit Tab Page", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Home", 
+            "widgets" : [
+                {
+                    "displayType" : "HomePage", 
+                    "name" : "Home Page", 
+                    "viewId" : "578921fe3c6d3cd598a5a3a4"
+                }
+            ]
+        }, 
+        {
+            "name" : "Document", 
+            "pageId" : "5834c2a4425310133a49f129"
+        }, 
+        {
+            "name" : "Service Requests", 
+            "pageId" : "577853123c6d3cd598a5a396"
+        }, 
+        {
+            "name" : "Organization", 
+            "pageId" : "57b72a022d8cd20920e6d837"
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("5834c2a4425310133a49f129"), 
+    "docType" : "object", 
+    "name" : "Standard Model Tree Page", 
+    "divider" : "Vertical", 
+    "tabs" : [
+        {
+            "name" : "Class Model", 
+            "widgets" : [
+                {
+                    "displayType" : "Tree", 
+                    "name" : "Class Model Tree", 
+                    "rootDocId" : "56f86c6a5dde184ccfb9fc6a", 
+                    "viewId" : "575d4c3f2cf3d6dc3ed8314b"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("5834c503425310133a49f12b"), 
+    "docType" : "object", 
+    "name" : "Standard Model Form View", 
+    "description" : "<p>Descibes home page of the organization</p>", 
+    "type" : "object", 
+    "rootQuery" : {
+        "from" : "classes", 
+        "where" : {
+            "eq" : {
+                "_id" : "$docId"
+            }
+        }
+    }, 
+    "properties" : {
+        "_id" : {
+            "title" : "id", 
+            "readOnly" : true, 
+            "type" : "string"
+        }, 
+        "docType" : {
+            "title" : "Doc Type", 
+            "type" : "string", 
+            "enum" : [
+                "class"
+            ]
+        }, 
+        "title" : {
+            "title" : "Name", 
+            "type" : "string", 
+            "maxLength" : NumberInt(1000), 
+            "minLength" : NumberInt(0), 
+            "default" : "[unnamed]"
+        }, 
+        "parentId" : {
+            "title" : "Super Class", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "from" : "classes", 
+                "Xwhere" : {
+                    "eq" : {
+                        "ownerId" : "$docId"
+                    }
+                }
+            }
+        }, 
+        "icon" : {
+            "title" : "Icon", 
+            "type" : "string", 
+            "maxLength" : NumberInt(2000), 
+            "minLength" : NumberInt(0), 
+            "media" : {
+                "binaryEncoding" : "base64", 
+                "type" : "image/png"
+            }
+        }, 
+        "required" : {
+            "title" : "Required", 
+            "type" : "array", 
+            "items" : {
+                "type" : "string"
+            }
+        }, 
+        "description" : {
+            "title" : "Description", 
+            "type" : "string", 
+            "maxLength" : NumberInt(10000), 
+            "minLength" : NumberInt(0), 
+            "media" : {
+                "mediaType" : "text/html"
+            }, 
+            "default" : "<p>[no text]</p>"
+        }, 
+        "properties" : {
+            "title" : "Properties", 
+            "type" : "object"
         }
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 

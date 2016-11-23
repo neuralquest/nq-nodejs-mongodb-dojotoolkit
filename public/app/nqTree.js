@@ -135,8 +135,15 @@ define(["dojo/_base/declare", "dojo/_base/lang", "app/nqWidgetBase", "dijit/Tree
                             //var tn = dijit.byNode(this.getParent().currentTarget);
                             //var selectedItem = tn.item;
                             var selectedItem = self.tree.get("selectedItem");
-                            var directives = {parentId: selectedItem._id, ownerId: self.rootDocId, schema: self.schema};
-                            self.store.add(null, directives).then(function(newObj){
+                            var newDoc = {
+                                docType: 'object',
+                                name: '[new paragraph]',
+                                ownerId: "575d4c3f2cf3d6dc3ed83148",
+                                classId: "573435f03c6d3cd598a5a2e1",
+                                $queryName: menu.queryName
+                            };
+                            var directives = {parentId: selectedItem._id, viewId: self.schema._id};
+                            self.store.add(newDoc, directives).then(function(newObj){
                                 var selectedNodes = self.tree.getNodesByItem(selectedItem);
                                 selectedNodes[0]._loadDeferred = null;
                                 self.tree._expandNode(selectedNodes[0]).then(function(newObj){

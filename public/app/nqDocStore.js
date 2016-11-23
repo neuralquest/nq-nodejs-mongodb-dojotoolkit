@@ -63,31 +63,40 @@ function(declare, lang, array, when, all, registry, request,
                 return true;
             }*/
         },
-        add: function (item, directives) {
+        add: function (newDoc, directives) {
             var self = this;
             this.enableTransactionButtons();
-            item._id = this.makeObjectId();
-            self.transactionObj.add[item._id] = item;
-            return this.cachingStore.add(item, directives).then(function(item){
-                self.emit('update', {target:item, directives:directives});
+            newDoc._id = this.makeObjectId();
+            this.transactionArr.push(
+                {
+                    action: 'add',
+                    viewId: directives.viewId,
+                    _id: newDoc._id,
+                    $queryName: newDoc.$queryName,
+                    doc: newDoc
+                }
+            );
+            return this.cachingStore.add(newDoc, directives).then(function(doc){
+                self.emit('update', {target:doc, directives:directives});
                 if(directives && 'parentId' in directives){
-                    var parentObj = this.cachingStore.getSync(directives.parentId);
-                    if(directives.schema.childrenQuery && 'in' in directives.schema.childrenQuery){
-                        var inObj = directives.schema.childrenQuery['in'];
-                        for(var key in inObj){
-                            var arrayName = inObj[key];
-                            var fkArray = parentObj[arrayName];
-                            if(!fkArray) fkArray = [];
-                            fkArray.push(item[key]);
-                            parentObj[arrayName] = fkArray;
-                            //parentObj.hasChildren = true;
+                    var parentObj = self.cachingStore.getSync(directives.parentId);
+                    if ('$queryName' in newDoc) {
+                        var viewObj = self.cachingStore.getSync(directives.viewId);
+                        var query;
+                        if (newDoc.$queryName == 'rootQuery') query = self.schema.rootQuery;
+                        else query = self.getSubQueryByName(viewObj.query, newDoc.$queryName);
+                        if('where' in query && 'in' in query.where){
+                            var qualifier = query.where.in;
+                            var key = Object.keys(qualifier)[0];
+                            var value = qualifier[key];
+                            if(value.substring(0, 1) == '$') {
+                                var arrayName = value.substring(1);
+                                if(!parentObj[arrayName]) parentObj[arrayName] = [doc._id];
+                                else parentObj[arrayName].push(doc._id);
+                            }
                         }
                     }
-                    else if(directives.schema.childrenQuery && 'and' in directives.schema.childrenQuery){
-                        var queryArray = directives.schema.childrenQuery['and'];
-                        debugger;
-                    }
-                    return self.put(parentObj).then(function(){
+                    return self.put(parentObj, {viewId:directives.viewId}).then(function(){
                         return item;
                     });
                 }
@@ -488,6 +497,18 @@ function(declare, lang, array, when, all, registry, request,
 
                 return true;
             });
+        },
+        getSubQueryByName: function(query, queryName) {
+            //This is a duplicate from ObjectStoreModel
+            if(Array.isArray(query)){
+                for(var i=0;i<query.length;i++){
+                    var subQuery = query[i];
+                    var foundQuery = this.getSubQueryByName(subQuery, queryName);
+                    if(foundQuery) return foundQuery;
+                }
+            }
+            else if(query.queryName == queryName) return query;
+            else if('join' in query) return this.getSubQueryByName(query.join, queryName);
         },
         amAuthorizedToUpdate: function(doc){
             return true;

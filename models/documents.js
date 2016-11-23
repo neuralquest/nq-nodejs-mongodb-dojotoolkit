@@ -31,6 +31,7 @@ exports.findOne = function(query){
 exports.insert = function(doc) {
     var collection = db.get().collection('documents');
     var deferred = new Deferred();
+    doc._id = ObjectID.createFromHexString(doc._id);
     collection.insert([doc],{},
         function(err, value) {
             if (err) deferred.reject(err);
@@ -157,7 +158,7 @@ function mergeProperties(viewProps, classProps) {
                 if (classProp.type == 'object' && 'properties' in classProp && 'properties' in viewProp) {
                     var subDocClassProps = classProp.properties;
                     var subDocViewProps = viewProp.properties;
-                    newProp.properties = self.mergeProperties(subDocViewProps, subDocClassProps);
+                    newProp.properties = mergeProperties(subDocViewProps, subDocClassProps);
                     newProp.type = 'object';
                     newProp.title = classProp.title;
                 }
@@ -165,8 +166,8 @@ function mergeProperties(viewProps, classProps) {
                     'items' in viewProp && 'properties' in viewProp.items) {
                     var subDocClassProps = classProp.items.properties;
                     var subDocViewProps = viewProp.items.properties;
-                    var items = self.mergeProperties(subDocViewProps, subDocClassProps);
-                    newProp.items = {properties: self.mergeProperties(subDocViewProps, subDocClassProps)};
+                    var items = mergeProperties(subDocViewProps, subDocClassProps);
+                    newProp.items = {properties: mergeProperties(subDocViewProps, subDocClassProps)};
                     newProp.type = 'array';
                     newProp.title = classProp.title;
                 }
@@ -195,7 +196,8 @@ function mergeProperties(viewProps, classProps) {
                 if(viewProp.styleColumn) newProp.styleColumn = viewProp.styleColumn;
                 if(viewPropName=='_id') newProp.type = 'string';
             }
-            else newProp = lang.clone(viewProp);
+            //else newProp = lang.clone(viewProp);
+            else newProp = viewProp;
             properties[viewPropName] = newProp;
         }
         else properties[viewPropName] = lang.clone(viewProp);
