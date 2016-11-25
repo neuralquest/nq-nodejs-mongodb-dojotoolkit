@@ -5,6 +5,7 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 	var docPositionStore = new Memory({});
 
 	return declare("nqClassChart", [nqWebGlChart], {
+        rootId: '56f86c6a5dde184ccfb9fc6a',
 		bodyViewHeight: 400,
 		bodyViewWidth: 800,
 		bodyViewDepth: 800,
@@ -36,7 +37,6 @@ define(["dojo/_base/declare", "dojo/when", "dojo/promise/all", "dojo/_base/array
 		postCreate: function(){
 			this.inherited(arguments);//create the scene
 			var self = this;
-			this.rootId = this.widget.rootId;
 
             // load any meshes, return a defered so that selecting the object can wait
 			var loader = new THREE.JSONLoader(true);			

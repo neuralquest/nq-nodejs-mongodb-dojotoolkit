@@ -17,7 +17,19 @@ define(['dojo/_base/declare', "dojo/_base/array",'dojo/dom-construct', "dojo/dom
             this.inherited(arguments);
             var self = this;
             if(!this.docId) return;
-            var docCol = this.store.filter({_id: this.docId});
+
+            var collection = self.store.getCollectionForSubstitutedQuery(self.schema.rootQuery, this.docId, this.docId);
+            collection.on('update', function(event){
+                collection.fetch().then(function(docsArr){
+                    var doc = docsArr[0];
+                    self.buildPage(doc);
+                });
+            });
+            collection.fetch().then(function(docsArr){
+                var doc = docsArr[0];
+                self.buildPage(doc);
+            });
+            /*var docCol = this.store.filter({_id: this.docId});
             this.own(docCol.on('update', function(event){
                 docCol.fetch().then(function(docsArr){
                     var doc = docsArr[0];
@@ -27,7 +39,7 @@ define(['dojo/_base/declare', "dojo/_base/array",'dojo/dom-construct', "dojo/dom
             docCol.fetch().then(function(docsArr){
                 var doc = docsArr[0];
 				self.buildPage(doc);
-            });
+            });*/
         },
         buildPage: function(item){
             var self = this;

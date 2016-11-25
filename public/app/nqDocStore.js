@@ -380,7 +380,10 @@ function(declare, lang, array, when, all, registry, request,
                         else {
                             newProp = lang.clone(classProp);
                             if (classProp.readOnly) newProp.readOnly = true;
-                            else newProp.readOnly = viewProp.readOnly == undefined ? true : viewProp.readOnly;
+                            else {
+                                newProp.readOnly = viewProp.readOnly == undefined ? true : viewProp.readOnly;
+                                newProp.readOnlyOnNew = viewProp.readOnlyOnNew == undefined ? true : viewProp.readOnlyOnNew;
+                            }
                             if (classProp.maxLength) {
                                 if (viewProp.maxLength && viewProp.maxLength < classProp.maxLength) newProp.maxLength = viewProp.maxLength
                             }

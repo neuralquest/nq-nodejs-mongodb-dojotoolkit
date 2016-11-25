@@ -82,8 +82,13 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                         var prop = this.prop;
                         var subArr = item[subDoc];
                         var subObj = subArr[0];
-                        var value = subObj[prop];
-                        return value;
+                        return subObj[prop];
+                    });
+                }
+                else if(attrProps.prop){
+                    attrProps.get = lang.hitch(attrProps, function(item){
+                        var prop = this.prop;
+                        return item[prop];
                     });
                 }
 
@@ -114,20 +119,32 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                         };
                         if(!self.readOnly) attrProps.editor = RTFEditor;
                     }
+                    else if(attrProps.media && attrProps.media.binaryEncoding == 'base64' && attrProps.media.type == 'image/png') {
+                        attrProps.renderCell = function(object, value, node, options) {
+                            var foundDoc = self.store.cachingStore.getSync(value);
+                            domConstruct.create("img", {src: foundDoc.icon}, node);
+                            //html.set(node, value);
+                        };
+
+                        //html.set(node, selectedOption.icon);
+                        /*if(!readOnly){
+                            dijitProperties.constraints = {
+                                minLength: attrProps.minLength,
+                                maxLength: attrProps.maxLength,
+                                regExp: attrProps.pattern
+                            };
+                            dijit = new ValidationTextBox(dijitProperties, domConstruct.create("input", null, node));
+                        }
+                        if(value) {
+                            domConstruct.create("br", null, node);
+                            domConstruct.create("img", {src:value}, node);
+                        }*/
+                    }
                     else if(attrProps.format == 'date-time'){
-                        /*attrProps.renderCell = function(object, value){
-                            var div = document.createElement("div");
-                            var date = null;
-                            //if(!value || value=='') html.set(node, '[no date selected]');
-                            if(lang.isObject(value)) date = value;//the date widget returns an date object
-                            else date = dojo.date.stamp.fromISOString(value);
-                            //html.set(node, date.toLocaleDateString());
-                            div.appendChild(document.createTextNode(date));
-                            return div;
-                        };*/
                         attrProps.renderCell = function(object, value, node, options) {
                             console.log('value', value);
                             if(!value || value=='') html.set(node, '[no date]');
+                            else if(value=='$now') html.set(node, '[$now]');
                             else {
                                 var date = null;
                                 //var value = "2008-10-17T00:00:00Z";
@@ -136,14 +153,6 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                                 html.set(node, date.toLocaleDateString());
                             }
                         };
-                        /*
-                        attrProps.get = function(item) {
-                            var value = item[this.field];
-                            if(!value) return '[no date]';
-                            var date = dojo.date.stamp.fromISOString(value);
-                            return date.toLocaleDateString();
-                        };*/
-                        //attrProps.autoSave = true;
                         attrProps.editor = DateTextBox;
                     }
                     else if(attrProps.format == 'uri'){
@@ -256,9 +265,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                 if(pageId) nq.setHash(item._id, pageId, 0, 0, self.level+1);
             }));
             self.own(self.grid.on("dgrid-error", function(event) {
-                //nq.errorDialog;
-                // Display an error message above the grid when an error occurs.
-                new dijit.Dialog({title: "dGrid Error", extractContent: true, content: event.error.message}).show();
+                nq.errorDialog(event.error);
             }));
             /*self.grid.on("dgrid-refresh-complete", function(event){
              var row = grid.row(event);

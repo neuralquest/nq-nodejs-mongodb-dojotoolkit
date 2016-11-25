@@ -29,7 +29,7 @@ define(['dojo/_base/declare', "dojo/_base/lang", "app/nqWidgetBase","dojo/when",
                                 //self.amAuthorizedToUpdate = updateAllowed;
                                 //if(newFormNeeded) self.renderForm(schema.properties, self.pane.containerNode);
                                 //self.setFromValues(schema.properties, doc, self.pane.containerNode);
-                                self.renderNewForm(schema.properties, doc, owner, self.pane.containerNode);
+                                self.renderNewForm(schema.properties, doc, self.pane.containerNode);
                             });
                         });
                     });
@@ -38,12 +38,12 @@ define(['dojo/_base/declare', "dojo/_base/lang", "app/nqWidgetBase","dojo/when",
                             var doc = docsArr[0];
                             //self.setFromValues(self.schema.properties, doc, self.pane.containerNode);
                             when(self.store.amAuthorizedToUpdate(doc), function(owner) {
-                                self.renderNewForm(self.schema.properties, doc, owner, self.pane.containerNode);
+                                self.renderNewForm(self.schema.properties, doc, self.pane.containerNode);
                             });
                         });
                     }));
                 }
-                else self.renderNewForm(self.schema.properties, {}, true, self.pane.containerNode);
+                else self.renderNewForm(self.schema.properties, {}, self.pane.containerNode);
 
             }
         });

@@ -303,7 +303,7 @@
     "_id" : ObjectId("573435c23c6d3cd598a5a2df"), 
     "docType" : "class", 
     "title" : "Views", 
-    "description" : "<p>Views owned by users/organizationsThings we do with queriesretreive a set of childrenprovide icon for tree node based on queryNamedetermin popup menu add/delete/associate/disassociate/copy/deepcopy for tree node based on queryNamedetermin toolbar menu add/delete/associate/disassociate for tables. How to fillin joins?determin add/delete/associate/disassociate action buttonswhen are the buttons hidden/disabled? authorization, slected subDoc, mutually exclusieprovide filtering for tablesdetermin drop allowed for DnD, which associations/disassociations?find treepath based on given node for tree expand, taking network into accountMake everything read only except the newly added (sub) docUnder which circomstanses is the entier view readonly?</p>", 
+    "description" : "<p>Views are important. They determine who gets to see/update what.</p><p>These are some of the things we do with queries</p><ul><li>Retrieve a set of children</li><li>Provide an icon for the tree node based on queryName</li><li>Determine popup menu/toolbar/buttons options: add/delete/associate/disassociate/copy/deepcopy for the tree node/table row based on queryName</li><li>Determine when buttons are hidden/disabled based on authorization, selected subDoc, mutually exclusive properties</li><li>Provide filtering for tables/trees</li><li>Determine drop allowed for DnD, which associations/disassociation</li><li>Find tree path based on given node for tree expand: reverse navigation</li></ul><p>&nbsp;</p>", 
     "type" : "object", 
     "properties" : {
         "type" : {
@@ -560,8 +560,15 @@
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
                 "from" : "56f87bcc5dde184ccfb9fc70"
-            }, 
-            "default" : "$docId"
+            }
+        }, 
+        "offeringId" : {
+            "title" : "Offering", 
+            "type" : "string", 
+            "pattern" : "[a-f0-9]{24}", 
+            "query" : {
+                "from" : "574234113c6d3cd598a5a30b"
+            }
         }, 
         "stateHistory" : {
             "title" : "History", 
@@ -569,23 +576,24 @@
             "items" : {
                 "type" : "object", 
                 "properties" : {
+                    "date" : {
+                        "title" : "Date", 
+                        "type" : "string", 
+                        "format" : "date-time", 
+                        "default" : "$now"
+                    }, 
                     "stateId" : {
                         "title" : "State", 
                         "type" : "string", 
                         "pattern" : "[a-f0-9]{24}", 
                         "query" : {
                             "from" : "5745eaa53c6d3cd598a5a371", 
-                            "where" : {
+                            "Xwhere" : {
                                 "eq" : {
                                     "ownerId" : "$docId"
                                 }
                             }
                         }
-                    }, 
-                    "date" : {
-                        "title" : "Date", 
-                        "type" : "date", 
-                        "format" : "date-time"
                     }, 
                     "description" : {
                         "title" : "Description", 
@@ -597,12 +605,22 @@
                         "default" : "<p>[no text]</p>"
                     }
                 }, 
-                "additionalProperties" : false
+                "additionalProperties" : false, 
+                "required" : [
+                    "date", 
+                    "stateId"
+                ]
             }, 
             "minItems" : NumberInt(1), 
             "uniqueItems" : true
         }
     }, 
+    "required" : [
+        "buyerId", 
+        "sellerId", 
+        "offeringId", 
+        "stateHistory"
+    ], 
     "parentId" : "56f86c6a5dde184ccfb9fc6a"
 }
 { 
@@ -2069,6 +2087,16 @@
             "name" : "Properties", 
             "widgets" : [
                 {
+                    "displayType" : "Document Read", 
+                    "name" : "Read", 
+                    "viewId" : "575d4c3f2cf3d6dc3ed8314b"
+                }
+            ]
+        }, 
+        {
+            "name" : "Properties", 
+            "widgets" : [
+                {
                     "displayType" : "Form", 
                     "name" : "Class Home Page", 
                     "viewId" : "5834c503425310133a49f12b"
@@ -2537,8 +2565,23 @@
     "properties" : {
         "buyerIcon" : {
             "title" : "", 
+            "type" : "string", 
             "readOnly" : true, 
-            "styleColumn" : "width : 1em"
+            "media" : {
+                "binaryEncoding" : "base64", 
+                "type" : "image/png"
+            }, 
+            "styleColumn" : "width : 2em", 
+            "prop" : "buyerId", 
+            "Xquery" : {
+                "from" : "56f870a55dde184ccfb9fc6c", 
+                "select" : "icon", 
+                "where" : {
+                    "eq" : {
+                        "_id" : "$buyerId"
+                    }
+                }
+            }
         }, 
         "buyerId" : {
             "title" : "From", 
@@ -2668,13 +2711,19 @@
         "name" : {
             "readOnly" : true
         }, 
-        "assetId" : {
-            "readOnly" : true
-        }, 
         "buyerId" : {
+            "title" : "From", 
             "readOnly" : true
         }, 
         "sellerId" : {
+            "title" : "To", 
+            "readOnly" : true
+        }, 
+        "assetId" : {
+            "title" : "Article", 
+            "readOnly" : true
+        }, 
+        "offeringId" : {
             "readOnly" : true
         }, 
         "description" : {
@@ -2686,11 +2735,7 @@
             "readOnly" : false, 
             "action" : {
                 "actionType" : "insertSubDocArray", 
-                "arrayName" : "stateHistory", 
-                "newDoc" : {
-                    "date" : "$now", 
-                    "stateId" : "57790e503c6d3cd598a5a3a0"
-                }
+                "arrayName" : "stateHistory"
             }
         }, 
         "stateHistory" : {
@@ -2700,10 +2745,22 @@
                         "readOnly" : true
                     }, 
                     "stateId" : {
-                        "readOnly" : true
+                        "readOnly" : true, 
+                        "readOnlyOnNew" : false, 
+                        "queryOnNew" : {
+                            "query" : {
+                                "from" : "5745eaa53c6d3cd598a5a371", 
+                                "where" : {
+                                    "in" : {
+                                        "nextStateId" : "$stateId"
+                                    }
+                                }
+                            }
+                        }
                     }, 
                     "description" : {
-                        "readOnly" : true
+                        "readOnly" : true, 
+                        "readOnlyOnNew" : false
                     }
                 }
             }
@@ -2815,7 +2872,7 @@
     "_id" : ObjectId("578c03fa3c6d3cd598a5a3a8"), 
     "docType" : "object", 
     "name" : "Red Bicycle", 
-    "description" : "<p>A very nice bicyle</p>", 
+    "description" : "<p>Material confined likewise it humanity raillery an unpacked as he. Three chief merit no if. Now how her edward engage not horses. Oh resolution he dissimilar precaution to comparison an. Matters engaged between he of pursuit manners we moments. Merit gay end sight front. Manor equal it on again ye folly by match. In so melancholy as an sentiments simplicity connection. Far supply depart branch agreed old get our.</p>", 
     "value" : NumberInt(150), 
     "currency" : "EUR", 
     "imageUrl" : "app/resources/img/Neuralquest/green-bike-19463282.jpg", 
@@ -2826,9 +2883,10 @@
     "_id" : ObjectId("578c06233c6d3cd598a5a3aa"), 
     "docType" : "object", 
     "name" : "Blue Bicycle", 
-    "description" : "<p>A very nice bicyle</p>", 
+    "description" : "<p>To sure calm much most long me mean. Able rent long in do we. Uncommonly no it announcing melancholy an in. Mirth learn it he given. Secure shy favour length all twenty denote. He felicity no an at packages answered opinions juvenile.</p>", 
     "value" : NumberInt(160), 
     "currency" : "EUR", 
+    "imageUrl" : "app/resources/img/Neuralquest/green-bike-19463282.jpg", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "classId" : "5742563e3c6d3cd598a5a32f"
 }
@@ -2836,9 +2894,10 @@
     "_id" : ObjectId("578c06793c6d3cd598a5a3ac"), 
     "docType" : "object", 
     "name" : "Green Bicycle", 
-    "description" : "<p>A very nice bicyle</p>", 
+    "description" : "<p>Are sentiments apartments decisively the especially alteration. Thrown shy denote ten ladies though ask saw. Or by to he going think order event music. Incommode so intention defective at convinced. Led income months itself and houses you. After nor you leave might share court balls.</p>", 
     "value" : NumberInt(155), 
     "currency" : "EUR", 
+    "imageUrl" : "app/resources/img/Neuralquest/green-bike-19463282.jpg", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "classId" : "5742563e3c6d3cd598a5a32f"
 }
@@ -2944,20 +3003,21 @@
         }
     }, 
     "properties" : {
-        "_id" : {
-
+        "name" : {
+            "title" : "", 
+            "size" : "2em", 
+            "bold" : "true"
         }, 
         "imageUrl" : {
-
-        }, 
-        "name" : {
-
+            "title" : ""
         }, 
         "description" : {
-
+            "title" : ""
         }, 
         "value" : {
-
+            "title" : "Price", 
+            "size" : "1.2em", 
+            "bold" : "true"
         }, 
         "buyButton" : {
             "type" : "button", 
@@ -4367,7 +4427,7 @@
         "583226da425310133a49f11d"
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "5747254b3c6d3cd598a5a379"
+    "classId" : "5747251e3c6d3cd598a5a377"
 }
 { 
     "_id" : ObjectId("58322689425310133a49f11b"), 
