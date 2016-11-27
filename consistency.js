@@ -1,7 +1,6 @@
 var Deferred = require("promised-io/promise").Deferred;
 var all = require("promised-io/promise").all;
 var when = require("promised-io/promise").when;
-var utils = require('./public/app/utils');
 var Documents = require('./models/documents');
 var tv4 = require("tv4");
 var ObjectID = require('mongodb').ObjectID;

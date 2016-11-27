@@ -3,13 +3,13 @@ require([
  'dojo', 'dojo/_base/lang', 'dojo/dom-construct',
  'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
-'app/nqDocStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocumentRO','app/nqDocumentRW','app/nqTreeGrid','app/nqHome',
+'app/nqDocStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocumentRO','app/nqDocumentRW','app/nqHome',
 "dojo/json","dijit/Dialog", "dojo/dom-attr"],
 function(arrayUtil, ready, topic, on, hash, registry,
 		dojo, lang, domConstruct,
 		when, all, query, BorderContainer,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
-        nqDocStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocumentRO, nqDocumentRW, nqTreeGrid, nqHome,
+        nqDocStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocumentRO, nqDocumentRW, nqHome,
 		JSON, Dialog, domAttr) {
 
     var nqStore = new nqDocStore();
@@ -244,10 +244,6 @@ function(arrayUtil, ready, topic, on, hash, registry,
                     }
                     else if (widget.displayType == 'Form') {
                         var widgetObj = new nqForm(parms, domConstruct.create('div'));
-                        tabPane.addChild(widgetObj);
-                    }
-                    else if (widget.displayType == 'TreeGrid') {
-                        var widgetObj = new nqTreeGrid(parms, domConstruct.create('div'));
                         tabPane.addChild(widgetObj);
                     }
                     else if (widget.displayType == 'Table') {

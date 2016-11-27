@@ -1,5 +1,5 @@
-define(['dojo/_base/declare', "dojo/_base/array",'dojo/dom-construct', "dojo/dom-attr", "dojo/promise/all", "dojo/_base/lang",'dojo/when'],
-	function(declare, array, domConstruct, domAttr, all, lang, when){
+define(['dojo/_base/declare', "dojo/_base/array",'dojo/dom-construct', "dojo/dom-attr", "dojo/promise/all", "dojo/_base/lang",'dojo/when', "dijit/form/ToggleButton", "dojo/dom-style"],
+	function(declare, array, domConstruct, domAttr, all, lang, when, ToggleButton, domStyle){
 	return declare("nqDocumentRO", [nqWidgetBase], {
         buildRendering: function(){
             this.inherited(arguments);
@@ -12,6 +12,18 @@ define(['dojo/_base/declare', "dojo/_base/array",'dojo/dom-construct', "dojo/dom
                 'padding-left': '10px',
                 'padding-right': '10px',
                 background:'backgroundClass'});*/
+            var editButton = new ToggleButton({
+                showLabel: false,
+                label: 'Edit',
+                iconClass: 'editIcon',
+                //style : {position: 'absolute', right: '0px', top: '0px'},
+                onChange: function(value){
+                    this.editMode = value;
+                }
+            });
+            this.pageToolbarDivNode.appendChild(editButton.domNode);
+            //initially show the toolbar div
+            domStyle.set(this.pageToolbarDivNode, 'display' , 'block');
         },
         _setDocIdAttr: function(docId){
             this.inherited(arguments);

@@ -1,4 +1,4 @@
-define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-style",'dijit/form/Select', 'dijit/Toolbar', 'dijit/form/DateTextBox', 'dojo/when', "dojo/promise/all",
+define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-style",'dijit/form/Select', 'dijit/Toolbar', "dijit/form/DropDownButton", "dijit/DropDownMenu", 'dijit/form/DateTextBox', 'dojo/when', "dojo/promise/all",
          'dijit/Editor', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", "dojo/cookie", "dojo/hash", "dijit/form/ToggleButton",
          "app/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/date/locale", "dojo/html", 'dgrid/extensions/ColumnResizer',
         'dgrid/OnDemandGrid', 'dgrid/Editor', 'dgrid/Selector', 'dgrid/Keyboard', 'dgrid/extensions/DijitRegistry', "dgrid/extensions/DnD",
@@ -7,7 +7,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
-	function(declare, nqSubDocStore, arrayUtil, lang, domStyle, Select, Toolbar, DateTextBox, when, all,
+	function(declare, nqSubDocStore, arrayUtil, lang, domStyle, Select, Toolbar, DropDownButton, DropDownMenu, DateTextBox, when, all,
 			RTFEditor, Memory, domConstruct, on, cookie, hash, ToggleButton,
 			nqWidgetBase, ContentPane, domGeometry, has, locale, html, ColumnResizer,
 			Grid, Editor, Selector, Keyboard, DijitRegistry, Dnd,
@@ -21,47 +21,55 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
 		postCreate: function(){
 			this.inherited(arguments);
             var self = this;
+            if('query' in self.schema && 'menu' in self.schema.query){
+                var menuDefArr = self.schema.query.menu;
+                //initially show the toolbar div
+                domStyle.set(this.pageToolbarDivNode, 'display' , 'block');
+                // Create toolbar and place it at the top of the page
+                var normalToolbar = new Toolbar({});
+                menuDefArr.forEach(function(menuDef){
+                    var button;
+                    if('menu' in menuDef){
+                        var menu = new DropDownMenu({ style: "display: none;"});
+                        self.addMenuItemsForMenuDefArr(menuDef.menu, menu);
+                        button = new DropDownButton({
+                            label: menuDef.label,
+                            iconClass: menuDef.iconClass,
+                            dropDown: menu
+                        })
+                    }
+                    else if('action' in menuDef){
+                        if(menuDef.action == 'add') {
+                            button = new Button({
+                                label: menuDef.label,
+                                iconClass: menuDef.iconClass,
+                                style: {'margin-left': '5px'},
+                                onClick: function (evt) {
+                                    //var selectedItem = self.tree.get("selectedItem");
+                                    var newDoc = {
+                                        docType: 'object',
+                                        name: '[new service agreement]',
+                                        buyerId: '575d4c3f2cf3d6dc3ed8314f', //platos cave //selected from owners with current offerings
+                                        //offeringId: '58322160425310133a49f115',
+                                        stateHistory: [{
+                                            date: '$now',//default
+                                            stateId: '583225ed425310133a49f119'//the initial state of parentDoc.offerings
+                                        }],
+                                        classId: "57424f1b3c6d3cd598a5a321"//from clause
+                                    };
+                                    var directives = {viewId: self.schema._id};
+                                    self.store.add(newDoc, directives).then(function (newObj) {
+                                        //update hash to open form
+                                    });
+                                }
+                            });
+                        }
+                    }
+                    if(button) normalToolbar.addChild(button);
+                });
+                this.pageToolbarDivNode.appendChild(normalToolbar.domNode);
+            }
 
-            /*
-			//initially show the toolbar div
-			domStyle.set(this.pageToolbarDivNode, 'display' , 'block');
-			// Create toolbar and place it at the top of the page
-			this.normalToolbar = new Toolbar({});
-			var self = this;
-			// Add sibling toggle button
-			var siblingButton = new Button({
-		        showLabel: true,
-		        label: 'Add Row',
-				iconClass: 'addIcon',
-		        onClick: function(evt){
-                    var addObj = {
-                        viewId: self.view._id, //TODO what about more than one
-                        classId: self.view.mapsTo
-                    };
-                    var directives = {parent:{id:self.docId}};
-                    self.store.add(addObj, directives);
-		        },
-				style : {'margin-left':'5px'} 
-			});
-			this.normalToolbar.addChild(siblingButton);
-			// Add delete toggle button
-			this.deleteButton = new Button({
-		        showLabel: true,
-		        checked: false,
-		        label: 'Delete Row',
-				iconClass: 'removeIcon',
-				style : {'margin-left':'5px'}, 
-		        onClick: function(evt){
-		        	for(var rowid in self.grid.selection){ 
-		        		var item=self.grid.row(rowid).data; 
-						var directives = {parent:{id:self.docId}};
-	                    self.store.remove(item.id, item.viewId, directives);//what if there is more than one view?
-		        	}
-				}
-			});
-			this.normalToolbar.addChild(this.deleteButton);
-			this.pageToolbarDivNode.appendChild(this.normalToolbar.domNode);
-*/
             var columns = [];
             var properties = self.schema.properties;
             for(var attrName in properties) {
@@ -81,8 +89,11 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                         var subDoc = this.subDoc;
                         var prop = this.prop;
                         var subArr = item[subDoc];
-                        var subObj = subArr[0];
-                        return subObj[prop];
+                        if(subArr) {
+                            var subObj = subArr[0];
+                            return subObj[prop];
+                        }
+                        return null;
                     });
                 }
                 else if(attrProps.prop){
@@ -121,24 +132,16 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                     }
                     else if(attrProps.media && attrProps.media.binaryEncoding == 'base64' && attrProps.media.type == 'image/png') {
                         attrProps.renderCell = function(object, value, node, options) {
-                            var foundDoc = self.store.cachingStore.getSync(value);
-                            domConstruct.create("img", {src: foundDoc.icon}, node);
-                            //html.set(node, value);
+                            if(value) {
+                                var foundDoc = self.store.cachingStore.getSync(value);
+                                if('icon' in foundDoc) domConstruct.create("img", {src: foundDoc.icon}, node);
+                                else {
+                                    var classDoc = self.store.cachingStore.getSync(foundDoc.classId);
+                                    if('icon' in classDoc) domConstruct.create("img", {src: classDoc.icon}, node);
+                                }
+                                //html.set(node, value);
+                            }
                         };
-
-                        //html.set(node, selectedOption.icon);
-                        /*if(!readOnly){
-                            dijitProperties.constraints = {
-                                minLength: attrProps.minLength,
-                                maxLength: attrProps.maxLength,
-                                regExp: attrProps.pattern
-                            };
-                            dijit = new ValidationTextBox(dijitProperties, domConstruct.create("input", null, node));
-                        }
-                        if(value) {
-                            domConstruct.create("br", null, node);
-                            domConstruct.create("img", {src:value}, node);
-                        }*/
                     }
                     else if(attrProps.format == 'date-time'){
                         attrProps.renderCell = function(object, value, node, options) {

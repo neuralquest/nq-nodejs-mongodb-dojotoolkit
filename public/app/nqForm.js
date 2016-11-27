@@ -1,9 +1,20 @@
-define(['dojo/_base/declare', "dojo/_base/lang", "app/nqWidgetBase","dojo/when",  "dojo/dom-attr"],
-    function(declare, lang, nqWidgetBase, when, domAttr){
+define(['dojo/_base/declare', "dojo/_base/lang", "app/nqWidgetBase","dojo/when",  "dojo/dom-attr", "dijit/form/ToggleButton"],
+    function(declare, lang, nqWidgetBase, when, domAttr, ToggleButton){
         return declare("nqForm", [nqWidgetBase],{
             buildRendering: function(){
                 this.inherited(arguments);
                 domAttr.set(this.pane.containerNode, 'style', {'padding-left': '10px', 'padding-right': '10px'});
+                var editButton = new ToggleButton({
+                    showLabel: true,
+                    label: 'Edit',
+                    iconClass: 'editIcon',
+                    value: false,
+                    style : {position: 'absolute', right: '0px', top: '0px'},
+                    onChange: function(value){
+                        this.editMode = value;
+                    }
+                });
+                this.pane.domNode.appendChild(editButton.domNode);
             },
             _setDocIdAttr: function(docId){
                 if(docId == this.docId) return;

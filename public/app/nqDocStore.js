@@ -9,64 +9,13 @@ function(declare, lang, array, when, all, registry, request,
         autoEmitEvents: false,
         transactionArr: [],
         constructor: function () {
-            /*this.cachingStore = new nqMemoryStore();
-            this.root = this;
-            this.cachingStore.getChildren = function(parent){
-                var filter = {};
-                for(var attrName in parent){
-                    if(attrName == 'structuredDocPathArr') continue;
-                    var attrProps = parent[attrName];
-                    if(Array.isArray(attrProps)) {
-                        var childrenArr = parent[attrName];
-                        var idx = 0;
-                        childrenArr.forEach(function(childObj){
-                            //childObj.arrayName = parent.arrayName?parent.arrayName+'.'+attrName:attrName;
 
-                            var structuredDocPathArr = [];
-                            if(parent.structuredDocPathArr) structuredDocPathArr = parent.structuredDocPathArr.slice(0);//clone
-                            structuredDocPathArr.push({arrayName:attrName,idx:idx});
-                            childObj.structuredDocPathArr = structuredDocPathArr;
-                            idx++;
-                        });
-                        filter = {data: childrenArr}
-                    }
-                }
-                return this.dotArray(filter);
-            };
-            this.cachingStore.dotArray = new QueryMethod({
-                type: 'dotArray',
-                querierFactory: function(filter){
-                    return function (data) {
-                        return filter.data;
-                        //return data[filter._id][filter.arrayName];
-                    };
-                }
-            });
-            this.isAChildren = new QueryMethod({
-                type: 'isA',
-                querierFactory: function (parent) {
-                    var parentId = this.getIdentity(parent);
-
-                    return function (data) {
-                        debugger;
-                        // note: in this case, the input data is ignored as this querier
-                        // returns an object's array of children instead
-
-                        // return the children of the parent
-                        // or an empty array if the parent no longer exists
-                        var parent = this.getSync(parentId);
-                        return parent ? parent.children : [];
-                    };
-                }
-            });
-            this.mayHaveChildren = function(obj) {
-                return true;
-            }*/
         },
         add: function (newDoc, directives) {
             var self = this;
             this.enableTransactionButtons();
             newDoc._id = this.makeObjectId();
+            newDoc.$newDoc = true;// Some forms need this to make new docs updatable
             this.transactionArr.push(
                 {
                     action: 'add',
@@ -397,12 +346,15 @@ function(declare, lang, array, when, all, registry, request,
                                 if (viewProp.minimum && viewProp.minimum > classProp.minimum) newProp.minimum = viewProp.minimum
                             }
                         }
-                        if(viewProp.title) newProp.title = viewProp.title;
+                        if(viewProp.title != undefined) newProp.title = viewProp.title;//the title may be set to null by the view
                         if(viewProp.col) newProp.col = viewProp.col;
                         if(viewProp.row) newProp.row = viewProp.row;
+                        if(viewProp.bold) newProp.bold = viewProp.bold;
+                        if(viewProp.size) newProp.size = viewProp.size;
                         if(viewProp.default) newProp.default = viewProp.default;
                         if(viewProp.styleColumn) newProp.styleColumn = viewProp.styleColumn;
-                        if(viewPropName=='_id') newProp.type = 'string';
+                        if(viewProp.displayIcon) newProp.displayIcon = viewProp.displayIcon;
+                        if(viewPropName=='_id') newProp.type = 'string';// hack so we get id as sting instead of object
                     }
                     else newProp = lang.clone(viewProp);
                     properties[viewPropName] = newProp;
@@ -452,6 +404,14 @@ function(declare, lang, array, when, all, registry, request,
                         if (value == "$docId") where[qualifier][key] = docId;
                         else if (value == "$userId") where[qualifier][key] = nq.getUser().id;
                         else if (value == "$ownerId") where[qualifier][key] = nq.getOwner().id;
+                        else if(1==2){
+                            var values = value.split('.');
+                            if(values.length>1) {
+                                if(values[0] == "$self") value = obj[values[1]];
+                            }
+                            var values = value.split('.');
+                            if(values.length==0) where[qualifier][key] = parentObj[value.substring(1)];
+                        }
                         else where[qualifier][key] = parentObj[value.substring(1)];
                     }
                 }
@@ -465,9 +425,12 @@ function(declare, lang, array, when, all, registry, request,
 
                 if(!'from' in query) return false;
                 if(query.from == 'classes'){
-                    if(obj.docType != 'class') return false;
+                    if(obj.docType == 'object') return false;
                 }
-                else if(!self.isASync(obj, query.from)) return false;
+                else {
+                    if(obj.docType == 'class') return false;
+                    if(!self.isASync(obj, query.from)) return false;
+                }
 
                 if('where' in query) {
                     var where = query.where;
@@ -475,6 +438,7 @@ function(declare, lang, array, when, all, registry, request,
                     var key = Object.keys(where[qualifier])[0];
                     var value = where[qualifier][key];
                     if (!value) return false;
+
                     if (qualifier == 'in') {
                         var position = array.indexOf(value, obj[key]);
                         if(position == -1) return false;
