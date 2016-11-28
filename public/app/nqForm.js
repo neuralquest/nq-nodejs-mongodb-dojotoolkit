@@ -1,20 +1,23 @@
-define(['dojo/_base/declare', "dojo/_base/lang", "app/nqWidgetBase","dojo/when",  "dojo/dom-attr", "dijit/form/ToggleButton"],
-    function(declare, lang, nqWidgetBase, when, domAttr, ToggleButton){
+define(['dojo/_base/declare', "dojo/_base/lang", "app/nqWidgetBase","dojo/when",  "dojo/dom-attr", "dijit/form/ToggleButton", "dojo/dom-style"],
+    function(declare, lang, nqWidgetBase, when, domAttr, ToggleButton, domStyle){
         return declare("nqForm", [nqWidgetBase],{
+            editMode: false,
             buildRendering: function(){
+                var self = this;
                 this.inherited(arguments);
-                domAttr.set(this.pane.containerNode, 'style', {'padding-left': '10px', 'padding-right': '10px'});
+                domAttr.set(this.pane.containerNode, 'style', {'padding-left': '10px', 'padding-right': '10px', 'max-width':'800px'});
                 var editButton = new ToggleButton({
-                    showLabel: true,
+                    showLabel: false,
                     label: 'Edit',
                     iconClass: 'editIcon',
-                    value: false,
-                    style : {position: 'absolute', right: '0px', top: '0px'},
+                    //style : {position: 'absolute', right: '0px', top: '0px'},
                     onChange: function(value){
-                        this.editMode = value;
+                        self.editMode = value;
                     }
                 });
-                this.pane.domNode.appendChild(editButton.domNode);
+                this.editorToolbarDivNode.appendChild(editButton.domNode);
+                //initially show the toolbar div
+                domStyle.set(this.editorToolbarDivNode, 'display' , 'block');
             },
             _setDocIdAttr: function(docId){
                 if(docId == this.docId) return;

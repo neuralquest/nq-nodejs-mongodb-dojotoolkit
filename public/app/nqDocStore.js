@@ -349,8 +349,8 @@ function(declare, lang, array, when, all, registry, request,
                         if(viewProp.title != undefined) newProp.title = viewProp.title;//the title may be set to null by the view
                         if(viewProp.col) newProp.col = viewProp.col;
                         if(viewProp.row) newProp.row = viewProp.row;
-                        if(viewProp.bold) newProp.bold = viewProp.bold;
-                        if(viewProp.size) newProp.size = viewProp.size;
+                        if(viewProp.style) newProp.style = viewProp.style;
+                        if(viewProp.labelStyle) newProp.labelStyle = viewProp.labelStyle;
                         if(viewProp.default) newProp.default = viewProp.default;
                         if(viewProp.styleColumn) newProp.styleColumn = viewProp.styleColumn;
                         if(viewProp.displayIcon) newProp.displayIcon = viewProp.displayIcon;
@@ -379,15 +379,15 @@ function(declare, lang, array, when, all, registry, request,
                 return self.isA(parentDoc, id);
             });
         },
-        getCollectionForSubstitutedQuery: function(query, parent, docId) {
+        getCollectionForSubstitutedQuery: function(query, parent, docId, selfObj) {
             var parentObj = parent;
             if(typeof parent == 'string') parentObj = this.cachingStore.getSync(parent);
             var clonedQuery = lang.clone(query);
-            this.substituteVariablesInQuery(clonedQuery, parentObj, docId);
+            this.substituteVariablesInQuery(clonedQuery, parentObj, docId, selfObj);
             var filter = this.buildFilterFromQuery(clonedQuery);
             return this.filter(filter);
         },
-        substituteVariablesInQuery: function(query, parentObj, docId) {
+        substituteVariablesInQuery: function(query, parentObj, docId, selfObj) {
             if(Array.isArray(query)){
                 for(var i=0;i<query.length;i++){
                     var subQuery = query[i];
@@ -400,20 +400,27 @@ function(declare, lang, array, when, all, registry, request,
                     var qualifier = Object.keys(where)[0];
                     var key = Object.keys(where[qualifier])[0];
                     var value = where[qualifier][key];
-                    if (value.substring(0, 1) == '$') {
-                        if (value == "$docId") where[qualifier][key] = docId;
-                        else if (value == "$userId") where[qualifier][key] = nq.getUser().id;
-                        else if (value == "$ownerId") where[qualifier][key] = nq.getOwner().id;
-                        else if(1==2){
+                    var substitutedValue = value;
+                    if(value.substring(0, 1) == '$') {
+                        if(value == "$docId") substitutedValue = docId;
+                        else if(value == "$userId") substitutedValue = nq.getUser().id;
+                        else if(value == "$ownerId") substitutedValue = nq.getOwner().id;
+                        else {
                             var values = value.split('.');
                             if(values.length>1) {
-                                if(values[0] == "$self") value = obj[values[1]];
+                                if(values[0] == "$self") {
+                                    var attr = values[1];
+                                    substitutedValue = selfObj[attr];
+                                }
+                                else if(values[0] == "$parent") {
+                                    var attr = values[1];
+                                    substitutedValue = parentObj[attr];
+                                }
                             }
-                            var values = value.split('.');
-                            if(values.length==0) where[qualifier][key] = parentObj[value.substring(1)];
+                            else substitutedValue = parentObj[value.substring(1)];
                         }
-                        else where[qualifier][key] = parentObj[value.substring(1)];
                     }
+                    where[qualifier][key] = substitutedValue;
                 }
                 if('join' in query) this.substituteVariablesInQuery(query.join, parentObj, docId);
             }

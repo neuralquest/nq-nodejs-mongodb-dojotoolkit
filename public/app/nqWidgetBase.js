@@ -128,13 +128,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             var attrProps = properties[attrName];
                             if(attrProps){
                                 // The label
-                                var labelStyle = {
-                                    'font-weight': attrProps.bold?'bold':'normal',
-                                    //'font-weight': 'bold',
-                                    'font-size': attrProps.size?attrProps.size:'1em',
-                                    'padding-top': '3px',
-                                    'white-space': 'nowrap'
-                                };
+                                var labelStyle = {};
+                                if('labelStyle' in attrProps) labelStyle = attrProps.labelStyle;
+                                labelStyle['padding-top'] = '3px';
+                                labelStyle['white-space'] = 'nowrap';
                                 if(attrProps.title) domConstruct.create("td", {innerHTML: attrProps.title, style: labelStyle},trDom);
                                 else domConstruct.create("td", null,trDom);
 
@@ -158,15 +155,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             var readOnly = attrProps.readOnly==undefined?true:attrProps.readOnly;
             if(readOnly) { // readOnly
                 domAttr.set(node, 'name', attrName); //give it a name so we know where to put the value
-                var style = {
-                    'font-weight': attrProps.bold?'bold':'normal',
-                    'font-size': attrProps.size?attrProps.size:'1em',
-                    'border-top-style': attrProps.bold?'solid':'',
-                    'border-top-color': 'lightgrey',
-                    'border-width': '1px',
-                    //'padding-right': attrProps.bold?'10px':'50px'
-                };
-                domAttr.set(node, 'style', style);
+                if('style' in attrProps)domAttr.set(node, 'style', attrProps.style);
             }
 
             var value = doc[attrName];
@@ -183,7 +172,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             };
             
             var dijit = null;
-            if(attrProps.type == 'string') dijit = self.renderValueString(attrProps,  node, dijitProperties);
+            if(attrProps.type == 'string') dijit = self.renderValueString(attrProps,  node, dijitProperties, doc);
             else if(attrProps.type == 'number') dijit = self.renderValueNumber(attrProps, node, dijitProperties);
             else if(attrProps.type == 'boolean') dijit = self.renderValueBoolean(attrProps, node, dijitProperties);
             else if(attrProps.type == 'array') dijit = self.renderValueArray(attrProps, node, dijitProperties);
@@ -218,7 +207,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         //------------------------------------------------------------
         // String
         //------------------------------------------------------------
-        renderValueString: function(attrProps, node, dijitProperties){
+        renderValueString: function(attrProps, node, dijitProperties, doc){
             var self = this;
             var dijit = null;
             var value = dijitProperties.value;
@@ -320,7 +309,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             }
             else if(attrProps.format && attrProps.format == 'date-time') {
                 if(readOnly){
-                    if(value=='$now') node.innerHTML = value;
+                    if(!value) node.innerHTML = '[no date]';
+                    else if(value=='$now') node.innerHTML = value;
                     else {
                         var date = dojo.date.stamp.fromISOString(value);
                         node.innerHTML = date.toLocaleDateString();
@@ -394,29 +384,54 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     }
                 }
                 else{
-                    var childrenCollection = self.store.getCollectionForSubstitutedQuery(attrProps.query, this.docId, this.docId);
+                    var childrenCollection = self.store.getCollectionForSubstitutedQuery(attrProps.query, this.docId, this.docId, doc);
                     data = [];
                     childrenCollection.forEach(function (childObject) {
                         data.push({id:childObject._id, label:childObject.name?childObject.name:childObject.title});
                     });
-                    data.push({id:'null',label:'[not selected]'});
-                    //data.push({id:'null',label:"<img width='16px' height='16px' src='images/one.jpg'/>Ecuador"});
-                    var selectStore = new Memory({
-                        data: data
-                    });
-                    var editorArgs = {
-                        value: value?value:"null",
-                        //id: node.id,
-                        name: dijitProperties.name,
-                        store: selectStore,
-                        style: "width:100%;",
-                        idProperty: "id",
-                        labelAttr: 'label',
-                        maxHeight: -1, // tells _HasDropDown to fit menu within viewport
-                        fetchProperties: {sort: [{attribute: "name"}]},
-                        queryOptions: {ignoreCase: true}//doesnt work
-                    };
-                    dijit = new Select(editorArgs, domConstruct.create("div", null, node));
+
+                    if(data.length == 1) {
+                        if('displayIcon' in attrProps) {
+                            var icon = self.getIconForObject(data);
+                            domConstruct.create("img", {src:icon}, node);
+                            domConstruct.create("span", {style:{'padding-left':'3px', 'vertical-align': 'top'}, innerHTML:data[0].label}, node);
+                        }
+                        else node.innerHTML = data[0].label;
+                    }
+                    else if(data.length > 1){
+                        data.push({id:'null',label:'[not selected]'});
+                        //data.push({id:'null',label:"<img width='16px' height='16px' src='images/one.jpg'/>Ecuador"});
+                        var selectStore = new Memory({
+                            data: data
+                        });
+                        if(data.length < 5){
+                            var editorArgs = {
+                                value: value?value:"",
+                                id: node.id,
+                                store: selectStore,
+                                idProperty: "id",
+                                labelAttr: "label",
+                                name: dijitProperties.name
+                                //dropDown: true
+                            };
+                            dijit = new CheckedMultiSelect(editorArgs, domConstruct.create("div", null, node));
+                        }
+                        else {
+                            var editorArgs = {
+                                value: value ? value : "null",
+                                id: node.id,
+                                name: dijitProperties.name,
+                                store: selectStore,
+                                style: "width:100%;",
+                                idProperty: "id",
+                                labelAttr: 'label',
+                                maxHeight: -1, // tells _HasDropDown to fit menu within viewport
+                                fetchProperties: {sort: [{attribute: "name"}]},
+                                queryOptions: {ignoreCase: true}//doesnt work
+                            };
+                            dijit = new Select(editorArgs, domConstruct.create("div", null, node));
+                        }
+                    }
                 }
             }
             else {
@@ -654,6 +669,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             //else if (newDoc[attrName] == '$ownerId') newDoc[attrName] = nq.getOwner().id;
                             //else if (newDoc[attrName] == '$docId') newDoc[attrName] = self.docId;
                         }
+                        newDoc.$newDoc = true;
                         var updateDoc = self.store.cachingStore.getSync(self.docId);
                         var updateArray = updateDoc[action.arrayName];
                         updateArray.unshift(newDoc);

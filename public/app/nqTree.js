@@ -121,6 +121,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", "app/nqWidgetBase", "dijit/Tree
         },
 		createMenusForWidget: function(){
 			var self = this;
+            if('query' in this.schema && 'menu' in this.schema.query){
+                var menu = this.schema.query.menu;
+            }
             if(this.schema.menus) this.schema.menus.forEach(function(menu){
                 var parentMenu = new Menu({targetNodeIds: [self.pane.containerNode], selector: ".css" + menu.queryName});
                 //var addMenu = new Menu({parentMenu: parentMenu});

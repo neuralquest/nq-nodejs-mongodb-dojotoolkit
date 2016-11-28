@@ -21,9 +21,9 @@ define(['dojo/_base/declare', "dojo/_base/array",'dojo/dom-construct', "dojo/dom
                     this.editMode = value;
                 }
             });
-            this.pageToolbarDivNode.appendChild(editButton.domNode);
+            this.editorToolbarDivNode.appendChild(editButton.domNode);
             //initially show the toolbar div
-            domStyle.set(this.pageToolbarDivNode, 'display' , 'block');
+            domStyle.set(this.editorToolbarDivNode, 'display' , 'block');
         },
         _setDocIdAttr: function(docId){
             this.inherited(arguments);

@@ -573,12 +573,9 @@
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
                 "from" : "56f87bcc5dde184ccfb9fc70", 
-                "query" : {
-                    "from" : "574234113c6d3cd598a5a30b", 
-                    "Xwhere" : {
-                        "in" : {
-                            "_id" : "$self.offeringId"
-                        }
+                "where" : {
+                    "in" : {
+                        "_id" : "$self.offeringId"
                     }
                 }
             }
@@ -1246,15 +1243,19 @@
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "size" : "1.2em", 
-            "bold" : "true"
+            "labelStyle" : {
+                "font-weight" : "bold", 
+                "font-size" : "1.2em"
+            }
         }, 
         "currentAssets" : {
             "title" : "Current Assets", 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "bold" : "true"
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }
         }, 
         "pettyCash" : {
             "title" : "Petty Cash", 
@@ -1271,6 +1272,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "temporaryInvestments" : {
@@ -1288,6 +1292,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "accountReceivibale" : {
@@ -1305,6 +1312,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "inventory" : {
@@ -1322,6 +1332,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "supplies" : {
@@ -1339,6 +1352,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "prepaidInsurance" : {
@@ -1356,6 +1372,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "totalCurrentAssests" : {
@@ -1365,7 +1384,6 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "bold" : true, 
             "query" : {
                 "select" : "value", 
                 "from" : "5742561f3c6d3cd598a5a327", 
@@ -1374,6 +1392,16 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }, 
+            "style" : {
+                "font-weight" : "bold", 
+                "border-top-style" : "solid", 
+                "border-top-color" : "lightgrey", 
+                "border-width" : "1px", 
+                "padding-right" : "10px"
             }
         }, 
         "investments" : {
@@ -1383,7 +1411,6 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "bold" : true, 
             "query" : {
                 "select" : "value", 
                 "from" : "574256493c6d3cd598a5a335", 
@@ -1392,6 +1419,16 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }, 
+            "style" : {
+                "font-weight" : "bold", 
+                "border-top-style" : "solid", 
+                "border-top-color" : "lightgrey", 
+                "border-width" : "1px", 
+                "padding-right" : "10px"
             }
         }, 
         "propertyPlantEquipment" : {
@@ -1399,7 +1436,9 @@
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "bold" : "true"
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }
         }, 
         "land" : {
             "title" : "Land", 
@@ -1416,6 +1455,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "landImprovements" : {
@@ -1433,6 +1475,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "buildings" : {
@@ -1450,6 +1495,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "equipment" : {
@@ -1467,6 +1515,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "lessAccumDeprecation" : {
@@ -1484,6 +1535,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "totalPropPlantEquipment" : {
@@ -1502,6 +1556,16 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }, 
+            "style" : {
+                "font-weight" : "bold", 
+                "border-top-style" : "solid", 
+                "border-top-color" : "lightgrey", 
+                "border-width" : "1px", 
+                "padding-right" : "10px"
             }
         }, 
         "intangibleAssets" : {
@@ -1509,7 +1573,9 @@
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "bold" : "true"
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }
         }, 
         "goodwill" : {
             "title" : "Goodwill", 
@@ -1526,6 +1592,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "tradeNames" : {
@@ -1543,6 +1612,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "totalIntangibleAssests" : {
@@ -1552,7 +1624,6 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(1), 
-            "bold" : true, 
             "query" : {
                 "select" : "value", 
                 "from" : "574256643c6d3cd598a5a345", 
@@ -1561,6 +1632,16 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }, 
+            "style" : {
+                "font-weight" : "bold", 
+                "border-top-style" : "solid", 
+                "border-top-color" : "lightgrey", 
+                "border-width" : "1px", 
+                "padding-right" : "10px"
             }
         }, 
         "totalAssests" : {
@@ -1570,8 +1651,6 @@
             "type" : "number", 
             "row" : NumberInt(2), 
             "col" : NumberInt(1), 
-            "size" : "1.2em", 
-            "bold" : true, 
             "query" : {
                 "select" : "value", 
                 "from" : "57343b823c6d3cd598a5a2e3", 
@@ -1580,6 +1659,18 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "labelStyle" : {
+                "font-weight" : "bold", 
+                "font-size" : "1.2em"
+            }, 
+            "style" : {
+                "font-weight" : "bold", 
+                "font-size" : "1.2em", 
+                "border-top-style" : "solid", 
+                "border-top-color" : "lightgrey", 
+                "border-width" : "1px", 
+                "padding-right" : "10px"
             }
         }, 
         "libilities" : {
@@ -1587,15 +1678,20 @@
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "size" : "1.2em", 
-            "bold" : "true"
+            "labelStyle" : {
+                "font-weight" : "bold", 
+                "font-size" : "1.2em"
+            }
         }, 
         "currentLiabilities" : {
             "title" : "Current Libilities", 
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "bold" : "true"
+            "bold" : "true", 
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }
         }, 
         "notesPayable" : {
             "title" : "Notes Payable", 
@@ -1612,6 +1708,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "accountsPayable" : {
@@ -1629,6 +1728,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "wagesPayable" : {
@@ -1646,6 +1748,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "intrestPayable" : {
@@ -1663,6 +1768,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "taxesPayable" : {
@@ -1680,6 +1788,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "warantyLiability" : {
@@ -1697,6 +1808,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "unearnedRevenues" : {
@@ -1714,6 +1828,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "totalCurrentLiabilities" : {
@@ -1732,6 +1849,16 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }, 
+            "style" : {
+                "font-weight" : "bold", 
+                "border-top-style" : "solid", 
+                "border-top-color" : "lightgrey", 
+                "border-width" : "1px", 
+                "padding-right" : "10px"
             }
         }, 
         "longTermLiabilities" : {
@@ -1739,7 +1866,9 @@
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "bold" : "true"
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }
         }, 
         "notesPayable2" : {
             "title" : "Notes Payable", 
@@ -1756,6 +1885,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "bondsPayable" : {
@@ -1773,6 +1905,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "totalLongTermLiabilities" : {
@@ -1782,7 +1917,6 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "bold" : true, 
             "query" : {
                 "select" : "value", 
                 "from" : "574256923c6d3cd598a5a361", 
@@ -1791,6 +1925,16 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }, 
+            "style" : {
+                "font-weight" : "bold", 
+                "border-top-style" : "solid", 
+                "border-top-color" : "lightgrey", 
+                "border-width" : "1px", 
+                "padding-right" : "10px"
             }
         }, 
         "totalLiabilities" : {
@@ -1800,7 +1944,6 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "bold" : true, 
             "query" : {
                 "select" : "value", 
                 "from" : "574256743c6d3cd598a5a34f", 
@@ -1809,6 +1952,16 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }, 
+            "style" : {
+                "font-weight" : "bold", 
+                "border-top-style" : "solid", 
+                "border-top-color" : "lightgrey", 
+                "border-width" : "1px", 
+                "padding-right" : "10px"
             }
         }, 
         "stockoldersEquity" : {
@@ -1816,8 +1969,10 @@
             "readOnly" : true, 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "size" : "1.2em", 
-            "bold" : "true"
+            "labelStyle" : {
+                "font-weight" : "bold", 
+                "font-size" : "1.2em"
+            }
         }, 
         "commonStock" : {
             "title" : "Common Stock", 
@@ -1834,6 +1989,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "retainedEarnings" : {
@@ -1851,6 +2009,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "accumOtherComprehesiveIncome" : {
@@ -1868,6 +2029,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "lessTreasuryStock" : {
@@ -1885,6 +2049,9 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "style" : {
+                "padding-right" : "50px"
             }
         }, 
         "totalStockholdersEquity" : {
@@ -1894,7 +2061,6 @@
             "type" : "number", 
             "row" : NumberInt(1), 
             "col" : NumberInt(2), 
-            "bold" : true, 
             "query" : {
                 "select" : "value", 
                 "from" : "5742616e3c6d3cd598a5a367", 
@@ -1903,6 +2069,16 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "labelStyle" : {
+                "font-weight" : "bold"
+            }, 
+            "style" : {
+                "font-weight" : "bold", 
+                "border-top-style" : "solid", 
+                "border-top-color" : "lightgrey", 
+                "border-width" : "1px", 
+                "padding-right" : "10px"
             }
         }, 
         "totalLibilitiesAndStock" : {
@@ -1912,8 +2088,6 @@
             "type" : "number", 
             "row" : NumberInt(2), 
             "col" : NumberInt(2), 
-            "size" : "1.2em", 
-            "bold" : true, 
             "query" : {
                 "select" : "value", 
                 "from" : "57343bba3c6d3cd598a5a2e5", 
@@ -1922,6 +2096,18 @@
                         "ownerId" : "$docId"
                     }
                 }
+            }, 
+            "labelStyle" : {
+                "font-weight" : "bold", 
+                "font-size" : "1.2em"
+            }, 
+            "style" : {
+                "font-weight" : "bold", 
+                "font-size" : "1.2em", 
+                "border-top-style" : "solid", 
+                "border-top-color" : "lightgrey", 
+                "border-width" : "1px", 
+                "padding-right" : "10px"
             }
         }
     }, 
@@ -1940,10 +2126,22 @@
         "pageId" : "575d4c3f2cf3d6dc3ed83154", 
         "where" : {
             "eq" : {
-                "_id" : "$initialDocId"
+                "_id" : "$parent.initialDocId"
             }
         }, 
-        "recursive" : "schemaQuery"
+        "recursive" : "schemaQuery", 
+        "menu" : [
+            {
+                "label" : "Add Child Paragraph", 
+                "iconClass" : "addIcon", 
+                "action" : "add"
+            }, 
+            {
+                "label" : "Delete", 
+                "iconClass" : "removeIcon", 
+                "action" : "delete"
+            }
+        ]
     }, 
     "query" : {
         "queryName" : "paragraphs", 
@@ -1952,10 +2150,22 @@
         "pageId" : "575d4c3f2cf3d6dc3ed83154", 
         "where" : {
             "in" : {
-                "_id" : "$childDocs"
+                "_id" : "$parent.childDocs"
             }
         }, 
-        "recursive" : "paragraphs"
+        "recursive" : "paragraphs", 
+        "menu" : [
+            {
+                "label" : "Add Child Paragraph", 
+                "iconClass" : "addIcon", 
+                "action" : "add"
+            }, 
+            {
+                "label" : "Delete", 
+                "iconClass" : "removeIcon", 
+                "action" : "delete"
+            }
+        ]
     }, 
     "menus" : [
         {
@@ -2014,7 +2224,7 @@
             "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
             "where" : {
                 "eq" : {
-                    "parentId" : "$_id"
+                    "parentId" : "$parent._id"
                 }
             }, 
             "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABTSURBVDhPYxjm4D/Dnf8gDOUSD2AaNzH8B2OiDULXiI5xGkRIIzpGMYgUjegYxRBSDIKpB2tGBoQMwqkRHaAbRLRGdEC2RvoCkA8pwVgFicf/GQD/KjucAgshDwAAAABJRU5ErkJggg==", 
@@ -2027,7 +2237,7 @@
             "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
             "where" : {
                 "eq" : {
-                    "classId" : "$_id"
+                    "classId" : "$parent._id"
                 }
             }, 
             "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABvSURBVDhPY/j//z9FeNiD/4pAjwIxyQCq0ecYAxgTbxCaRnSM2yACGtExqkEkaETHEEOGgQGDAgBzVTYQewKxGhBLALEIEDMBMSMSBvFVgVgXiEuBOBmmnQmImYGYEQmzQzEHFMPkQepBGMr+zwUAa2Uzpn+czq8AAAAASUVORK5CYII="
@@ -2155,7 +2365,7 @@
             "from" : "classes", 
             "where" : {
                 "eq" : {
-                    "parentId" : "$_id"
+                    "parentId" : "$parent._id"
                 }
             }, 
             "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAADxSURBVDhPY/j//z9FmLrgzEyT/yB8eobx/5PTDP+fmGpAvBUgjahgFxgf6tcibAhI8+3thUAchAUX/t/bpfp/V7vS/+0t8v+3Nsn+39wo/X9DnQTCYJCTSQVrqkQQBoD8+///TCCeQySe+X95KT/CgONT9MGCpODFhdwIA45O0oVI/JhMHAaqXZDHgTAAFNJgA953EoeBauflsCEMONCrATHgST1xGKh2ThYLwgBQNIENuF1KHAaqnZXBhDAAFMdgA67kE4eBamemMyIMAAHkBLKuRuz/6krh/yvKBP4vLeYFhzgo0ED+BjkdQ/MAAgYGAKPFDB0e1bt2AAAAAElFTkSuQmCC", 
@@ -2167,7 +2377,7 @@
             "from" : "56f870a55dde184ccfb9fc6c", 
             "where" : {
                 "eq" : {
-                    "classId" : "$_id"
+                    "classId" : "$parent._id"
                 }
             }, 
             "join" : {
@@ -2176,7 +2386,7 @@
                 "from" : "574237133c6d3cd598a5a30d", 
                 "where" : {
                     "eq" : {
-                        "parentOrgId" : "$_id"
+                        "parentOrgId" : "$parent._id"
                     }
                 }, 
                 "recursive" : "organizatinalUnits"
@@ -2601,30 +2811,11 @@
     }, 
     "type" : "object", 
     "properties" : {
-        "buyerIcon" : {
-            "title" : "", 
-            "type" : "string", 
-            "readOnly" : true, 
-            "media" : {
-                "binaryEncoding" : "base64", 
-                "type" : "image/png"
-            }, 
-            "styleColumn" : "width : 2em", 
-            "prop" : "buyerId", 
-            "Xquery" : {
-                "from" : "56f870a55dde184ccfb9fc6c", 
-                "select" : "icon", 
-                "where" : {
-                    "eq" : {
-                        "_id" : "$buyerId"
-                    }
-                }
-            }
-        }, 
         "buyerId" : {
             "title" : "From", 
             "readOnly" : true, 
-            "styleColumn" : "width : 6em"
+            "styleColumn" : "width : 10em", 
+            "displayIcon" : true
         }, 
         "stateHistoryDate" : {
             "readOnly" : true, 
@@ -2649,7 +2840,8 @@
                     }
                 }
             }, 
-            "styleColumn" : "width : 6em"
+            "styleColumn" : "width : 6em", 
+            "displayIcon" : true
         }, 
         "name" : {
             "title" : "Subject", 
@@ -2782,15 +2974,18 @@
             "title" : "Subject", 
             "readOnly" : true, 
             "readOnlyOnNew" : false, 
-            "bold" : true
+            "style" : {
+                "font-weight" : "bold"
+            }
         }, 
         "description" : {
+            "title" : "Question", 
             "readOnly" : true, 
             "readOnlyOnNew" : false
         }, 
         "newStateButton" : {
             "type" : "button", 
-            "label" : "Update State", 
+            "label" : "Reply", 
             "readOnly" : false, 
             "readOnlyOnNew" : true, 
             "action" : {
@@ -2802,7 +2997,8 @@
             "items" : {
                 "properties" : {
                     "date" : {
-                        "readOnly" : true
+                        "readOnly" : true, 
+                        "default" : "$now"
                     }, 
                     "stateId" : {
                         "readOnly" : true, 
@@ -2812,7 +3008,7 @@
                             "from" : "5745eaa53c6d3cd598a5a371", 
                             "where" : {
                                 "in" : {
-                                    "nextStateId" : "$stateId"
+                                    "nextStateId" : "$self.stateHistory[1].stateId"
                                 }
                             }
                         }
@@ -3064,8 +3260,10 @@
     "properties" : {
         "name" : {
             "title" : "", 
-            "size" : "2em", 
-            "bold" : "true"
+            "style" : {
+                "font-weight" : "bold", 
+                "font-size" : "2em"
+            }
         }, 
         "imageUrl" : {
             "title" : ""
@@ -3075,8 +3273,10 @@
         }, 
         "value" : {
             "title" : "", 
-            "size" : "1.2em", 
-            "bold" : "true"
+            "style" : {
+                "font-weight" : "bold", 
+                "font-size" : "1.2em"
+            }
         }, 
         "buyButton" : {
             "type" : "button", 
@@ -3218,7 +3418,7 @@
             "pageId" : "57a677652d8cd20920e6d817", 
             "where" : {
                 "eq" : {
-                    "ownerId" : "$_id"
+                    "ownerId" : "$parent._id"
                 }
             }, 
             "join" : {
@@ -3241,7 +3441,7 @@
                             "pageId" : "57a678162d8cd20920e6d819", 
                             "where" : {
                                 "eq" : {
-                                    "_id" : "$viewId"
+                                    "_id" : "$parent.viewId"
                                 }
                             }
                         }
@@ -3253,7 +3453,7 @@
                         "pageId" : "57a677652d8cd20920e6d817", 
                         "where" : {
                             "eq" : {
-                                "_id" : "$pageId"
+                                "_id" : "$parent.pageId"
                             }
                         }, 
                         "recursive" : "tabs"
@@ -3293,7 +3493,7 @@
         "pageId" : "57a678162d8cd20920e6d819", 
         "where" : {
             "eq" : {
-                "ownerId" : "$_id"
+                "ownerId" : "$parent._id"
             }
         }
     }, 
@@ -3524,7 +3724,7 @@
         "pageId" : "57b72a022d8cd20920e6d837", 
         "where" : {
             "eq" : {
-                "parentOrgId" : "$_id"
+                "parentOrgId" : "$parent._id"
             }
         }, 
         "recursive" : "orgUnit"
@@ -3560,7 +3760,7 @@
         "pageId" : "57b72a3c2d8cd20920e6d839", 
         "where" : {
             "eq" : {
-                "ownerId" : "$_id"
+                "ownerId" : "$parent._id"
             }
         }, 
         "join" : {
@@ -3570,7 +3770,7 @@
             "pageId" : "57b72a3c2d8cd20920e6d839", 
             "where" : {
                 "in" : {
-                    "_id" : "$nextStateIds"
+                    "_id" : "$parent.nextStateIds"
                 }
             }, 
             "recursive" : "state"
@@ -3960,7 +4160,7 @@
             "pageId" : "57b729d52d8cd20920e6d835", 
             "where" : {
                 "eq" : {
-                    "ownerId" : "$_id"
+                    "ownerId" : "$parent._id"
                 }
             }, 
             "join" : {
@@ -3970,7 +4170,7 @@
                 "pageId" : "57b72a3c2d8cd20920e6d839", 
                 "where" : {
                     "eq" : {
-                        "_id" : "$initialStateId"
+                        "_id" : "$parent.initialStateId"
                     }
                 }, 
                 "join" : {
@@ -3980,7 +4180,7 @@
                     "pageId" : "57b72a3c2d8cd20920e6d839", 
                     "where" : {
                         "in" : {
-                            "_id" : "$nextStateIds"
+                            "_id" : "$parent.nextStateIds"
                         }
                     }, 
                     "recursive" : "nextStates"
@@ -4563,7 +4763,7 @@
         "pageId" : "57a678162d8cd20920e6d819", 
         "Xwhere" : {
             "eq" : {
-                "ownerId" : "$_id"
+                "ownerId" : "$parent._id"
             }
         }
     }, 
@@ -4823,7 +5023,7 @@
         "pageId" : "575d4c3f2cf3d6dc3ed83154", 
         "where" : {
             "in" : {
-                "_id" : "$childDocs"
+                "_id" : "$parent.childDocs"
             }
         }, 
         "recursive" : "paragraphs"
@@ -4891,30 +5091,11 @@
     }, 
     "type" : "object", 
     "properties" : {
-        "buyerIcon" : {
-            "title" : "", 
-            "type" : "string", 
-            "readOnly" : true, 
-            "media" : {
-                "binaryEncoding" : "base64", 
-                "type" : "image/png"
-            }, 
-            "styleColumn" : "width : 2em", 
-            "prop" : "sellerId", 
-            "Xquery" : {
-                "from" : "56f870a55dde184ccfb9fc6c", 
-                "select" : "icon", 
-                "where" : {
-                    "eq" : {
-                        "_id" : "$buyerId"
-                    }
-                }
-            }
-        }, 
         "sellerId" : {
             "title" : "To", 
             "readOnly" : true, 
-            "styleColumn" : "width : 10em"
+            "styleColumn" : "width : 10em", 
+            "displayIcon" : true
         }, 
         "stateHistoryDate" : {
             "readOnly" : true, 
@@ -4939,7 +5120,8 @@
                     }
                 }
             }, 
-            "styleColumn" : "width : 6em"
+            "styleColumn" : "width : 6em", 
+            "displayIcon" : true
         }, 
         "name" : {
             "title" : "Subject", 

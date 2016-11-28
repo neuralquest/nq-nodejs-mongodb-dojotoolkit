@@ -154,12 +154,23 @@ define([
                     var correctChildObjArr = [];
                     // in the case of in array, we have reorder because the query returns the natural order
                     if('in' in query.where){
+                        var properOrderArr = [];
                         var qualifier = query.where.in;
                         var key = Object.keys(qualifier)[0];
                         var value = qualifier[key];
-                        if(value.substring(0, 1) == '$') value = parentItem[value.substring(1)];
+                        if(value.substring(0, 1) == '$') {
+                            var values = value.split('.');
+                            if(values.length>1) {
+                                if(values[0] == "$self") properOrderArr = selfObj[values[1]];
+                                else if(values[0] == "$parent") {
+                                    var attr = values[1];
+                                    properOrderArr = parentItem[attr];
+                                }
+                            }
+                            else properOrderArr = parentItem[value.substring(1)];
+                        }
                         childObjects.forEach(function(childObj){
-                            var position = array.indexOf(value, childObj._id);
+                            var position = array.indexOf(properOrderArr, childObj._id);
                             correctChildObjArr[position] = lang.clone(childObj);
                         });
                     }

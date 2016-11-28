@@ -170,15 +170,19 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                             //var date = dojo.date.stamp.fromISOString(value);
                             return self.store.cachingStore.getSync(value).name;
                         };*/
-                        attrProps.renderCell = function(object, value, node, options){
+                        attrProps.renderCell = lang.hitch(attrProps, function(object, value, node, options){
                             if(!value) html.set(node, '[not selected]');
                             else{
-                                var selectedOption = self.store.cachingStore.getSync(value);
-                                html.set(node, selectedOption.name);
-                                //if(selectedOption) node.appendChild(document.createTextNode(selectedOption.name));
-                                //else node.appendChild(document.createTextNode('id: '+value));
+                                var refDoc = self.store.cachingStore.getSync(value);
+                                if('displayIcon' in this) {
+                                    var icon = self.getIconForObject(refDoc);
+                                    var div = domConstruct.create("div", {style:{'white-space': 'nowrap'}},  node);
+                                    domConstruct.create("img", {src:icon}, div);
+                                    domConstruct.create("span", {style:{'padding-left':'3px', 'vertical-align': 'top'}, innerHTML:refDoc.name}, div);
+                                }
+                                else html.set(node, refDoc.name);
                             }
-                        };
+                        });
                         //attrProps.autoSave = true;
                         attrProps.editor =  'text';
                     }
