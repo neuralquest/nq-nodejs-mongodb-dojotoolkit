@@ -598,9 +598,9 @@
                         "pattern" : "[a-f0-9]{24}", 
                         "query" : {
                             "from" : "5745eaa53c6d3cd598a5a371", 
-                            "Xwhere" : {
-                                "eq" : {
-                                    "ownerId" : "$docId"
+                            "where" : {
+                                "in" : {
+                                    "_id" : "get($self.stateHistory.1.stateId).nextStateIds"
                                 }
                             }
                         }
@@ -2462,7 +2462,7 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315a"), 
     "docType" : "object", 
-    "name" : "Client", 
+    "name" : "The Client", 
     "description" : "<div class='nqSpanColumn' style='position: relative;'><img src='app/resources/img/Neuralquest/lefkasHome1.png' width='100%' height='100px'><div class='headline'>Client</div></div><p>The Neuralquest client</p>", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2554,7 +2554,7 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83159"), 
     "docType" : "object", 
-    "name" : "Server", 
+    "name" : "The Server", 
     "description" : "<div class='nqSpanColumn' style='position: relative;'><img src='app/resources/img/Neuralquest/lefkasHome1.png' width='100%' height='100px'><div class='headline'>Server</div></div><p>The Neuralquest server</p>", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -3003,15 +3003,7 @@
                     "stateId" : {
                         "readOnly" : true, 
                         "readOnlyOnNew" : false, 
-                        "displayIcon" : true, 
-                        "query" : {
-                            "from" : "5745eaa53c6d3cd598a5a371", 
-                            "where" : {
-                                "in" : {
-                                    "nextStateId" : "$self.stateHistory[1].stateId"
-                                }
-                            }
-                        }
+                        "displayIcon" : true
                     }, 
                     "description" : {
                         "readOnly" : true, 

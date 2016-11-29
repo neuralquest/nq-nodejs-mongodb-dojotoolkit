@@ -172,7 +172,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             };
             
             var dijit = null;
-            if(attrProps.type == 'string') dijit = self.renderValueString(attrProps,  node, dijitProperties, doc);
+            if(attrProps.type == 'string') dijit = self.renderValueString(attrProps,  node, dijitProperties);
             else if(attrProps.type == 'number') dijit = self.renderValueNumber(attrProps, node, dijitProperties);
             else if(attrProps.type == 'boolean') dijit = self.renderValueBoolean(attrProps, node, dijitProperties);
             else if(attrProps.type == 'array') dijit = self.renderValueArray(attrProps, node, dijitProperties);
@@ -207,7 +207,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         //------------------------------------------------------------
         // String
         //------------------------------------------------------------
-        renderValueString: function(attrProps, node, dijitProperties, doc){
+        renderValueString: function(attrProps, node, dijitProperties){
             var self = this;
             var dijit = null;
             var value = dijitProperties.value;
@@ -384,7 +384,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     }
                 }
                 else{
-                    var childrenCollection = self.store.getCollectionForSubstitutedQuery(attrProps.query, this.docId, this.docId, doc);
+                    var childrenCollection = self.store.getCollectionForSubstitutedQuery(attrProps.query, this.docId, this.docId);
                     data = [];
                     childrenCollection.forEach(function (childObject) {
                         data.push({id:childObject._id, label:childObject.name?childObject.name:childObject.title});
@@ -670,9 +670,11 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             //else if (newDoc[attrName] == '$docId') newDoc[attrName] = self.docId;
                         }
                         newDoc.$newDoc = true;
+                        newDoc.date = '$now';
+                        newDoc.description = '<p>[new text]</p>';//editor will crash with no text
                         var updateDoc = self.store.cachingStore.getSync(self.docId);
-                        var updateArray = updateDoc[action.arrayName];
-                        updateArray.unshift(newDoc);
+                        //var updateArray = updateDoc[action.arrayName];
+                        updateDoc.stateHistory.unshift(newDoc);
                         self.store.put(updateDoc, {viewId: self.schema._id});
                     }
                     else if(action.actionType == 'post'){

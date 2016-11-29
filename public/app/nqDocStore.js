@@ -379,8 +379,9 @@ function(declare, lang, array, when, all, registry, request,
                 return self.isA(parentDoc, id);
             });
         },
-        getCollectionForSubstitutedQuery: function(query, parent, docId, selfObj) {
+        getCollectionForSubstitutedQuery: function(query, parent, docId) {
             var parentObj = parent;
+            var selfObj = this.cachingStore.getSync(docId);
             if(typeof parent == 'string') parentObj = this.cachingStore.getSync(parent);
             var clonedQuery = lang.clone(query);
             this.substituteVariablesInQuery(clonedQuery, parentObj, docId, selfObj);
@@ -388,6 +389,7 @@ function(declare, lang, array, when, all, registry, request,
             return this.filter(filter);
         },
         substituteVariablesInQuery: function(query, parentObj, docId, selfObj) {
+            var self  = this;
             if(Array.isArray(query)){
                 for(var i=0;i<query.length;i++){
                     var subQuery = query[i];
@@ -401,29 +403,44 @@ function(declare, lang, array, when, all, registry, request,
                     var key = Object.keys(where[qualifier])[0];
                     var value = where[qualifier][key];
                     var substitutedValue = value;
-                    if(value.substring(0, 1) == '$') {
-                        if(value == "$docId") substitutedValue = docId;
-                        else if(value == "$userId") substitutedValue = nq.getUser().id;
-                        else if(value == "$ownerId") substitutedValue = nq.getOwner().id;
-                        else {
-                            var values = value.split('.');
-                            if(values.length>1) {
-                                if(values[0] == "$self") {
-                                    var attr = values[1];
-                                    substitutedValue = selfObj[attr];
-                                }
-                                else if(values[0] == "$parent") {
-                                    var attr = values[1];
-                                    substitutedValue = parentObj[attr];
-                                }
+                    if(value == "$docId") substitutedValue = docId;
+                    else if(value == "$userId") substitutedValue = nq.getUser().id;
+                    else if(value == "$ownerId") substitutedValue = nq.getOwner().id;
+                    else if(value.substring(0, 4) == 'get('){
+                        var getString = value.substring(value.indexOf("(")+1,value.lastIndexOf(")"));
+                        if(getString.substring(0, 1) == '$') {
+                            var values = getString.split('.');
+                            var first = values.shift();
+                            if(first == "$self") {
+                                var id = self.getValueByDotNotation(parentObj, values);
+                                var obj = self.cachingStore.getSync(id);
+                                var remainingGetString =  value.substring(value.lastIndexOf(")")+2);
+                                substitutedValue = self.getValueByDotNotation(obj, remainingGetString.split('.'));
                             }
-                            else substitutedValue = parentObj[value.substring(1)];
                         }
+                    }
+                    else if(value.substring(0, 1) == '$') {
+                        var values = value.split('.');
+                        if(values.length>1) {
+                            var first = values.shift();
+                            if(first == "$self") debugger;
+                            if(first == "$self") substitutedValue = self.getValueByDotNotation(parentObj, values);
+                            else if(first == "$parent") substitutedValue = self.getValueByDotNotation(parentObj, values);
+                            else substitutedValue = undefined;
+                        }
+                        else substitutedValue = undefined;
                     }
                     where[qualifier][key] = substitutedValue;
                 }
                 if('join' in query) this.substituteVariablesInQuery(query.join, parentObj, docId);
             }
+        },
+        getValueByDotNotation: function(obj, pathArr) {
+            var current=obj;
+            pathArr.forEach(function(p){
+                current = current[p];
+            });
+            return current;
         },
         buildFilterFromQuery: function(query){
             var self = this;
