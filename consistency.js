@@ -56,7 +56,7 @@ function validateObjects(){
                             type: error.params.type
                         });
                     });
-                    results.push({object: objDoc, schema: inheritedClassSchema, results: errors});
+                    results.push({object: objDoc, /*schema: inheritedClassSchema, */results: errors});
                 }
                 return true;
             }));

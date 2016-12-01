@@ -161,8 +161,11 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             var value = doc[attrName];
             //value = value==undefined?attrProps.default:value;
 
-            var readOnly = attrProps.readOnly==undefined?true:attrProps.readOnly;
-            if(doc.$newDoc) readOnly = attrProps.readOnlyOnNew==undefined?true:attrProps.readOnlyOnNew;
+            var readOnly = true;
+            if(self.editMode) {
+                readOnly = attrProps.readOnly == undefined ? true : attrProps.readOnly;
+                if (doc.$newDoc) readOnly = attrProps.readOnlyOnNew == undefined ? true : attrProps.readOnlyOnNew;
+            }
             
             var dijitProperties = {
                 name: attrName,

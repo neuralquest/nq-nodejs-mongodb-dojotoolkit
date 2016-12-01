@@ -148,6 +148,10 @@
             ], 
             "default" : "Tabs"
         }, 
+        "editMode" : {
+            "title" : "Initially Edit Mode", 
+            "type" : "boolean"
+        }, 
         "tabs" : {
             "title" : "Tabs", 
             "description" : "", 
@@ -210,14 +214,12 @@
                                     "title" : "Display Type", 
                                     "type" : "string", 
                                     "enum" : [
-                                        "Document Read", 
-                                        "Document Update", 
+                                        "Document", 
                                         "Tree", 
                                         "Table", 
                                         "3D Class Model", 
                                         "Process Model", 
                                         "Form", 
-                                        "TreeGrid", 
                                         "HomePage"
                                     ], 
                                     "default" : "Form"
@@ -368,7 +370,7 @@
         }, 
         "query" : {
             "title" : "Query", 
-            "type" : "object"
+            "type" : "array"
         }, 
         "required" : {
             "title" : "Required", 
@@ -681,12 +683,12 @@
         }, 
         "fromDate" : {
             "title" : "Date", 
-            "type" : "date", 
+            "type" : "string", 
             "format" : "date-time"
         }, 
         "toDate" : {
             "title" : "Date", 
-            "type" : "date", 
+            "type" : "string", 
             "format" : "date-time"
         }, 
         "assetIds" : {
@@ -2143,41 +2145,30 @@
             }
         ]
     }, 
-    "query" : {
-        "queryName" : "paragraphs", 
-        "select" : "name", 
-        "from" : "573435f03c6d3cd598a5a2e1", 
-        "pageId" : "575d4c3f2cf3d6dc3ed83154", 
-        "where" : {
-            "in" : {
-                "_id" : "$parent.childDocs"
-            }
-        }, 
-        "recursive" : "paragraphs", 
-        "menu" : [
-            {
-                "label" : "Add Child Paragraph", 
-                "iconClass" : "addIcon", 
-                "action" : "add"
-            }, 
-            {
-                "label" : "Delete", 
-                "iconClass" : "removeIcon", 
-                "action" : "delete"
-            }
-        ]
-    }, 
-    "menus" : [
+    "query" : [
         {
             "queryName" : "paragraphs", 
-            "add" : {
-                "label" : "Add Child Paragraph", 
-                "iconClass" : "addIcon"
+            "select" : "name", 
+            "from" : "573435f03c6d3cd598a5a2e1", 
+            "pageId" : "575d4c3f2cf3d6dc3ed83154", 
+            "where" : {
+                "in" : {
+                    "_id" : "$parent.childDocs"
+                }
             }, 
-            "delete" : {
-                "label" : "Delete", 
-                "iconClass" : "removeIcon"
-            }
+            "recursive" : "paragraphs", 
+            "menu" : [
+                {
+                    "label" : "Add Child Paragraph", 
+                    "iconClass" : "addIcon", 
+                    "action" : "add"
+                }, 
+                {
+                    "label" : "Delete", 
+                    "iconClass" : "removeIcon", 
+                    "action" : "delete"
+                }
+            ]
         }
     ], 
     "properties" : {
@@ -2310,7 +2301,7 @@
             "name" : "Properties", 
             "widgets" : [
                 {
-                    "displayType" : "Document Read", 
+                    "displayType" : "Document", 
                     "name" : "Read", 
                     "viewId" : "575d4c3f2cf3d6dc3ed8314b"
                 }
@@ -2414,7 +2405,6 @@
                 {
                     "displayType" : "Tree", 
                     "name" : "Document Tree", 
-                    "rootDocId" : "575d4c3f2cf3d6dc3ed83151", 
                     "viewId" : "575d4c3f2cf3d6dc3ed8314a"
                 }
             ]
@@ -2521,17 +2511,7 @@
             "name" : "Read", 
             "widgets" : [
                 {
-                    "displayType" : "Document Read", 
-                    "name" : "Document Page", 
-                    "viewId" : "5838e9be425336e46912c78b"
-                }
-            ]
-        }, 
-        {
-            "name" : "Update", 
-            "widgets" : [
-                {
-                    "displayType" : "Document Update", 
+                    "displayType" : "Document", 
                     "name" : "Document Page", 
                     "viewId" : "5838e9be425336e46912c78b"
                 }
@@ -2774,41 +2754,43 @@
     "_id" : ObjectId("5777a04e3c6d3cd598a5a392"), 
     "docType" : "object", 
     "name" : "Service Request Recieved Table View", 
-    "query" : {
-        "queryName" : "seviceRequests", 
-        "select" : "name", 
-        "from" : "574225cb3c6d3cd598a5a305", 
-        "where" : {
-            "eq" : {
-                "sellerId" : "$docId"
-            }
-        }, 
-        "menu" : [
-            {
-                "label" : "Filter", 
-                "iconClass" : "filterIcon", 
-                "menu" : [
-                    {
-                        "label" : "By State", 
-                        "iconClass" : "filterIcon", 
-                        "action" : "filter", 
-                        "Xmenu" : [
-                            {
-                                "label" : "Open", 
-                                "iconClass" : "filterIcon", 
-                                "action" : "filter"
-                            }, 
-                            {
-                                "label" : "Closed", 
-                                "iconClass" : "filterIcon", 
-                                "action" : "filter"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-    }, 
+    "query" : [
+        {
+            "queryName" : "seviceRequests", 
+            "select" : "name", 
+            "from" : "574225cb3c6d3cd598a5a305", 
+            "where" : {
+                "eq" : {
+                    "sellerId" : "$docId"
+                }
+            }, 
+            "menu" : [
+                {
+                    "label" : "Filter", 
+                    "iconClass" : "filterIcon", 
+                    "menu" : [
+                        {
+                            "label" : "By State", 
+                            "iconClass" : "filterIcon", 
+                            "action" : "filter", 
+                            "Xmenu" : [
+                                {
+                                    "label" : "Open", 
+                                    "iconClass" : "filterIcon", 
+                                    "action" : "filter"
+                                }, 
+                                {
+                                    "label" : "Closed", 
+                                    "iconClass" : "filterIcon", 
+                                    "action" : "filter"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ], 
     "type" : "object", 
     "properties" : {
         "buyerId" : {
@@ -3184,17 +3166,19 @@
     "name" : "Catalog Table View", 
     "description" : "<p>View used for the catalog table</p>", 
     "type" : "object", 
-    "query" : {
-        "comment" : "Items on sale", 
-        "select" : "name", 
-        "from" : "5742563e3c6d3cd598a5a32f", 
-        "pageId" : "57979cdc3c6d3cd598a5a3b9", 
-        "where" : {
-            "eq" : {
-                "ownerId" : "$docId"
+    "query" : [
+        {
+            "comment" : "Items on sale", 
+            "select" : "name", 
+            "from" : "5742563e3c6d3cd598a5a32f", 
+            "pageId" : "57979cdc3c6d3cd598a5a3b9", 
+            "where" : {
+                "eq" : {
+                    "ownerId" : "$docId"
+                }
             }
         }
-    }, 
+    ], 
     "properties" : {
         "imageUrl" : {
             "styleColumn" : "width : 100px"
@@ -3218,11 +3202,6 @@
     "tabs" : [
         {
             "name" : "Product", 
-            "Xstyle" : {
-                "backgroundImage" : "url('app/resources/img/Neuralquest/bicycle-788733_960_720.jpg')", 
-                "background-position" : "center", 
-                "background-size" : "cover"
-            }, 
             "widgets" : [
                 {
                     "displayType" : "Form", 
@@ -3478,17 +3457,19 @@
         }, 
         "recursive" : "schemaQuery"
     }, 
-    "query" : {
-        "queryName" : "views", 
-        "select" : "name", 
-        "from" : "573435c23c6d3cd598a5a2df", 
-        "pageId" : "57a678162d8cd20920e6d819", 
-        "where" : {
-            "eq" : {
-                "ownerId" : "$parent._id"
+    "query" : [
+        {
+            "queryName" : "views", 
+            "select" : "name", 
+            "from" : "573435c23c6d3cd598a5a2df", 
+            "pageId" : "57a678162d8cd20920e6d819", 
+            "where" : {
+                "eq" : {
+                    "ownerId" : "$parent._id"
+                }
             }
         }
-    }, 
+    ], 
     "properties" : {
         "name" : {
 
@@ -3709,18 +3690,20 @@
         }, 
         "recursive" : "schemaQuery"
     }, 
-    "query" : {
-        "queryName" : "orgUnit", 
-        "select" : "name", 
-        "from" : "574237133c6d3cd598a5a30d", 
-        "pageId" : "57b72a022d8cd20920e6d837", 
-        "where" : {
-            "eq" : {
-                "parentOrgId" : "$parent._id"
-            }
-        }, 
-        "recursive" : "orgUnit"
-    }, 
+    "query" : [
+        {
+            "queryName" : "orgUnit", 
+            "select" : "name", 
+            "from" : "574237133c6d3cd598a5a30d", 
+            "pageId" : "57b72a022d8cd20920e6d837", 
+            "where" : {
+                "eq" : {
+                    "parentOrgId" : "$parent._id"
+                }
+            }, 
+            "recursive" : "orgUnit"
+        }
+    ], 
     "properties" : {
         "name" : {
 
@@ -3745,29 +3728,31 @@
         }, 
         "recursive" : "schema"
     }, 
-    "query" : {
-        "queryName" : "allStates", 
-        "select" : "name", 
-        "from" : "5745eaa53c6d3cd598a5a371", 
-        "pageId" : "57b72a3c2d8cd20920e6d839", 
-        "where" : {
-            "eq" : {
-                "ownerId" : "$parent._id"
-            }
-        }, 
-        "join" : {
-            "queryName" : "state", 
+    "query" : [
+        {
+            "queryName" : "allStates", 
             "select" : "name", 
             "from" : "5745eaa53c6d3cd598a5a371", 
             "pageId" : "57b72a3c2d8cd20920e6d839", 
             "where" : {
-                "in" : {
-                    "_id" : "$parent.nextStateIds"
+                "eq" : {
+                    "ownerId" : "$parent._id"
                 }
             }, 
-            "recursive" : "state"
+            "join" : {
+                "queryName" : "state", 
+                "select" : "name", 
+                "from" : "5745eaa53c6d3cd598a5a371", 
+                "pageId" : "57b72a3c2d8cd20920e6d839", 
+                "where" : {
+                    "in" : {
+                        "_id" : "$parent.nextStateIds"
+                    }
+                }, 
+                "recursive" : "state"
+            }
         }
-    }, 
+    ], 
     "properties" : {
         "name" : {
 
@@ -4195,16 +4180,18 @@
     "_id" : ObjectId("582b9ae215456a300beb7e01"), 
     "docType" : "object", 
     "name" : "Backlog Table View", 
-    "query" : {
-        "comment" : "Blacklog", 
-        "select" : "name", 
-        "from" : "574225cb3c6d3cd598a5a305", 
-        "where" : {
-            "eq" : {
-                "memberId" : "$docId"
+    "query" : [
+        {
+            "comment" : "Blacklog", 
+            "select" : "name", 
+            "from" : "574225cb3c6d3cd598a5a305", 
+            "where" : {
+                "eq" : {
+                    "memberId" : "$docId"
+                }
             }
         }
-    }, 
+    ], 
     "type" : "object", 
     "properties" : {
         "name" : {
@@ -4748,17 +4735,19 @@
         }, 
         "recursive" : "schemaQuery"
     }, 
-    "query" : {
-        "queryName" : "media", 
-        "select" : "name", 
-        "Xfrom" : "573435c23c6d3cd598a5a2df", 
-        "pageId" : "57a678162d8cd20920e6d819", 
-        "Xwhere" : {
-            "eq" : {
-                "ownerId" : "$parent._id"
+    "query" : [
+        {
+            "queryName" : "media", 
+            "select" : "name", 
+            "Xfrom" : "573435c23c6d3cd598a5a2df", 
+            "pageId" : "57a678162d8cd20920e6d819", 
+            "Xwhere" : {
+                "eq" : {
+                    "ownerId" : "$parent._id"
+                }
             }
         }
-    }, 
+    ], 
     "properties" : {
         "name" : {
 
@@ -4900,7 +4889,6 @@
                 {
                     "displayType" : "Tree", 
                     "name" : "Class Model Tree", 
-                    "rootDocId" : "56f86c6a5dde184ccfb9fc6a", 
                     "viewId" : "575d4c3f2cf3d6dc3ed8314b"
                 }
             ]
@@ -5008,18 +4996,20 @@
         }, 
         "recursive" : "schemaQuery"
     }, 
-    "query" : {
-        "queryName" : "paragraphs", 
-        "select" : "name", 
-        "from" : "573435f03c6d3cd598a5a2e1", 
-        "pageId" : "575d4c3f2cf3d6dc3ed83154", 
-        "where" : {
-            "in" : {
-                "_id" : "$parent.childDocs"
-            }
-        }, 
-        "recursive" : "paragraphs"
-    }, 
+    "query" : [
+        {
+            "queryName" : "paragraphs", 
+            "select" : "name", 
+            "from" : "573435f03c6d3cd598a5a2e1", 
+            "pageId" : "575d4c3f2cf3d6dc3ed83154", 
+            "where" : {
+                "in" : {
+                    "_id" : "$parent.childDocs"
+                }
+            }, 
+            "recursive" : "paragraphs"
+        }
+    ], 
     "properties" : {
         "_id" : {
 
@@ -5041,46 +5031,48 @@
     "_id" : ObjectId("58398e42425336e46912c78d"), 
     "docType" : "object", 
     "name" : "Service Request Sent Table View", 
-    "query" : {
-        "queryName" : "seviceRequests", 
-        "select" : "name", 
-        "from" : "574225cb3c6d3cd598a5a305", 
-        "where" : {
-            "eq" : {
-                "buyerId" : "$docId"
-            }
-        }, 
-        "menu" : [
-            {
-                "label" : "New Message", 
-                "iconClass" : "addIcon", 
-                "action" : "add"
+    "query" : [
+        {
+            "queryName" : "seviceRequests", 
+            "select" : "name", 
+            "from" : "574225cb3c6d3cd598a5a305", 
+            "where" : {
+                "eq" : {
+                    "buyerId" : "$docId"
+                }
             }, 
-            {
-                "label" : "Filter", 
-                "iconClass" : "filterIcon", 
-                "menu" : [
-                    {
-                        "label" : "By State", 
-                        "iconClass" : "filterIcon", 
-                        "action" : "filter", 
-                        "Xmenu" : [
-                            {
-                                "label" : "Open", 
-                                "iconClass" : "filterIcon", 
-                                "action" : "filter"
-                            }, 
-                            {
-                                "label" : "Closed", 
-                                "iconClass" : "filterIcon", 
-                                "action" : "filter"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-    }, 
+            "menu" : [
+                {
+                    "label" : "New Message", 
+                    "iconClass" : "addIcon", 
+                    "action" : "add"
+                }, 
+                {
+                    "label" : "Filter", 
+                    "iconClass" : "filterIcon", 
+                    "menu" : [
+                        {
+                            "label" : "By State", 
+                            "iconClass" : "filterIcon", 
+                            "action" : "filter", 
+                            "Xmenu" : [
+                                {
+                                    "label" : "Open", 
+                                    "iconClass" : "filterIcon", 
+                                    "action" : "filter"
+                                }, 
+                                {
+                                    "label" : "Closed", 
+                                    "iconClass" : "filterIcon", 
+                                    "action" : "filter"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ], 
     "type" : "object", 
     "properties" : {
         "sellerId" : {

@@ -381,14 +381,13 @@ function(declare, lang, array, when, all, registry, request,
         },
         getCollectionForSubstitutedQuery: function(query, parent, docId) {
             var parentObj = parent;
-            var selfObj = this.cachingStore.getSync(docId);
             if(typeof parent == 'string') parentObj = this.cachingStore.getSync(parent);
             var clonedQuery = lang.clone(query);
-            this.substituteVariablesInQuery(clonedQuery, parentObj, docId, selfObj);
+            this.substituteVariablesInQuery(clonedQuery, parentObj, docId);
             var filter = this.buildFilterFromQuery(clonedQuery);
             return this.filter(filter);
         },
-        substituteVariablesInQuery: function(query, parentObj, docId, selfObj) {
+        substituteVariablesInQuery: function(query, parentObj, docId) {
             var self  = this;
             if(Array.isArray(query)){
                 for(var i=0;i<query.length;i++){
