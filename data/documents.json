@@ -2452,7 +2452,7 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8315a"), 
     "docType" : "object", 
-    "name" : "The Client", 
+    "name" : "Client", 
     "description" : "<div class='nqSpanColumn' style='position: relative;'><img src='app/resources/img/Neuralquest/lefkasHome1.png' width='100%' height='100px'><div class='headline'>Client</div></div><p>The Neuralquest client</p>", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2534,7 +2534,7 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed83159"), 
     "docType" : "object", 
-    "name" : "The Server", 
+    "name" : "Server", 
     "description" : "<div class='nqSpanColumn' style='position: relative;'><img src='app/resources/img/Neuralquest/lefkasHome1.png' width='100%' height='100px'><div class='headline'>Server</div></div><p>The Neuralquest server</p>", 
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -2800,28 +2800,18 @@
             "displayIcon" : true
         }, 
         "stateHistoryDate" : {
-            "readOnly" : true, 
-            "subDoc" : "stateHistory", 
-            "prop" : "date", 
             "title" : "Date", 
+            "readOnly" : true, 
             "type" : "string", 
             "format" : "date-time", 
-            "styleColumn" : "width : 6em"
+            "styleColumn" : "width : 6em", 
+            "path" : "$self.stateHistory.0.date"
         }, 
         "stateHistoryState" : {
             "readOnly" : true, 
-            "subDoc" : "stateHistory", 
-            "prop" : "stateId", 
             "title" : "State", 
             "type" : "string", 
-            "query" : {
-                "from" : "5745eaa53c6d3cd598a5a371", 
-                "Xwhere" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
-                }
-            }, 
+            "path" : "$self.stateHistory.0.stateId", 
             "styleColumn" : "width : 6em", 
             "displayIcon" : true
         }, 
@@ -2890,6 +2880,7 @@
     "name" : "Service Request Tab Page", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
+    "editMode" : true, 
     "tabs" : [
         {
             "name" : "Service Request", 
@@ -2939,37 +2930,30 @@
         }, 
         "sellerId" : {
             "title" : "To", 
-            "readOnly" : true, 
-            "readOnlyOnNew" : false, 
-            "displayIcon" : true
+            "readOnly" : "$self.$newDoc==true?false:true"
         }, 
         "offeringId" : {
-            "readOnly" : true, 
-            "readOnlyOnNew" : false
+            "readOnly" : "$self.$newDoc==true?false:true"
         }, 
         "assetId" : {
             "title" : "Article", 
-            "readOnly" : true, 
-            "readOnlyOnNew" : false
+            "readOnly" : "$self.$newDoc==true?false:true"
         }, 
         "name" : {
             "title" : "Subject", 
-            "readOnly" : true, 
-            "readOnlyOnNew" : false, 
+            "readOnly" : "$self.$newDoc==true?false:true", 
             "style" : {
                 "font-weight" : "bold"
             }
         }, 
         "description" : {
             "title" : "Question", 
-            "readOnly" : true, 
-            "readOnlyOnNew" : false
+            "readOnly" : "$self.$newDoc==true?false:true"
         }, 
         "newStateButton" : {
             "type" : "button", 
             "label" : "Reply", 
-            "readOnly" : false, 
-            "readOnlyOnNew" : true, 
+            "readOnly" : "$self.stateHistory.0.stateId.$isA(574724b43c6d3cd598a5a375)", 
             "action" : {
                 "actionType" : "insertSubDocArray", 
                 "arrayName" : "stateHistory"
@@ -2978,14 +2962,14 @@
         "stateHistory" : {
             "items" : {
                 "properties" : {
-                    "date" : {
-                        "readOnly" : true, 
-                        "default" : "$now"
-                    }, 
                     "stateId" : {
                         "readOnly" : true, 
                         "readOnlyOnNew" : false, 
                         "displayIcon" : true
+                    }, 
+                    "date" : {
+                        "readOnly" : true, 
+                        "default" : "$now"
                     }, 
                     "description" : {
                         "readOnly" : true, 
@@ -4837,7 +4821,7 @@
 { 
     "_id" : ObjectId("5834c066425310133a49f125"), 
     "docType" : "object", 
-    "name" : "The Standard Model", 
+    "name" : "Standard Model", 
     "description" : "<div class='nqSpanColumn' style='position: relative;'><img src='app/resources/img/Neuralquest/lefkasHome1.png' width='100%' height='100px'><div class='headline'>The Standard Model</div></div><p>The Neuralquest client</p>", 
     "pageId" : "5834c139425310133a49f127", 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
@@ -5082,28 +5066,18 @@
             "displayIcon" : true
         }, 
         "stateHistoryDate" : {
-            "readOnly" : true, 
-            "subDoc" : "stateHistory", 
-            "prop" : "date", 
             "title" : "Date", 
+            "readOnly" : true, 
             "type" : "string", 
             "format" : "date-time", 
-            "styleColumn" : "width : 6em"
+            "styleColumn" : "width : 6em", 
+            "path" : "$self.stateHistory.0.date"
         }, 
         "stateHistoryState" : {
             "readOnly" : true, 
-            "subDoc" : "stateHistory", 
-            "prop" : "stateId", 
             "title" : "State", 
             "type" : "string", 
-            "query" : {
-                "from" : "5745eaa53c6d3cd598a5a371", 
-                "Xwhere" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
-                }
-            }, 
+            "path" : "$self.stateHistory.0.stateId", 
             "styleColumn" : "width : 6em", 
             "displayIcon" : true
         }, 

@@ -239,9 +239,9 @@ function(declare, lang, array, when, all, registry, request,
                 var inheritedClassSchemaPromise = {};
                 if('rootQuery' in viewObj && 'from' in viewObj.rootQuery && viewObj.rootQuery.from != 'classes') {
                     inheritedClassSchemaPromise = self.getInheritedClassSchema(viewObj.rootQuery.from);
-                }
-                else if('query' in viewObj && 'from' in viewObj.query && viewObj.query.from != 'classes') {
-                    inheritedClassSchemaPromise = self.getInheritedClassSchema(viewObj.query.from);
+                }//TODO we have to rethink this. what do we do if we have more tahn one query in the array
+                else if('query' in viewObj && 'from' in viewObj.query[0] && viewObj.query[0].from != 'classes') {
+                    inheritedClassSchemaPromise = self.getInheritedClassSchema(viewObj.query[0].from);
                 }
                 return when(inheritedClassSchemaPromise, function(inheritedClassSchema){
                     //var properties = viewObj.properties;
@@ -363,12 +363,17 @@ function(declare, lang, array, when, all, registry, request,
             }
             return properties;
         },
-        isASync: function(doc, id) {
+        isASync: function(docId, id) {
+            var doc = docId;
+            if(typeof(docId) == 'string') {
+                if(docId == id) return true;
+                doc = this.cachingStore.getSync(docId);
+            }
             if(doc._id === id) return true;
             var parentId = doc.docType=='object'?doc.classId:doc.parentId;
             if(!parentId) return false;
-            var parentDoc =  this.cachingStore.getSync(parentId);
-            return this.isASync(parentDoc, id);
+            //var parentDoc =  this.cachingStore.getSync(parentId);
+            return this.isASync(parentId, id);
         },
         isA: function(doc, id) {
             var self = this;
@@ -422,7 +427,7 @@ function(declare, lang, array, when, all, registry, request,
                         var values = value.split('.');
                         if(values.length>1) {
                             var first = values.shift();
-                            if(first == "$self") debugger;
+                            //if(first == "$self") debugger;
                             if(first == "$self") substitutedValue = self.getValueByDotNotation(parentObj, values);
                             else if(first == "$parent") substitutedValue = self.getValueByDotNotation(parentObj, values);
                             else substitutedValue = undefined;
@@ -438,6 +443,40 @@ function(declare, lang, array, when, all, registry, request,
             var current=obj;
             pathArr.forEach(function(p){
                 current = current[p];
+            });
+            return current;
+        },
+        getValueByDotNotation2: function(obj, path) {
+            var self = this;
+            var pathArr = path.split('.');
+            var current = path;
+            pathArr.forEach(function(part){
+                if(path == "$userId") return nq.getUser().id;
+                else if(path == "$ownerId") return nq.getOwner().id;
+                else if(part == '$self') current = obj;
+                else {
+                    var pos = part.search('==');
+                    if(pos>-1){
+                        var leftString = part.substring(0, pos);
+                        var rightString = part.substring(pos);
+                        var workValue = current[leftString];
+                        if(typeof(workValue) == 'string') workValue = "'"+workValue+"'";
+                        var res = eval(workValue+rightString);
+                        current = res;
+                    }
+                    else if (part.startsWith('$get(')) {
+                        var internalString = part.substring(part.indexOf('(') + 1, part.lastIndexOf(')'));
+                        debugger;
+                    }
+                    else if (part.startsWith('$isA(')) {
+                        if(!current) return;
+                        var internalString = part.substring(part.indexOf('(') + 1, part.lastIndexOf(')'));
+                        var res = self.isASync(current, internalString);
+                        debugger;
+                        current = res;
+                    }
+                    else current = current[part];
+                }
             });
             return current;
         },

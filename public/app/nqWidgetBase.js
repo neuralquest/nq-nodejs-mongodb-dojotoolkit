@@ -1,6 +1,6 @@
 define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/_base/lang", 'dojo/on',
         'dojo/_base/array', 'dojo/dom-attr', 'dijit/registry', 'dojo/store/Memory', "dojo/dom-style",'dojo/query!css3',
-        "dojo/sniff", "dojo/date", "dojox/form/Uploader", 'app/nqSubDocStore',
+        "dojo/sniff", "dojo/date", "dojox/form/Uploader",
         'dijit/form/Select',
         'dijit/form/DateTextBox',
         'dijit/form/NumberTextBox',
@@ -23,7 +23,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins'],
 	function(declare, domConstruct, _WidgetBase, ContentPane, domGeometry, lang, on,
-			arrayUtil, domAttr, registry, Memory, domStyle, css3, has, date, Uploader, nqSubDocStore,
+			arrayUtil, domAttr, registry, Memory, domStyle, css3, has, date, Uploader,
              Select, DateTextBox, NumberTextBox, Textarea,Menu,  MenuItem, DropDownMenu, PopupMenuItem, CheckedMenuItem,
              CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton,
              Toolbar, OnDemandGrid, CheckedMultiSelect, Button, Keyboard,
@@ -152,19 +152,16 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             var self = this;
             if(!doc) return;
 
-            var readOnly = attrProps.readOnly==undefined?true:attrProps.readOnly;
-            if(readOnly) { // readOnly
-                domAttr.set(node, 'name', attrName); //give it a name so we know where to put the value
-                if('style' in attrProps)domAttr.set(node, 'style', attrProps.style);
-            }
-
             var value = doc[attrName];
-            //value = value==undefined?attrProps.default:value;
 
             var readOnly = true;
-            if(self.editMode) {
-                readOnly = attrProps.readOnly == undefined ? true : attrProps.readOnly;
-                if (doc.$newDoc) readOnly = attrProps.readOnlyOnNew == undefined ? true : attrProps.readOnlyOnNew;
+            if(self.editMode && attrProps.readOnly) {
+                if(typeof(attrProps.readOnly) == 'boolean') readOnly = attrProps.readOnly;
+                else readOnly = self.store.getValueByDotNotation2(doc, attrProps.readOnly);
+            }
+            if(readOnly) { // readOnly
+                domAttr.set(node, 'name', attrName); //give it a name so we know where to get the value
+                if('style' in attrProps) domAttr.set(node, 'style', attrProps.style);
             }
             
             var dijitProperties = {
@@ -642,6 +639,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         //------------------------------------------------------------
         renderValueButton: function(attrProps, node, dijitProperties){
             var self = this;
+            if(dijitProperties.readOnly) return null;
             var readOnly = dijitProperties.readOnly;
             var buttonProps = {
                 label: attrProps.label,

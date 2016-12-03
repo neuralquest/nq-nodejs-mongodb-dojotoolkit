@@ -1,4 +1,4 @@
-define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-style",'dijit/form/Select', 'dijit/Toolbar', "dijit/form/DropDownButton", "dijit/DropDownMenu", 'dijit/form/DateTextBox', 'dojo/when', "dojo/promise/all",
+define(['dojo/_base/declare',  'dojo/_base/array',  "dojo/_base/lang", "dojo/dom-style",'dijit/form/Select', 'dijit/Toolbar', "dijit/form/DropDownButton", "dijit/DropDownMenu", 'dijit/form/DateTextBox', 'dojo/when', "dojo/promise/all",
          'dijit/Editor', 'dojo/store/Memory', 'dojo/dom-construct', "dojo/on", "dojo/cookie", "dojo/hash", "dijit/form/ToggleButton",
          "app/nqWidgetBase", 'dijit/layout/ContentPane', "dojo/dom-geometry", "dojo/sniff", "dojo/date/locale", "dojo/html", 'dgrid/extensions/ColumnResizer',
         'dgrid/OnDemandGrid', 'dgrid/Editor', 'dgrid/Selector', 'dgrid/Keyboard', 'dgrid/extensions/DijitRegistry', "dgrid/extensions/DnD",
@@ -7,7 +7,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
         
         'dijit/_editor/plugins/TextColor', 'dijit/_editor/plugins/LinkDialog', 'dijit/_editor/plugins/ViewSource', 'dojox/editor/plugins/TablePlugins', 
         /*'dojox/editor/plugins/ResizeTableColumn'*/],
-	function(declare, nqSubDocStore, arrayUtil, lang, domStyle, Select, Toolbar, DropDownButton, DropDownMenu, DateTextBox, when, all,
+	function(declare, arrayUtil, lang, domStyle, Select, Toolbar, DropDownButton, DropDownMenu, DateTextBox, when, all,
 			RTFEditor, Memory, domConstruct, on, cookie, hash, ToggleButton,
 			nqWidgetBase, ContentPane, domGeometry, has, locale, html, ColumnResizer,
 			Grid, Editor, Selector, Keyboard, DijitRegistry, Dnd,
@@ -21,8 +21,8 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
 		postCreate: function(){
 			this.inherited(arguments);
             var self = this;
-            if('query' in self.schema && 'menu' in self.schema.query){
-                var menuDefArr = self.schema.query.menu;
+            if('query' in self.schema && 'menu' in self.schema.query[0]){
+                var menuDefArr = self.schema.query[0].menu;
                 //initially show the toolbar div
                 domStyle.set(this.pageToolbarDivNode, 'display' , 'block');
                 // Create toolbar and place it at the top of the page
@@ -84,7 +84,15 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                     return self.store.amAuthorizedToUpdate(object);
                 };
                 columns.push(attrProps);
-                if(attrProps.subDoc){
+                //if(attrName == 'stateHistoryDate') debugger;
+
+                if('path' in attrProps){
+                    attrProps.get = lang.hitch(attrProps.path, function(obj){
+                        return self.store.getValueByDotNotation2(obj, this);
+                    });
+                }
+
+                /*if(attrProps.subDoc){
                     attrProps.get = lang.hitch(attrProps, function(item){
                         var subDoc = this.subDoc;
                         var prop = this.prop;
@@ -101,8 +109,7 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                         var prop = this.prop;
                         return item[prop];
                     });
-                }
-
+                }*/
                 if(attrProps.enum){
                     attrProps.renderCell = function(object, value, node, options){
                         if(!value) html.set(node, '[not selected]');
@@ -185,6 +192,18 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
                         });
                         //attrProps.autoSave = true;
                         attrProps.editor =  'text';
+                    }
+                    else if('displayIcon' in attrProps) {
+                        attrProps.renderCell = function (object, value, node, options) {
+                            if (!value) html.set(node, '[null]');
+                            else {
+                                var refDoc = self.store.cachingStore.getSync(value);
+                                var icon = self.getIconForObject(refDoc);
+                                var div = domConstruct.create("div", {style:{'white-space': 'nowrap'}},  node);
+                                domConstruct.create("img", {src:icon}, div);
+                                domConstruct.create("span", {style:{'padding-left':'3px', 'vertical-align': 'top'}, innerHTML:refDoc.name}, div);
+                            }
+                        };
                     }
                     else {
                         attrProps.renderCell = function (object, value, node, options) {
@@ -279,48 +298,18 @@ define(['dojo/_base/declare', 'app/nqSubDocStore', 'dojo/_base/array',  "dojo/_b
              console.log("Row complete:", event);
              });
              */
-
-
-
-            //self.own(self.normalToolbar);
-            //self.own(self.grid);
 		},
-        _setDocIdAttr: function(docId){
-            //if(docId == this.docId) return;
-            this.inherited(arguments);
+        _setDocIdAttr: function(docId) {
+            if (docId == this.docId) return;
             var self = this;
+            this.inherited(arguments);
             if(!this.docId) return;
-            var parentDoc = this.store.cachingStore.getSync(this.docId);
-            //load the data
-            var docCol = null;
-            if(this.schema && (this.schema.query || this.schema.isA)) {
-                var query = this.schema.query;
-                if(query && 'subDoc' in query){
-                    var subDocName = query.subDoc;
-                    var subDocStore = new nqSubDocStore({
-                        idProperty: "name",
-                        data: parentDoc[subDocName]?parentDoc[subDocName]:[]
-                    });
-                    //var subDocStore = new nqSubDocStore({data:parentDoc.insets});
-                    docCol = subDocStore.filter();
-                    //docCol = new QueryResults(parentDoc.insets?parentDoc.insets:[]);
-                    this.grid.set('collection', docCol);
-                }
-                else{
-                    var docCol = self.store.getCollectionForSubstitutedQuery(query, this.docId, this.docId);
-                    this.grid.set('collection', docCol);
-                }
-            }
-            if(docCol) {
-                docCol.on('update', function (event) {
-                    /*var newFilter = self.store.buildFilterFromQuery(null, self.schema.query);
-                    var col = self.store.filter(newFilter);
-                    col.fetch().then(function (childObjects) {
-                        console.log('childObjects', childObjects);
-                    });*/
+            if('query' in this.schema) {
+                this.docCol = this.store.getCollectionForSubstitutedQuery(this.schema.query[0], this.docId, this.docId);
+                this.own(this.docCol.on('update', function(event){
                     self.grid.refresh();
-                });
-                //this.grid.set('collection', docCol);
+                }));
+                this.grid.set('collection', self.docCol);
             }
         },
         _setSelectedIdAttr: function(selectedId){

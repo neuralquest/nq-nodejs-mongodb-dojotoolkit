@@ -215,6 +215,7 @@ function(arrayUtil, ready, topic, on, hash, registry,
     }
     function drawWidgets(tabPane) {
         var pageId = tabPane.id.split('.')[0];
+        //if(pageId == '577853123c6d3cd598a5a396') debugger;
         //if(pageId == 'slave') pageId = tabPane.id.split('.')[1];
         return nqStore.get(pageId).then(function(pageObj){
             var widgetPromises = [];
@@ -226,6 +227,7 @@ function(arrayUtil, ready, topic, on, hash, registry,
                     var parms = {
                         id: pageId + '.' + tabPane.tabNum + '.' + widNum,
                         pageId: pageId,
+                        editMode: pageObj.editMode,
                         tabNum: tabPane.tabNum,
                         widNum: widNum,
                         widTot: tabObj.widgets.length,
