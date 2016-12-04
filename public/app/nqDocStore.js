@@ -328,7 +328,7 @@ function(declare, lang, array, when, all, registry, request,
                         }
                         else {
                             newProp = lang.clone(classProp);
-                            if (classProp.readOnly) newProp.readOnly = true;
+                            if (classProp.readOnly) newProp.readOnly = classProp.readOnly;
                             else {
                                 newProp.readOnly = viewProp.readOnly == undefined ? true : viewProp.readOnly;
                                 newProp.readOnlyOnNew = viewProp.readOnlyOnNew == undefined ? true : viewProp.readOnlyOnNew;
@@ -364,6 +364,7 @@ function(declare, lang, array, when, all, registry, request,
             return properties;
         },
         isASync: function(docId, id) {
+            if(!docId || !id) return false;
             var doc = docId;
             if(typeof(docId) == 'string') {
                 if(docId == id) return true;
@@ -384,20 +385,20 @@ function(declare, lang, array, when, all, registry, request,
                 return self.isA(parentDoc, id);
             });
         },
-        getCollectionForSubstitutedQuery: function(query, parent, docId) {
+        getCollectionForSubstitutedQuery: function(query, parent) {
             var parentObj = parent;
             if(typeof parent == 'string') parentObj = this.cachingStore.getSync(parent);
             var clonedQuery = lang.clone(query);
-            this.substituteVariablesInQuery(clonedQuery, parentObj, docId);
+            this.substituteVariablesInQuery(clonedQuery, parentObj);
             var filter = this.buildFilterFromQuery(clonedQuery);
             return this.filter(filter);
         },
-        substituteVariablesInQuery: function(query, parentObj, docId) {
+        substituteVariablesInQuery: function(query, parentObj) {
             var self  = this;
             if(Array.isArray(query)){
                 for(var i=0;i<query.length;i++){
                     var subQuery = query[i];
-                    this.substituteVariablesInQuery(subQuery, parentObj, docId);
+                    this.substituteVariablesInQuery(subQuery, parentObj);
                 }
             }
             else {
@@ -405,78 +406,55 @@ function(declare, lang, array, when, all, registry, request,
                     var where = query.where;
                     var qualifier = Object.keys(where)[0];
                     var key = Object.keys(where[qualifier])[0];
-                    var value = where[qualifier][key];
-                    var substitutedValue = value;
-                    if(value == "$docId") substitutedValue = docId;
-                    else if(value == "$userId") substitutedValue = nq.getUser().id;
-                    else if(value == "$ownerId") substitutedValue = nq.getOwner().id;
-                    else if(value.substring(0, 4) == 'get('){
-                        var getString = value.substring(value.indexOf("(")+1,value.lastIndexOf(")"));
-                        if(getString.substring(0, 1) == '$') {
-                            var values = getString.split('.');
-                            var first = values.shift();
-                            if(first == "$self") {
-                                var id = self.getValueByDotNotation(parentObj, values);
-                                var obj = self.cachingStore.getSync(id);
-                                var remainingGetString =  value.substring(value.lastIndexOf(")")+2);
-                                substitutedValue = self.getValueByDotNotation(obj, remainingGetString.split('.'));
-                            }
-                        }
-                    }
-                    else if(value.substring(0, 1) == '$') {
-                        var values = value.split('.');
-                        if(values.length>1) {
-                            var first = values.shift();
-                            //if(first == "$self") debugger;
-                            if(first == "$self") substitutedValue = self.getValueByDotNotation(parentObj, values);
-                            else if(first == "$parent") substitutedValue = self.getValueByDotNotation(parentObj, values);
-                            else substitutedValue = undefined;
-                        }
-                        else substitutedValue = undefined;
-                    }
+                    var path = where[qualifier][key];
+                    var substitutedValue = self.getValueByDotNotation2(parentObj, path);
                     where[qualifier][key] = substitutedValue;
                 }
-                if('join' in query) this.substituteVariablesInQuery(query.join, parentObj, docId);
+                if('join' in query) this.substituteVariablesInQuery(query.join, parentObj);
             }
-        },
-        getValueByDotNotation: function(obj, pathArr) {
-            var current=obj;
-            pathArr.forEach(function(p){
-                current = current[p];
-            });
-            return current;
         },
         getValueByDotNotation2: function(obj, path) {
             var self = this;
+            if(path == "$docId") return obj._id; //TODO replace docId with $self._id
+            if(path == "$userId") return nq.getUser().id;
+            if(path == "$ownerId") return nq.getOwner().id;
+
+            var pos = path.search('==');
+            if(pos>-1){
+                var leftString = path.substring(0, pos);
+                var rightString = path.substring(pos);
+                var leftValue = self.getValueByDotNotation2(obj, leftString);
+                if(typeof(leftValue) == 'string') leftValue = "'"+leftValue+"'";
+                var res = eval(leftValue+rightString);
+                return res;
+            }
+            else if (path.startsWith('$get(')) {
+                var internalString = path.substring(path.indexOf('(') + 1, path.lastIndexOf(')'));
+                var remainingString = path.substring(path.lastIndexOf(')')+2);
+                var internalValue = self.getValueByDotNotation2(obj, internalString);
+                var foundObj = self.cachingStore.getSync(internalValue);
+                var res = self.getValueByDotNotation2(foundObj, remainingString);
+                return res;
+            }
+            else if (path.startsWith('$isA(')) {
+                var leftString = path.substring(path.indexOf('(') + 1, path.indexOf(','));
+                var rightString = path.substring(path.indexOf(',') + 1, path.indexOf(')'));
+                var leftValue = self.getValueByDotNotation2(obj, leftString);
+                var rightValue = self.getValueByDotNotation2(obj, rightString);
+                var res = self.isASync(leftValue, rightValue);
+                return res;
+            }
+
             var pathArr = path.split('.');
+            if(pathArr.length == 1){
+                return path;
+            }
             var current = path;
             pathArr.forEach(function(part){
-                if(path == "$userId") return nq.getUser().id;
-                else if(path == "$ownerId") return nq.getOwner().id;
-                else if(part == '$self') current = obj;
-                else {
-                    var pos = part.search('==');
-                    if(pos>-1){
-                        var leftString = part.substring(0, pos);
-                        var rightString = part.substring(pos);
-                        var workValue = current[leftString];
-                        if(typeof(workValue) == 'string') workValue = "'"+workValue+"'";
-                        var res = eval(workValue+rightString);
-                        current = res;
-                    }
-                    else if (part.startsWith('$get(')) {
-                        var internalString = part.substring(part.indexOf('(') + 1, part.lastIndexOf(')'));
-                        debugger;
-                    }
-                    else if (part.startsWith('$isA(')) {
-                        if(!current) return;
-                        var internalString = part.substring(part.indexOf('(') + 1, part.lastIndexOf(')'));
-                        var res = self.isASync(current, internalString);
-                        debugger;
-                        current = res;
-                    }
-                    else current = current[part];
-                }
+                if(!current) return;
+                if(part == '$self') current = obj;
+                else if(part == '$parent') current = obj;//TODO parent will be removed
+                else current = current[part];
             });
             return current;
         },

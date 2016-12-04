@@ -227,7 +227,7 @@ function(arrayUtil, ready, topic, on, hash, registry,
                     var parms = {
                         id: pageId + '.' + tabPane.tabNum + '.' + widNum,
                         pageId: pageId,
-                        editMode: pageObj.editMode,
+                        editMode: tabObj.editMode,
                         tabNum: tabPane.tabNum,
                         widNum: widNum,
                         widTot: tabObj.widgets.length,

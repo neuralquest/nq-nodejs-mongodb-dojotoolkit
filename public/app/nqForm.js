@@ -6,20 +6,22 @@ define(['dojo/_base/declare', "dojo/_base/lang", "app/nqWidgetBase","dojo/when",
                 var self = this;
                 this.inherited(arguments);
                 domAttr.set(this.pane.containerNode, 'style', {'padding-left': '10px', 'padding-right': '10px', 'max-width':'800px'});
-                var editButton = new ToggleButton({
-                    value: false,
-                    showLabel: false,
-                    label: 'Edit',
-                    iconClass: 'editIcon',
-                    //style : {position: 'absolute', right: '0px', top: '0px'},
-                    onChange: function(value){
-                        self.editMode = value;
-                        self.buildPage();
-                    }
-                });
-                this.editorToolbarDivNode.appendChild(editButton.domNode);
-                //initially show the toolbar div
-                domStyle.set(this.editorToolbarDivNode, 'display' , 'block');
+                if(!this.editMode) {
+                    var editButton = new ToggleButton({
+                        value: false,
+                        showLabel: false,
+                        label: 'Edit',
+                        iconClass: 'editIcon',
+                        //style : {position: 'absolute', right: '0px', top: '0px'},
+                        onChange: function (value) {
+                            self.editMode = value;
+                            self.buildPage();
+                        }
+                    });
+                    this.editorToolbarDivNode.appendChild(editButton.domNode);
+                    //initially show the toolbar div
+                    domStyle.set(this.editorToolbarDivNode, 'display', 'block');
+                }
             },
             _setDocIdAttr: function(docId) {
                 if (docId == this.docId) return;

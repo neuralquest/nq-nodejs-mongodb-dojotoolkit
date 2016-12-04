@@ -148,14 +148,14 @@
             ], 
             "default" : "Tabs"
         }, 
-        "editMode" : {
-            "title" : "Initially Edit Mode", 
-            "type" : "boolean"
-        }, 
         "tabs" : {
             "title" : "Tabs", 
             "description" : "", 
             "type" : "array", 
+            "editMode" : {
+                "title" : "Initially Edit Mode", 
+                "type" : "boolean"
+            }, 
             "items" : {
                 "type" : "object", 
                 "properties" : {
@@ -602,10 +602,11 @@
                             "from" : "5745eaa53c6d3cd598a5a371", 
                             "where" : {
                                 "in" : {
-                                    "_id" : "get($self.stateHistory.1.stateId).nextStateIds"
+                                    "_id" : "$get($self.stateHistory.1.stateId).$self.nextStateIds"
                                 }
                             }
-                        }
+                        }, 
+                        "readOnly" : "$self.date=='$now'?false:true"
                     }, 
                     "description" : {
                         "title" : "Description", 
@@ -614,7 +615,8 @@
                         "media" : {
                             "mediaType" : "text/html"
                         }, 
-                        "default" : "<p>[no text]</p>"
+                        "default" : "<p>[no text]</p>", 
+                        "readOnly" : "$self.date=='$now'?false:true"
                     }
                 }, 
                 "additionalProperties" : false, 
@@ -2479,7 +2481,7 @@
 { 
     "_id" : ObjectId("575d4c3f2cf3d6dc3ed8314f"), 
     "docType" : "object", 
-    "name" : "Platoscave", 
+    "name" : "platoscave", 
     "isActive" : true, 
     "password" : "$2a$10$WIx8rGcMeuPigotQqQi.b.HUhpgqd0bEaLQ1Eerq6Q9WA/Y6v/y92", 
     "email" : "", 
@@ -2611,6 +2613,7 @@
     "tabs" : [
         {
             "name" : "Login", 
+            "editMode" : true, 
             "widgets" : [
                 {
                     "displayType" : "Form", 
@@ -2621,6 +2624,7 @@
         }, 
         {
             "name" : "Sign Up", 
+            "editMode" : true, 
             "widgets" : [
                 {
                     "displayType" : "Form", 
@@ -2659,11 +2663,7 @@
             "type" : "button", 
             "iconClass" : "saveIcon", 
             "action" : {
-                "actionType" : "post", 
-                "post" : "/login", 
-                "newDoc" : {
-
-                }
+                "actionType" : "login"
             }
         }, 
         "googlelogin" : {
@@ -2717,7 +2717,9 @@
             "label" : "Sign Up", 
             "readOnly" : false, 
             "type" : "button", 
-            "post" : "/signup"
+            "action" : {
+                "actionType" : "signup"
+            }
         }, 
         "googlelogin" : {
             "label" : "Goggle Login", 
@@ -2880,10 +2882,10 @@
     "name" : "Service Request Tab Page", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
-    "editMode" : true, 
     "tabs" : [
         {
             "name" : "Service Request", 
+            "editMode" : true, 
             "widgets" : [
                 {
                     "displayType" : "Form", 
@@ -2953,7 +2955,7 @@
         "newStateButton" : {
             "type" : "button", 
             "label" : "Reply", 
-            "readOnly" : "$self.stateHistory.0.stateId.$isA(574724b43c6d3cd598a5a375)", 
+            "readOnly" : "$isA($self.stateHistory.0.stateId,5747254b3c6d3cd598a5a379)==true?false:true", 
             "action" : {
                 "actionType" : "insertSubDocArray", 
                 "arrayName" : "stateHistory"
@@ -3186,6 +3188,7 @@
     "tabs" : [
         {
             "name" : "Product", 
+            "editMode" : true, 
             "widgets" : [
                 {
                     "displayType" : "Form", 
@@ -3238,7 +3241,8 @@
             "label" : "Purchase", 
             "readOnly" : false, 
             "action" : {
-                "add" : {
+                "actionType" : "add", 
+                "template" : {
                     "name" : "Purchase Agreement", 
                     "docType" : "object", 
                     "classId" : "574232b83c6d3cd598a5a309", 
@@ -4651,7 +4655,7 @@
         "583226da425310133a49f11d"
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "5747251e3c6d3cd598a5a377"
+    "classId" : "5747254b3c6d3cd598a5a379"
 }
 { 
     "_id" : ObjectId("58322689425310133a49f11b"), 
@@ -4663,7 +4667,7 @@
         "583226fa425310133a49f11f"
     ], 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
-    "classId" : "5747254b3c6d3cd598a5a379"
+    "classId" : "5747251e3c6d3cd598a5a377"
 }
 { 
     "_id" : ObjectId("583226da425310133a49f11d"), 
@@ -5088,4 +5092,56 @@
     }, 
     "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
     "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("58433e8670bcf9c6627cf5c9"), 
+    "name" : "ACME user1", 
+    "isActive" : true, 
+    "password" : "$2a$10$2Wqx6HoNhxD7eTqck.oV8eeE3Vuzjg9iZt3iCJdwueBorOqGGM1PG", 
+    "email" : "u@u.com", 
+    "docType" : "object", 
+    "classId" : "57343beb3c6d3cd598a5a2e7"
+}
+{ 
+    "_id" : ObjectId("584340fd215503df49b7e86d"), 
+    "name" : "ACME user2", 
+    "isActive" : true, 
+    "password" : "$2a$10$pSbeb7qPuqUn.1wHeprOhOSxCo2f5mc7D8BcSKXGvRR/0KA84lfOm", 
+    "email" : "u@u.com", 
+    "docType" : "object", 
+    "classId" : "57343beb3c6d3cd598a5a2e7"
+}
+{ 
+    "_id" : ObjectId("58434c8280c94ccf01838ba2"), 
+    "docType" : "object", 
+    "name" : "ACME Membership Agreement", 
+    "description" : "<p>Welcome to the club</p>", 
+    "buyerId" : "58433e8670bcf9c6627cf5c9", 
+    "sellerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "oraganizationalUnitId" : "57af81b02d8cd20920e6d823", 
+    "stateHistory" : [
+        {
+            "description" : "<p>Joined the organization</p>", 
+            "stateId" : "57790e503c6d3cd598a5a3a0", 
+            "date" : "2008-10-17T00:00:00Z"
+        }
+    ], 
+    "classId" : "574232a53c6d3cd598a5a307"
+}
+{ 
+    "_id" : ObjectId("5843567380c94ccf01838ba4"), 
+    "docType" : "object", 
+    "name" : "ACME Membership Agreement", 
+    "description" : "<p>Welcome to the club</p>", 
+    "buyerId" : "584340fd215503df49b7e86d", 
+    "sellerId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "oraganizationalUnitId" : "57af88862d8cd20920e6d825", 
+    "stateHistory" : [
+        {
+            "description" : "<p>Joined the organization</p>", 
+            "stateId" : "57790e503c6d3cd598a5a3a0", 
+            "date" : "2008-10-17T00:00:00Z"
+        }
+    ], 
+    "classId" : "574232a53c6d3cd598a5a307"
 }

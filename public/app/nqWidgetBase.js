@@ -155,7 +155,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             var value = doc[attrName];
 
             var readOnly = true;
-            if(self.editMode && attrProps.readOnly) {
+            if(self.editMode && (attrProps != undefined)) {
                 if(typeof(attrProps.readOnly) == 'boolean') readOnly = attrProps.readOnly;
                 else readOnly = self.store.getValueByDotNotation2(doc, attrProps.readOnly);
             }
@@ -654,13 +654,13 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 if('action' in attrProps && 'actionType' in attrProps.action){
                     var action = attrProps.action;
                     if(action.actionType == 'add'){
-                        var newDoc = lang.clone(action.newDoc);
+                        var newDoc = lang.clone(action.template);
                         for(var attrName in newDoc){
                             if (newDoc[attrName] == '$userId') newDoc[attrName] = nq.getUser().id;
                             else if (newDoc[attrName] == '$ownerId') newDoc[attrName] = nq.getOwner().id;
                             else if (newDoc[attrName] == '$docId') newDoc[attrName] = self.docId;
                         }
-                        self.store.add(newDoc);
+                        self.store.add(newDoc, {viewId:self.schema._id});
                     }
                     else if(action.actionType == 'insertSubDocArray'){
                         var newDoc = {};
@@ -678,7 +678,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         updateDoc.stateHistory.unshift(newDoc);
                         self.store.put(updateDoc, {viewId: self.schema._id});
                     }
-                    else if(action.actionType == 'post'){
+                    else if(action.actionType == 'login'){
                         var userNameWid = null;
                         var passwordWid = null;
                         registry.findWidgets(self.pane.containerNode).forEach(function(wid){
@@ -690,6 +690,31 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             password: passwordWid.getValue()
                         };
                         request.post('login', {
+                            headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
+                            data: JSON.stringify(data)
+                        }).then(function(result){
+                            var user = dojo.fromJson(result);
+                            nq.setUser(user);
+                            //TODO refresh the data
+                            window.history.back();
+                        }, nq.errorDialog);
+                    }
+                    else if(action.actionType == 'signup'){
+                        var userNameWid = null;
+                        var passwordWid = null;
+                        var emailWid = null;
+                        registry.findWidgets(self.pane.containerNode).forEach(function(wid){
+                            if(wid.name == 'username') userNameWid = wid;
+                            if(wid.name == 'password') passwordWid = wid;
+                            if(wid.name == 'email') emailWid = wid;
+                        });
+                        var data = {
+                            _id: self.store.makeObjectId(),
+                            username: userNameWid.getValue(),
+                            password: passwordWid.getValue(),
+                            email: emailWid.getValue()
+                        };
+                        request.post('signup', {
                             headers: {'Content-Type': 'application/json; charset=UTF-8'},//This is not the default!!
                             data: JSON.stringify(data)
                         }).then(function(result){

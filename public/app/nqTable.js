@@ -87,8 +87,8 @@ define(['dojo/_base/declare',  'dojo/_base/array',  "dojo/_base/lang", "dojo/dom
                 //if(attrName == 'stateHistoryDate') debugger;
 
                 if('path' in attrProps){
-                    attrProps.get = lang.hitch(attrProps.path, function(obj){
-                        return self.store.getValueByDotNotation2(obj, this);
+                    attrProps.get = lang.hitch({path:attrProps.path}, function(obj){
+                        return self.store.getValueByDotNotation2(obj, this.path);
                     });
                 }
 

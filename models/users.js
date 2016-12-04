@@ -22,6 +22,7 @@ exports.signup = function(req){
         else if(usersArr.length > 1) throw (new Error("Duplicate user name found"));
         else {
             var newUser = {
+                _id:body._id,
                 name:body.username,
                 isActive:true,
                 password:createHash(body.password),
