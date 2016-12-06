@@ -155,7 +155,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             var value = doc[attrName];
 
             var readOnly = true;
-            if(self.editMode && (attrProps != undefined)) {
+            if(self.editMode && (attrProps.readOnly != undefined)) {
                 if(typeof(attrProps.readOnly) == 'boolean') readOnly = attrProps.readOnly;
                 else readOnly = self.store.getValueByDotNotation2(doc, attrProps.readOnly);
             }
@@ -376,9 +376,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     else {
                         var refDoc = self.store.cachingStore.getSync(value);
                         if('displayIcon' in attrProps) {
-                            var icon = self.getIconForObject(refDoc);
-                            domConstruct.create("img", {src:icon}, node);
-                            domConstruct.create("span", {style:{'padding-left':'3px', 'vertical-align': 'top'}, innerHTML:refDoc.name}, node);
+                            var iconDiv = self.getIconDivForObject(refDoc);
+                            node.appendChild(iconDiv);
                         }
                         else node.innerHTML = refDoc.name ? refDoc.name : refDoc.title;
                     }
@@ -392,9 +391,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
                     if(data.length == 1) {
                         if('displayIcon' in attrProps) {
-                            var icon = self.getIconForObject(data);
-                            domConstruct.create("img", {src:icon}, node);
-                            domConstruct.create("span", {style:{'padding-left':'3px', 'vertical-align': 'top'}, innerHTML:data[0].label}, node);
+                            var iconDiv = self.getIconDivForObject(data);
+                            node.appendChild(iconDiv);
                         }
                         else node.innerHTML = data[0].label;
                     }
@@ -516,17 +514,20 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             self.renderForm(attrProps, valueObj, node);
                         });
                     }
+                    else if(attrProps.query){
+
+                        dijitProperties.value.forEach(function(id){
+                            if('displayIcon' in attrProps) {
+                                var iconDiv = self.getIconDivForObject(id);
+                                node.appendChild(iconDiv);
+                            }
+                            else {
+                                var docObj = self.store.cachingStore.getSync(id);
+                                node.innerHTML = docObj.name;
+                            }
+                        });
+                    }
                 }
-                else if(attrProps.query){
-                    var refDoc = self.store.cachingStore.getSync(item);
-                    domConstruct.create("p", {innerHTML:refDoc.name}, td);
-                }
-                /*else if(attrProps.items && attrProps.items.properties){
-                 var props = attrProps.items.properties;
-                 //self.setFromValues(props, doc, td)
-                 var codeNode = domConstruct.create("pre", {style:{padding:'0px', border:'none',background:'transparent'}}, node);
-                 codeNode.innerHTML = JSON.stringify(value, null, 4);
-                 }*/
                 else node.innerHTML = value;
             }
             else{
@@ -753,13 +754,21 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             }));
             return dijit;
         },
-        
-        getIconForObject: function(doc){
-            if('icon' in doc) return doc.icon;
+        getIconDivForObject: function(doc){
+            var docObj = doc;
+            if(typeof doc == 'string') docObj = this.store.cachingStore.getSync(doc);
+            var icon = this.getIconForObject(docObj);
+            var div = domConstruct.create("div", {style:{'white-space': 'nowrap'}});
+            domConstruct.create("img", {src:icon}, div);
+            domConstruct.create("span", {style:{'padding-left':'3px', 'vertical-align': 'top'}, innerHTML:docObj.name}, div);
+            return div;
+        },
+        getIconForObject: function(docObj){
+            if('icon' in docObj) return docObj.icon;
             else {
-                var classDoc = this.store.cachingStore.getSync(doc.classId);
+                var classDoc = this.store.cachingStore.getSync(docObj.classId);
                 if('icon' in classDoc) return classDoc.icon;
-
+                //TODO search ancestors
             }
         },
         XsetFromValues: function(properties, doc, node){

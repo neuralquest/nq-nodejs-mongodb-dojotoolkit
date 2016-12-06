@@ -72,12 +72,7 @@
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
-                "from" : "56f87ec55dde184ccfb9fc74", 
-                "Xwhere" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
-                }
+                "from" : "56f87ec55dde184ccfb9fc74"
             }
         }, 
         "initialDocId" : {
@@ -87,9 +82,9 @@
             "query" : {
                 "from" : "573435f03c6d3cd598a5a2e1", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }
         }
@@ -108,12 +103,7 @@
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
-                "from" : "56f870a55dde184ccfb9fc6c", 
-                "Xwhere" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
-                }
+                "from" : "56f870a55dde184ccfb9fc6c"
             }
         }
     }, 
@@ -152,10 +142,6 @@
             "title" : "Tabs", 
             "description" : "", 
             "type" : "array", 
-            "editMode" : {
-                "title" : "Initially Edit Mode", 
-                "type" : "boolean"
-            }, 
             "items" : {
                 "type" : "object", 
                 "properties" : {
@@ -176,17 +162,16 @@
                         }, 
                         "default" : "<p>no text</p>"
                     }, 
+                    "editMode" : {
+                        "title" : "Initially Edit Mode", 
+                        "type" : "boolean"
+                    }, 
                     "pageId" : {
                         "title" : "Page", 
                         "type" : "string", 
                         "pattern" : "[a-f0-9]{24}", 
                         "query" : {
-                            "from" : "56f87ec55dde184ccfb9fc74", 
-                            "Xwhere" : {
-                                "eq" : {
-                                    "ownerId" : "$docId"
-                                }
-                            }
+                            "from" : "56f87ec55dde184ccfb9fc74"
                         }
                     }, 
                     "widgets" : {
@@ -229,12 +214,7 @@
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
                                     "query" : {
-                                        "from" : "573435c23c6d3cd598a5a2df", 
-                                        "Xwhere" : {
-                                            "eq" : {
-                                                "ownerId" : "$docId"
-                                            }
-                                        }
+                                        "from" : "573435c23c6d3cd598a5a2df"
                                     }
                                 }, 
                                 "pageId" : {
@@ -242,12 +222,7 @@
                                     "type" : "string", 
                                     "pattern" : "[a-f0-9]{24}", 
                                     "query" : {
-                                        "from" : "56f87ec55dde184ccfb9fc74", 
-                                        "Xwhere" : {
-                                            "eq" : {
-                                                "ownerId" : "$docId"
-                                            }
-                                        }
+                                        "from" : "56f87ec55dde184ccfb9fc74"
                                     }
                                 }
                             }, 
@@ -345,7 +320,7 @@
                     "maxLength" : NumberInt(1000), 
                     "minLength" : NumberInt(0)
                 }, 
-                "fromId" : {
+                "from" : {
                     "title" : "From", 
                     "type" : "string", 
                     "pattern" : "[a-f0-9]{24}", 
@@ -357,20 +332,203 @@
                     "title" : "Where", 
                     "type" : "object", 
                     "properties" : {
-                        "type" : "object"
-                    }
+                        "operator" : {
+                            "title" : "Operator", 
+                            "type" : "string", 
+                            "enum" : [
+                                "eq", 
+                                "in", 
+                                "and", 
+                                "or"
+                            ]
+                        }, 
+                        "docProp" : {
+                            "title" : "Document Property", 
+                            "type" : "string", 
+                            "maxLength" : NumberInt(1000), 
+                            "minLength" : NumberInt(0)
+                        }, 
+                        "value" : {
+                            "title" : "Value", 
+                            "type" : "string", 
+                            "maxLength" : NumberInt(1000), 
+                            "minLength" : NumberInt(0)
+                        }
+                    }, 
+                    "additionalProperties" : false
                 }, 
                 "recursive" : {
                     "title" : "Recursive Query Name", 
                     "type" : "string", 
                     "maxLength" : NumberInt(1000), 
                     "minLength" : NumberInt(0)
+                }, 
+                "pageId" : {
+                    "title" : "Page", 
+                    "type" : "string", 
+                    "pattern" : "[a-f0-9]{24}", 
+                    "query" : {
+                        "from" : "56f87ec55dde184ccfb9fc74"
+                    }
+                }, 
+                "icon" : {
+                    "title" : "Icon", 
+                    "type" : "string", 
+                    "maxLength" : NumberInt(2000), 
+                    "minLength" : NumberInt(0), 
+                    "media" : {
+                        "binaryEncoding" : "base64", 
+                        "type" : "image/png"
+                    }
+                }, 
+                "menu" : {
+                    "title" : "Menu", 
+                    "type" : "array", 
+                    "items" : {
+                        "type" : "object", 
+                        "properties" : {
+                            "label" : {
+                                "title" : "Label", 
+                                "type" : "string", 
+                                "maxLength" : NumberInt(1000), 
+                                "minLength" : NumberInt(0)
+                            }, 
+                            "iconClass" : {
+                                "title" : "Icon Class", 
+                                "type" : "string", 
+                                "maxLength" : NumberInt(1000), 
+                                "minLength" : NumberInt(0)
+                            }, 
+                            "action" : {
+                                "title" : "Action", 
+                                "type" : "string", 
+                                "enum" : [
+                                    "add", 
+                                    "delete", 
+                                    "login", 
+                                    "signup"
+                                ]
+                            }
+                        }
+                    }
                 }
-            }
+            }, 
+            "additionalProperties" : false
         }, 
         "query" : {
             "title" : "Query", 
-            "type" : "array"
+            "type" : "array", 
+            "items" : {
+                "type" : "object", 
+                "properties" : {
+                    "queryName" : {
+                        "title" : "Query Name", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(1000), 
+                        "minLength" : NumberInt(0)
+                    }, 
+                    "from" : {
+                        "title" : "From", 
+                        "type" : "string", 
+                        "pattern" : "[a-f0-9]{24}", 
+                        "query" : {
+                            "from" : "classes"
+                        }
+                    }, 
+                    "where" : {
+                        "title" : "Where", 
+                        "type" : "object", 
+                        "properties" : {
+                            "operator" : {
+                                "title" : "Operator", 
+                                "type" : "string", 
+                                "enum" : [
+                                    "eq", 
+                                    "in", 
+                                    "and", 
+                                    "or"
+                                ]
+                            }, 
+                            "docProp" : {
+                                "title" : "Document Property", 
+                                "type" : "string", 
+                                "maxLength" : NumberInt(1000), 
+                                "minLength" : NumberInt(0)
+                            }, 
+                            "value" : {
+                                "title" : "Value", 
+                                "type" : "string", 
+                                "maxLength" : NumberInt(1000), 
+                                "minLength" : NumberInt(0)
+                            }
+                        }, 
+                        "additionalProperties" : false
+                    }, 
+                    "recursive" : {
+                        "title" : "Recursive Query Name", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(1000), 
+                        "minLength" : NumberInt(0)
+                    }, 
+                    "pageId" : {
+                        "title" : "Page", 
+                        "type" : "string", 
+                        "pattern" : "[a-f0-9]{24}", 
+                        "query" : {
+                            "from" : "56f87ec55dde184ccfb9fc74"
+                        }
+                    }, 
+                    "icon" : {
+                        "title" : "Icon", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(2000), 
+                        "minLength" : NumberInt(0), 
+                        "media" : {
+                            "binaryEncoding" : "base64", 
+                            "type" : "image/png"
+                        }
+                    }, 
+                    "menu" : {
+                        "title" : "Menu", 
+                        "type" : "array", 
+                        "items" : {
+                            "type" : "object", 
+                            "properties" : {
+                                "label" : {
+                                    "title" : "Label", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "minLength" : NumberInt(0)
+                                }, 
+                                "iconClass" : {
+                                    "title" : "Icon Class", 
+                                    "type" : "string", 
+                                    "maxLength" : NumberInt(1000), 
+                                    "minLength" : NumberInt(0)
+                                }, 
+                                "action" : {
+                                    "title" : "Action", 
+                                    "type" : "string", 
+                                    "enum" : [
+                                        "add", 
+                                        "delete", 
+                                        "login", 
+                                        "signup"
+                                    ]
+                                }
+                            }, 
+                            "additionalProperties" : false
+                        }
+                    }, 
+                    "join" : {
+                        "type" : "object", 
+                        "properties" : {
+
+                        }
+                    }
+                }, 
+                "additionalProperties" : false
+            }
         }, 
         "required" : {
             "title" : "Required", 
@@ -397,9 +555,9 @@
             "query" : {
                 "from" : "573435c23c6d3cd598a5a2df", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }
         }, 
@@ -461,9 +619,9 @@
             "query" : {
                 "from" : "573435f03c6d3cd598a5a2e1", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "minItems" : NumberInt(0), 
@@ -563,9 +721,9 @@
             "query" : {
                 "from" : "574234113c6d3cd598a5a30b", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$self.sellerId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$self.sellerId"
                 }
             }
         }, 
@@ -576,9 +734,9 @@
             "query" : {
                 "from" : "56f87bcc5dde184ccfb9fc70", 
                 "where" : {
-                    "in" : {
-                        "_id" : "$self.offeringId"
-                    }
+                    "operator" : "in", 
+                    "docProp" : "_id", 
+                    "value" : "$self.offeringId"
                 }
             }
         }, 
@@ -601,9 +759,9 @@
                         "query" : {
                             "from" : "5745eaa53c6d3cd598a5a371", 
                             "where" : {
-                                "in" : {
-                                    "_id" : "$get($self.stateHistory.1.stateId).$self.nextStateIds"
-                                }
+                                "operator" : "in", 
+                                "docProp" : "_id", 
+                                "value" : "$get($self.stateHistory.1.stateId).$self.nextStateIds"
                             }
                         }, 
                         "readOnly" : "$self.date=='$now'?false:true"
@@ -677,9 +835,9 @@
             "query" : {
                 "from" : "5747254b3c6d3cd598a5a379", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }
         }, 
@@ -703,9 +861,9 @@
             "query" : {
                 "from" : "57343b823c6d3cd598a5a2e3", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "minItems" : NumberInt(0), 
@@ -727,12 +885,7 @@
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
-                "from" : "56f87ec55dde184ccfb9fc74", 
-                "Xwhere" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
-                }
+                "from" : "56f87ec55dde184ccfb9fc74"
             }
         }, 
         "parentOrgId" : {
@@ -740,12 +893,7 @@
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
-                "from" : "57343c283c6d3cd598a5a2e9", 
-                "Xwhere" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
-                }
+                "from" : "57343c283c6d3cd598a5a2e9"
             }
         }, 
         "responsibleStates" : {
@@ -756,12 +904,7 @@
                 "pattern" : "[a-f0-9]{24}"
             }, 
             "query" : {
-                "from" : "5745eaa53c6d3cd598a5a371", 
-                "Xwhere" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
-                }
+                "from" : "5745eaa53c6d3cd598a5a371"
             }, 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
@@ -1094,12 +1237,7 @@
                 "pattern" : "[a-f0-9]{24}"
             }, 
             "query" : {
-                "from" : "5745eaa53c6d3cd598a5a371", 
-                "Xwhere" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
-                }
+                "from" : "5745eaa53c6d3cd598a5a371"
             }, 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
@@ -1272,9 +1410,9 @@
                 "select" : "value", 
                 "from" : "574256343c6d3cd598a5a329", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1292,9 +1430,9 @@
                 "select" : "value", 
                 "from" : "574256373c6d3cd598a5a32b", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1312,9 +1450,9 @@
                 "select" : "value", 
                 "from" : "5742563a3c6d3cd598a5a32d", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1332,9 +1470,9 @@
                 "select" : "value", 
                 "from" : "5742563e3c6d3cd598a5a32f", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1352,9 +1490,9 @@
                 "select" : "value", 
                 "from" : "574256413c6d3cd598a5a331", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1372,9 +1510,9 @@
                 "select" : "value", 
                 "from" : "574256453c6d3cd598a5a333", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1392,9 +1530,9 @@
                 "select" : "value", 
                 "from" : "5742561f3c6d3cd598a5a327", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "labelStyle" : {
@@ -1419,9 +1557,9 @@
                 "select" : "value", 
                 "from" : "574256493c6d3cd598a5a335", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "labelStyle" : {
@@ -1455,9 +1593,9 @@
                 "select" : "value", 
                 "from" : "5742564f3c6d3cd598a5a339", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1475,9 +1613,9 @@
                 "select" : "value", 
                 "from" : "574256573c6d3cd598a5a33d", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1495,9 +1633,9 @@
                 "select" : "value", 
                 "from" : "5742565b3c6d3cd598a5a33f", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1515,9 +1653,9 @@
                 "select" : "value", 
                 "from" : "5742565e3c6d3cd598a5a341", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1535,9 +1673,9 @@
                 "select" : "value", 
                 "from" : "574256613c6d3cd598a5a343", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1556,9 +1694,9 @@
                 "select" : "value", 
                 "from" : "5742564c3c6d3cd598a5a337", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "labelStyle" : {
@@ -1592,9 +1730,9 @@
                 "select" : "value", 
                 "from" : "5742566a3c6d3cd598a5a349", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1612,9 +1750,9 @@
                 "select" : "value", 
                 "from" : "574256713c6d3cd598a5a34d", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1632,9 +1770,9 @@
                 "select" : "value", 
                 "from" : "574256643c6d3cd598a5a345", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "labelStyle" : {
@@ -1659,9 +1797,9 @@
                 "select" : "value", 
                 "from" : "57343b823c6d3cd598a5a2e3", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "labelStyle" : {
@@ -1708,9 +1846,9 @@
                 "select" : "value", 
                 "from" : "574256773c6d3cd598a5a351", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1728,9 +1866,9 @@
                 "select" : "value", 
                 "from" : "5742567a3c6d3cd598a5a353", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1748,9 +1886,9 @@
                 "select" : "value", 
                 "from" : "5742567d3c6d3cd598a5a355", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1768,9 +1906,9 @@
                 "select" : "value", 
                 "from" : "574256833c6d3cd598a5a359", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1788,9 +1926,9 @@
                 "select" : "value", 
                 "from" : "574256863c6d3cd598a5a35b", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1808,9 +1946,9 @@
                 "select" : "value", 
                 "from" : "574256893c6d3cd598a5a35d", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1828,9 +1966,9 @@
                 "select" : "value", 
                 "from" : "5742568e3c6d3cd598a5a35f", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1849,9 +1987,9 @@
                 "select" : "value", 
                 "from" : "574256743c6d3cd598a5a34f", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "labelStyle" : {
@@ -1885,9 +2023,9 @@
                 "select" : "value", 
                 "from" : "574261583c6d3cd598a5a363", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1905,9 +2043,9 @@
                 "select" : "value", 
                 "from" : "574261633c6d3cd598a5a365", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -1925,9 +2063,9 @@
                 "select" : "value", 
                 "from" : "574256923c6d3cd598a5a361", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "labelStyle" : {
@@ -1952,9 +2090,9 @@
                 "select" : "value", 
                 "from" : "574256743c6d3cd598a5a34f", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "labelStyle" : {
@@ -1989,9 +2127,9 @@
                 "select" : "value", 
                 "from" : "574261743c6d3cd598a5a369", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -2009,9 +2147,9 @@
                 "select" : "value", 
                 "from" : "574261793c6d3cd598a5a36b", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -2029,9 +2167,9 @@
                 "select" : "value", 
                 "from" : "5742617f3c6d3cd598a5a36d", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -2049,9 +2187,9 @@
                 "select" : "value", 
                 "from" : "574261843c6d3cd598a5a36f", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "style" : {
@@ -2069,9 +2207,9 @@
                 "select" : "value", 
                 "from" : "5742616e3c6d3cd598a5a367", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "labelStyle" : {
@@ -2096,9 +2234,9 @@
                 "select" : "value", 
                 "from" : "57343bba3c6d3cd598a5a2e5", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }, 
             "labelStyle" : {
@@ -2129,9 +2267,9 @@
         "from" : "573435f03c6d3cd598a5a2e1", 
         "pageId" : "575d4c3f2cf3d6dc3ed83154", 
         "where" : {
-            "eq" : {
-                "_id" : "$parent.initialDocId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$parent.initialDocId"
         }, 
         "recursive" : "schemaQuery", 
         "menu" : [
@@ -2154,9 +2292,9 @@
             "from" : "573435f03c6d3cd598a5a2e1", 
             "pageId" : "575d4c3f2cf3d6dc3ed83154", 
             "where" : {
-                "in" : {
-                    "_id" : "$parent.childDocs"
-                }
+                "operator" : "in", 
+                "docProp" : "_id", 
+                "value" : "$parent.childDocs"
             }, 
             "recursive" : "paragraphs", 
             "menu" : [
@@ -2202,9 +2340,9 @@
         "from" : "classes", 
         "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
         "where" : {
-            "eq" : {
-                "_id" : "56f86c6a5dde184ccfb9fc6a"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "56f86c6a5dde184ccfb9fc6a"
         }, 
         "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABTSURBVDhPYxjm4D/Dnf8gDOUSD2AaNzH8B2OiDULXiI5xGkRIIzpGMYgUjegYxRBSDIKpB2tGBoQMwqkRHaAbRLRGdEC2RvoCkA8pwVgFicf/GQD/KjucAgshDwAAAABJRU5ErkJggg==", 
         "recursive" : "schemaQuery"
@@ -2216,9 +2354,9 @@
             "from" : "classes", 
             "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
             "where" : {
-                "eq" : {
-                    "parentId" : "$parent._id"
-                }
+                "operator" : "eq", 
+                "docProp" : "parentId", 
+                "value" : "$parent._id"
             }, 
             "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABTSURBVDhPYxjm4D/Dnf8gDOUSD2AaNzH8B2OiDULXiI5xGkRIIzpGMYgUjegYxRBSDIKpB2tGBoQMwqkRHaAbRLRGdEC2RvoCkA8pwVgFicf/GQD/KjucAgshDwAAAABJRU5ErkJggg==", 
             "recursive" : "schemaQuery"
@@ -2229,9 +2367,9 @@
             "from" : "56f86c6a5dde184ccfb9fc6a", 
             "pageId" : "575d4c3f2cf3d6dc3ed8314c", 
             "where" : {
-                "eq" : {
-                    "classId" : "$parent._id"
-                }
+                "operator" : "eq", 
+                "docProp" : "classId", 
+                "value" : "$parent._id"
             }, 
             "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAABvSURBVDhPY/j//z9FeNiD/4pAjwIxyQCq0ecYAxgTbxCaRnSM2yACGtExqkEkaETHEEOGgQGDAgBzVTYQewKxGhBLALEIEDMBMSMSBvFVgVgXiEuBOBmmnQmImYGYEQmzQzEHFMPkQepBGMr+zwUAa2Uzpn+czq8AAAAASUVORK5CYII="
         }
@@ -2344,9 +2482,9 @@
         "select" : "title", 
         "from" : "classes", 
         "where" : {
-            "eq" : {
-                "_id" : "56f870a55dde184ccfb9fc6c"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "56f870a55dde184ccfb9fc6c"
         }, 
         "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAADxSURBVDhPY/j//z9FmLrgzEyT/yB8eobx/5PTDP+fmGpAvBUgjahgFxgf6tcibAhI8+3thUAchAUX/t/bpfp/V7vS/+0t8v+3Nsn+39wo/X9DnQTCYJCTSQVrqkQQBoD8+///TCCeQySe+X95KT/CgONT9MGCpODFhdwIA45O0oVI/JhMHAaqXZDHgTAAFNJgA953EoeBauflsCEMONCrATHgST1xGKh2ThYLwgBQNIENuF1KHAaqnZXBhDAAFMdgA67kE4eBamemMyIMAAHkBLKuRuz/6krh/yvKBP4vLeYFhzgo0ED+BjkdQ/MAAgYGAKPFDB0e1bt2AAAAAElFTkSuQmCC", 
         "recursive" : "schemaQuery"
@@ -2357,9 +2495,9 @@
             "select" : "title", 
             "from" : "classes", 
             "where" : {
-                "eq" : {
-                    "parentId" : "$parent._id"
-                }
+                "operator" : "eq", 
+                "docProp" : "parentId", 
+                "value" : "$parent._id"
             }, 
             "icon" : "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAADxSURBVDhPY/j//z9FmLrgzEyT/yB8eobx/5PTDP+fmGpAvBUgjahgFxgf6tcibAhI8+3thUAchAUX/t/bpfp/V7vS/+0t8v+3Nsn+39wo/X9DnQTCYJCTSQVrqkQQBoD8+///TCCeQySe+X95KT/CgONT9MGCpODFhdwIA45O0oVI/JhMHAaqXZDHgTAAFNJgA953EoeBauflsCEMONCrATHgST1xGKh2ThYLwgBQNIENuF1KHAaqnZXBhDAAFMdgA67kE4eBamemMyIMAAHkBLKuRuz/6krh/yvKBP4vLeYFhzgo0ED+BjkdQ/MAAgYGAKPFDB0e1bt2AAAAAElFTkSuQmCC", 
             "recursive" : "schemaQuery"
@@ -2369,18 +2507,18 @@
             "select" : "name", 
             "from" : "56f870a55dde184ccfb9fc6c", 
             "where" : {
-                "eq" : {
-                    "classId" : "$parent._id"
-                }
+                "operator" : "eq", 
+                "docProp" : "classId", 
+                "value" : "$parent._id"
             }, 
             "join" : {
                 "queryName" : "organizatinalUnits", 
                 "select" : "name", 
                 "from" : "574237133c6d3cd598a5a30d", 
                 "where" : {
-                    "eq" : {
-                        "parentOrgId" : "$parent._id"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "parentOrgId", 
+                    "value" : "$parent._id"
                 }, 
                 "recursive" : "organizatinalUnits"
             }
@@ -2552,9 +2690,9 @@
     "rootQuery" : {
         "from" : "573435f03c6d3cd598a5a2e1", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -2762,9 +2900,9 @@
             "select" : "name", 
             "from" : "574225cb3c6d3cd598a5a305", 
             "where" : {
-                "eq" : {
-                    "sellerId" : "$docId"
-                }
+                "operator" : "eq", 
+                "docProp" : "sellerId", 
+                "value" : "$docId"
             }, 
             "menu" : [
                 {
@@ -2916,9 +3054,9 @@
     "rootQuery" : {
         "from" : "574225cb3c6d3cd598a5a305", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -3020,9 +3158,9 @@
     "rootQuery" : {
         "from" : "57343c283c6d3cd598a5a2e9", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -3159,9 +3297,9 @@
             "from" : "5742563e3c6d3cd598a5a32f", 
             "pageId" : "57979cdc3c6d3cd598a5a3b9", 
             "where" : {
-                "eq" : {
-                    "ownerId" : "$docId"
-                }
+                "operator" : "eq", 
+                "docProp" : "ownerId", 
+                "value" : "$docId"
             }
         }
     ], 
@@ -3210,9 +3348,9 @@
     "rootQuery" : {
         "from" : "5742563e3c6d3cd598a5a32f", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -3363,9 +3501,9 @@
         "select" : "name", 
         "from" : "56f870a55dde184ccfb9fc6c", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }, 
         "recursive" : "schemaQuery"
     }, 
@@ -3376,9 +3514,9 @@
             "from" : "56f87ec55dde184ccfb9fc74", 
             "pageId" : "57a677652d8cd20920e6d817", 
             "where" : {
-                "eq" : {
-                    "ownerId" : "$parent._id"
-                }
+                "operator" : "eq", 
+                "docProp" : "ownerId", 
+                "value" : "$parent._id"
             }, 
             "join" : {
                 "queryName" : "tabs", 
@@ -3399,9 +3537,9 @@
                             "from" : "573435c23c6d3cd598a5a2df", 
                             "pageId" : "57a678162d8cd20920e6d819", 
                             "where" : {
-                                "eq" : {
-                                    "_id" : "$parent.viewId"
-                                }
+                                "operator" : "eq", 
+                                "docProp" : "_id", 
+                                "value" : "$parent.viewId"
                             }
                         }
                     }, 
@@ -3411,9 +3549,9 @@
                         "from" : "56f87ec55dde184ccfb9fc74", 
                         "pageId" : "57a677652d8cd20920e6d817", 
                         "where" : {
-                            "eq" : {
-                                "_id" : "$parent.pageId"
-                            }
+                            "operator" : "eq", 
+                            "docProp" : "_id", 
+                            "value" : "$parent.pageId"
                         }, 
                         "recursive" : "tabs"
                     }
@@ -3439,9 +3577,9 @@
         "select" : "name", 
         "from" : "56f870a55dde184ccfb9fc6c", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }, 
         "recursive" : "schemaQuery"
     }, 
@@ -3452,9 +3590,9 @@
             "from" : "573435c23c6d3cd598a5a2df", 
             "pageId" : "57a678162d8cd20920e6d819", 
             "where" : {
-                "eq" : {
-                    "ownerId" : "$parent._id"
-                }
+                "operator" : "eq", 
+                "docProp" : "ownerId", 
+                "value" : "$parent._id"
             }
         }
     ], 
@@ -3474,9 +3612,9 @@
     "rootQuery" : {
         "from" : "56f87ec55dde184ccfb9fc74", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -3506,6 +3644,9 @@
             "items" : {
                 "properties" : {
                     "name" : {
+                        "readOnly" : false
+                    }, 
+                    "editMode" : {
                         "readOnly" : false
                     }, 
                     "pageId" : {
@@ -3545,9 +3686,9 @@
     "rootQuery" : {
         "from" : "573435c23c6d3cd598a5a2df", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -3570,10 +3711,103 @@
 
         }, 
         "rootQuery" : {
-            "readOnly" : false
+            "properties" : {
+                "queryName" : {
+                    "readOnly" : false
+                }, 
+                "from" : {
+                    "readOnly" : false
+                }, 
+                "where" : {
+                    "properties" : {
+                        "operator" : {
+                            "readOnly" : false
+                        }, 
+                        "docProp" : {
+                            "readOnly" : false
+                        }, 
+                        "value" : {
+                            "readOnly" : false
+                        }
+                    }
+                }, 
+                "recursive" : {
+                    "readOnly" : false
+                }, 
+                "icon" : {
+                    "readOnly" : false
+                }, 
+                "pageId" : {
+                    "readOnly" : false
+                }, 
+                "menu" : {
+                    "items" : {
+                        "properties" : {
+                            "label" : {
+                                "readOnly" : false
+                            }, 
+                            "iconClass" : {
+                                "readOnly" : false
+                            }, 
+                            "action" : {
+                                "readOnly" : false
+                            }
+                        }
+                    }
+                }
+            }
         }, 
         "query" : {
-            "readOnly" : false
+            "items" : {
+                "properties" : {
+                    "queryName" : {
+                        "readOnly" : false
+                    }, 
+                    "from" : {
+                        "readOnly" : false
+                    }, 
+                    "where" : {
+                        "properties" : {
+                            "operator" : {
+                                "readOnly" : false
+                            }, 
+                            "docProp" : {
+                                "readOnly" : false
+                            }, 
+                            "value" : {
+                                "readOnly" : false
+                            }
+                        }
+                    }, 
+                    "recursive" : {
+                        "readOnly" : false
+                    }, 
+                    "icon" : {
+                        "readOnly" : false
+                    }, 
+                    "pageId" : {
+                        "readOnly" : false
+                    }, 
+                    "menu" : {
+                        "items" : {
+                            "properties" : {
+                                "label" : {
+                                    "readOnly" : false
+                                }, 
+                                "iconClass" : {
+                                    "readOnly" : false
+                                }, 
+                                "action" : {
+                                    "readOnly" : false
+                                }
+                            }
+                        }
+                    }, 
+                    "join" : {
+
+                    }
+                }
+            }
         }, 
         "properties" : {
             "readOnly" : false
@@ -3590,6 +3824,9 @@
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "responsibleStates" : [
+        "57790e503c6d3cd598a5a3a0"
+    ], 
     "classId" : "574237133c6d3cd598a5a30d"
 }
 { 
@@ -3600,6 +3837,9 @@
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed8315b", 
+    "responsibleStates" : [
+        "57b715662d8cd20920e6d829"
+    ], 
     "classId" : "574237133c6d3cd598a5a30d"
 }
 { 
@@ -3625,7 +3865,14 @@
         }, 
         {
             "name" : "Service Requests", 
-            "pageId" : "577853123c6d3cd598a5a396"
+            "widgets" : [
+                {
+                    "displayType" : "Table", 
+                    "name" : "Backlog Table", 
+                    "viewId" : "5844b6f580c94ccf01838ba6", 
+                    "pageId" : "57785c393c6d3cd598a5a398"
+                }
+            ]
         }, 
         {
             "name" : "Organization", 
@@ -3672,9 +3919,9 @@
         "select" : "name", 
         "from" : "56f870a55dde184ccfb9fc6c", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }, 
         "recursive" : "schemaQuery"
     }, 
@@ -3685,9 +3932,9 @@
             "from" : "574237133c6d3cd598a5a30d", 
             "pageId" : "57b72a022d8cd20920e6d837", 
             "where" : {
-                "eq" : {
-                    "parentOrgId" : "$parent._id"
-                }
+                "operator" : "eq", 
+                "docProp" : "parentOrgId", 
+                "value" : "$parent._id"
             }, 
             "recursive" : "orgUnit"
         }
@@ -3710,9 +3957,9 @@
         "select" : "name", 
         "from" : "56f870a55dde184ccfb9fc6c", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }, 
         "recursive" : "schema"
     }, 
@@ -3723,9 +3970,9 @@
             "from" : "5745eaa53c6d3cd598a5a371", 
             "pageId" : "57b72a3c2d8cd20920e6d839", 
             "where" : {
-                "eq" : {
-                    "ownerId" : "$parent._id"
-                }
+                "operator" : "eq", 
+                "docProp" : "ownerId", 
+                "value" : "$parent._id"
             }, 
             "join" : {
                 "queryName" : "state", 
@@ -3834,9 +4081,9 @@
     "rootQuery" : {
         "from" : "574234113c6d3cd598a5a30b", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -3879,9 +4126,9 @@
     "rootQuery" : {
         "from" : "574237133c6d3cd598a5a30d", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -3892,7 +4139,7 @@
 
         }, 
         "ownerId" : {
-
+            "displayIcon" : true
         }, 
         "name" : {
             "readOnly" : false
@@ -3904,7 +4151,8 @@
             "readOnly" : false
         }, 
         "responsibleStates" : {
-            "readOnly" : false
+            "readOnly" : false, 
+            "displayIcon" : true
         }, 
         "description" : {
             "readOnly" : false, 
@@ -3922,9 +4170,9 @@
     "rootQuery" : {
         "from" : "5745eaa53c6d3cd598a5a371", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -3954,12 +4202,7 @@
                 "pattern" : "[a-f0-9]{24}"
             }, 
             "query" : {
-                "from" : "573435f03c6d3cd598a5a2e1", 
-                "Xwhere" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
-                }
+                "from" : "573435f03c6d3cd598a5a2e1"
             }, 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
@@ -4085,9 +4328,9 @@
     "rootQuery" : {
         "from" : "5745eaa53c6d3cd598a5a371", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -4111,9 +4354,9 @@
         "select" : "name", 
         "from" : "56f870a55dde184ccfb9fc6c", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }, 
         "recursive" : "schema"
     }, 
@@ -4124,9 +4367,9 @@
             "from" : "574234113c6d3cd598a5a30b", 
             "pageId" : "57b729d52d8cd20920e6d835", 
             "where" : {
-                "eq" : {
-                    "ownerId" : "$parent._id"
-                }
+                "operator" : "eq", 
+                "docProp" : "ownerId", 
+                "value" : "$parent._id"
             }, 
             "join" : {
                 "queryName" : "initaialState", 
@@ -4134,9 +4377,9 @@
                 "from" : "5745eaa53c6d3cd598a5a371", 
                 "pageId" : "57b72a3c2d8cd20920e6d839", 
                 "where" : {
-                    "eq" : {
-                        "_id" : "$parent.initialStateId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "_id", 
+                    "value" : "$parent.initialStateId"
                 }, 
                 "join" : {
                     "queryName" : "nextStates", 
@@ -4144,9 +4387,9 @@
                     "from" : "5745eaa53c6d3cd598a5a371", 
                     "pageId" : "57b72a3c2d8cd20920e6d839", 
                     "where" : {
-                        "in" : {
-                            "_id" : "$parent.nextStateIds"
-                        }
+                        "operator" : "in", 
+                        "docProp" : "_id", 
+                        "value" : "$parent.nextStateIds"
                     }, 
                     "recursive" : "nextStates"
                 }
@@ -4174,9 +4417,9 @@
             "select" : "name", 
             "from" : "574225cb3c6d3cd598a5a305", 
             "where" : {
-                "eq" : {
-                    "memberId" : "$docId"
-                }
+                "operator" : "eq", 
+                "docProp" : "memberId", 
+                "value" : "$docId"
             }
         }
     ], 
@@ -4207,9 +4450,9 @@
     "rootQuery" : {
         "from" : "56f87ec55dde184ccfb9fc74", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -4231,9 +4474,9 @@
     "rootQuery" : {
         "from" : "56f87ec55dde184ccfb9fc74", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -4430,9 +4673,9 @@
                 "select" : "value", 
                 "from" : "574256343c6d3cd598a5a329", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }
         }, 
@@ -4447,9 +4690,9 @@
                 "select" : "value", 
                 "from" : "574256493c6d3cd598a5a335", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }
         }, 
@@ -4464,9 +4707,9 @@
                 "select" : "value", 
                 "from" : "5742565b3c6d3cd598a5a33f", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }
         }, 
@@ -4491,9 +4734,9 @@
                 "select" : "value", 
                 "from" : "57343b823c6d3cd598a5a2e3", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }
         }, 
@@ -4558,9 +4801,9 @@
                 "select" : "value", 
                 "from" : "574256743c6d3cd598a5a34f", 
                 "where" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
+                    "operator" : "eq", 
+                    "docProp" : "ownerId", 
+                    "value" : "$docId"
                 }
             }
         }
@@ -4717,9 +4960,9 @@
         "select" : "name", 
         "from" : "56f870a55dde184ccfb9fc6c", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }, 
         "recursive" : "schemaQuery"
     }, 
@@ -4727,13 +4970,8 @@
         {
             "queryName" : "media", 
             "select" : "name", 
-            "Xfrom" : "573435c23c6d3cd598a5a2df", 
-            "pageId" : "57a678162d8cd20920e6d819", 
-            "Xwhere" : {
-                "eq" : {
-                    "ownerId" : "$parent._id"
-                }
-            }
+            "from" : "573435c23c6d3cd598a5a2df", 
+            "pageId" : "57a678162d8cd20920e6d819"
         }
     ], 
     "properties" : {
@@ -4894,9 +5132,9 @@
     "rootQuery" : {
         "from" : "classes", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }
     }, 
     "properties" : {
@@ -4924,12 +5162,7 @@
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
-                "from" : "classes", 
-                "Xwhere" : {
-                    "eq" : {
-                        "ownerId" : "$docId"
-                    }
-                }
+                "from" : "classes"
             }
         }, 
         "icon" : {
@@ -4978,9 +5211,9 @@
         "from" : "573435f03c6d3cd598a5a2e1", 
         "pageId" : "575d4c3f2cf3d6dc3ed83154", 
         "where" : {
-            "eq" : {
-                "_id" : "$docId"
-            }
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
         }, 
         "recursive" : "schemaQuery"
     }, 
@@ -4991,9 +5224,9 @@
             "from" : "573435f03c6d3cd598a5a2e1", 
             "pageId" : "575d4c3f2cf3d6dc3ed83154", 
             "where" : {
-                "in" : {
-                    "_id" : "$parent.childDocs"
-                }
+                "operator" : "in", 
+                "docProp" : "_id", 
+                "value" : "$parent.childDocs"
             }, 
             "recursive" : "paragraphs"
         }
@@ -5025,9 +5258,9 @@
             "select" : "name", 
             "from" : "574225cb3c6d3cd598a5a305", 
             "where" : {
-                "eq" : {
-                    "buyerId" : "$docId"
-                }
+                "operator" : "eq", 
+                "docProp" : "buyerId", 
+                "value" : "$docId"
             }, 
             "menu" : [
                 {
@@ -5100,6 +5333,7 @@
     "password" : "$2a$10$2Wqx6HoNhxD7eTqck.oV8eeE3Vuzjg9iZt3iCJdwueBorOqGGM1PG", 
     "email" : "u@u.com", 
     "docType" : "object", 
+    "pageId" : "58320fff425310133a49f10f", 
     "classId" : "57343beb3c6d3cd598a5a2e7"
 }
 { 
@@ -5109,6 +5343,7 @@
     "password" : "$2a$10$pSbeb7qPuqUn.1wHeprOhOSxCo2f5mc7D8BcSKXGvRR/0KA84lfOm", 
     "email" : "u@u.com", 
     "docType" : "object", 
+    "pageId" : "58320fff425310133a49f10f", 
     "classId" : "57343beb3c6d3cd598a5a2e7"
 }
 { 
@@ -5144,4 +5379,83 @@
         }
     ], 
     "classId" : "574232a53c6d3cd598a5a307"
+}
+{ 
+    "_id" : ObjectId("5844b6f580c94ccf01838ba6"), 
+    "docType" : "object", 
+    "name" : "OrgUnit Service Request Recieved Table View", 
+    "query" : [
+        {
+            "queryName" : "seviceRequests", 
+            "select" : "name", 
+            "from" : "574225cb3c6d3cd598a5a305", 
+            "newWhere" : {
+                "operator" : "in", 
+                "docProp" : "stateHistory.0.stateId", 
+                "value" : "$self.responsibleStates"
+            }, 
+            "path" : "$self.stateHistory.0", 
+            "where" : {
+                "operator" : "in", 
+                "docProp" : "stateHistory.0.stateId", 
+                "value" : "$self.responsibleStates"
+            }, 
+            "menu" : [
+                {
+                    "label" : "Filter", 
+                    "iconClass" : "filterIcon", 
+                    "menu" : [
+                        {
+                            "label" : "By State", 
+                            "iconClass" : "filterIcon", 
+                            "action" : "filter", 
+                            "Xmenu" : [
+                                {
+                                    "label" : "Open", 
+                                    "iconClass" : "filterIcon", 
+                                    "action" : "filter"
+                                }, 
+                                {
+                                    "label" : "Closed", 
+                                    "iconClass" : "filterIcon", 
+                                    "action" : "filter"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ], 
+    "type" : "object", 
+    "properties" : {
+        "buyerId" : {
+            "title" : "From", 
+            "readOnly" : true, 
+            "styleColumn" : "width : 10em", 
+            "displayIcon" : true
+        }, 
+        "stateHistoryDate" : {
+            "title" : "Date", 
+            "readOnly" : true, 
+            "type" : "string", 
+            "format" : "date-time", 
+            "styleColumn" : "width : 6em", 
+            "path" : "$self.stateHistory.0.date"
+        }, 
+        "stateHistoryState" : {
+            "readOnly" : true, 
+            "title" : "State", 
+            "type" : "string", 
+            "path" : "$self.stateHistory.0.stateId", 
+            "styleColumn" : "width : 6em", 
+            "displayIcon" : true
+        }, 
+        "name" : {
+            "title" : "Subject", 
+            "readOnly" : true
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
 }

@@ -91,25 +91,6 @@ define(['dojo/_base/declare',  'dojo/_base/array',  "dojo/_base/lang", "dojo/dom
                         return self.store.getValueByDotNotation2(obj, this.path);
                     });
                 }
-
-                /*if(attrProps.subDoc){
-                    attrProps.get = lang.hitch(attrProps, function(item){
-                        var subDoc = this.subDoc;
-                        var prop = this.prop;
-                        var subArr = item[subDoc];
-                        if(subArr) {
-                            var subObj = subArr[0];
-                            return subObj[prop];
-                        }
-                        return null;
-                    });
-                }
-                else if(attrProps.prop){
-                    attrProps.get = lang.hitch(attrProps, function(item){
-                        var prop = this.prop;
-                        return item[prop];
-                    });
-                }*/
                 if(attrProps.enum){
                     attrProps.renderCell = function(object, value, node, options){
                         if(!value) html.set(node, '[not selected]');
@@ -182,10 +163,8 @@ define(['dojo/_base/declare',  'dojo/_base/array',  "dojo/_base/lang", "dojo/dom
                             else{
                                 var refDoc = self.store.cachingStore.getSync(value);
                                 if('displayIcon' in this) {
-                                    var icon = self.getIconForObject(refDoc);
-                                    var div = domConstruct.create("div", {style:{'white-space': 'nowrap'}},  node);
-                                    domConstruct.create("img", {src:icon}, div);
-                                    domConstruct.create("span", {style:{'padding-left':'3px', 'vertical-align': 'top'}, innerHTML:refDoc.name}, div);
+                                    var iconDiv = self.getIconDivForObject(refDoc);
+                                    node.appendChild(iconDiv);
                                 }
                                 else html.set(node, refDoc.name);
                             }
@@ -197,11 +176,8 @@ define(['dojo/_base/declare',  'dojo/_base/array',  "dojo/_base/lang", "dojo/dom
                         attrProps.renderCell = function (object, value, node, options) {
                             if (!value) html.set(node, '[null]');
                             else {
-                                var refDoc = self.store.cachingStore.getSync(value);
-                                var icon = self.getIconForObject(refDoc);
-                                var div = domConstruct.create("div", {style:{'white-space': 'nowrap'}},  node);
-                                domConstruct.create("img", {src:icon}, div);
-                                domConstruct.create("span", {style:{'padding-left':'3px', 'vertical-align': 'top'}, innerHTML:refDoc.name}, div);
+                                var iconDiv = self.getIconDivForObject(value);
+                                node.appendChild(iconDiv);
                             }
                         };
                     }

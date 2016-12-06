@@ -42,11 +42,11 @@ exports.insert = function(doc) {
 exports.update = function(doc, unset) {
     var collection = db.get().collection('documents');
     var deferred = new Deferred();
-    //var id = doc._id;
-    var id = ObjectID.createFromHexString(doc._id);
+    var id = doc._id;
+    if(typeof(doc._id) == 'string') id = ObjectID.createFromHexString(doc._id);
     delete doc._id;
     var updateObj = {};
-    if(unset) updateObj = {$set:doc, $unset: unset};
+    if(unset) updateObj = {$unset: unset};
     else updateObj = {$set:doc};
     collection.update({_id: id}, updateObj,
         function(err, value) {

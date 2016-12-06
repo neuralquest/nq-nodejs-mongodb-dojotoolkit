@@ -7,7 +7,7 @@ var ObjectID = require('mongodb').ObjectID;
 
 function check(){
     var checkPromises = [];
-    //heckPromises.push(cleanup());
+    //checkPromises.push(cleanup());
     checkPromises.push(findOrphans());
     checkPromises.push(validateObjects());
     return all(checkPromises).then(function(checkArr){
@@ -73,17 +73,101 @@ function validateObjects(){
     });
 }
 /**/
-function cleanup(){
+function cleanup2() {
+    return Documents.find({}).then(function (objectsArr) {
+        objectsArr.forEach(function (objDoc) {
+            if(objDoc.properties){
+                for(var key in objDoc.properties){
+                    var prop = objDoc.properties[key];
+                    if (prop.query && prop.query.Xwhere) {
 
-    return Documents.find({docType:'object'}).then(function(objectsArr){
+                        var unsetString = 'properties.'+ key +'.query.Xwhere';
+                        var unset = {};
+                        unset[unsetString] = 1;
+                        Documents.update(objDoc, unset);
+
+
+                        /*var where = prop.query.where;
+                        if(where.eq) {
+                            var unsetString = 'properties.'+ key +'.query.where.eq';
+                            var unset = {};
+                            unset[unsetString] = 1;
+                            Documents.update(objDoc, unset);
+                        }
+                        if (where.in) {
+                            var unsetString = 'properties.'+ key +'.query.where.in';
+                            var unset = {};
+                            unset[unsetString] = 1;
+                            Documents.update(objDoc, unset);
+                        }*/
+                    }
+                }
+            }
+
+            //console.log(objDoc);
+
+            //delete(objDoc.parentId);
+            //Documents.update(objDoc);
+            //var unset  = {'parentId': null};
+            //Documents.update(objDoc, unset);
+            //Documents.insert(objDoc);
+            //results.push(objDoc._id);
+        });
+        /*Documents.findById("570064645dde184ccfb9fc84").then(function(nqObj){
+         nqObj.owns = results;
+         console.log(nqObj);
+         Documents.update(nqObj);
+         });*/
+        return true;
+    });
+}
+function cleanup1() {
+
+    return Documents.find({docType: 'object'}).then(function (objectsArr) {
         var classPromises = [];
         var results = [];
-        objectsArr.forEach(function(objDoc) {
-            if(objDoc.classId == '573435c23c6d3cd598a5a2df'){
-                if(objDoc.query && objDoc.query.isA){
-                    objDoc.isA = objDoc.query.isA;
-                    console.log(objDoc);
-                    //Documents.update(objDoc);
+        objectsArr.forEach(function (objDoc) {
+            if (objDoc.classId == '573435c23c6d3cd598a5a2df') {
+                if (objDoc.query || objDoc.rootQuery) {
+                    if (objDoc.query) {
+                        var count = 0;
+                        objDoc.query.forEach(function (query) {
+                            if (query.where) {
+                                var where = query.where;
+                                if(where.eq) {
+                                    var unsetString = 'query.'+count+'.where.eq';
+                                    var unset = {};
+                                    unset[unsetString] = 1;
+                                    Documents.update(objDoc, unset);
+                                }
+                                if (where.in) {
+                                    var unsetString = 'query.'+count+'.where.in';
+                                    var unset = {};
+                                    unset[unsetString] = 1;
+                                    Documents.update(objDoc, unset);
+                                }
+                            }
+                            count ++;
+                        });
+                    }
+                    if (objDoc.rootQuery && objDoc.rootQuery.where) {
+                        var where = objDoc.rootQuery.where;
+                        if(where.eq) {
+                            var unsetString = 'rootQuery.where.eq';
+                            var unset = {};
+                            unset[unsetString] = 1;
+                            Documents.update(objDoc, unset);
+                        }
+                        if (where.in) {
+                            var unsetString = 'rootQuery.where.in';
+                            var unset = {};
+                            unset[unsetString] = 1;
+                            Documents.update(objDoc, unset);
+                        }
+
+                    }
+                    //console.log(objDoc);
+                    Documents.update(objDoc);
                 }
             }
             //delete(objDoc.parentId);
@@ -94,13 +178,12 @@ function cleanup(){
             //results.push(objDoc._id);
         });
         /*Documents.findById("570064645dde184ccfb9fc84").then(function(nqObj){
-            nqObj.owns = results;
-            console.log(nqObj);
-            Documents.update(nqObj);
-        });*/
+         nqObj.owns = results;
+         console.log(nqObj);
+         Documents.update(nqObj);
+         });*/
         return true;
     });
-
 
 }
 

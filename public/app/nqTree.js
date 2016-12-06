@@ -16,10 +16,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", "app/nqWidgetBase", "dijit/Tree
             if(this.tree &&
                 'rootQuery' in this.schema &&
                 'where' in this.schema.rootQuery &&
-                'eq' in this.schema.rootQuery.where &&
-                '_id' in this.schema.rootQuery.where.eq)
+                'docProp' in this.schema.rootQuery.where)
             {
-                var value = this.schema.rootQuery.where.eq._id;
+                var value = this.schema.rootQuery.where.value;
                 if(value.substring(0, 1) != '$') return;
             }
 
@@ -50,21 +49,17 @@ define(["dojo/_base/declare", "dojo/_base/lang", "app/nqWidgetBase", "dijit/Tree
 					return '';//for some reason this override is required
 				},
                 getIconStyle: function(item, opened){
-                    var self = this;
+                    //var self = this;
                     var icon;
                     if(!item) return '';
                     if('$queryName' in item) {
                         var query;
                         if(item.$queryName == 'rootQuery') query = self.schema.rootQuery;
-                        else query = self.model.getSubQueryByName(self.schema.query, item.$queryName);
+                        else query = self.store.getSubQueryByName(self.schema.query, item.$queryName);
                         if('icon' in query) icon = query.icon;
                     }
                     if(!icon){
-                        if('icon' in item) icon = item.icon;
-                        else if(item.docType == 'object'){
-                            var classType = self.store.cachingStore.getSync(item.classId);
-                            if('icon' in classType) icon = classType.icon;
-                        }
+                        icon = self.getIconForObject(item);
                     }
                     return {backgroundImage: "url('"+icon+"')"}
                 },

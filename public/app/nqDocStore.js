@@ -402,16 +402,21 @@ function(declare, lang, array, when, all, registry, request,
                 }
             }
             else {
-                if('where' in query) {
-                    var where = query.where;
-                    var qualifier = Object.keys(where)[0];
-                    var key = Object.keys(where[qualifier])[0];
-                    var path = where[qualifier][key];
-                    var substitutedValue = self.getValueByDotNotation2(parentObj, path);
-                    where[qualifier][key] = substitutedValue;
+                if('where' in query && 'value' in query.where) {
+                    var value = query.where.value;
+                    var substitutedValue = self.getValueByDotNotation2(parentObj, value);
+                    query.where.value = substitutedValue;
                 }
                 if('join' in query) this.substituteVariablesInQuery(query.join, parentObj);
             }
+        },
+        getValueByDotNotation: function(obj, path) {
+            var current = obj;
+            var pathArr = path.split('.');
+            pathArr.forEach(function(part){
+                current = current[part];
+            });
+            return current;
         },
         getValueByDotNotation2: function(obj, path) {
             var self = this;
@@ -473,32 +478,30 @@ function(declare, lang, array, when, all, registry, request,
                 }
 
                 if('where' in query) {
-                    var where = query.where;
-                    var qualifier = Object.keys(where)[0];
-                    var key = Object.keys(where[qualifier])[0];
-                    var value = where[qualifier][key];
-                    if (!value) return false;
-
-                    if (qualifier == 'in') {
-                        var position = array.indexOf(value, obj[key]);
-                        if(position == -1) return false;
-                    }
-                    else if (qualifier == 'eq') {
-                        if (value != obj[key]) return false;
-                    }
-                    else if ('and' in where) {
-                        var andArr = query.and;
-                        debugger;
-                        andArr.forEach(function(subQuery){
-                            if(!self.buildFilterFromQuery(subQuery)) return false;
-                        });
-                    }
-                    else if ('or' in where) {
-                        var orArr = query.or;
-                        debugger;
-                        orArr.forEach(function(subQuery){
-                            if(!self.buildFilterFromQuery(subQuery)) return false;
-                        });
+                    if('operator' in query.where) {
+                        var whereClause = query.where;
+                        if(whereClause.operator == 'eq'){
+                            if(!whereClause.docProp || !whereClause.value) return false;
+                            var docValue = self.getValueByDotNotation(obj, whereClause.docProp);
+                            if(!docValue) return false;
+                            if(docValue != whereClause.value) return false;
+                        }
+                        else if(whereClause.operator == 'in'){
+                            if(!whereClause.docProp || !whereClause.value) return false;
+                            var docValue = self.getValueByDotNotation(obj, whereClause.docProp);
+                            if(!docValue) return false;
+                            var value = whereClause.value;
+                            var position = array.indexOf(value, docValue);
+                            if(position == -1) return false;
+                        }
+                        else if(whereClause.operator == 'and') {
+                            debugger;
+                            return false;
+                        }
+                        else if(whereClause.operator == 'or') {
+                            debugger;
+                            return false;
+                        }
                     }
                 }
 
