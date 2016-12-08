@@ -1,12 +1,12 @@
 require([
 'dojo/_base/array', 'dojo/ready', 'dojo/topic', "dojo/on", 'dojo/hash', 'dijit/registry',
- 'dojo', 'dojo/_base/lang', 'dojo/dom-construct',
+ 'dojo', 'dojo/_base/lang', 'dojo/dom-construct',"dojox/html/styles",
  'dojo/when', "dojo/promise/all", 'dojo/query', 'dijit/layout/BorderContainer',
 'dijit/layout/TabContainer', 'dijit/layout/ContentPane', 'dijit/layout/AccordionContainer', "dojo/cookie", "dojo/request",
 'app/nqDocStore', 'app/nqProcessChart', 'app/nqClassChart', 'app/nqForm', 'app/nqTable', 'app/nqTree','app/nqDocument','app/nqHome',
 "dojo/json","dijit/Dialog", "dojo/dom-attr"],
 function(arrayUtil, ready, topic, on, hash, registry,
-		dojo, lang, domConstruct,
+		dojo, lang, domConstruct, styles,
 		when, all, query, BorderContainer,
 		TabContainer, ContentPane, AccordionContainer, cookie, request,
         nqDocStore, nqProcessChart, nqClassChart, nqForm, nqTable, nqTree, nqDocument, nqHome,
@@ -16,12 +16,12 @@ function(arrayUtil, ready, topic, on, hash, registry,
     var user = {};
     var owner = {};
     ready(function () {
-        setOwner(
+        /*setOwner(
             {
                 id: "575d4c3f2cf3d6dc3ed8315b",
                 name: "ACME Bicycle Shop"
             }
-        );
+        );*/
         //request.get('/hello').then(setUser);
         request.get('/hello').then(function (data) {
             setUser(dojo.fromJson(data));
@@ -37,8 +37,8 @@ function(arrayUtil, ready, topic, on, hash, registry,
             nqStore.commit();
         });
         on(registry.byId('helpButtonId'), 'change', function (value) {
-            if (value) dojox.html.insertCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
-            else dojox.html.removeCssRule('.helpTextInvisable', 'display:block;', 'nq.css');
+            if (value) styles.insertCssRule('.helpTextInvisible', 'display:block;', 'nq.css');
+            else styles.removeCssRule('.helpTextInvisible', 'display:block;', 'nq.css');
         });
 
         if (hash() == "") {
@@ -71,6 +71,17 @@ function(arrayUtil, ready, topic, on, hash, registry,
     }
     function drawFramesRecursive(level){
         var state = getState(level);
+        if(state.docId){
+            if(nqStore.isASync(state.docId, '56f870a55dde184ccfb9fc6c')){// Owners
+                var ownerDoc = nqStore.cachingStore.getSync(state.docId);
+                setOwner(ownerDoc);
+            }
+            else if(nqStore.isASync(state.docId, '574237133c6d3cd598a5a30d')){// Organizational Units
+                var orgUnit = nqStore.cachingStore.getSync(state.docId);
+                var ownerDoc = nqStore.cachingStore.getSync(orgUnit.ownerId);
+                setOwner(ownerDoc);
+            }
+        }
         //console.log('state', state);
         if(!state.pageId) return false;//nothing left to display
         if(registry.byId(state.pageId)) return drawFramesRecursive(level+1); // if the page already exists we can simply go on to the next level

@@ -114,160 +114,64 @@ define(["dojo/_base/declare", "dojo/_base/lang", "app/nqWidgetBase", "dijit/Tree
             this.inherited(arguments);
             this.tree.set('selectedItem', selectedId);
         },
-		createMenusForWidget: function(){
-			var self = this;
-            if('query' in this.schema && 'menu' in this.schema.query){
-                var menu = this.schema.query.menu;
-            }
-            if(this.schema.menus) this.schema.menus.forEach(function(menu){
-                var parentMenu = new Menu({targetNodeIds: [self.pane.containerNode], selector: ".css" + menu.queryName});
-                //var addMenu = new Menu({parentMenu: parentMenu});
-                if(menu.add){
-                    //var menu = new MenuItem();
-                    parentMenu.addChild(new MenuItem({
-                        label: menu.add.label,
-                        iconClass: menu.add.iconClass,
-                        onClick: function(evt){
-                            //var node = this.getParent().currentTarget;
-                            //var target = dijit.getEnclosingWidget(evt.target);
-                            //var tn = dijit.byNode(this.getParent().currentTarget);
-                            //var selectedItem = tn.item;
-                            var selectedItem = self.tree.get("selectedItem");
-                            var newDoc = {
-                                docType: 'object',
-                                name: '[new paragraph]',
-                                ownerId: "575d4c3f2cf3d6dc3ed83148",
-                                classId: "573435f03c6d3cd598a5a2e1",
-                                $queryName: menu.queryName
-                            };
-                            var directives = {parentId: selectedItem._id, viewId: self.schema._id};
-                            self.store.add(newDoc, directives).then(function(newObj){
-                                var selectedNodes = self.tree.getNodesByItem(selectedItem);
-                                selectedNodes[0]._loadDeferred = null;
-                                self.tree._expandNode(selectedNodes[0]).then(function(newObj){
-                                    //self.tree.set('selectedItem', newObj._id);
-                                });
-                            });
-                        }
-                    }));
-                }
-                if(menu.delete){
-                    parentMenu.addChild(new MenuItem({
-                        label: menu.delete.label,
-                        iconClass: menu.delete.iconClass,
-                        onClick: function(){
-                            var pathArr = self.tree.path;
-                            var selectedItem = pathArr[pathArr.length-1];
-                            var parentItem = pathArr[pathArr.length-2];
-                            var directives = {oldParent:parentItem, viewId: self.viewId};
-                            self.store.remove(selectedItem, directives);
-                        }
-                    }));
-                }
-            });
-
-
-                /*var uViewObj = self.permittedClassesByViewObj[viewId];
-                if(viewId!=844){
-                    parentMenu.addChild(new MenuItem({
-                        label:"Delete",
-                        iconClass:"removeIcon",
-                        viewId: viewId,
-                        disabled: self.store.updateAllowed(self.tree.get("selectedItem")),
-                        onClick: function(){
-                            var pathArr = self.tree.path;
-                            var selectedItem = pathArr[pathArr.length-1];
-                            var parentItem = pathArr[pathArr.length-2];
-                            var directives = {oldParent:parentItem, viewId: this.viewId};
-                            self.store.remove(selectedItem, directives);
-                        }
-                    }));
-                    for(var uViewId in uViewObj){
-                        var manyViewObj = uViewObj[uViewId];
-                        var manyView = manyViewObj.view;
-                        var permittedClassesArr = manyViewObj.classes;
-                        for(var i=0;i<permittedClassesArr.length;i++){
-                            var classesObj = permittedClassesArr[i];
-
-                            var menuItem = new MenuItem({
-                                label: "<b>"+classesObj.name+"</b> by <span style='color:blue'>"+manyView.toManyAssociations+"</span>",
-                                iconClass: "icon"+classesObj._id,
-                                classId: classesObj._id,
-                                viewId: manyView._id
-                            });
-                            menuItem.on("click", function(evt){
-                                var addObj = {
-                                    'type': 'object',
-                                    '_icon': this.classId
-                                };
-                                var selectedItem = self.tree.get("selectedItem");
-                                var directives = {parent: selectedItem, viewId: this.viewId, classId:this.classId};
-                                self.store.add(addObj, directives);
-
-                                var selectedNodes = self.tree.getNodesByItem(selectedItem);
-                                if(!selectedNodes[0].isExpanded){
-                                    self.tree._expandNode(selectedNodes[0]);
-                                }
-                                self.tree.set('selectedItem', addObj._id);
-                            });
-                            addMenu.addChild(menuItem);
-                        }
+		createMenusForWidget: function() {
+            var self = this;
+            var menus = [];
+            if('query' in this.schema) {
+                this.schema.query.forEach(function (query) {
+                    if('menu' in query){
+                        var parentMenu = new Menu({
+                            targetNodeIds: [self.pane.containerNode],
+                            selector: ".css" + query.queryName
+                        });
+                        //var addMenu = new Menu({parentMenu: parentMenu});
+                        query.menu.forEach(function(menuDef) {
+                            if ('action' in menuDef) {
+                                //var menu = new MenuItem();
+                                parentMenu.addChild(new MenuItem({
+                                    label: menuDef.label,
+                                    iconClass: menuDef.iconClass,
+                                    onClick: function (evt) {
+                                        //var node = this.getParent().currentTarget;
+                                        //var target = dijit.getEnclosingWidget(evt.target);
+                                        //var tn = dijit.byNode(this.getParent().currentTarget);
+                                        //var selectedItem = tn.item;
+                                        var selectedItem = self.tree.get("selectedItem");
+                                        var newDoc = {
+                                            docType: 'object',
+                                            name: '[new paragraph]',
+                                            ownerId: "575d4c3f2cf3d6dc3ed83148",
+                                            classId: "573435f03c6d3cd598a5a2e1",
+                                            $queryName: query.queryName
+                                        };
+                                        var directives = {parentId: selectedItem._id, viewId: self.schema._id};
+                                        self.store.add(newDoc, directives).then(function (newObj) {
+                                            var selectedNodes = self.tree.getNodesByItem(selectedItem);
+                                            selectedNodes[0]._loadDeferred = null;
+                                            self.tree._expandNode(selectedNodes[0]).then(function (newObj) {
+                                                //self.tree.set('selectedItem', newObj._id);
+                                            });
+                                        });
+                                    }
+                                }));
+                            }
+                            else if ('action' in menuDef) {
+                                parentMenu.addChild(new MenuItem({
+                                    label: menuDef.label,
+                                    iconClass: menuDef.iconClass,
+                                    onClick: function () {
+                                        var pathArr = self.tree.path;
+                                        var selectedItem = pathArr[pathArr.length - 1];
+                                        var parentItem = pathArr[pathArr.length - 2];
+                                        var directives = {oldParent: parentItem, viewId: self.viewId};
+                                        self.store.remove(selectedItem, directives);
+                                    }
+                                }));
+                            }
+                        });
                     }
-                }
-                else{//exception for class model
-                    parentMenu.addChild(new MenuItem({
-                        label:"Delete",
-                        iconClass:"removeIcon",
-                        onClick: function(){
-                            var pathArr = self.tree.path;
-                            var selectedItem = pathArr[pathArr.length-1];
-                            var parentItem = pathArr[pathArr.length-2];
-                            var directives = {oldParent:parentItem, viewId: 844};
-                            self.store.remove(selectedItem, directives);
-                        }
-                    }));
-                    var classMenuItem = new MenuItem({
-                        label: "<b>Class</b> by <span style='color:blue'>children</span>",
-                        iconClass: "icon0"
-                    });
-                    classMenuItem.on("click", function(evt){
-                        var addObj = {
-                            'type': 'class',
-                            '_icon': 0
-                        };
-                        var selectedItem = self.tree.get("selectedItem");
-                        var directives = {parent: selectedItem, viewId: 844};
-                        self.store.add(addObj, directives);
-
-                        var selectedNodes = self.tree.getNodesByItem(selectedItem);
-                        if(!selectedNodes[0].isExpanded){
-                            self.tree._expandNode(selectedNodes[0]);
-                        }
-                        self.tree.set('selectedItem', addObj._id);
-                    });
-                    addMenu.addChild(classMenuItem);
-                    var objectMenuItem = new MenuItem({
-                        label: "<b>Object</b> by <span style='color:blue'>children</span>",
-                        iconClass: "icon1"
-                    });
-                    objectMenuItem.on("click", function(evt){
-                        var selectedItem = self.tree.get("selectedItem");
-                        var addObj = {
-                            'type': 'object',
-                            '_icon': selectedItem._id
-                        };
-                        var directives = {parent: selectedItem, viewId: 844};
-                        self.store.add(addObj, directives);
-
-                        var selectedNodes = self.tree.getNodesByItem(selectedItem);
-                        if(!selectedNodes[0].isExpanded){
-                            self.tree._expandNode(selectedNodes[0]);
-                        }
-                        self.tree.set('selectedItem', addObj._id);
-                    });
-                    addMenu.addChild(objectMenuItem);
-                }
-            }*/
+                });
+            }
 		}
 	});
 });

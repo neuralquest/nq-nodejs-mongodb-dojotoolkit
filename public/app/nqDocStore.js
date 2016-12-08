@@ -16,6 +16,7 @@ function(declare, lang, array, when, all, registry, request,
             this.enableTransactionButtons();
             newDoc._id = this.makeObjectId();
             newDoc.$newDoc = true;// Some forms need this to make new docs updatable
+
             this.transactionArr.push(
                 {
                     action: 'add',
@@ -34,22 +35,23 @@ function(declare, lang, array, when, all, registry, request,
                         var query;
                         if (newDoc.$queryName == 'rootQuery') query = self.schema.rootQuery;
                         else query = self.getSubQueryByName(viewObj.query, newDoc.$queryName);
-                        if('where' in query && 'in' in query.where){
-                            var qualifier = query.where.in;
-                            var key = Object.keys(qualifier)[0];
-                            var value = qualifier[key];
+                        if('where' in query && 'operator' in query.where && 'in' == query.where.operator){
+                            var operator = query.where.operator;
+                            var docProp = query.where.docProp;
+                            var value = query.where.value;
                             if(value.substring(0, 1) == '$') {
-                                var arrayName = value.substring(1);
-                                if(!parentObj[arrayName]) parentObj[arrayName] = [doc._id];
-                                else parentObj[arrayName].push(doc._id);
+                                var parentArray = self.getValueByDotNotation2(parentObj, value);
+                                //var arrayName = value.substring(1);
+                                //if(!parentObj[arrayName]) parentObj[arrayName] = [doc._id];
+                                parentArray.push(doc._id);
+                                self.put(parentObj, {viewId:directives.viewId}).then(function(item){
+                                    return item;
+                                });
                             }
                         }
                     }
-                    return self.put(parentObj, {viewId:directives.viewId}).then(function(){
-                        return item;
-                    });
                 }
-                else return item;
+                return doc;
             });
 
             return;
@@ -370,6 +372,7 @@ function(declare, lang, array, when, all, registry, request,
                 if(docId == id) return true;
                 doc = this.cachingStore.getSync(docId);
             }
+            if(!doc) return false;
             if(doc._id === id) return true;
             var parentId = doc.docType=='object'?doc.classId:doc.parentId;
             if(!parentId) return false;
@@ -418,11 +421,20 @@ function(declare, lang, array, when, all, registry, request,
             });
             return current;
         },
+        setValueByDotNotation: function(obj, path, value) {
+            var current = obj;
+            var pathArr = path.split('.');
+            var last = pathArr.pop();
+            pathArr.forEach(function(part){
+                current = current[part];
+            });
+            current[last] = value;
+        },
         getValueByDotNotation2: function(obj, path) {
             var self = this;
             if(path == "$docId") return obj._id; //TODO replace docId with $self._id
-            if(path == "$userId") return nq.getUser().id;
-            if(path == "$ownerId") return nq.getOwner().id;
+            if(path == "$userId") return nq.getUser()._id;
+            if(path == "$ownerId") return nq.getOwner()._id;
 
             var pos = path.search('==');
             if(pos>-1){

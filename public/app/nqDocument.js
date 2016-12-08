@@ -257,7 +257,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', "dojo/_base/lang",'dojo/dom-co
                              update = true;
                              storedItem.paragraphParts = newParagraphParts;
                              }*/
-                            if(update) self.store.put(storedItem);
+                            if(update) self.store.put(storedItem, {viewId:self.schema._id});
                         });
                     }
                 }

@@ -102,7 +102,7 @@ exports = module.exports = function(app, passport) {
     app.get('/hello', function(req, res) {
         var auth = req.isAuthenticated();
         if(auth) {
-            var returnUser = {name: req.user.name, id: req.user._id};
+            var returnUser = {name: req.user.name, _id: req.user._id};
             res.send(returnUser);
         }
         else res.send({});

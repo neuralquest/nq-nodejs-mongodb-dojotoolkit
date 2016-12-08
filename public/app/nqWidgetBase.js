@@ -47,7 +47,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
             this.headerDivNode = domConstruct.create('div', null, this.domNode);//placeholder for header
-            this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisable', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
+            this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisible', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
 			this.pageToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.domNode);//placeholder for the page toolbar
 			this.editorToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.domNode);//placeholder for the editor toolbar
 			this.pane = new ContentPane( {
@@ -90,9 +90,9 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 //node.destroyDescendants(wid);
             });
             domConstruct.empty(node);
-            this.renderForm(properties, doc, node);
+            this.renderForm(properties, doc, node, '');
         },
-        renderForm: function(properties, doc, node){
+        renderForm: function(properties, doc, node, path){
             var self = this;
             var tableNode = domConstruct.create('table', null/*{style:{'border-top-style':'solid', 'border-top-width':'thin', 'border-top-color':'#a8c1eb'}}*/, node);
             //Collect the properties in a three dimensional array: [rows, columns, propNameArr]
@@ -137,10 +137,15 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 
                                 //The input td
                                 var inputNode = domConstruct.create("td", {style:{'padding-left': '5px'}}, trDom);
-                                self.renderRow(attrProps, attrName, doc, inputNode);
+                                var pathArr = [];
+                                if(path) pathArr = path.split('.');
+                                pathArr.push(attrName);
+                                self.renderValue(attrProps, attrName, doc, inputNode, pathArr.join('.'));
 
                                 //The help td
-                                //domConstruct.create("img",{class:'helpIcon'}, inputNode);
+                                //domConstruct.create("img",{class:'helpIcon'}, trDom);
+                                var helpTextTd = domConstruct.create("td", {class:'helpTextInvisible'},trDom);
+                                helpTextTd.appendChild(self.getHelpTextDiv(attrProps, attrName));
                             }
                         }
 
@@ -148,7 +153,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 }
             }
         },
-        renderRow: function(attrProps, attrName, doc, node){
+        renderValue: function(attrProps, attrName, doc, node, path){
             var self = this;
             if(!doc) return;
 
@@ -165,7 +170,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             }
             
             var dijitProperties = {
-                name: attrName,
+                name: path,
                 value: value,
                 readOnly: readOnly,
                 class: 'nqField'
@@ -188,13 +193,17 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 if(!attrProps.abstract){
                     this.own(dijit.on('change', function(value){
                         var attrName = this.name;
-                        var attrDefault = this.default;
+                        var path = this.name;
                         self.store.get(self.docId).then(function(doc){
                             var docPart = doc;
+                            var storedValue = self.store.getValueByDotNotation(doc, path, value);
+                            if(storedValue!=value) {
+                                self.store.setValueByDotNotation(doc, path, value);
+                                self.store.put(doc, {viewId: self.schema._id});
+                            }
                             //console.log(docPart);
                             if(docPart[attrName] !== value){
-                                if(!value || value == attrDefault) docPart.delete(attrName);
-                                else docPart[attrName] = value;
+                                docPart[attrName] = value;
                                 self.store.put(doc, {viewId: self.schema._id});
                             }
                         },nq.errorDialog);
@@ -509,9 +518,13 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 if(attrProps.items) {
                     var itemProperties = attrProps.items;
                     if(itemProperties.properties) {
-                        var attrProps = itemProperties.properties;
+                        var itemAttrProps = itemProperties.properties;
+                        var num = 0;
                         if(value) value.forEach(function(valueObj){
-                            self.renderForm(attrProps, valueObj, node);
+                            var pathArr = dijitProperties.name.split('.');
+                            pathArr.push(num);
+                            self.renderForm(itemAttrProps, valueObj, node, pathArr.join('.'));
+                            num++;
                         });
                     }
                     else if(attrProps.query){
@@ -534,11 +547,15 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 if(attrProps.items) {
                     var itemProperties = attrProps.items;
                     if(itemProperties.properties) {
-                        var attrProps = itemProperties.properties;
+                        var itemAttrProps = itemProperties.properties;
                         var dndTbl = domConstruct.create('div', {class: 'container'}, node);
+                        var num = 0;
                         if (value) value.forEach(function (valueObj) {
                             var dndRow = domConstruct.create('div', {class: 'dojoDndItem'}, dndTbl);
-                            self.renderForm(attrProps, valueObj, dndRow);
+                            var pathArr = dijitProperties.name.split('.');
+                            pathArr.push(num);
+                            self.renderForm(itemAttrProps, valueObj, dndRow, pathArr.join('.'));
+                            num++;
                         });
                         new Source(dndTbl, {skipForm: 'true', type: dijitProperties.attrName});
                     }
@@ -627,7 +644,10 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             var self = this;
             var value = dijitProperties.value;
             if(attrProps.properties){
-                self.renderForm(attrProps.properties, value, node);
+                //self.renderForm(attrProps.properties, value, node);
+                //var pathArr = dijitProperties.name.split('.');
+                //pathArr.push(valueObj);
+                //self.renderForm(itemAttrProps, valueObj, dndRow, pathArr.join('.'));
             }
             else{
                 var codeNode = domConstruct.create("pre", {}, node);
@@ -657,8 +677,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     if(action.actionType == 'add'){
                         var newDoc = lang.clone(action.template);
                         for(var attrName in newDoc){
-                            if (newDoc[attrName] == '$userId') newDoc[attrName] = nq.getUser().id;
-                            else if (newDoc[attrName] == '$ownerId') newDoc[attrName] = nq.getOwner().id;
+                            if (newDoc[attrName] == '$userId') newDoc[attrName] = nq.getUser()._id;
+                            else if (newDoc[attrName] == '$ownerId') newDoc[attrName] = nq.getOwner()._id;
                             else if (newDoc[attrName] == '$docId') newDoc[attrName] = self.docId;
                         }
                         self.store.add(newDoc, {viewId:self.schema._id});
@@ -741,8 +761,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             this.own(dijit.on('change', function(evt){
                 var data = evt[0];
                 var temp = window.webkitURL.createObjectURL(evt);
-                data.owner = nq.getOwner().id;
-                data.user = nq.getUser().id;
+                data.owner = nq.getOwner()._id;
+                data.user = nq.getUser()._id;
                 data.path = 'C:/Users/cjong/Pictures/zonomhoog.jpg';
                 //data = {path:'C:/Users/cjong/Pictures/zonomhoog.jpg', name:'zonomhoog', owner:nq.getOwner().id};
                 request.post(this.post, {
@@ -771,13 +791,74 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 //TODO search ancestors
             }
         },
+        addMenuItemsForMenuDefArr: function(menuDefArr, parent){
+            var self = this;
+            menuDefArr.forEach(function(menuDef){
+                var menuItem;
+                if('menu' in menuDef){
+                    var menu = new Menu({ style: "display: none;"}).startup();
+                    self.addMenuItemsForMenuDefArr(menuDef.menu, menu);
+                    menuItem = new PopupMenuItem({
+                        showLabel: true,
+                        label: menuDef.label,
+                        iconClass: menuDef.iconClass,
+                        popup: menu
+                    }).startup();
+                }
+                else if('action' in menuDef){
+                    var menuProperties = {
+                        label: menuDef.label,
+                        iconClass: menuDef.iconClass,
+                        checked: menuDef.checked,
+                        onClick: function(evt){
+                            //var selectedItem = self.tree.get("selectedItem");
+                            var newDoc = {
+                                docType: 'object',
+                                name: '[new service agreement]',
+                                //offeringId: '',
+                                buyerId: '575d4c3f2cf3d6dc3ed8314f', //platos cave
+                                classId: "57424f1b3c6d3cd598a5a321"
+                            };
+                            var directives = {viewId: self.schema._id};
+                            self.store.add(newDoc, directives).then(function(newObj){
+                                //update hash to open form
+                            });
+                        }
+                    };
+                    if(menuDef.checked == undefined) menuItem = new MenuItem(menuProperties);
+                    else menuItem = new CheckedMenuItem(menuProperties);
+                    menuItem.startup();
+                }
+                if(menuItem) parent.addChild(menuItem);
+            });
+        },
+        getHelpTextDiv: function(attrProps, attrName){
+            var div = domConstruct.create("div");
+            if('title' in attrProps) domConstruct.create("p", {style:{'font-weight':'bold'},innerHTML:attrProps.title}, div);
+            if('description' in attrProps) domConstruct.create('div', {innerHTML:attrProps.description}, div);
+            var ulDiv = domConstruct.create("ul",null, div);
+            if(attrName) domConstruct.create("li",{innerHTML: 'Property Name: '+ attrName}, ulDiv);
+            if(attrProps.readOnly) domConstruct.create("li",{innerHTML: 'Read Only: '+ attrProps.readOnly}, ulDiv);
+            if(attrProps.maxLength) domConstruct.create("li",{innerHTML: 'Maximum Length: '+ attrProps.maxLength}, ulDiv);
+            if(attrProps.minLength) domConstruct.create("li",{innerHTML: 'Minimum Length: '+ attrProps.minLength}, ulDiv);
+            if(attrProps.maximum) domConstruct.create("li",{innerHTML: 'Maximum: '+ attrProps.maximum}, ulDiv);
+            if(attrProps.minimum) domConstruct.create("li",{innerHTML: 'Minimum: '+ attrProps.minimum}, ulDiv);
+            //if(attrProps.col) domConstruct.create("li",{innerHTML: 'Column: '+ attrProps.col}, ulDiv);
+            //if(attrProps.row) domConstruct.create("li",{innerHTML: 'Row: '+ attrProps.row}, ulDiv);
+            //if(attrProps.style) domConstruct.create("li",{innerHTML: 'Field Style: '+ attrProps.style}, ulDiv);
+            //if(attrProps.labelStyle) domConstruct.create("li",{innerHTML: 'Label Style: '+ attrProps.labelStyle}, ulDiv);
+            if(attrProps.default) domConstruct.create("li",{innerHTML: 'Default: '+ attrProps.default}, ulDiv);
+            //if(attrProps.styleColumn) domConstruct.create("li",{innerHTML: 'Column Style: '+ attrProps.styleColumn}, ulDiv);
+            //if(attrProps.displayIcon) domConstruct.create("li",{innerHTML: 'Display Icon: '+ attrProps.displayIcon?'true':'false'}, ulDiv);
+        return div;
+        },
         XsetFromValues: function(properties, doc, node){
             var self = this;
             for(var attrName in properties) {
                 var attrProps = properties[attrName];
                 var value = doc[attrName]?doc[attrName]:attrProps.default;
-                if(value == '$userId') value = nq.getUser().id;
-                else if(value == '$ownerId') value = nq.getOwner().id;
+                if(value == '$userId') value = nq.getUser()._id;
+                else if(value == '$ownerId') value = nq.getOwner()._id;
                 else if(value == '$docId') value = self.docId;
 
                 //console.log('attrName', attrName);
@@ -869,48 +950,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 }
             }
         },
-        addMenuItemsForMenuDefArr: function(menuDefArr, parent){
-            var self = this;
-            menuDefArr.forEach(function(menuDef){
-                var menuItem;
-                if('menu' in menuDef){
-                    var menu = new Menu({ style: "display: none;"}).startup();
-                    self.addMenuItemsForMenuDefArr(menuDef.menu, menu);
-                    menuItem = new PopupMenuItem({
-                        showLabel: true,
-                        label: menuDef.label,
-                        iconClass: menuDef.iconClass,
-                        popup: menu
-                    }).startup();
-                }
-                else if('action' in menuDef){
-                    var menuProperties = {
-                        label: menuDef.label,
-                        iconClass: menuDef.iconClass,
-                        checked: menuDef.checked,
-                        onClick: function(evt){
-                            //var selectedItem = self.tree.get("selectedItem");
-                            var newDoc = {
-                                docType: 'object',
-                                name: '[new service agreement]',
-                                //offeringId: '',
-                                buyerId: '575d4c3f2cf3d6dc3ed8314f', //platos cave
-                                classId: "57424f1b3c6d3cd598a5a321"
-                            };
-                            var directives = {viewId: self.schema._id};
-                            self.store.add(newDoc, directives).then(function(newObj){
-                                //update hash to open form
-                            });
-                        }
-                    };
-                    if(menuDef.checked == undefined) menuItem = new MenuItem(menuProperties);
-                    else menuItem = new CheckedMenuItem(menuProperties);
-                    menuItem.startup();
-                }
-                if(menuItem) parent.addChild(menuItem);
-            });
-        },
-		extraPlugins:[
+
+        extraPlugins:[
      		'|',
      		'foreColor','hiliteColor',
      	    '|',
