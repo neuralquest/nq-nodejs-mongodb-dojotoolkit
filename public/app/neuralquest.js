@@ -16,13 +16,6 @@ function(arrayUtil, ready, topic, on, hash, registry,
     var user = {};
     var owner = {};
     ready(function () {
-        /*setOwner(
-            {
-                id: "575d4c3f2cf3d6dc3ed8315b",
-                name: "ACME Bicycle Shop"
-            }
-        );*/
-        //request.get('/hello').then(setUser);
         request.get('/hello').then(function (data) {
             setUser(dojo.fromJson(data));
         }, errorDialog);

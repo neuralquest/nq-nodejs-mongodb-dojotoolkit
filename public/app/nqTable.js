@@ -234,7 +234,17 @@ define(['dojo/_base/declare',  'dojo/_base/array',  "dojo/_base/lang", "dojo/dom
                 //className: "dgrid-autoheight",
                 //height: '',//needed for auto grow
                 showHeader: columns.length>1,
-                getBeforePut:false// temporary fix for the fact that a get without a viewId ruins the item sent to the put
+                //getBeforePut:false// temporary fix for the fact that a get without a viewId ruins the item sent to the put
+                renderRow: function(object){
+                    var row = this.inherited(arguments);
+                    if('query' in self.schema && 'rowStyle' in self.schema.query[0]){
+                        var rowStyle = self.schema.query[0].rowStyle;
+                        var style = self.store.getValueByDotNotation3(object, self.docId, rowStyle);
+                        if(style) domStyle.set(row, style);
+                    }
+
+                    return row;
+                }
             }, domConstruct.create('div'));
 //					self.grid.startup();
             for(var i=0;i<columns.length;i++){

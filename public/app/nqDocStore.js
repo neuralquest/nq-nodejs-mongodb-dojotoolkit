@@ -431,12 +431,14 @@ function(declare, lang, array, when, all, registry, request,
             current[last] = value;
         },
         getValueByDotNotation2: function(obj, path) {
+            if(typeof obj == 'string') obj = this.cachingStore.getSync(obj);
             var self = this;
             if(path == "$docId") return obj._id; //TODO replace docId with $self._id
             if(path == "$userId") return nq.getUser()._id;
             if(path == "$ownerId") return nq.getOwner()._id;
 
             var pos = path.search('==');
+            if(pos == -1) pos = path.search('>');
             if(pos>-1){
                 var leftString = path.substring(0, pos);
                 var rightString = path.substring(pos);
@@ -461,6 +463,14 @@ function(declare, lang, array, when, all, registry, request,
                 var res = self.isASync(leftValue, rightValue);
                 return res;
             }
+            else if (path.startsWith('$pos(')) {
+                var leftString = path.substring(path.indexOf('(') + 1, path.indexOf(','));
+                var rightString = path.substring(path.indexOf(',') + 1, path.indexOf(')'));
+                var leftValue = self.getValueByDotNotation2(obj, leftString);
+                var rightValue = self.getValueByDotNotation2(obj, rightString);
+                var res = array.indexOf(leftValue, rightValue);
+                return res;
+            }
 
             var pathArr = path.split('.');
             if(pathArr.length == 1){
@@ -471,6 +481,63 @@ function(declare, lang, array, when, all, registry, request,
                 if(!current) return;
                 if(part == '$self') current = obj;
                 else if(part == '$parent') current = obj;//TODO parent will be removed
+                else current = current[part];
+            });
+            return current;
+        },
+        getValueByDotNotation3: function(selfObj, parentObj, path) {
+            var self = this;
+            if(typeof path != 'string') return path;
+            if(typeof selfObj == 'string') selfObj = this.cachingStore.getSync(selfObj);
+            if(typeof parentObj == 'string') parentObj = this.cachingStore.getSync(parentObj);
+
+            if(path == "$userId") return nq.getUser()._id;
+            if(path == "$ownerId") return nq.getOwner()._id;
+
+            var pos = path.search('==');
+            if(pos == -1) pos = path.search('>');
+            if(pos>-1){
+                var leftString = path.substring(0, pos);
+                var rightString = path.substring(pos);
+                var leftValue = self.getValueByDotNotation3(selfObj, parentObj, leftString);
+                if(typeof(leftValue) == 'string') leftValue = "'"+leftValue+"'";
+                var res = eval(leftValue+rightString);
+                return res;
+            }
+            else if (path.startsWith('$get(')) {
+                var internalString = path.substring(path.indexOf('(') + 1, path.lastIndexOf(')'));
+                var remainingString = path.substring(path.lastIndexOf(')')+2);
+                var internalValue = self.getValueByDotNotation3(selfObj, parentObj, internalString);
+                var foundObj = self.cachingStore.getSync(internalValue);
+                var res = self.getValueByDotNotation3(foundObj, parentObj, remainingString);
+                return res;
+            }
+            else if (path.startsWith('$isA(')) {
+                var leftString = path.substring(path.indexOf('(') + 1, path.indexOf(','));
+                var rightString = path.substring(path.indexOf(',') + 1, path.indexOf(')'));
+                var leftValue = self.getValueByDotNotation3(selfObj, parentObj, leftString);
+                var rightValue = self.getValueByDotNotation3(selfObj, parentObj, rightString);
+                var res = self.isASync(leftValue, rightValue);
+                return res;
+            }
+            else if (path.startsWith('$pos(')) {
+                var leftString = path.substring(path.indexOf('(') + 1, path.indexOf(','));
+                var rightString = path.substring(path.indexOf(',') + 1, path.indexOf(')'));
+                var leftValue = self.getValueByDotNotation3(selfObj, parentObj, leftString);
+                var rightValue = self.getValueByDotNotation3(selfObj, parentObj, rightString);
+                var res = array.indexOf(leftValue, rightValue);
+                return res;
+            }
+
+            var pathArr = path.split('.');
+            if(pathArr.length == 1){
+                return path;
+            }
+            var current = path;
+            pathArr.forEach(function(part){
+                if(!current) return;
+                if(part == '$') current = selfObj;
+                else if(part == '$parent') current = parentObj;
                 else current = current[part];
             });
             return current;

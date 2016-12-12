@@ -767,6 +767,15 @@
                         }, 
                         "readOnly" : "$self.date=='$now'?false:true"
                     }, 
+                    "userId" : {
+                        "title" : "By", 
+                        "type" : "string", 
+                        "pattern" : "[a-f0-9]{24}", 
+                        "query" : {
+                            "from" : "57343beb3c6d3cd598a5a2e7"
+                        }, 
+                        "default" : "$userId"
+                    }, 
                     "description" : {
                         "title" : "Description", 
                         "type" : "string", 
@@ -897,7 +906,7 @@
                 "from" : "57343c283c6d3cd598a5a2e9"
             }
         }, 
-        "responsibleStates" : {
+        "responsibleForStateIds" : {
             "type" : "array", 
             "title" : "Responsible for States", 
             "items" : {
@@ -906,6 +915,19 @@
             }, 
             "query" : {
                 "from" : "5745eaa53c6d3cd598a5a371"
+            }, 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
+        }, 
+        "involvedInOfferingIds" : {
+            "type" : "array", 
+            "title" : "Involved In Offerings", 
+            "items" : {
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}"
+            }, 
+            "query" : {
+                "from" : "574234113c6d3cd598a5a30b"
             }, 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
@@ -3071,7 +3093,8 @@
         }, 
         "sellerId" : {
             "title" : "To", 
-            "readOnly" : "$self.$newDoc==true?false:true"
+            "readOnly" : "$self.$newDoc==true?false:true", 
+            "displayIcon" : true
         }, 
         "offeringId" : {
             "readOnly" : "$self.$newDoc==true?false:true"
@@ -3094,7 +3117,8 @@
         "newStateButton" : {
             "type" : "button", 
             "label" : "Reply", 
-            "readOnly" : "$isA($self.stateHistory.0.stateId,5747254b3c6d3cd598a5a379)==true?false:true", 
+            "Xstyle" : "$pos($parent.responsibleForStateIds,$.stateHistory.0.stateId)==-1?{display:'none'}:null", 
+            "readOnly" : false, 
             "action" : {
                 "actionType" : "insertSubDocArray", 
                 "arrayName" : "stateHistory"
@@ -3112,7 +3136,13 @@
                         "readOnly" : true, 
                         "default" : "$now"
                     }, 
+                    "userId" : {
+                        "title" : "By", 
+                        "readOnly" : true, 
+                        "default" : "$userId"
+                    }, 
                     "description" : {
+                        "title" : "Reply", 
                         "readOnly" : true, 
                         "readOnlyOnNew" : false
                     }
@@ -3825,8 +3855,11 @@
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed8315b", 
-    "responsibleStates" : [
+    "responsibleForStateIds" : [
         "57790e503c6d3cd598a5a3a0"
+    ], 
+    "involvedInOfferingIds" : [
+        "577909043c6d3cd598a5a39e"
     ], 
     "classId" : "574237133c6d3cd598a5a30d"
 }
@@ -3838,8 +3871,11 @@
     "pageId" : "57afa6372d8cd20920e6d827", 
     "ownerId" : "575d4c3f2cf3d6dc3ed8315b", 
     "parentOrgId" : "575d4c3f2cf3d6dc3ed8315b", 
-    "responsibleStates" : [
+    "responsibleForStateIds" : [
         "57b715662d8cd20920e6d829"
+    ], 
+    "involvedInOfferingIds" : [
+        "577909043c6d3cd598a5a39e"
     ], 
     "classId" : "574237133c6d3cd598a5a30d"
 }
@@ -4144,7 +4180,10 @@
         "pageId" : {
             "readOnly" : false
         }, 
-        "responsibleStates" : {
+        "involvedInOfferingIds" : {
+            "readOnly" : false
+        }, 
+        "responsibleForStateIds" : {
             "readOnly" : false, 
             "displayIcon" : true
         }, 
@@ -5387,17 +5426,12 @@
             "queryName" : "seviceRequests", 
             "select" : "name", 
             "from" : "574225cb3c6d3cd598a5a305", 
-            "newWhere" : {
-                "operator" : "in", 
-                "docProp" : "stateHistory.0.stateId", 
-                "value" : "$self.responsibleStates"
-            }, 
-            "path" : "$self.stateHistory.0", 
             "where" : {
                 "operator" : "in", 
-                "docProp" : "stateHistory.0.stateId", 
-                "value" : "$self.responsibleStates"
+                "docProp" : "offeringId", 
+                "value" : "$self.involvedInOfferingIds"
             }, 
+            "rowStyle" : "$pos($parent.responsibleForStateIds,$.stateHistory.0.stateId)>-1?{fontWeight:'bold'}:null", 
             "menu" : [
                 {
                     "label" : "Filter", 

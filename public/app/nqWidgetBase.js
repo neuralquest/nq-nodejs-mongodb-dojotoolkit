@@ -11,7 +11,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         'dijit/form/ValidationTextBox',
         "dijit/form/RadioButton",
         'dijit/Toolbar',
-        'dgrid/OnDemandGrid',
+        'dijit/Tooltip',
+        'dijit/form/MultiSelect',
         'dojox/form/CheckedMultiSelect',
         "dijit/form/Button",
         'dgrid/Keyboard',
@@ -26,7 +27,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			arrayUtil, domAttr, registry, Memory, domStyle, css3, has, date, Uploader,
              Select, DateTextBox, NumberTextBox, Textarea,Menu,  MenuItem, DropDownMenu, PopupMenuItem, CheckedMenuItem,
              CheckBox, Editor, CurrencyTextBox, ValidationTextBox, RadioButton,
-             Toolbar, OnDemandGrid, CheckedMultiSelect, Button, Keyboard,
+             Toolbar, Tooltip, MultiSelect, CheckedMultiSelect, Button, Keyboard,
              Selection, DnD, Source, DijitRegistry, request){
 	return declare("nqWidgetBase", [_WidgetBase], {
         widget: null,
@@ -59,6 +60,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 			this.own(this.pane);
 		},
         postCreate: function(){
+            var self = this;
             this.inherited(arguments);
             if(this.schema){
                 if(this.widTot>1) {
@@ -67,6 +69,15 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                     domStyle.set(this.headerDivNode, 'display', 'block');//set the header node, created in the superclass,  to visible
                 }
                 this.pageHelpTextDiv.innerHTML = this.schema.description;
+                new Tooltip({
+                    //connectId: ["css_id"],
+                    connectId: [self.pane.containerNode],
+                    //label: 'Hi'
+                    selector: "td",
+                    getContent: function(matchedNode){
+                        return matchedNode.getAttribute("helpText");
+                    }
+                });
             }
         },
 		resize: function(changeSize){
@@ -94,7 +105,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         },
         renderForm: function(properties, doc, node, path){
             var self = this;
-            var tableNode = domConstruct.create('table', null/*{style:{'border-top-style':'solid', 'border-top-width':'thin', 'border-top-color':'#a8c1eb'}}*/, node);
+            var tableNode = domConstruct.create('table', {style:{'border-top-style':'solid', 'border-top-width':'thin', 'border-top-color':'#a8c1eb'}}, node);
             //Collect the properties in a three dimensional array: [rows, columns, propNameArr]
             var rowColProperties = [];
             for(var attrName in properties) {
@@ -136,19 +147,19 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 else domConstruct.create("td", null,trDom);
 
                                 //The input td
-                                var inputNode = domConstruct.create("td", {style:{'padding-left': '5px'}}, trDom);
+                                var helpText = self.getHelpText(attrProps, attrName);
+                                var inputNode = domConstruct.create("td", {helpText: helpText, style:{'padding-left': '5px', width:'100%'}}, trDom);
                                 var pathArr = [];
                                 if(path) pathArr = path.split('.');
                                 pathArr.push(attrName);
                                 self.renderValue(attrProps, attrName, doc, inputNode, pathArr.join('.'));
 
                                 //The help td
-                                //domConstruct.create("img",{class:'helpIcon'}, trDom);
-                                var helpTextTd = domConstruct.create("td", {class:'helpTextInvisible'},trDom);
-                                helpTextTd.appendChild(self.getHelpTextDiv(attrProps, attrName));
+                                domConstruct.create("img",{class:'smallHelp helpTextInvisible'}, trDom);
+                                //var helpTextTd = domConstruct.create("td", {class:'helpTextInvisible'},trDom);
+                                //helpTextTd.appendChild(self.makeToolTip(attrProps, attrName));
                             }
                         }
-
                     }
                 }
             }
@@ -166,9 +177,13 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             }
             if(readOnly) { // readOnly
                 domAttr.set(node, 'name', attrName); //give it a name so we know where to get the value
-                if('style' in attrProps) domAttr.set(node, 'style', attrProps.style);
+                //if('style' in attrProps) domAttr.set(node, 'style', attrProps.style);
             }
-            
+            if('style' in attrProps){
+                var style = self.store.getValueByDotNotation3(doc, self.docId, attrProps.style);
+                if(style) domStyle.set(node, style);
+            }
+
             var dijitProperties = {
                 name: path,
                 value: value,
@@ -560,79 +575,66 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                         new Source(dndTbl, {skipForm: 'true', type: dijitProperties.attrName});
                     }
                     else if(attrProps.query){
+                        var childrenCollection = self.store.getCollectionForSubstitutedQuery(attrProps.query, this.docId, this.docId);
+                        data = [];
+                        childrenCollection.forEach(function (childObject) {
+                            data.push({id:childObject._id, label:childObject.name?childObject.name:childObject.title});
+                        });
 
-                        var clonedQuery = lang.clone(attrProps.query);
-                        var parentItem = this.store.cachingStore.getSync(this.docId);
-                        this.store.substituteVariablesInQuery(clonedQuery, parentItem, this.docId);
-                        var childrenFilter = self.store.buildFilterFromQuery(clonedQuery);
-                        // Create a new constructor by mixing in the components
-                        var CustomGrid = declare([OnDemandGrid, Keyboard, Selection, DnD, DijitRegistry]);
-                        var columns = [{
-                            label: 'Name',
-                            field: 'name',
-                            sortable: true
-                        }];
-                        dijit = new CustomGrid({
-                            name: dijitProperties.attrName,
-                            collection: self.store.filter(childrenFilter),
-                            loadingMessage: 'Loading data...',
-                            noDataMessage: 'No results found.',
-                            columns: columns,
-                            showHeader: false,
-                            // for Selection; only select a single row at a time
-                            selectionMode: 'single',
-                            // for Keyboard; allow only row-level keyboard navigation
-                            cellNavigation: false,
-                            className: "dgrid-autoheight nqTransparent"//,
-                            //declaredClass: 'OnDemandGrid' //need this for recognition later on
-                        }, domConstruct.create("div",null, node));
+                        if(data.length == 0) {
+                            node.innerHTML = '[no options]';
+                        }
+                        if(data.length == 1) {
+                            if('displayIcon' in attrProps) {
+                                var iconDiv = self.getIconDivForObject(data);
+                                node.appendChild(iconDiv);
+                            }
+                            else node.innerHTML = data[0].label;
+                        }
+                        else if(data.length > 1){
+                            //data.push({id:'null',label:"<img width='16px' height='16px' src='images/one.jpg'/>Ecuador"});
+
+                            if(data.length < 5){
+                                var selectStore = new Memory({
+                                    data: data
+                                });
+                                var editorArgs = {
+                                    value: value?value:"",
+                                    id: node.id,
+                                    store: selectStore,
+                                    idProperty: "id",
+                                    labelAttr: "label",
+                                    name: dijitProperties.name,
+                                    multiple: true
+                                    //dropDown: true
+                                };
+                                dijit = new CheckedMultiSelect(editorArgs, domConstruct.create("div", null, node));
+                            }
+                            else {
+                                var selectElement = domConstruct.create("select", null, node);
+                                for (var i in data) {
+                                    var opData = document.createElement('option');
+                                    opData.innerHTML =data[i].label;
+                                    opData.value = data[i].id;
+                                    selectElement.appendChild(opData);
+                                }
+                                var editorArgs = {
+                                    value: value ? value : "null",
+                                    id: node.id,
+                                    name: dijitProperties.name,
+                                    store: selectStore,
+                                    style: "width:100%;",
+                                    idProperty: "id",
+                                    labelAttr: 'label',
+                                    maxHeight: -1, // tells _HasDropDown to fit menu within viewport
+                                    fetchProperties: {sort: [{attribute: "name"}]},
+                                    queryOptions: {ignoreCase: true},//doesnt work,
+                                    multiple: true
+                                };
+                                dijit = new MultiSelect(editorArgs, selectElement);
+                            }
+                        }
                     }
-                    /*
-                     if(itemProperties.properties) {
-                     var subDocStore = new nqSubDocStore({
-                     idProperty: "name",
-                     data: value?value:[]
-                     });
-                     //var subDocStore = new nqSubDocStore({data:parentDoc.insets});
-                     var docCol = subDocStore.filter();
-                     //docCol = new QueryResults(parentDoc.insets?parentDoc.insets:[]);
-                     //this.grid.set('collection', docCol);
-                     // Create a new constructor by mixing in the components
-                     var CustomGrid = declare([OnDemandGrid, Keyboard,  DnD, DijitRegistry]);
-                     var columns = [{
-                     label: 'Label',
-                     field: 'title',
-                     sortable: true,
-                     renderCell: function(object, value, gridNode, options) {
-                     if(!object) html.set(node, '{}');
-                     else self.renderForm(itemProperties.properties, object, owner, gridNode);
-                     //else html.set(node, JSON.stringify(object, null, 4));
-                     }//,
-                     //editor: 'text'
-                     }];
-                     dijit = new CustomGrid({
-                     name: attrName,
-                     collection: docCol,
-                     loadingMessage: 'Loading data...',
-                     noDataMessage: 'No results found.',
-                     columns: columns,
-                     showHeader: false,
-                     // for Selection; only select a single row at a time
-                     selectionMode: 'single',
-                     // for Keyboard; allow only row-level keyboard navigation
-                     cellNavigation: false,
-                     className: "dgrid-autoheight nqTransparent",
-                     declaredClass: 'OnDemandGrid' //need this for recognition later on
-                     }, domConstruct.create("div",null, node));
-                     /*var attrProps = itemProperties.properties;
-                     if(value) value.forEach(function(valueObj){
-                     self.renderForm(attrProps, valueObj, owner, node);
-                     });* /
-                     }*/
-
-                }
-                else {
-                    dijit = new Select(dijitProperties, domConstruct.create("input", null, node));
                 }
             }
             return dijit;
@@ -660,7 +662,6 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         //------------------------------------------------------------
         renderValueButton: function(attrProps, node, dijitProperties){
             var self = this;
-            if(dijitProperties.readOnly) return null;
             var readOnly = dijitProperties.readOnly;
             var buttonProps = {
                 label: attrProps.label,
@@ -832,25 +833,35 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 if(menuItem) parent.addChild(menuItem);
             });
         },
-        getHelpTextDiv: function(attrProps, attrName){
+        getHelpText: function(attrProps, attrName){
             var div = domConstruct.create("div");
-            if('title' in attrProps) domConstruct.create("p", {style:{'font-weight':'bold'},innerHTML:attrProps.title}, div);
-            if('description' in attrProps) domConstruct.create('div', {innerHTML:attrProps.description}, div);
+            var firstLine = '';
+            if('title' in attrProps) firstLine = '<b>'+attrProps.title+': </b>';
+            if('description' in attrProps) firstLine += attrProps.description;
+            domConstruct.create("p", {innerHTML:firstLine}, div);
             var ulDiv = domConstruct.create("ul",null, div);
             if(attrName) domConstruct.create("li",{innerHTML: 'Property Name: '+ attrName}, ulDiv);
+            if(attrProps.type) domConstruct.create("li",{innerHTML: 'Type: '+ attrProps.type}, ulDiv);
+            if(attrProps.media) domConstruct.create("li",{innerHTML: 'Media Type: '+ attrProps.media.mediaType}, ulDiv);
             if(attrProps.readOnly) domConstruct.create("li",{innerHTML: 'Read Only: '+ attrProps.readOnly}, ulDiv);
             if(attrProps.maxLength) domConstruct.create("li",{innerHTML: 'Maximum Length: '+ attrProps.maxLength}, ulDiv);
             if(attrProps.minLength) domConstruct.create("li",{innerHTML: 'Minimum Length: '+ attrProps.minLength}, ulDiv);
             if(attrProps.maximum) domConstruct.create("li",{innerHTML: 'Maximum: '+ attrProps.maximum}, ulDiv);
             if(attrProps.minimum) domConstruct.create("li",{innerHTML: 'Minimum: '+ attrProps.minimum}, ulDiv);
+            if(attrProps.pattern) domConstruct.create("li",{innerHTML: 'Pattern: '+ attrProps.pattern}, ulDiv);
             //if(attrProps.col) domConstruct.create("li",{innerHTML: 'Column: '+ attrProps.col}, ulDiv);
             //if(attrProps.row) domConstruct.create("li",{innerHTML: 'Row: '+ attrProps.row}, ulDiv);
-            //if(attrProps.style) domConstruct.create("li",{innerHTML: 'Field Style: '+ attrProps.style}, ulDiv);
-            //if(attrProps.labelStyle) domConstruct.create("li",{innerHTML: 'Label Style: '+ attrProps.labelStyle}, ulDiv);
+            if(attrProps.style) domConstruct.create("li",{innerHTML: 'Field Style: '+ JSON.stringify(attrProps.style, null, 4)}, ulDiv);
+            if(attrProps.labelStyle) domConstruct.create("li",{innerHTML: 'Label Style: '+ JSON.stringify(attrProps.labelStyle, null, 4)}, ulDiv);
             if(attrProps.default) domConstruct.create("li",{innerHTML: 'Default: '+ attrProps.default}, ulDiv);
             //if(attrProps.styleColumn) domConstruct.create("li",{innerHTML: 'Column Style: '+ attrProps.styleColumn}, ulDiv);
             //if(attrProps.displayIcon) domConstruct.create("li",{innerHTML: 'Display Icon: '+ attrProps.displayIcon?'true':'false'}, ulDiv);
-        return div;
+            if(attrProps.query) {
+                domConstruct.create("p",{innerHTML: 'Query: '}, div);
+                domConstruct.create("pre",{innerHTML: JSON.stringify(attrProps.query, null, 4) }, div);
+            }
+
+            return div.innerHTML;
         },
         XsetFromValues: function(properties, doc, node){
             var self = this;

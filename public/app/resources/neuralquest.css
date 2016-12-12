@@ -49,7 +49,7 @@ h5:before {counter-increment: h5; content: counter(h2) "." counter(h3) "." count
 h6:before {counter-increment: h6; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". "}
 h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.nocount:before, h6.nocount:before { content: ""; counter-increment: none }
 
-
+.soria .dijitTooltipContainer {font-size: 90%; background-color: rgb(252, 252, 181);}
 
 /*our icons*/
 .editIcon {background-image: url('img/Neuralquest/edit.png'); background-repeat: no-repeat; width: 16px; height: 16px; background-position: center center;}
@@ -88,7 +88,7 @@ div.floatright iframe {
   -ms-transform-origin: top left;
   transform-origin: top left;
 }
-
+.dijitTooltipContents {font-size: 90%; background-color: rgb(252, 252, 181);}
 /*used for todo floats* /
 .todofloatright { display:none; float: right; width: 300px; margin: 0 0 10px 10px; background-color: fff; padding: 3px; border-top: 1px solid #999; border-right: 2px solid #555; border-bottom: 2px solid #555; border-left: 1px solid #999; clear:right }
 div.todofloatright p {font-size: 90%; background-color: rgb(252, 252, 181);}

@@ -19,18 +19,18 @@ Author: Mike Wilcox, SitePen Inc.
 /****************************************************************************************************
 					Large Form Boxes
 *****************************************************************************************************/
-
-.soria .nqField.dijitTextBox,				/* TextBox, ValidationTextBox, Date Box */ 
-.soria .nqField.dijitSpinner,				/* Number Spinner			*/
-.nqField.dijitTextBox.dijitTimeTextBox,     /* Time Text Box 			*/
+/*
+.soria .nqField.dijitTextBox,				/* TextBox, ValidationTextBox, Date Box * /
+.soria .nqField.dijitSpinner,				/* Number Spinner			* /
+.nqField.dijitTextBox.dijitTimeTextBox     /* Time Text Box 			* /
 .soria .nqField.dijitTextArea
 {
 	width:200px !important;
 	margin:3px 0 0 0 !important;
-}
+}*/
 .dj_ie6 .soria .nqField.dijitTextArea
 {		
-	width:200px !important;				/* TextArea is a different size in IE6	*/
+/*	width:200px !important;		*/		/* TextArea is a different size in IE6	*/
 }
 .soria .nqField.dijitSpinner
 {
@@ -66,19 +66,23 @@ Author: Mike Wilcox, SitePen Inc.
 					Nq Additions
 					TODO add nqField
 ******************************************************************************************************/
-.soria .dijitTextBox,
-.soria .dijitSelect,
-.soria .dijitSelect .dijitButtonContents,
-.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{
-    /*width: 15em;*/
+
+.dijitSelect,
+.dojoxCheckedMultiSelectWrapper,
+.dijitMultiSelect{
     width:200px !important;
 }
+.dijitTextBox{
+    width: 100%
+}
+
 
 .soria .dijitTextBox,
 .soria .dijitSelect,
 .soria .dijitSelect .dijitButtonContents,
 .soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper,
-.dijitEditor{
+.dijitEditor,
+.dijitMultiSelect{
 	border: solid;
     border-color: #e6f2ff;              /*give dijits a blue border*/
     border-width: thin;
@@ -89,11 +93,12 @@ Author: Mike Wilcox, SitePen Inc.
 .soria .dijitSelect:hover,
 .soria .dijitSelect:hover .dijitButtonContents:hover,
 .soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper:hover,
-.dijitEditor:hover{
+.dijitEditor:hover,
+.dijitMultiSelect:hover{
 	background: #fafcff;                /*give dijits a blue hover background*/
 }
                                         /*MULTI SELECT*/
-.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper{
+.soria .dojoxCheckedMultiSelect .dojoxCheckedMultiSelectWrapper, .dijitMultiSelect{
     overflow:hidden;                     /*remove overflow from checked multi select*/
 	padding-right:0px;
 }
