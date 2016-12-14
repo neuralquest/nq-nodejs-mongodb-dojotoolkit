@@ -47,8 +47,8 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
 		buildRendering: function(){
 			this.inherited(arguments);
 			this.domNode = domConstruct.create("div");
-            this.headerDivNode = domConstruct.create('div', null, this.domNode);//placeholder for header
-            this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisible', 'style' : { 'padding': '10px'} }, this.domNode);//placeholder for the helptext
+            this.headerDivNode = domConstruct.create('div', {style:{'font-size': '90%'}}, this.domNode);//placeholder for header
+            this.pageHelpTextDiv = domConstruct.create('div', {'class': 'helpTextInvisible'}, this.domNode);//placeholder for the helptext
 			this.pageToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.domNode);//placeholder for the page toolbar
 			this.editorToolbarDivNode = domConstruct.create('div', {'style' : { 'display': 'none', 'min-height': '23px'} }, this.domNode);//placeholder for the editor toolbar
 			this.pane = new ContentPane( {
@@ -70,9 +70,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                 }
                 this.pageHelpTextDiv.innerHTML = this.schema.description;
                 new Tooltip({
-                    //connectId: ["css_id"],
                     connectId: [self.pane.containerNode],
-                    //label: 'Hi'
                     selector: "td",
                     getContent: function(matchedNode){
                         return matchedNode.getAttribute("helpText");
@@ -105,7 +103,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         },
         renderForm: function(properties, doc, node, path){
             var self = this;
-            var tableNode = domConstruct.create('table', {style:{'border-top-style':'solid', 'border-top-width':'thin', 'border-top-color':'#a8c1eb'}}, node);
+            var tableNode = domConstruct.create('table', {style:{width:'100%','border-top-style':'solid', 'border-top-width':'thin', 'border-top-color':'#a8c1eb'}}, node);
             //Collect the properties in a three dimensional array: [rows, columns, propNameArr]
             var rowColProperties = [];
             for(var attrName in properties) {
@@ -155,7 +153,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                                 self.renderValue(attrProps, attrName, doc, inputNode, pathArr.join('.'));
 
                                 //The help td
-                                domConstruct.create("img",{class:'smallHelp helpTextInvisible'}, trDom);
+                                //domConstruct.create("img",{class:'smallHelp helpTextInvisible'}, trDom);
                                 //var helpTextTd = domConstruct.create("td", {class:'helpTextInvisible'},trDom);
                                 //helpTextTd.appendChild(self.makeToolTip(attrProps, attrName));
                             }
@@ -197,7 +195,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
             else if(attrProps.type == 'boolean') dijit = self.renderValueBoolean(attrProps, node, dijitProperties);
             else if(attrProps.type == 'array') dijit = self.renderValueArray(attrProps, node, dijitProperties);
             else if(attrProps.type == 'object') dijit = self.renderValueObject(attrProps, node, dijitProperties);
-            else if(attrProps.type == 'button') dijit = self.renderValueButton(attrProps, node, dijitProperties);
+            else if(attrProps.type == 'button') dijit = self.renderValueButton(attrProps, node, dijitProperties, doc);
             else if(attrProps.type == 'file') dijit = self.renderValueFile(attrProps, node, dijitProperties);
             
  
@@ -551,7 +549,7 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
                             }
                             else {
                                 var docObj = self.store.cachingStore.getSync(id);
-                                node.innerHTML = docObj.name;
+                                domConstruct.create("p", {innerHTML:docObj.name}, node);
                             }
                         });
                     }
@@ -660,14 +658,16 @@ define(['dojo/_base/declare',  'dojo/dom-construct', "dijit/_WidgetBase", 'dijit
         //------------------------------------------------------------
         // Button
         //------------------------------------------------------------
-        renderValueButton: function(attrProps, node, dijitProperties){
+        renderValueButton: function(attrProps, node, dijitProperties, doc){
             var self = this;
-            var readOnly = dijitProperties.readOnly;
+            var style = self.store.getValueByDotNotation3(doc, self.docId, attrProps.style);
+
             var buttonProps = {
                 label: attrProps.label,
                 iconClass: attrProps.iconClass,
                 attrProps: attrProps,
-                disabled: readOnly
+                disabled: dijitProperties.readOnly,
+                style: style
             };
             var dijit = new Button(buttonProps, domConstruct.create("input", null, node));
             this.own(dijit.on('click', function(evt){

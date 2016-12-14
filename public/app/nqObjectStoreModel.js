@@ -153,11 +153,11 @@ define([
 				return childrenCollection.fetch().then(function (childObjects) {
                     var correctChildObjArr = [];
                     // in the case of in array, we have reorder because the query returns the natural order
-                    if('in' in query.where){
+                    if('operator' in query.where && query.where.operator == 'in'){
                         var properOrderArr = [];
-                        var qualifier = query.where.in;
-                        var key = Object.keys(qualifier)[0];
-                        var value = qualifier[key];
+                        //var qualifier = query.where.in;
+                        //var key = query.where.docProp;
+                        var value = query.where.value;
                         if(value.substring(0, 1) == '$') {
                             var values = value.split('.');
                             if(values.length>1) {

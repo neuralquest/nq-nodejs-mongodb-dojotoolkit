@@ -24,7 +24,7 @@ define(['dojo/_base/declare', "dojo/_base/lang", "app/nqWidgetBase","dojo/when",
                 }
             },
             _setDocIdAttr: function(docId) {
-                if (docId == this.docId) return;
+                //if (docId == this.docId) return;
                 var self = this;
                 this.inherited(arguments);
                 if(!this.docId) return;

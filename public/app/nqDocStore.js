@@ -436,6 +436,7 @@ function(declare, lang, array, when, all, registry, request,
             if(path == "$docId") return obj._id; //TODO replace docId with $self._id
             if(path == "$userId") return nq.getUser()._id;
             if(path == "$ownerId") return nq.getOwner()._id;
+            if(path == "$orgUnitId") return nq.getOrgUnit()._id;
 
             var pos = path.search('==');
             if(pos == -1) pos = path.search('>');
@@ -493,6 +494,7 @@ function(declare, lang, array, when, all, registry, request,
 
             if(path == "$userId") return nq.getUser()._id;
             if(path == "$ownerId") return nq.getOwner()._id;
+            if(path == "$orgUnitId") return nq.getOrgUnit()._id;
 
             var pos = path.search('==');
             if(pos == -1) pos = path.search('>');
@@ -501,7 +503,7 @@ function(declare, lang, array, when, all, registry, request,
                 var rightString = path.substring(pos);
                 var leftValue = self.getValueByDotNotation3(selfObj, parentObj, leftString);
                 if(typeof(leftValue) == 'string') leftValue = "'"+leftValue+"'";
-                var res = eval(leftValue+rightString);
+                var res = eval(leftValue+rightString); //TODO Red Flag
                 return res;
             }
             else if (path.startsWith('$get(')) {
@@ -538,6 +540,10 @@ function(declare, lang, array, when, all, registry, request,
                 if(!current) return;
                 if(part == '$') current = selfObj;
                 else if(part == '$parent') current = parentObj;
+                else if(part == '$orgUnit') {
+                    var unitId = nq.getOrgUnit()._id;
+                    current = self.cachingStore.getSync(unitId);
+                }
                 else current = current[part];
             });
             return current;

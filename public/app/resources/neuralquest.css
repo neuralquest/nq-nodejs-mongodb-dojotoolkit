@@ -18,9 +18,10 @@ html, body, #fullPage, #placholder {width: 100%;height: 100%;overflow: hidden;pa
 /* add padding to each contentpane inside the tab container, and scrollbar if necessary 
 .dojoTabPane {padding : 10px 10px 10px 10px; overflow: auto;}*/
 
+/*.backgroundClass{linear-gradient(#CDDDE9, white); background-size:300px; background-repeat-y:no-repeat;}*/
 .backgroundClass{background: #FFFFFF url(img/Neuralquest/testsBodyBg.gif) repeat-x scroll left top;}
-.headline{position:absolute;top:30%; width:100%;text-align:center;font-size:40px;font-weight:bold;color:white;text-shadow: 2px 2px 4px black}
-.helpTextInvisible {color:navy; display:none;}
+.headline{position:absolute; top:30%; width:100%;text-align:center;font-size:40px;font-weight:bold;color:white;text-shadow: 2px 2px 4px black}
+.helpTextInvisible {display:none;  background-color: rgb(252, 252, 181); padding: 10px; }
 
 p,ul,ol {text-align: justify; margin-top: 0em; margin-bottom: 0em; font-family: sans-serif;}
 ul,ol {margin-left: -1em;}

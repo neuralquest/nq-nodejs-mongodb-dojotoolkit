@@ -15,6 +15,7 @@ function(arrayUtil, ready, topic, on, hash, registry,
     var nqStore = new nqDocStore();
     var user = {};
     var owner = {};
+    var orgUnit = {};
     ready(function () {
         request.get('/hello').then(function (data) {
             setUser(dojo.fromJson(data));
@@ -68,9 +69,11 @@ function(arrayUtil, ready, topic, on, hash, registry,
             if(nqStore.isASync(state.docId, '56f870a55dde184ccfb9fc6c')){// Owners
                 var ownerDoc = nqStore.cachingStore.getSync(state.docId);
                 setOwner(ownerDoc);
+                setOrgUnit({_id:null});
             }
             else if(nqStore.isASync(state.docId, '574237133c6d3cd598a5a30d')){// Organizational Units
                 var orgUnit = nqStore.cachingStore.getSync(state.docId);
+                setOrgUnit(orgUnit);
                 var ownerDoc = nqStore.cachingStore.getSync(orgUnit.ownerId);
                 setOwner(ownerDoc);
             }
@@ -295,6 +298,15 @@ function(arrayUtil, ready, topic, on, hash, registry,
     lang.setObject("nq.getOwner", getOwner);//make the function globally accessible
     function getOwner(){
         return owner;
+    }
+    lang.setObject("nq.setOrgUnit", setOrgUnit);//make the function globally accessible
+    function setOrgUnit(_orgUnit){
+        orgUnit = _orgUnit;
+        //domAttr.set('orgUnitNameDiv', 'innerHTML', _orgUnit.name);
+    }
+    lang.setObject("nq.getOrgUnit", getOrgUnit);//make the function globally accessible
+    function getOrgUnit(){
+        return orgUnit;
     }
     lang.setObject("nq.getState", getState);//make the function globally accessible
     function getState(level){

@@ -315,6 +315,7 @@
             "title" : "Root Query", 
             "type" : "object", 
             "properties" : {
+                "#ref" : "#/definitions/address", 
                 "queryName" : {
                     "title" : "Query Name", 
                     "type" : "string", 
@@ -536,6 +537,108 @@
             "type" : "array", 
             "items" : {
                 "type" : "string"
+            }
+        }
+    }, 
+    "definitions" : {
+        "query" : {
+            "queryName" : {
+                "title" : "Query Name", 
+                "type" : "string", 
+                "maxLength" : NumberInt(1000), 
+                "minLength" : NumberInt(0)
+            }, 
+            "from" : {
+                "title" : "From", 
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}", 
+                "query" : {
+                    "from" : "classes"
+                }
+            }, 
+            "where" : {
+                "title" : "Where", 
+                "type" : "object", 
+                "properties" : {
+                    "operator" : {
+                        "title" : "Operator", 
+                        "type" : "string", 
+                        "enum" : [
+                            "eq", 
+                            "in", 
+                            "and", 
+                            "or"
+                        ]
+                    }, 
+                    "docProp" : {
+                        "title" : "Document Property", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(1000), 
+                        "minLength" : NumberInt(0)
+                    }, 
+                    "value" : {
+                        "title" : "Value", 
+                        "type" : "string", 
+                        "maxLength" : NumberInt(1000), 
+                        "minLength" : NumberInt(0)
+                    }
+                }, 
+                "additionalProperties" : false
+            }, 
+            "recursive" : {
+                "title" : "Recursive Query Name", 
+                "type" : "string", 
+                "maxLength" : NumberInt(1000), 
+                "minLength" : NumberInt(0)
+            }, 
+            "pageId" : {
+                "title" : "Page", 
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}", 
+                "query" : {
+                    "from" : "56f87ec55dde184ccfb9fc74"
+                }
+            }, 
+            "icon" : {
+                "title" : "Icon", 
+                "type" : "string", 
+                "maxLength" : NumberInt(2000), 
+                "minLength" : NumberInt(0), 
+                "media" : {
+                    "binaryEncoding" : "base64", 
+                    "type" : "image/png"
+                }
+            }, 
+            "menu" : {
+                "title" : "Menu", 
+                "type" : "array", 
+                "items" : {
+                    "type" : "object", 
+                    "properties" : {
+                        "label" : {
+                            "title" : "Label", 
+                            "type" : "string", 
+                            "maxLength" : NumberInt(1000), 
+                            "minLength" : NumberInt(0)
+                        }, 
+                        "iconClass" : {
+                            "title" : "Icon Class", 
+                            "type" : "string", 
+                            "maxLength" : NumberInt(1000), 
+                            "minLength" : NumberInt(0)
+                        }, 
+                        "action" : {
+                            "title" : "Action", 
+                            "type" : "string", 
+                            "enum" : [
+                                "add", 
+                                "delete", 
+                                "login", 
+                                "signup"
+                            ]
+                        }
+                    }
+                }
             }
         }
     }, 
@@ -834,7 +937,7 @@
 { 
     "_id" : ObjectId("574234113c6d3cd598a5a30b"), 
     "docType" : "class", 
-    "title" : "Offerings", 
+    "title" : "Processes", 
     "description" : "<p>Offerings</p>", 
     "type" : "object", 
     "properties" : {
@@ -843,21 +946,16 @@
             "type" : "string", 
             "pattern" : "[a-f0-9]{24}", 
             "query" : {
-                "from" : "5747254b3c6d3cd598a5a379", 
-                "where" : {
-                    "operator" : "eq", 
-                    "docProp" : "ownerId", 
-                    "value" : "$docId"
-                }
+                "from" : "5747254b3c6d3cd598a5a379"
             }
         }, 
         "fromDate" : {
-            "title" : "Date", 
+            "title" : "From Date", 
             "type" : "string", 
             "format" : "date-time"
         }, 
         "toDate" : {
-            "title" : "Date", 
+            "title" : "To Date", 
             "type" : "string", 
             "format" : "date-time"
         }, 
@@ -873,7 +971,7 @@
                 "where" : {
                     "operator" : "eq", 
                     "docProp" : "ownerId", 
-                    "value" : "$docId"
+                    "value" : "$ownerId"
                 }
             }, 
             "minItems" : NumberInt(0), 
@@ -906,19 +1004,6 @@
                 "from" : "57343c283c6d3cd598a5a2e9"
             }
         }, 
-        "responsibleForStateIds" : {
-            "type" : "array", 
-            "title" : "Responsible for States", 
-            "items" : {
-                "type" : "string", 
-                "pattern" : "[a-f0-9]{24}"
-            }, 
-            "query" : {
-                "from" : "5745eaa53c6d3cd598a5a371"
-            }, 
-            "minItems" : NumberInt(0), 
-            "uniqueItems" : true
-        }, 
         "involvedInOfferingIds" : {
             "type" : "array", 
             "title" : "Involved In Offerings", 
@@ -928,6 +1013,19 @@
             }, 
             "query" : {
                 "from" : "574234113c6d3cd598a5a30b"
+            }, 
+            "minItems" : NumberInt(0), 
+            "uniqueItems" : true
+        }, 
+        "responsibleForStateIds" : {
+            "type" : "array", 
+            "title" : "Responsible for States", 
+            "items" : {
+                "type" : "string", 
+                "pattern" : "[a-f0-9]{24}"
+            }, 
+            "query" : {
+                "from" : "5745eaa53c6d3cd598a5a371"
             }, 
             "minItems" : NumberInt(0), 
             "uniqueItems" : true
@@ -2916,10 +3014,11 @@
 { 
     "_id" : ObjectId("5777a04e3c6d3cd598a5a392"), 
     "docType" : "object", 
-    "name" : "Service Request Recieved Table View", 
+    "name" : "Personal Service Request Recieved Table View", 
     "query" : [
         {
             "queryName" : "seviceRequests", 
+            "description" : "<p>Select Agreements where sellerId = $parent</p>", 
             "select" : "name", 
             "from" : "574225cb3c6d3cd598a5a305", 
             "where" : {
@@ -2927,6 +3026,7 @@
                 "docProp" : "sellerId", 
                 "value" : "$docId"
             }, 
+            "rowStyle" : "$isA($.stateHistory.0.stateId,5747254b3c6d3cd598a5a379)==true?{fontWeight:'bold'}:null", 
             "menu" : [
                 {
                     "label" : "Filter", 
@@ -3007,7 +3107,7 @@
 { 
     "_id" : ObjectId("577853123c6d3cd598a5a396"), 
     "docType" : "object", 
-    "name" : "Service Request Table Page", 
+    "name" : "Personal Service Request Table Page", 
     "divider" : "Vertical", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
@@ -3040,7 +3140,7 @@
 { 
     "_id" : ObjectId("57785c393c6d3cd598a5a398"), 
     "docType" : "object", 
-    "name" : "Service Request Tab Page", 
+    "name" : "Personal Service Request Tab Page", 
     "divider" : "None", 
     "accordionOrTab" : "Tabs", 
     "tabs" : [
@@ -3072,7 +3172,7 @@
 { 
     "_id" : ObjectId("577862b83c6d3cd598a5a39a"), 
     "docType" : "object", 
-    "name" : "Service Request Form View", 
+    "name" : "Personal Service Request Form View", 
     "type" : "object", 
     "rootQuery" : {
         "from" : "574225cb3c6d3cd598a5a305", 
@@ -3117,7 +3217,7 @@
         "newStateButton" : {
             "type" : "button", 
             "label" : "Reply", 
-            "Xstyle" : "$pos($parent.responsibleForStateIds,$.stateHistory.0.stateId)==-1?{display:'none'}:null", 
+            "style" : "$isA($.stateHistory.0.stateId,5747254b3c6d3cd598a5a379)==true?null:{display:'none'}", 
             "readOnly" : false, 
             "action" : {
                 "actionType" : "insertSubDocArray", 
@@ -3135,11 +3235,6 @@
                     "date" : {
                         "readOnly" : true, 
                         "default" : "$now"
-                    }, 
-                    "userId" : {
-                        "title" : "By", 
-                        "readOnly" : true, 
-                        "default" : "$userId"
                     }, 
                     "description" : {
                         "title" : "Reply", 
@@ -3467,7 +3562,7 @@
             "pageId" : "57b7624f2d8cd20920e6d845"
         }, 
         {
-            "name" : "Offerings", 
+            "name" : "Processes", 
             "pageId" : "57b762622d8cd20920e6d849"
         }, 
         {
@@ -3942,7 +4037,7 @@
 { 
     "_id" : ObjectId("57b725d32d8cd20920e6d831"), 
     "docType" : "object", 
-    "name" : "Organizational Unit Tree View", 
+    "name" : "OrgUnit Tree View", 
     "type" : "object", 
     "rootQuery" : {
         "queryName" : "owner", 
@@ -4029,7 +4124,7 @@
 { 
     "_id" : ObjectId("57b729d52d8cd20920e6d835"), 
     "docType" : "object", 
-    "name" : "Offerings Tab Page", 
+    "name" : "Processes Tab Page", 
     "tabs" : [
         {
             "name" : "Offerings", 
@@ -4058,7 +4153,7 @@
 { 
     "_id" : ObjectId("57b72a022d8cd20920e6d837"), 
     "docType" : "object", 
-    "name" : "Organizational Unit Form Page", 
+    "name" : "OrgUnit Form Page", 
     "tabs" : [
         {
             "name" : "Organizational Units", 
@@ -4106,7 +4201,7 @@
 { 
     "_id" : ObjectId("57b72d062d8cd20920e6d83b"), 
     "docType" : "object", 
-    "name" : "Offering Form View", 
+    "name" : "Process Form View", 
     "type" : "object", 
     "rootQuery" : {
         "from" : "574234113c6d3cd598a5a30b", 
@@ -4151,7 +4246,7 @@
 { 
     "_id" : ObjectId("57b72d5e2d8cd20920e6d83d"), 
     "docType" : "object", 
-    "name" : "Organizational Unit Form View", 
+    "name" : "OrgUnit Form View", 
     "type" : "object", 
     "rootQuery" : {
         "from" : "574237133c6d3cd598a5a30d", 
@@ -4878,7 +4973,7 @@
             "pageId" : "57b7624f2d8cd20920e6d845"
         }, 
         {
-            "name" : "Offerings", 
+            "name" : "Processes", 
             "pageId" : "57b762622d8cd20920e6d849"
         }, 
         {
@@ -5424,6 +5519,7 @@
     "query" : [
         {
             "queryName" : "seviceRequests", 
+            "description" : "<p>Select Agreements where $parent = involvedInOffering</p>", 
             "select" : "name", 
             "from" : "574225cb3c6d3cd598a5a305", 
             "where" : {
@@ -5505,7 +5601,124 @@
                     "displayType" : "Table", 
                     "name" : "Backlog Table", 
                     "viewId" : "5844b6f580c94ccf01838ba6", 
-                    "pageId" : "57785c393c6d3cd598a5a398"
+                    "pageId" : "584fe41680c94ccf01838bac"
+                }
+            ]
+        }
+    ], 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "56f87ec55dde184ccfb9fc74"
+}
+{ 
+    "_id" : ObjectId("584fe37f80c94ccf01838baa"), 
+    "docType" : "object", 
+    "name" : "OrgUnit Service Request Form View", 
+    "type" : "object", 
+    "rootQuery" : {
+        "from" : "574225cb3c6d3cd598a5a305", 
+        "where" : {
+            "operator" : "eq", 
+            "docProp" : "_id", 
+            "value" : "$docId"
+        }
+    }, 
+    "properties" : {
+        "_id" : {
+
+        }, 
+        "buyerId" : {
+            "title" : "From", 
+            "readOnly" : true, 
+            "displayIcon" : true
+        }, 
+        "sellerId" : {
+            "title" : "To", 
+            "readOnly" : "$self.$newDoc==true?false:true", 
+            "displayIcon" : true
+        }, 
+        "offeringId" : {
+            "readOnly" : "$self.$newDoc==true?false:true"
+        }, 
+        "assetId" : {
+            "title" : "Article", 
+            "readOnly" : "$self.$newDoc==true?false:true"
+        }, 
+        "name" : {
+            "title" : "Subject", 
+            "readOnly" : "$self.$newDoc==true?false:true", 
+            "style" : {
+                "font-weight" : "bold"
+            }
+        }, 
+        "description" : {
+            "title" : "Question", 
+            "readOnly" : "$self.$newDoc==true?false:true"
+        }, 
+        "newStateButton" : {
+            "type" : "button", 
+            "label" : "Reply", 
+            "style" : "$pos($orgUnit.responsibleForStateIds,$.stateHistory.0.stateId)==-1?{display:'none'}:null", 
+            "readOnly" : false, 
+            "action" : {
+                "actionType" : "insertSubDocArray", 
+                "arrayName" : "stateHistory"
+            }
+        }, 
+        "stateHistory" : {
+            "items" : {
+                "properties" : {
+                    "stateId" : {
+                        "readOnly" : true, 
+                        "readOnlyOnNew" : false, 
+                        "displayIcon" : true
+                    }, 
+                    "date" : {
+                        "readOnly" : true, 
+                        "default" : "$now"
+                    }, 
+                    "userId" : {
+                        "title" : "By", 
+                        "readOnly" : true, 
+                        "default" : "$userId", 
+                        "displayIcon" : true
+                    }, 
+                    "description" : {
+                        "title" : "Reply", 
+                        "readOnly" : true, 
+                        "readOnlyOnNew" : false
+                    }
+                }
+            }
+        }
+    }, 
+    "ownerId" : "575d4c3f2cf3d6dc3ed83148", 
+    "classId" : "573435c23c6d3cd598a5a2df"
+}
+{ 
+    "_id" : ObjectId("584fe41680c94ccf01838bac"), 
+    "docType" : "object", 
+    "name" : "OrgUnit Service Request Tab Page", 
+    "divider" : "None", 
+    "accordionOrTab" : "Tabs", 
+    "tabs" : [
+        {
+            "name" : "Service Request", 
+            "editMode" : true, 
+            "widgets" : [
+                {
+                    "displayType" : "Form", 
+                    "name" : "Service Request", 
+                    "viewId" : "584fe37f80c94ccf01838baa"
+                }
+            ]
+        }, 
+        {
+            "name" : "Process", 
+            "widgets" : [
+                {
+                    "displayType" : "Process Model", 
+                    "name" : "Process", 
+                    "viewId" : "57c0a53b2d8cd20920e6d84b"
                 }
             ]
         }

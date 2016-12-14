@@ -69,24 +69,25 @@
 	</head>
 	<body class="soria" >
 		<div  id="fullPage" data-dojo-id="fullPage" data-dojo-type="dijit.layout.BorderContainer" data-dojo-props="design:'headline', gutters:'false'" persist="true">	
+            <!-- background:linear-gradient(#CDDDE9, white); background-size:300px; background-repeat-y:no-repeat;-->
 			<div class="noOverFlow" style="padding: 0px;" id="placeholder" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center'" class="backgroundClass" ></div>
 			<div data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'bottom'" class="backgroundClass">
 				<div>
-					<button  style="float: left;" data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){nq.test();}">Test</button>
-					<button  style="float: left;" id="loginButtonId" data-dojo-type="dijit/form/Button" >Login</button>
-					<p style="float: left; margin-top: 5px;">User: <b id="userNameDiv"></b></p>
-					<p style="float: left; margin-top: 5px;">Owner: <b id="ownerNameDiv"></b></p>
-				</div>
-				<div style="float: right;">
-					<button id="saveButtonId" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true, iconClass:'saveIcon'">Save</button>
-					<button id="cancelButtonId" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true, iconClass:'cancelIcon'">Cancel</button>
-					<button id="helpButtonId" data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'helpIcon'" >Help</button>
-					<div style="float: right; width: 160px">
-						<img src="app/resources/img/Neuralquest/lefkasHome1.png" width="160px" height="24px">
-						<div style="position:absolute;top:10%; width:inherit;text-align:center;font-size:20px;font-weight:bold;color:white;text-shadow: 2px 2px 4px black">Neuralquest</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</body> 
+                    <!-- <button  style="float: left;" data-dojo-type="dijit/form/Button" data-dojo-props="onClick:function(){nq.test();}">Test</button>-->
+                    <button  style="float: left;" id="loginButtonId" data-dojo-type="dijit/form/Button" >Login</button>
+                    <p style="float: left; margin-top: 5px;">User: <b id="userNameDiv"></b></p>
+                    <p style="float: left; margin-top: 5px;">Owner: <b id="ownerNameDiv"></b></p>
+                </div>
+                <div style="float: right;">
+                    <button id="saveButtonId" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true, iconClass:'saveIcon'">Save</button>
+                    <button id="cancelButtonId" data-dojo-type="dijit/form/Button" data-dojo-props="disabled:true, iconClass:'cancelIcon'">Cancel</button>
+                    <button id="helpButtonId" data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'helpIcon'" >Help</button>
+                    <div style="float: right; width: 160px">
+                        <img src="app/resources/img/Neuralquest/lefkasHome1.png" width="160px" height="24px">
+                        <div style="position:absolute;top:10%; width:inherit;text-align:center;font-size:20px;font-weight:bold;color:white;text-shadow: 2px 2px 4px black">Neuralquest</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>
