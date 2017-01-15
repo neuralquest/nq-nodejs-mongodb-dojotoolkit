@@ -7,9 +7,15 @@ var ObjectID = require('mongodb').ObjectID;
 
 function check(){
     var checkPromises = [];
+
+    return rebuild().then(function(res){
+        return {documents:res};
+    });
+
+
     //checkPromises.push(cleanup());
-    checkPromises.push(findOrphans());
-    checkPromises.push(validateObjects());
+    //checkPromises.push(findOrphans());
+    //checkPromises.push(validateObjects());
     return all(checkPromises).then(function(checkArr){
         return {consistencyCheck:checkArr};
     });
@@ -73,52 +79,20 @@ function validateObjects(){
     });
 }
 /**/
-function cleanup2() {
+function rebuild() {
     return Documents.find({}).then(function (objectsArr) {
-        objectsArr.forEach(function (objDoc) {
-            if(objDoc.properties){
-                for(var key in objDoc.properties){
-                    var prop = objDoc.properties[key];
-                    if (prop.query && prop.query.Xwhere) {
-
-                        var unsetString = 'properties.'+ key +'.query.Xwhere';
-                        var unset = {};
-                        unset[unsetString] = 1;
-                        Documents.update(objDoc, unset);
-
-
-                        /*var where = prop.query.where;
-                        if(where.eq) {
-                            var unsetString = 'properties.'+ key +'.query.where.eq';
-                            var unset = {};
-                            unset[unsetString] = 1;
-                            Documents.update(objDoc, unset);
-                        }
-                        if (where.in) {
-                            var unsetString = 'properties.'+ key +'.query.where.in';
-                            var unset = {};
-                            unset[unsetString] = 1;
-                            Documents.update(objDoc, unset);
-                        }*/
-                    }
-                }
-            }
-
-            //console.log(objDoc);
-
-            //delete(objDoc.parentId);
-            //Documents.update(objDoc);
-            //var unset  = {'parentId': null};
-            //Documents.update(objDoc, unset);
-            //Documents.insert(objDoc);
-            //results.push(objDoc._id);
+        var results ={};
+        var count = 0;
+        objectsArr.forEach(function (doc) {
+            var id = doc._id;
+            delete(doc._id);
+            // 0 - 70 ok
+            //if(count>=4 && count<=6)results[id] = doc;
+            //if(count==6)results[id] = doc;
+            results[id] = doc;
+            count++;
         });
-        /*Documents.findById("570064645dde184ccfb9fc84").then(function(nqObj){
-         nqObj.owns = results;
-         console.log(nqObj);
-         Documents.update(nqObj);
-         });*/
-        return true;
+        return results;
     });
 }
 function cleanup1() {

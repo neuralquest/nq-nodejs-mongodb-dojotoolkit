@@ -275,7 +275,7 @@ define(['dojo/_base/declare', 'dojo/_base/array', "dojo/_base/lang",'dojo/dom-co
             'pageBreak', 'insertHorizontalRule', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'blockquote', '|',
             'justifyLeft', 'justifyRight', 'justifyCenter', 'justifyFull', 'toggleDir', '|',
             'bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'foreColor', 'hiliteColor', 'removeFormat', '|',
-            'insertEntity', 'smiley', 'createLink', 'insertanchor', 'unlink', //'insertImage', '||',
+            'insertEntity', 'smiley', 'createLink', 'insertanchor', 'unlink', 'insertImage', '||',
             //{name: 'nqLocalImage', uploadable: true, uploadUrl: '/upload', baseImageUrl: '/app/resources/Neuralquest'},
             //'fontName', {name: 'fontSize', plainText: true}, {name: 'formatBlock', plainText: true},// '||',
 

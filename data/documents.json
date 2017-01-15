@@ -295,7 +295,8 @@
             "title" : "Properties", 
             "type" : "object", 
             "patternProperties" : {
-                "^[a-z0-9]+$" : {
+                "pattern" : {
+                    "old" : "^[a-z0-9]+$", 
                     "anyOf" : [
                         {
                             "title" : "string", 
@@ -315,9 +316,15 @@
             "title" : "Root Query", 
             "type" : "object", 
             "properties" : {
-                "#ref" : "#/definitions/address", 
+                "ref" : "#/definitions/address", 
                 "queryName" : {
                     "title" : "Query Name", 
+                    "type" : "string", 
+                    "maxLength" : NumberInt(1000), 
+                    "minLength" : NumberInt(0)
+                }, 
+                "select" : {
+                    "title" : "Select", 
                     "type" : "string", 
                     "maxLength" : NumberInt(1000), 
                     "minLength" : NumberInt(0)
@@ -4556,12 +4563,8 @@
         "name" : {
 
         }, 
-        "stateHistory[date[0]]" : {
-            "title" : "Date", 
-            "type" : "string", 
-            "format" : "date-time"
-        }, 
-        "stateHistory[state[0]]" : {
+        "stateHistory" : {
+            "old" : "stateHistory[state[0]]", 
             "title" : "Sate", 
             "type" : "string", 
             "query" : ""
